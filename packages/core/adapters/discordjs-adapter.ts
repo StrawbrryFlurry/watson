@@ -1,3 +1,3 @@
-import { stuff } from '@watson/common';
+import * as watson from '@watson/common';
 
-console.log(stuff);
+console.log(watson.stuff);

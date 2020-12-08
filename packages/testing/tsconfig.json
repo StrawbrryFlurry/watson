@@ -8,6 +8,5 @@
     "rootDir": ".",
   },
   "exclude": ["./dist/**/*"],
-  "references": [{ "path": "../common" }]
-
+  "references": [{ "path": "../common" }, { "path": "../core" }]
 }

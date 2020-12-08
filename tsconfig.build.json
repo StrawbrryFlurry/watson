@@ -1,15 +1,12 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "declaration": true,
+    "declarationMap": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "es6",
-    "sourceMap": true,
-    "allowJs": true,
-    "lib": ["es7"]
+    "module": "commonjs",
+    "noEmit": false,
+    "composite": true
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "references": [{ "path": "./common" }]
 }

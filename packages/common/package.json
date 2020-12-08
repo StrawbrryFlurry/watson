@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "> TODO: description",
   "main": "dist/index",
+  "types": "dist/index",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
   },
   "scripts": {
-    "build": "npm run clean && npm run compile",
-    "clean": "rimraf -rf ./dist",
-    "compile": "tsc -p tsconfig.build.json"
+    "build": "yarn run clean && yarn run compile",
+    "clean": "rimraf -rf ./dist tsconfig.build.tsbuildinfo",
+    "compile": "tsc -b"
   },
   "keywords": [
     "discord"
@@ -38,10 +39,6 @@
     "rxjs": "^6.0.0"
   },
   "homepage": "https://github.com/M1CH3L1US/Watson",
-  "directories": {
-    "dist": "dist",
-    "test": "__tests__"
-  },
   "files": [
     "dist"
   ],
