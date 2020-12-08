@@ -88,3 +88,25 @@ To run the bot in prod mode first use the TypeScript compiler to compile all fil
 - Add easier multi server support
 - Add Constructor injection for the DJS Client
 - Integration with NestJS
+
+# TODO
+
+- Dependency Injection
+- Module Abstraction
+- Module provicers for receiver
+- Support for importing / exporting modules
+- Decorators:
+  - Commands
+  - Events
+  - Modules
+  - Providers
+  - Receiver
+  - Injecting base application components (client..)
+  - Roles
+- Support multiple instances
+- Additions:
+  - Multi Step command
+  - Reaction Support
+  - Menu Support
+- Predefined Services
+- \*Integration with NestJS
