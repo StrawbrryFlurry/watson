@@ -1,16 +1,16 @@
 {
-  "name": "@watson/core",
+  "name": "@watson/common",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "> TODO: description",
+  "main": "dist/index",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
   },
   "scripts": {
-    "build": "lerna run build",
-    "clean": "lerna run clean",
-    "test": "lerna run test"
+    "build": "npm run clean && npm run compile",
+    "clean": "rimraf -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json"
   },
   "keywords": [
     "discord"
@@ -33,10 +33,19 @@
     "tslib": "^2.0.3",
     "uuid": "^8.3.1"
   },
-  "devDependencies": {
-    "@types/node": "^14.14.11",
-    "@types/reflect-metadata": "^0.1.0",
-    "lerna": "^3.22.1",
-    "typescript": "^4.1.2"
+  "peerDependencies": {
+    "reflect-metadata": "^0.1.12",
+    "rxjs": "^6.0.0"
+  },
+  "homepage": "https://github.com/M1CH3L1US/Watson",
+  "directories": {
+    "dist": "dist",
+    "test": "__tests__"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

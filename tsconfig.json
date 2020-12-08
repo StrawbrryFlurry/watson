@@ -1,33 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es6",
     "module": "commonjs",
-    "lib": [
-      "dom",
-      "es6",
-      "es2017",
-      "esnext.asynciterable"
-    ],
-    "sourceMap": true,
-    "outDir": "./dist",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "declaration": false,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "removeComments": true,
+    "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "resolveJsonModule": true
+    "target": "es6",
+    "sourceMap": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "lib": ["es7"],
+    "baseUrl": ".",
+    "paths": {
+      "@watson/common": ["./packages/common"],
+      "@watson/core": ["./packages/core"]
+    }
   },
-  "include": [
-    "**/*.ts",
-    "src/*.json"
- ],
-  "exclude": [
-    "node_modules"
-  ]
 }
