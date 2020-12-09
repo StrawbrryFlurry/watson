@@ -18,6 +18,6 @@
       "@watson/common": ["./packages/common"],
       "@watson/core": ["./packages/core"]
     },
-    "types": []
+    "types": ["node"]
   },
 }
