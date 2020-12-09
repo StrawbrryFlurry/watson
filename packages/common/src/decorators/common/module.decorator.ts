@@ -1,7 +1,6 @@
-import { MODULE_IMPORT_METADTA, MODULE_PROVIDER_METADTA, MODULE_RECEIVER_METADTA } from 'packages/common/constants';
-import { isNil } from 'packages/common/utils';
-
+import { MODULE_IMPORT_METADTA, MODULE_PROVIDER_METADTA, MODULE_RECEIVER_METADTA } from '../../constants';
 import { Type } from '../../types';
+import { isNil } from '../../utils';
 
 export interface IModuleOptions {
   imports?: Type<any>[];

@@ -5,10 +5,9 @@ import {
   MODULE_IMPORT_METADTA,
   MODULE_PROVIDER_METADTA,
   MODULE_RECEIVER_METADTA,
+  RECEIVER_OPTIONS_METADATA,
   Type,
 } from '@watson/common';
-
-import { RECEIVER_OPTIONS_METADATA } from '../constants';
 
 export class MetadataResolver {
   public resolveInjectableMetadata(target: Object): IInjectableOptions {

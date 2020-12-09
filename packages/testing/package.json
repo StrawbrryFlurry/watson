@@ -2,16 +2,16 @@
   "name": "@watson/testing",
   "version": "1.0.0",
   "description": "> TODO: description",
-  "main": "dist/index",
-  "types": "dist/index",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
   },
   "scripts": {
     "build": "yarn run clean && yarn run compile",
-    "clean": "rimraf -rf ./dist tsconfig.build.tsbuildinfo",
-    "compile": "tsc -b"
+    "clean": "rimraf -rf ./dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build"
   },
   "keywords": [
     "discord"

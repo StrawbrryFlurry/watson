@@ -4,9 +4,11 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "src",
   },
-  "exclude": ["./dist/**/*", "*.d.ts"],
+  "include": ["src"],
   "references": [{ "path": "../common" }]
-
 }

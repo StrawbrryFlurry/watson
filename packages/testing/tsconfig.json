@@ -4,9 +4,11 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "src",
   },
-  "exclude": ["./dist/**/*"],
+  "include": ["src"],
   "references": [{ "path": "../common" }, { "path": "../core" }]
 }

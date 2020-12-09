@@ -8,5 +8,4 @@
     "noEmit": false,
     "composite": true
   },
-  "references": [{ "path": "./common" }]
 }
