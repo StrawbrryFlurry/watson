@@ -1,4 +1,10 @@
 import { Module } from '@watson/common';
 
-@Module({})
-export class ApplicationModule {}
+import { TestReceiver } from './test.receiver';
+import { TestService } from './test.service';
+
+@Module({
+  providers: [TestService],
+  receivers: [TestReceiver],
+})
+export class TestModule {}

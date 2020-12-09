@@ -31,6 +31,8 @@
 // import { InstanceWrapper } from "./instance-wrapper";
 // import { ModuleRef } from "./module-ref";
 
+export class Module {}
+
 // interface ProviderName {
 //   name?: string | symbol;
 // }
