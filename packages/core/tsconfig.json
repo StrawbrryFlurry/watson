@@ -5,9 +5,8 @@
     "composite": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": ".",
   },
-  "exclude": ["./dist/**/*"],
+  "exclude": ["./dist/**/*", "*.d.ts"],
   "references": [{ "path": "../common" }]
 
 }

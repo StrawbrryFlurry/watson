@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 export * from "./adapters";
 export * from "./command";
 export * from "./errors";
