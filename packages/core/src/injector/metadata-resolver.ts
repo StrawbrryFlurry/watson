@@ -1,7 +1,7 @@
 import {
   IInjectableOptions,
   INJECTABLE_OPTIONS_METADATA,
-  IReciverOptions,
+  IReceiverOptions,
   MODULE_IMPORT_METADTA,
   MODULE_PROVIDER_METADTA,
   MODULE_RECEIVER_METADTA,
@@ -36,10 +36,10 @@ export class MetadataResolver {
       receivers,
     };
   }
-  public resolveComponentMetadata(target: Object): IReciverOptions {
+  public resolveComponentMetadata(target: Object): IReceiverOptions {
     return Reflect.getMetadata(
       RECEIVER_OPTIONS_METADATA,
       target
-    ) as IReciverOptions;
+    ) as IReceiverOptions;
   }
 }

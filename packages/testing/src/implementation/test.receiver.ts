@@ -1,7 +1,7 @@
 import { Command, Receiver } from '@watson/common';
 
-@Receiver({})
+@Receiver()
 export class TestReceiver {
-  @Command({})
+  @Command()
   doStuff() {}
 }
