@@ -1,37 +1,13 @@
-// import {
-//   Abstract,
-//   ClassProvider,
-//   Controller,
-//   DynamicModule,
-//   ExistingProvider,
-//   FactoryProvider,
-//   Injectable,
-//   NestModule,
-//   Provider,
-//   ValueProvider,
-// } from "@nestjs/common/interfaces";
-// import { Type } from "@nestjs/common/interfaces/type.interface";
-// import { randomStringGenerator } from "@nestjs/common/utils/random-string-generator.util";
-// import {
-//   isFunction,
-//   isNil,
-//   isString,
-//   isSymbol,
-//   isUndefined,
-// } from "@nestjs/common/utils/shared.utils";
-// import { iterate } from "iterare";
-// import { ApplicationConfig } from "../application-config";
-// import { InvalidClassException } from "../errors/exceptions/invalid-class.exception";
-// import { RuntimeException } from "../errors/exceptions/runtime.exception";
-// import { UnknownExportException } from "../errors/exceptions/unknown-export.exception";
-// import { createContextId } from "../helpers";
-// import { getClassScope } from "../helpers/get-class-scope";
-// import { CONTROLLER_ID_KEY } from "./constants";
-// import { NestContainer } from "./container";
-// import { InstanceWrapper } from "./instance-wrapper";
-// import { ModuleRef } from "./module-ref";
+import { TInjectable, TReceiver } from '@watson/common';
 
-export class Module {}
+import { InstanceWrapper } from './instance-wrapper';
+
+export class Module {
+  private readonly _id: string;
+  private readonly _imports = new Set<Module>();
+  private readonly _providers = new Map<any, InstanceWrapper<TInjectable>>();
+  private readonly _receivers = new Map<any, InstanceWrapper<TReceiver>>();
+}
 
 // interface ProviderName {
 //   name?: string | symbol;

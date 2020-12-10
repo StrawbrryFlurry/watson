@@ -1,4 +1,7 @@
-import { Receiver } from '@watson/common';
+import { Command, Receiver } from '@watson/common';
 
-@Receiver()
-export class TestReceiver {}
+@Receiver({})
+export class TestReceiver {
+  @Command({})
+  doStuff() {}
+}

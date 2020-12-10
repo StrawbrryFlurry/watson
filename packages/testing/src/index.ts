@@ -1,5 +1,11 @@
-import { DiscordJSAdapter } from "@watson/core";
+import { MetadataResolver } from '@watson/core';
 
-let adapter = new DiscordJSAdapter('test');
+import { ApplicationModule } from './implementation/app.module';
 
-console.log(adapter);
+const m = ApplicationModule;
+const resolver = new MetadataResolver();
+
+const {
+  imports: [i],
+} = resolver.resolveModuleMetadata(m);
+console.log(resolver.resolveModuleMetadata(i));

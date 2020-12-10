@@ -1,1 +1,3 @@
-export class WatsonApplication {}
+export class WatsonApplicationFactory {
+  static create() {}
+}

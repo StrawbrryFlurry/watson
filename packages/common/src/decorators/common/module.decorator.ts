@@ -1,5 +1,5 @@
 import { MODULE_IMPORT_METADTA, MODULE_PROVIDER_METADTA, MODULE_RECEIVER_METADTA } from '../../constants';
-import { Type } from '../../types';
+import { Type } from '../../interfaces';
 import { isNil } from '../../utils';
 
 export interface IModuleOptions {

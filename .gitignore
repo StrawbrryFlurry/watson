@@ -14,6 +14,9 @@ packages/**/*.js
 # build folder
 dist
 
+# build file
+*.tsbuildinfo
+
 # misc
 .DS_Store
 lerna-debug.log

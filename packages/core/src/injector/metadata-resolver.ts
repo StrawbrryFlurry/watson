@@ -17,15 +17,18 @@ export class MetadataResolver {
     ) as IInjectableOptions;
   }
   public resolveModuleMetadata(target: Object) {
-    const imports = Reflect.getMetadata(MODULE_IMPORT_METADTA, target) as Type;
+    const imports = Reflect.getMetadata(
+      MODULE_IMPORT_METADTA,
+      target
+    ) as Type[];
     const providers = Reflect.getMetadata(
       MODULE_PROVIDER_METADTA,
       target
-    ) as Type;
+    ) as Type[];
     const receivers = Reflect.getMetadata(
       MODULE_RECEIVER_METADTA,
       target
-    ) as Type;
+    ) as Type[];
 
     return {
       imports,

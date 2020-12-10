@@ -1,13 +1,35 @@
-import { isUndefined } from "../../utils";
-import {
-  COMMAND_DESCRIPTOR_METADATA,
-  COMMAND_OPTIONS_METADATA,
-  COMMAND_PROPERTY_KEY_METADATA,
-} from "../../constants";
-export interface ICommandOptions {}
+import { COMMAND_DESCRIPTOR_METADATA, COMMAND_OPTIONS_METADATA, COMMAND_PROPERTY_KEY_METADATA } from '../../constants';
+import { isUndefined } from '../../utils';
 
-export function Command(commandOptions?: ICommandOptions): MethodDecorator {
+export interface ICommandParams {
+  [index: number]: {
+    optional?: boolean;
+    isUser?: boolean;
+    isTextChannel?: boolean;
+    isVoiceChannel?: boolean;
+    isWordString?: {
+      encapsulator: string;
+    };
+  };
+}
+
+export interface ICommandOptions {
+  command?: string;
+  params?: ICommandOptions;
+}
+
+export function Command(): MethodDecorator;
+export function Command(command: string): MethodDecorator;
+export function Command(
+  command?: string,
+  commandOptions?: ICommandOptions
+): MethodDecorator {
   const options = isUndefined(commandOptions) ? undefined : commandOptions;
+  options["command"] = isUndefined(command)
+    ? isUndefined(commandOptions.command)
+      ? undefined
+      : commandOptions.command
+    : command;
 
   return (
     target: Object,
