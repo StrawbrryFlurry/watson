@@ -1,5 +1,9 @@
 export class Injector {
   constructor() {}
 
-  resolveClassDependencies() {}
+  loadClassInstance() {}
+
+  resolveConstructorDependencies() {}
+
+  resolveParameterDependencies() {}
 }

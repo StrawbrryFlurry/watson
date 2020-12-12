@@ -25,9 +25,9 @@ export function Receiver(
   command?: string,
   reciverOptions?: IReceiverOptions
 ): ClassDecorator {
-  const options = isUndefined(reciverOptions) ? undefined : reciverOptions;
+  const options = isUndefined(reciverOptions) ? {} : reciverOptions;
   options["command"] = isUndefined(command)
-    ? isUndefined(reciverOptions.command)
+    ? isUndefined(reciverOptions?.command)
       ? undefined
       : reciverOptions.command
     : command;

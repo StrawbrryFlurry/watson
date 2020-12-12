@@ -16,6 +16,18 @@ export class MetadataResolver {
       target
     ) as IInjectableOptions;
   }
+
+  public resolveMethodPrams(
+    target: Object,
+    propertyKey: string | symbol
+  ): unknown[] {
+    return Reflect.getMetadata("design:paramtypes", target, propertyKey);
+  }
+
+  public resolveConstructorParams(target: Object): Type[] {
+    return Reflect.getMetadata("design:paramtyps", target);
+  }
+
   public resolveModuleMetadata(target: Object) {
     const imports = Reflect.getMetadata(
       MODULE_IMPORT_METADTA,

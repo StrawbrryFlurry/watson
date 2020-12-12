@@ -1,7 +1,14 @@
-import { ApplicationConfig } from './application-config';
-import { WatsonApplicationContext } from './watson-application-context';
+import { WatsonContainer } from './watson-container';
 
+/**
+ * Main Application class that holds all other components
+ */
 export class WatsonApplication {
-  private config: ApplicationConfig;
-  private context: WatsonApplicationContext;
+  private container: WatsonContainer;
+
+  constructor(container: WatsonContainer) {}
+
+  public async start(): Promise<Boolean> {
+    return true;
+  }
 }

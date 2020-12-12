@@ -24,9 +24,9 @@ export function Command(
   command?: string,
   commandOptions?: ICommandOptions
 ): MethodDecorator {
-  const options = isUndefined(commandOptions) ? undefined : commandOptions;
+  const options = isUndefined(commandOptions) ? {} : commandOptions;
   options["command"] = isUndefined(command)
-    ? isUndefined(commandOptions.command)
+    ? isUndefined(commandOptions?.command)
       ? undefined
       : commandOptions.command
     : command;
