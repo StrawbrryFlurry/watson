@@ -10,12 +10,14 @@ export interface ICommandParams {
     isWordString?: {
       encapsulator: string;
     };
+    defautl: any;
   };
 }
 
 export interface ICommandOptions {
   command?: string;
-  params?: ICommandOptions;
+  alias?: string[];
+  params?: ICommandParams;
 }
 
 export function Command(): MethodDecorator;
