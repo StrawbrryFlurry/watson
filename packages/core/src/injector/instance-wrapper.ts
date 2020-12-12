@@ -1,31 +1,47 @@
 import { Type } from '@watson/common';
-import { v4 } from 'uuid';
 
-import { IInstanceType } from '../interfaces';
-import { MetadataResolver } from './metadata-resolver';
+import { Module } from './module';
 
 /**
  * Wraps around Provicer, Receiver and Module instaces
  * Provides init options and dependencies
  */
 export class InstanceWrapper<T = any> {
-  public constructorParams: Type[];
-  public instanceId: string;
-  public type: IInstanceType;
+  public readonly name: string;
+  public readonly metatype: Type;
+  public readonly host: Module;
+  public isResolved: boolean;
+  public instance: T;
+  private dependencies: InstanceWrapper[] = [];
 
-  private resolver = new MetadataResolver();
-
-  private instance: T;
-
-  resolveConstructor() {}
-
-  resolveModuleMetadata() {
-    return this.resolver.resolveModuleMetadata(this.instance);
+  constructor(
+    name: string,
+    metatype: Type,
+    host: Module,
+    instance: T,
+    isResolved: boolean = false
+  ) {
+    this.name = name;
+    this.metatype = metatype;
+    this.host = host;
+    this.instance = instance;
+    this.isResolved = isResolved;
   }
 
-  constructor(inputType: Type) {
-    this.instanceId = v4();
+  public addCtorMetadata(index: number, wrapper: InstanceWrapper) {
+    this.dependencies[index] = wrapper;
+  }
 
-    this.constructorParams = this.resolver.resolveConstructorParams(inputType);
+  public hasNoDependencies() {
+    return this.dependencies.length === 0;
+  }
+
+  public getDependencies() {
+    return this.dependencies;
+  }
+
+  public setInstance(instance: Type) {
+    this.instance = (instance as unknown) as T;
+    this.isResolved = true;
   }
 }

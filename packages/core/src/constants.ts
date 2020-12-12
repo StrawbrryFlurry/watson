@@ -1,1 +1,3 @@
-export {};
+export const CLIENT_ADAPTER_PROVIDER = "CLIENT";
+export const CURRENT_MODULE_PROVIDER = "MODULE";
+export const WATSON_CONTAINER_PROVIDER = "CONTAINER";

@@ -1,18 +1,18 @@
 import { Message } from 'discord.js';
-import { ClientEvents } from 'discord.js';
-import { WatsonApplicationContext } from './../watson-application-context';
+
+import { WatsonContainer } from '../watson-container';
 
 export class CommandParser {
-    private context: WatsonApplicationContext;
-    
-    public CommandParser(context: WatsonApplicationContext) {
-        this.context = context;
-    }
+  private context: WatsonContainer;
 
-    public parse(message: Message) {
-        // Check if prefix matches (maybe)
-        // Check if command registered
-        // Check if command takes subcommand
-        // Parse agruments according to specification
-    }
+  public CommandParser(context: WatsonContainer) {
+    this.context = context;
+  }
+
+  public parse(message: Message) {
+    // Check if prefix matches (maybe)
+    // Check if command registered
+    // Check if command takes subcommand
+    // Parse agruments according to specification
+  }
 }
