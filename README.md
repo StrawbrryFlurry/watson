@@ -1,90 +1,108 @@
+<p align="center">
+<img src="https://raw.githubusercontent.com/M1CH3L1US/Watson/master/.github/assets/logo.png" width="250">
+</p>
+ <p align="center">A scalable <a href="https://nodejs.org">Node.js</a> framework for building <a href="https://discord.com">Discord</a> Bots</p>
+
+# Description
+
+Watson is a Discord bot framework heavily inspired by the architecture of <a href="https://github.com/nestjs/nest">NestJS</a> and <a href="https://github.com/angular/angular">Angular</a>. It uses TypeScript to provide an easy to use API to scale along with the growth and complexity of your service.
+
+As an interface to the Discord API we use <a href="https://discord.js.org">DiscordJS</a> though we also plan to support other client frameworks in the future.
+
+## Documentation
+
+These docs are temporary and will be moved to the official website, once the first build is released.
+
 # Usage
 
-Use the provided index.ts file as a point of reference on how to create a new app.
+If you already have any experience using either Angular or NestJS this will feel very familiar to you. We're going to start off by creating our root module, which by convention is called AppModule or ApplicationModule. For this create a `app.moodule.ts` file in your project directory.
 
 ```TS
-// Import the BotFactory and reflect-metadata which bot are required.
-import 'reflect-metadata';
-import { DiscordBotFactory } from './lib';
+// app.module.ts
+@Module({
+  imports: [ ],
+  exports: [ ],
+  receivers: [ ],
+  providers: [ ]
+})
+export class AppModule {}
+```
+
+This new Module can be used create a new Watson Application class. To do this create a new file to start your application. This could either be `main.ts`, `index.ts` or some other name of your choice.
+
+Im this file we're going to bootsrap the application:
+
+```TS
+// main.ts
+import { WatsonApplicationFactory } from '@watson/core';
+import { ApplicationModule } from './app.module';
 
 const bootstrap = async () => {
-  // Create a new Instance of the DiscordBot;
-  const bot = new DiscordBotFactory({
-    token: "My Token",
+  const bot = await WatsonApplicationFactory.create(ApplicationModule, {
+    discordAuthToken: "My Discord Bot token",
   });
 
-  await bot.start().catch(err => console.log("Whoops something yiksed"));
+  bot.start()
+    .then(
+      () => console.log("The bot is now running!")
+    );
 };
 
 bootstrap();
 ```
 
-## Registering command files to the bot
+Great job! Your bot can now be started by running your entrypoint file. At this point this wont do much though. To add some functionality to our bot we need to add a `Receiver` to the application.
 
-To get started with adding new commands to your bot you first need to check the `config.json` file that should be present inside the `src` folder. In here you can define folder paths in which the app should look for your files.
+## Receiver
 
-```JSON
-{
-  "commands": ["dist/bot/commands/*.command.js"]
+To add a `Receiver` to your app start by creating a new file using the extension `.receiver.ts`. In this file we're going to implement our first `Receiver`. While at it we're also going to create a file for a service that will handle all our logic for the commands using the extension `.service.ts`.
+
+```TS
+// hat.receiver.ts
+@Receiver('hat')
+export class HatReceiver {
+  constructor(private readonly hatService: HatService) {  }
+
+  @Command()
+  hatCommand() {
+    const hat = this.hatService.getHat();
+
+    return hat.name;
+  }
+
+  @Event()
+  hatEvent() {  }
 }
 ```
 
-In the example above it will scan the ./dist/bot/commands folder for files that end with command.js. To use this with the TypeScript compiler you just need to name your files in the ./src/bot/commands folder according to this.
-
-```
-- src
-  | bot
-    | commands
-      - my.command.ts
-```
-
-In your new command file you need to declare a new class using the @BotCommand decorator. The class name doesn't matter in this case.
-
 ```TS
-import { Message } from 'discord.js';
-import { BotCommand, Command } from '../../lib';
-
-@BotCommand()
-export class TestCommand {  }
-```
-
-Using this class we can then add new commands to out bot. If you don't have a global prefix defined you'll need to specify one as an argument in the `BotCommand` decorator.
-
-## Adding command handles
-
-We can now finally start with adding some fancy new commands for out bot to handle. To do this we need to create a method inside the class we've just created. You'll need to decorate this method as well. This time using the `Command` decorator. It let's you specify the command name that should trigger the method when a user uses it in channel. You can also specify an array of channels that the command works in and an array of arguments that it supports.
-
-```TS
-import { BotCommand, Command } from '../../lib';
-import { IncommingMessage } from '../../lib/commands/IncommingMessage';
-
-@BotCommand({ prefix: "!" })
-export class EventCommand {
-  @Command({ name: "foo" })
-  someCommand(message: IncommingMessage) {
-    message.message.react("❤");
+// hat.service.ts
+@Injectable()
+export class HatService {
+  public getHat() {
+    return new class Hat {
+      name = 'Watsons Hat';
+    }
   }
 }
 ```
 
-The example above will register a new command `!foo` that works in all channels. All `@Command` methods are called with the message argument that is of type `IncommingMessage`. In future builds it should also give you the option to grab arguments directly from the command and maybe some other neat things.
+Both the `Service` and the `Receiver` have then to be registered in either the `AppModule` or one of its underlying imports.
 
-# Running the bot in dev
+```TS
+// app.module.ts
+import { HatService } from './hat.service';
+import { HatReceiver } from './hat.receiver';
 
-To run the bot in dev mode use `npm run compile`
+@Module({
+  imports: [ ],
+  exports: [ ],
+  receivers: [ HatReceiver ],
+  providers: [ HatService ]
+})
+```
 
-# Running the bot in prod
+# TODOs
 
-To run the bot in prod mode first use the TypeScript compiler to compile all files to JavaScript. Then update the config file to match your new file structure. After that run the bot with `node ./index.js`.
-
-# TODO
-
-- Update Documentation
-- Clean up code
-- Add global dependency injection
-- Add parameter injection for BotClasses
-- Command argument injection with @Arg('NAME')
-- Add Modules
-- Add easier multi server support
-- Add Constructor injection for the DJS Client
-- Integration with NestJS
+- Custom providers
+- Dynamic Modules
