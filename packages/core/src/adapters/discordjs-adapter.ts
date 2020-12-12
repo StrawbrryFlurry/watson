@@ -12,6 +12,10 @@ export class DiscordJSAdapter {
     private subMessage: Subject<Message>;
     public onMessage: Observable<Message>;
 
+    /**
+     * Constructs a DiscordJS adapter
+     * @param token Discord API token
+     */
     constructor(token: string) {
         this.token = token;
 
@@ -21,6 +25,9 @@ export class DiscordJSAdapter {
         this.onMessage = this.subMessage.asObservable();
     }
 
+    /**
+     * Instantiates the DiscordJS client with the provided token
+     */
     initialize() {
         this.client = new Client();
         this.client.login(this.token);
@@ -31,6 +38,11 @@ export class DiscordJSAdapter {
         });
     }
 
+    /**
+     * Subscribe to a DiscordJS event. The observable emits each time the event occurs.
+     * @param name name of the event
+     * @return event observable
+     */
     onEvent<K extends keyof ClientEvents>(name: K): Observable<ClientEvents[K]> {
         return new Observable((sub) => {
             this.client.on(name, (...args) => {
@@ -39,6 +51,10 @@ export class DiscordJSAdapter {
         });
     }
 
+    /**
+     * Binds discord js events internally
+     * @internal
+     */
     private bindEvents() {
         this.client.on('message', (msg) => this.subMessage.next(msg));
     }
