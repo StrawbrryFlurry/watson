@@ -26,18 +26,18 @@ export function Command(
   command?: string,
   commandOptions?: ICommandOptions
 ): MethodDecorator {
-  const options = isUndefined(commandOptions) ? {} : commandOptions;
-  options["command"] = isUndefined(command)
-    ? isUndefined(commandOptions?.command)
-      ? undefined
-      : commandOptions.command
-    : command;
-
   return (
     target: Object,
     propertyKey: string | Symbol,
     descriptor: PropertyDescriptor
   ) => {
+    const options = isUndefined(commandOptions) ? {} : commandOptions;
+    options["command"] = isUndefined(command)
+      ? isUndefined(commandOptions?.command)
+        ? (propertyKey as string)
+        : commandOptions.command
+      : command;
+
     Reflect.defineMetadata(COMMAND_OPTIONS_METADATA, options, target);
     Reflect.defineMetadata(COMMAND_DESCRIPTOR_METADATA, descriptor, target);
     Reflect.defineMetadata(COMMAND_PROPERTY_KEY_METADATA, propertyKey, target);
