@@ -52,6 +52,10 @@ export class Module {
     this._imports.add(module);
   }
 
+  // TODO:
+  // If the provider is a module
+  // Look for the module in the global container
+  // If it exists add all exports as exports
   addExportedProvider(provider: String | Type<TInjectable>) {
     if (isString(provider)) {
       if (!this._exports.has(provider)) {

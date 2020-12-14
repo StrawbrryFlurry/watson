@@ -11,23 +11,21 @@ export class Injector {
       return wrapper.instance;
     }
 
-    const callback = () => {
-      let dependencies = [];
+    let dependencies = [];
 
-      if (wrapper.hasNoDependencies()) {
-        dependencies = [];
-      } else {
-        dependencies = this.resolveConstructorParam(wrapper, module);
-      }
+    if (wrapper.hasNoDependencies()) {
+      dependencies = [];
+    } else {
+      dependencies = this.resolveConstructorParam(wrapper, module);
+    }
 
-      return Reflect.construct(wrapper.metatype, dependencies) as T;
-    };
-
-    const instance = callback();
+    const instance = Reflect.construct(wrapper.metatype, dependencies) as T;
     wrapper.setInstance((instance as unknown) as Type);
     return instance;
   }
 
+  // TODO:
+  // Don't call this recursively
   public lookupProviderInImports(
     provider: InstanceWrapper<TInjectable>,
     module: Module
@@ -39,10 +37,16 @@ export class Injector {
       return undefined;
     }
 
-    const importProviders = importsArray.map((module) => module.providers);
-    const moduleProvider = importProviders.find((moduleProvider) =>
-      moduleProvider.has(provider.name)
-    );
+    const moduleRefExports = importsArray.map((module) => module.exports);
+
+    // TODO:
+    // Check the imported modules if they export a provider with the requested type!!!
+    // Check if the module already has an instance of the provider.
+    // If not create it and return its value
+    if (moduleRefExports.includes(provider.name))
+      const moduleProvider = moduleRefExports.find((moduleProvider) =>
+        moduleProvider.has(provider.name)
+      );
 
     if (typeof moduleProvider === "undefined") {
       for (const importedModule of importsArray) {

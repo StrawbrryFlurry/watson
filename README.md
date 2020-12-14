@@ -104,5 +104,13 @@ import { HatReceiver } from './hat.receiver';
 
 # TODOs
 
+## Module API
+
 - Custom providers
 - Dynamic Modules
+
+## Commands
+
+- Dynamic Prefix API
+- Differenciate Guild vs DM Commands
+- Exception Zone for executing command handles
