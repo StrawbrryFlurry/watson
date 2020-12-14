@@ -5,13 +5,16 @@ import {
   IReceiverOptions,
   MODULE_METADATA,
   RECEIVER_OPTIONS_METADATA,
+  INJECT_DEPENDENCY_METADATA,
   Type,
-} from '@watson/common';
+  IInjectValue,
+} from "@watson/common";
+import { isNil } from "@watson/common/dist/utils";
 
-import { UnknownProviderException } from '../exceptions';
-import { WatsonContainer } from '../watson-container';
-import { InstanceWrapper } from './instance-wrapper';
-import { Module } from './module';
+import { UnknownProviderException } from "../exceptions";
+import { WatsonContainer } from "../watson-container";
+import { InstanceWrapper } from "./instance-wrapper";
+import { Module } from "./module";
 
 export class MetadataResolver {
   private container: WatsonContainer;
@@ -57,7 +60,7 @@ export class MetadataResolver {
 
       this.addImports(token, imports);
       this.addExports(token, exports);
-      this.addProviders(token, providers);
+      this.addInjectables(token, providers);
       this.addReceivers(token, receivers);
     }
   }
@@ -70,11 +73,7 @@ export class MetadataResolver {
     metatypes.forEach((metatype) => this.container.addExport(token, metatype));
   }
 
-  /**
-   * Provider imports in the Module only support injectables for now.
-   * Therefore they're directly added to the injectables map on the module
-   */
-  private addProviders(token: string, metatypes: Type[]) {
+  private addInjectables(token: string, metatypes: Type[]) {
     metatypes.forEach((metatype) =>
       this.container.addInjectable(token, metatype)
     );
@@ -131,12 +130,22 @@ export class MetadataResolver {
     }
 
     for (const [idx, metatype] of params.entries()) {
-      if (!module.providers.has(metatype.name)) {
+      const injectedProvider = this.resolveInjectedProvider(
+        wrapper.metatype,
+        idx
+      );
+      let provider = metatype.name;
+
+      if (!isNil(injectedProvider)) {
+        provider = injectedProvider;
+      }
+
+      if (!module.providers.has(provider)) {
         throw new UnknownProviderException(metatype.name, module.name);
       }
 
-      const provider = module.providers.get(metatype.name);
-      wrapper.addCtorMetadata(idx, provider);
+      const providerRef = module.providers.get(provider);
+      wrapper.addCtorMetadata(idx, providerRef);
     }
   }
 
@@ -175,5 +184,22 @@ export class MetadataResolver {
       RECEIVER_OPTIONS_METADATA,
       target
     ) as IReceiverOptions;
+  }
+
+  public resolveInjectedProvider(target: Type, ctorIndex: number) {
+    const injectValue = this.resolveMetadata<IInjectValue>(
+      INJECT_DEPENDENCY_METADATA,
+      target
+    );
+
+    if (Array.isArray(injectValue)) {
+      return null;
+    }
+
+    if (injectValue.parameterIndex === ctorIndex) {
+      return injectValue.token;
+    }
+
+    return null;
   }
 }

@@ -1,6 +1,7 @@
-import { Module } from '@watson/common';
+import { Module } from "@watson/common";
+import { DogService } from "./dog.service";
 
-import { TestModule } from './test.module';
+import { TestModule } from "./test.module";
 
 @Module({
   imports: [TestModule],

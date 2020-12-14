@@ -1,11 +1,14 @@
-import { Command, Receiver } from '@watson/common';
+import { Command, Inject, Receiver } from "@watson/common";
 
-import { TestService } from './test.service';
-
+import { TestService } from "./test.service";
+import { DogService } from "./dog.service";
 @Receiver()
 export class TestReceiver {
   @Command()
   doStuff() {}
 
-  constructor(private test: TestService, private test1: TestService) {}
+  constructor(
+    @Inject(DogService) private test: any,
+    private test1: TestService
+  ) {}
 }

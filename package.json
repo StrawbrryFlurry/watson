@@ -18,7 +18,15 @@
   "scripts": {
     "clean": "lerna run clean",
     "build": "lerna run build",
-    "test": "yarn run build && node packages/testing/dist/index.js"
+    "build:common": "lerna run build --scope @watson/common",
+    "build:core": "lerna run build --scope @watson/core",
+    "build:test": "lerna run build --scope @watson/testing",
+    "dev:common": "yarn build:common && yarn dev:run",
+    "dev:core": "yarn build:core && yarn dev:run",
+    "dev:testing": "yarn build:test && yarn dev:run",
+    "test": "yarn run build && node packages/testing/dist/index.js",
+    "dev:run": "node packages/testing/dist/implementation/bootstrap.js",
+    "dev:bootstrap": "yarn run build && node packages/testing/dist/implementation/bootstrap.js"
   },
   "keywords": [
     "discord"

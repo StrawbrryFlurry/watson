@@ -1,12 +1,16 @@
-import { TInjectable, TReceiver, Type } from '@watson/common';
-import { isFunction, isString } from '@watson/common/dist/utils';
-import { iterate } from 'iterare';
-import { v4 } from 'uuid';
+import { TInjectable, TReceiver, Type } from "@watson/common";
+import { isFunction, isString } from "@watson/common/dist/utils";
+import { iterate } from "iterare";
+import { v4 } from "uuid";
 
-import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';
-import { UnknownExportException } from '../exceptions';
-import { WatsonContainer } from '../watson-container';
-import { InstanceWrapper } from './instance-wrapper';
+import {
+  CLIENT_ADAPTER_PROVIDER,
+  CURRENT_MODULE_PROVIDER,
+  WATSON_CONTAINER_PROVIDER,
+} from "../constants";
+import { UnknownExportException } from "../exceptions";
+import { WatsonContainer } from "../watson-container";
+import { InstanceWrapper } from "./instance-wrapper";
 
 /**
  * Wrapper for a class decorated with the @\Module decorator.
@@ -16,7 +20,10 @@ import { InstanceWrapper } from './instance-wrapper';
 export class Module {
   private readonly _id: string;
   private readonly _imports = new Set<Module>();
-  private readonly _exports = new Set<any>();
+  /**
+   * This set contains the names of all providers exported by the module
+   */
+  private readonly _exports = new Set<string>();
   private readonly _receivers = new Map<any, InstanceWrapper<TReceiver>>();
   /**
    * Injectables are services that can be injected during the instance creation of a controller, service and such.
@@ -45,11 +52,11 @@ export class Module {
   initProperties() {}
 
   addImport(module: Module) {
-    if (this._imports.has(module)) {
+    if (this.imports.has(module)) {
       return;
     }
 
-    this._imports.add(module);
+    this.imports.add(module);
   }
 
   // TODO:
@@ -58,13 +65,23 @@ export class Module {
   // If it exists add all exports as exports
   addExportedProvider(provider: String | Type<TInjectable>) {
     if (isString(provider)) {
-      if (!this._exports.has(provider)) {
-        this._exports.add(provider);
+      if (!this.exports.has(provider)) {
+        this.exports.add(provider);
       }
     }
 
     if (isFunction(provider)) {
-      this._exports.add(this.validateExportedProvider((provider as Type).name));
+      this.exports.add(this.validateExportedProvider((provider as Type).name));
+    }
+  }
+
+  addExportedModule(moduleRef: Module) {
+    const { providers } = moduleRef;
+
+    for (const [token, wrapper] of providers.entries()) {
+      if (!this.exports.has(token)) {
+        this.exports.add(token);
+      }
     }
   }
 
@@ -84,7 +101,7 @@ export class Module {
   }
 
   addReceiver(receiver: Type) {
-    this._receivers.set(
+    this.receivers.set(
       receiver.name,
       new InstanceWrapper<TReceiver>(receiver.name, receiver, this, null, false)
     );
@@ -106,13 +123,13 @@ export class Module {
   private registerDefaultProviders() {
     this.providers.set(
       WATSON_CONTAINER_PROVIDER,
-      new InstanceWrapper("container", null, this, this.container, true)
+      new InstanceWrapper("CONTAINER", null, this, this.container, true)
     );
 
     this.providers.set(
       CLIENT_ADAPTER_PROVIDER,
       new InstanceWrapper(
-        "adapter",
+        "ADAPTER",
         null,
         this,
         this.container.getClient(),
@@ -122,7 +139,7 @@ export class Module {
 
     this.providers.set(
       CURRENT_MODULE_PROVIDER,
-      new InstanceWrapper("module", this.metatype, this, this, true)
+      new InstanceWrapper("MODULE", this.metatype, this, this, true)
     );
   }
 

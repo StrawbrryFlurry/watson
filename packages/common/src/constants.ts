@@ -13,4 +13,6 @@ export const COMMAND_PROPERTY_KEY_METADATA = "command:propertykey";
 
 export const INJECTABLE_OPTIONS_METADATA = "injectable:options";
 
+export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
+
 export const DESIGN_PARAMETERS = "design:paramtypes";

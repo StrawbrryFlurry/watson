@@ -1,13 +1,16 @@
-import { WatsonApplicationFactory } from '@watson/core';
+import { WatsonApplicationFactory } from "@watson/core";
 
-import { ApplicationModule } from './app.module';
+import { ApplicationModule } from "./app.module";
+import { TestService } from "./test.service";
 
 const bootstrap = async () => {
-  const watson = await WatsonApplicationFactory.create(ApplicationModule, {
+  const app = await WatsonApplicationFactory.create(ApplicationModule, {
     discordAuthToken: "Asdjads",
   });
 
-  watson.start().then((res) => console.log(res));
+  console.log(app.getProviderInstance(TestService));
+
+  app.start().then((res) => console.log("started"));
 };
 
 bootstrap();

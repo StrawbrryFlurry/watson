@@ -1,10 +1,12 @@
-import { Type } from '@watson/common';
+import { Type } from "@watson/common";
+import iterate from "iterare";
+import { type } from "os";
 
-import { DiscordJSAdapter } from './adapters';
-import { ApplicationConfig } from './application-config';
-import { UnknownModuleException } from './exceptions';
-import { ModuleTokenFactory } from './helpers/module-token-factory';
-import { Injector, Module } from './injector';
+import { DiscordJSAdapter } from "./adapters";
+import { ApplicationConfig } from "./application-config";
+import { UnknownModuleException, UnknownProviderException } from "./exceptions";
+import { ModuleTokenFactory } from "./helpers/module-token-factory";
+import { Injector, Module } from "./injector";
 
 /**
  * Contains application state such as modules and provides an interface to get those
@@ -60,15 +62,20 @@ export class WatsonContainer {
     moduleRef.addImport(module);
   }
 
-  // TODO: FIX EXPORTRS
   public addExport(token: string, metatype: Type) {
     if (!this.modules.has(token)) {
       throw new UnknownModuleException();
     }
 
-    const module = new Module(metatype, this);
     const moduleRef = this.modules.get(token);
-    moduleRef.addExportedProvider("s");
+    const exportedMoudleRef = this.moduleTokenFactory.getTokenByModuleType(
+      metatype
+    );
+
+    if (exportedMoudleRef) {
+    } else {
+      moduleRef.addExportedProvider("s");
+    }
   }
 
   public addReceiver(token: string, metatype: Type) {
@@ -99,5 +106,22 @@ export class WatsonContainer {
 
   public hasModule(metatype: Type) {
     return !!this.moduleTokenFactory.getTokenByModuleType(metatype);
+  }
+
+  public getInstanceOfProvider<T>(metatype: Type<T>): T {
+    const providers = iterate(this.modules.entries())
+      .map(([token, moduleRef]) => moduleRef.providers)
+      .toArray();
+
+    const moduleProviders = providers.find((provider) =>
+      provider.has(metatype.name)
+    );
+
+    if (typeof moduleProviders === "undefined") {
+      throw new UnknownProviderException(metatype.name);
+    }
+
+    const providerRef = moduleProviders.get(metatype.name);
+    return providerRef.instance as T;
   }
 }

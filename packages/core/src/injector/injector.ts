@@ -1,31 +1,45 @@
-import { TInjectable, Type } from '@watson/common';
+import { TInjectable, TReceiver, Type } from "@watson/common";
+import { wrap } from "module";
+import { UnknownProviderException } from "../exceptions";
+import { UnknownComponentReferenceException } from "../exceptions/unknown-component-reference.exception";
 
-import { InstanceWrapper } from './instance-wrapper';
-import { Module } from './module';
+import { InstanceWrapper } from "./instance-wrapper";
+import { Module } from "./module";
 
 export class Injector {
   constructor() {}
 
-  private createInstance<T = any>(wrapper: InstanceWrapper<T>, module: Module) {
+  /**
+   * Creates an instance of the wrapper provided in the argument resolving dependencies using the module provided.
+   * @param wrapper The instance wrapper used to create the instnace
+   * @param module The module to get the dependencies from
+   */
+  public createInstance<T = any>(wrapper: InstanceWrapper<T>, module: Module) {
     if (wrapper.isResolved) {
       return wrapper.instance;
     }
 
+    const { metatype } = wrapper;
     let dependencies = [];
 
-    if (wrapper.hasNoDependencies()) {
-      dependencies = [];
-    } else {
+    if (!metatype) {
+      throw new UnknownComponentReferenceException(wrapper.name, module.name);
+    }
+
+    if (!wrapper.hasNoDependencies()) {
       dependencies = this.resolveConstructorParam(wrapper, module);
     }
 
     const instance = Reflect.construct(wrapper.metatype, dependencies) as T;
     wrapper.setInstance((instance as unknown) as Type);
+
     return instance;
   }
 
-  // TODO:
-  // Don't call this recursively
+  /**
+   * @param provider The instance wrapper of a provider that should be looked up in  the exports of the target module
+   * @param module The target module
+   */
   public lookupProviderInImports(
     provider: InstanceWrapper<TInjectable>,
     module: Module
@@ -34,48 +48,31 @@ export class Injector {
     const importsArray = Array.from(imports);
 
     if (imports.size === 0) {
-      return undefined;
+      throw new UnknownComponentReferenceException(provider.name, module.name);
     }
 
-    const moduleRefExports = importsArray.map((module) => module.exports);
+    const moduleRef = importsArray.find((module) =>
+      module.exports.has(provider.name)
+    );
 
-    // TODO:
-    // Check the imported modules if they export a provider with the requested type!!!
-    // Check if the module already has an instance of the provider.
-    // If not create it and return its value
-    if (moduleRefExports.includes(provider.name))
-      const moduleProvider = moduleRefExports.find((moduleProvider) =>
-        moduleProvider.has(provider.name)
-      );
+    if (typeof moduleRef === "undefined") {
+      throw new UnknownProviderException(provider.name, module.name);
+    }
 
-    if (typeof moduleProvider === "undefined") {
-      for (const importedModule of importsArray) {
-        const providerRef = this.lookupProviderInImports(
-          provider,
-          importedModule
-        );
+    const providerRef = moduleRef.providers.get(provider.name);
 
-        if (typeof providerRef !== "undefined") {
-          if (providerRef.isResolved) {
-            return providerRef.instance;
-          }
-
-          this.createInstance(providerRef, module);
-          return providerRef.instance;
-        }
-      }
-    } else {
-      const providerRef = moduleProvider.get(provider.name);
-
-      if (providerRef.isResolved) {
-        return providerRef.instance;
-      }
-
-      this.createInstance(providerRef, module);
+    if (providerRef.isResolved) {
       return providerRef.instance;
     }
+
+    this.createInstance(providerRef, moduleRef);
+    return providerRef.instance;
   }
 
+  /**
+   * @param wrapper The instance wrapper which dependencies should be resolved
+   * @param module The host module of the wrapper
+   */
   public resolveConstructorParam(wrapper: InstanceWrapper, module: Module) {
     const dependencies = wrapper.getDependencies().entries();
     let ctorDependencies: unknown[] = [];
@@ -105,11 +102,14 @@ export class Injector {
     this.createInstance(provider, module);
   }
 
-  public loadInjectable(injectable: InstanceWrapper, module: Module) {
+  public loadInjectable(
+    injectable: InstanceWrapper<TInjectable>,
+    module: Module
+  ) {
     this.createInstance(injectable, module);
   }
 
-  public loadReceiver(receiver: InstanceWrapper, module: Module) {
+  public loadReceiver(receiver: InstanceWrapper<TReceiver>, module: Module) {
     this.createInstance(receiver, module);
   }
 }
