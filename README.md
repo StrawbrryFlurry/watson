@@ -114,3 +114,4 @@ import { HatReceiver } from './hat.receiver';
 - Dynamic Prefix API
 - Differenciate Guild vs DM Commands
 - Exception Zone for executing command handles
+- Support for slash commands
