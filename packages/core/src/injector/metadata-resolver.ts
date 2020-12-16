@@ -1,20 +1,17 @@
 import {
   DESIGN_PARAMETERS,
   IInjectableOptions,
+  IInjectValue,
+  INJECT_DEPENDENCY_METADATA,
   INJECTABLE_OPTIONS_METADATA,
   IReceiverOptions,
   MODULE_METADATA,
   RECEIVER_OPTIONS_METADATA,
-  INJECT_DEPENDENCY_METADATA,
   Type,
-  IInjectValue,
-} from "@watson/common";
-import { isNil } from "@watson/common/dist/utils";
+} from '@watson/common';
 
-import { UnknownProviderException } from "../exceptions";
-import { WatsonContainer } from "../watson-container";
-import { InstanceWrapper } from "./instance-wrapper";
-import { Module } from "./module";
+import { CircularDependencyException } from '../exceptions';
+import { WatsonContainer } from '../watson-container';
 
 export class MetadataResolver {
   private container: WatsonContainer;
@@ -31,22 +28,6 @@ export class MetadataResolver {
     this.resolveModuleProperties();
   }
 
-  public resolveDependencies() {
-    const modules = this.container.getModules();
-
-    for (const [token, module] of modules) {
-      const { receivers, injectables } = module;
-
-      for (const receiver of receivers.values()) {
-        this.resolveConstructorParams(module, receiver);
-      }
-
-      for (const injectable of injectables.values()) {
-        this.resolveConstructorParams(module, injectable);
-      }
-    }
-  }
-
   private resolveModuleProperties() {
     const modules = this.container.getModules();
 
@@ -58,10 +39,10 @@ export class MetadataResolver {
         receivers,
       } = this.resolveModuleMetadata(metatype);
 
-      this.addImports(token, imports);
-      this.addExports(token, exports);
       this.addInjectables(token, providers);
       this.addReceivers(token, receivers);
+      this.addImports(token, imports);
+      this.addExports(token, exports);
     }
   }
 
@@ -85,12 +66,13 @@ export class MetadataResolver {
     );
   }
 
-  private scanForModuleImports(metatype: Type) {
+  private scanForModuleImports(metatype: Type, context: Type[] = []) {
+    context.push(metatype);
     const { imports } = this.resolveModuleMetadata(metatype);
 
     for (const module of imports) {
-      if (module === undefined) {
-        continue;
+      if (typeof module === "undefined") {
+        throw new CircularDependencyException(metatype, context);
       }
 
       if (this.container.hasModule(module)) {
@@ -98,7 +80,7 @@ export class MetadataResolver {
       }
 
       this.container.addModule(module);
-      this.scanForModuleImports(module);
+      this.scanForModuleImports(module, context);
     }
   }
 
@@ -116,38 +98,38 @@ export class MetadataResolver {
     return Reflect.getMetadata(DESIGN_PARAMETERS, target, propertyKey);
   }
 
-  public resolveConstructorParams(
-    module: Module,
-    wrapper: InstanceWrapper
-  ): void {
-    const params = this.resolveMetadata<Type[]>(
-      DESIGN_PARAMETERS,
-      wrapper.metatype
-    );
-
-    if (params.length === 0) {
-      return;
-    }
-
-    for (const [idx, metatype] of params.entries()) {
-      const injectedProvider = this.resolveInjectedProvider(
-        wrapper.metatype,
-        idx
-      );
-      let provider = metatype.name;
-
-      if (!isNil(injectedProvider)) {
-        provider = injectedProvider;
-      }
-
-      if (!module.providers.has(provider)) {
-        throw new UnknownProviderException(metatype.name, module.name);
-      }
-
-      const providerRef = module.providers.get(provider);
-      wrapper.addCtorMetadata(idx, providerRef);
-    }
-  }
+  //public resolveConstructorParams(
+  //  module: Module,
+  //  wrapper: InstanceWrapper
+  //): void {
+  //  const params = this.resolveMetadata<Type[]>(
+  //    DESIGN_PARAMETERS,
+  //    wrapper.metatype
+  //  );
+  //
+  //  if (params.length === 0) {
+  //    return;
+  //  }
+  //
+  //  for (const [idx, metatype] of params.entries()) {
+  //    const injectedProvider = this.resolveInjectedProvider(
+  //      wrapper.metatype,
+  //      idx
+  //    );
+  //    let provider = metatype?.name;
+  //
+  //    if (!isNil(injectedProvider)) {
+  //      provider = injectedProvider;
+  //    }
+  //
+  //    if (!module.providers.has(provider)) {
+  //      throw new UnknownProviderException(metatype.name, module.name);
+  //    }
+  //
+  //    const providerRef = module.providers.get(provider);
+  //    wrapper.addCtorMetadata(idx, providerRef);
+  //  }
+  //}
 
   public resolveModuleMetadata(target: Type) {
     const imports = this.resolveMetadata(

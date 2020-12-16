@@ -1,39 +1,57 @@
-import { TInjectable, TReceiver, Type } from "@watson/common";
-import { wrap } from "module";
-import { UnknownProviderException } from "../exceptions";
-import { UnknownComponentReferenceException } from "../exceptions/unknown-component-reference.exception";
+import { DESIGN_PARAMETERS, isNil, TInjectable, TReceiver, Type } from '@watson/common';
 
-import { InstanceWrapper } from "./instance-wrapper";
-import { Module } from "./module";
+import { CircularDependencyException, UnknownProviderException } from '../exceptions';
+import { UnknownComponentReferenceException } from '../exceptions/unknown-component-reference.exception';
+import { InstanceWrapper } from './instance-wrapper';
+import { Module } from './module';
 
 export class Injector {
+  // TODO:
+  // Global dependencies such as providers, receivers and services
+  // Global module maps
+
   constructor() {}
 
   /**
    * Creates an instance of the wrapper provided in the argument resolving dependencies using the module provided.
    * @param wrapper The instance wrapper used to create the instnace
    * @param module The module to get the dependencies from
+   * @param context The dependency resolving context. It is used to decect wether a dependency of a provider circularly references itself.
    */
-  public createInstance<T = any>(wrapper: InstanceWrapper<T>, module: Module) {
+  public createInstance<T = any>(
+    wrapper: InstanceWrapper<T>,
+    module: Module,
+    context: InstanceWrapper[] = []
+  ) {
     if (wrapper.isResolved) {
       return wrapper.instance;
     }
 
     const { metatype } = wrapper;
-    let dependencies = [];
 
     if (!metatype) {
       throw new UnknownComponentReferenceException(wrapper.name, module.name);
     }
 
-    if (!wrapper.hasNoDependencies()) {
-      dependencies = this.resolveConstructorParam(wrapper, module);
+    if (context.includes(wrapper)) {
+      throw new CircularDependencyException(wrapper, context);
     }
 
-    const instance = Reflect.construct(wrapper.metatype, dependencies) as T;
-    wrapper.setInstance((instance as unknown) as Type);
+    context.push(wrapper);
+    const dependencies = this.resolveDependencies(wrapper);
+    let ctorDependencies = [];
 
-    return instance;
+    if (dependencies.length !== 0) {
+      ctorDependencies = this.resolveConstructorParam(
+        wrapper,
+        dependencies,
+        module,
+        context
+      );
+    }
+
+    const instance = Reflect.construct(wrapper.metatype, ctorDependencies) as T;
+    wrapper.setInstance((instance as unknown) as Type);
   }
 
   /**
@@ -41,8 +59,9 @@ export class Injector {
    * @param module The target module
    */
   public lookupProviderInImports(
-    provider: InstanceWrapper<TInjectable>,
-    module: Module
+    provider: Type,
+    module: Module,
+    context: InstanceWrapper[]
   ) {
     const { imports } = module;
     const importsArray = Array.from(imports);
@@ -51,8 +70,8 @@ export class Injector {
       throw new UnknownComponentReferenceException(provider.name, module.name);
     }
 
-    const moduleRef = importsArray.find((module) =>
-      module.exports.has(provider.name)
+    const moduleRef = importsArray.find((moduleRef) =>
+      moduleRef.exports.has(provider.name)
     );
 
     if (typeof moduleRef === "undefined") {
@@ -65,7 +84,7 @@ export class Injector {
       return providerRef.instance;
     }
 
-    this.createInstance(providerRef, moduleRef);
+    this.createInstance(providerRef, moduleRef, context);
     return providerRef.instance;
   }
 
@@ -73,11 +92,19 @@ export class Injector {
    * @param wrapper The instance wrapper which dependencies should be resolved
    * @param module The host module of the wrapper
    */
-  public resolveConstructorParam(wrapper: InstanceWrapper, module: Module) {
-    const dependencies = wrapper.getDependencies().entries();
+  public resolveConstructorParam(
+    wrapper: InstanceWrapper,
+    dependencies: Type[],
+    module: Module,
+    context: InstanceWrapper[]
+  ) {
     let ctorDependencies: unknown[] = [];
 
-    for (const [idx, dependency] of dependencies) {
+    for (const [idx, dependency] of dependencies.entries()) {
+      if (typeof dependency === "undefined") {
+        throw new CircularDependencyException(wrapper, context);
+      }
+
       if (module.providers.has(dependency.name)) {
         const provider = module.providers.get(dependency.name);
 
@@ -85,12 +112,13 @@ export class Injector {
           ctorDependencies[idx] = provider.instance;
         }
 
-        this.createInstance(dependency, module);
-        ctorDependencies[idx] = dependency.instance;
+        this.createInstance(provider, module, context);
+        ctorDependencies[idx] = provider.instance;
       } else {
         ctorDependencies[idx] = this.lookupProviderInImports(
           dependency,
-          module
+          module,
+          context
         );
       }
     }
@@ -111,5 +139,15 @@ export class Injector {
 
   public loadReceiver(receiver: InstanceWrapper<TReceiver>, module: Module) {
     this.createInstance(receiver, module);
+  }
+
+  private resolveDependencies(wrapper: InstanceWrapper): Type[] {
+    if (!isNil(wrapper.inject)) {
+      return wrapper.inject;
+    }
+
+    console.log(Reflect.getMetadata(DESIGN_PARAMETERS, wrapper.metatype));
+
+    return Reflect.getMetadata(DESIGN_PARAMETERS, wrapper.metatype) || [];
   }
 }

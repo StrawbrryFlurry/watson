@@ -1,6 +1,8 @@
-// IMPORTANT:
-// RUN CONTROLLER FN
-
+/**
+ * Executes the command after it was parsed
+ * Looks up command handlers in the application context
+ */
+export class CommandHandler {}
 // class TestController {
 //   constructor(private readonly dep1: string, private readonly dep2: number) {}
 //

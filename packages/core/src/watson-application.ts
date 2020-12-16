@@ -1,6 +1,7 @@
-import { Type } from "@watson/common";
-import { CommandExplorer } from "./command/command-explorer";
-import { WatsonContainer } from "./watson-container";
+import { Type } from '@watson/common';
+
+import { CommandExplorer } from './command/command-explorer';
+import { WatsonContainer } from './watson-container';
 
 /**
  * Main Application class that holds all other components
@@ -21,5 +22,9 @@ export class WatsonApplication {
 
   public getProviderInstance<T>(provider: Type<T>): T {
     return this.container.getInstanceOfProvider<T>(provider);
+  }
+
+  public addGlobalPrefix(prefix: string) {
+    this.container.addGlobalPrefix(prefix);
   }
 }

@@ -1,12 +1,11 @@
-import { Type } from "@watson/common";
-import iterate from "iterare";
-import { type } from "os";
+import { Type } from '@watson/common';
+import iterate from 'iterare';
 
-import { DiscordJSAdapter } from "./adapters";
-import { ApplicationConfig } from "./application-config";
-import { UnknownModuleException, UnknownProviderException } from "./exceptions";
-import { ModuleTokenFactory } from "./helpers/module-token-factory";
-import { Injector, Module } from "./injector";
+import { DiscordJSAdapter } from './adapters';
+import { ApplicationConfig } from './application-config';
+import { UnknownModuleException, UnknownProviderException } from './exceptions';
+import { ModuleTokenFactory } from './helpers/module-token-factory';
+import { Injector, Module } from './injector';
 
 /**
  * Contains application state such as modules and provides an interface to get those
@@ -57,9 +56,13 @@ export class WatsonContainer {
       throw new UnknownModuleException();
     }
 
-    const module = new Module(metatype, this);
+    const importedModuleToken = this.moduleTokenFactory.getTokenByModuleType(
+      metatype
+    );
+    const importedModuleRef = this.modules.get(importedModuleToken);
     const moduleRef = this.modules.get(token);
-    moduleRef.addImport(module);
+
+    moduleRef.addImport(importedModuleRef);
   }
 
   public addExport(token: string, metatype: Type) {
@@ -68,13 +71,15 @@ export class WatsonContainer {
     }
 
     const moduleRef = this.modules.get(token);
-    const exportedMoudleRef = this.moduleTokenFactory.getTokenByModuleType(
+    const exportedModuleToken = this.moduleTokenFactory.getTokenByModuleType(
       metatype
     );
 
-    if (exportedMoudleRef) {
+    if (exportedModuleToken) {
+      const exportedModuleRef = this.modules.get(exportedModuleToken);
+      moduleRef.addExportedModule(exportedModuleRef);
     } else {
-      moduleRef.addExportedProvider("s");
+      moduleRef.addExportedProvider(metatype);
     }
   }
 
@@ -123,5 +128,9 @@ export class WatsonContainer {
 
     const providerRef = moduleProviders.get(metatype.name);
     return providerRef.instance as T;
+  }
+
+  public addGlobalPrefix(prefix: string) {
+    this.config.globalCommandPrefix = prefix;
   }
 }

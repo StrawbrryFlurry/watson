@@ -26,7 +26,6 @@ export class WatsonApplicationFactory {
     const instanceLoader = new InstanceLoader(container);
 
     resolver.resolveRootModule(module);
-    resolver.resolveDependencies();
     instanceLoader.createInstances();
   }
 

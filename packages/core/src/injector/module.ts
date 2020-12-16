@@ -1,16 +1,11 @@
-import { TInjectable, TReceiver, Type } from "@watson/common";
-import { isFunction, isString } from "@watson/common/dist/utils";
-import { iterate } from "iterare";
-import { v4 } from "uuid";
+import { TInjectable, TReceiver, Type } from '@watson/common';
+import { isFunction, isString } from '@watson/common/dist/utils';
+import { v4 } from 'uuid';
 
-import {
-  CLIENT_ADAPTER_PROVIDER,
-  CURRENT_MODULE_PROVIDER,
-  WATSON_CONTAINER_PROVIDER,
-} from "../constants";
-import { UnknownExportException } from "../exceptions";
-import { WatsonContainer } from "../watson-container";
-import { InstanceWrapper } from "./instance-wrapper";
+import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';
+import { UnknownExportException } from '../exceptions';
+import { WatsonContainer } from '../watson-container';
+import { InstanceWrapper } from './instance-wrapper';
 
 /**
  * Wrapper for a class decorated with the @\Module decorator.
@@ -59,19 +54,17 @@ export class Module {
     this.imports.add(module);
   }
 
-  // TODO:
-  // If the provider is a module
-  // Look for the module in the global container
-  // If it exists add all exports as exports
   addExportedProvider(provider: String | Type<TInjectable>) {
     if (isString(provider)) {
-      if (!this.exports.has(provider)) {
+      if (!this.exports.has(provider as string)) {
         this.exports.add(provider);
       }
     }
 
     if (isFunction(provider)) {
       this.exports.add(this.validateExportedProvider((provider as Type).name));
+      console.log(this.exports);
+      console.log(this.providers);
     }
   }
 
@@ -86,17 +79,11 @@ export class Module {
   }
 
   validateExportedProvider(token: string): string {
-    const importedModules = this.imports;
-
-    const moduleNames = iterate(importedModules)
-      .map(({ metatype }) => metatype)
-      .filter((metatype) => !!metatype)
-      .map((metatype) => metatype.name);
-
-    if (!moduleNames.includes(token)) {
+    if (!this.providers.has(token)) {
       const { name } = this.metatype;
       throw new UnknownExportException(token, name);
     }
+
     return token;
   }
 

@@ -12,7 +12,7 @@ export class InstanceWrapper<T = any> {
   public readonly host: Module;
   public isResolved: boolean;
   public instance: T;
-  private dependencies: InstanceWrapper[] = [];
+  public inject?: Type[];
 
   constructor(
     name: string,
@@ -26,18 +26,6 @@ export class InstanceWrapper<T = any> {
     this.host = host;
     this.instance = instance;
     this.isResolved = isResolved;
-  }
-
-  public addCtorMetadata(index: number, wrapper: InstanceWrapper) {
-    this.dependencies[index] = wrapper;
-  }
-
-  public hasNoDependencies() {
-    return this.dependencies.length === 0;
-  }
-
-  public getDependencies() {
-    return this.dependencies;
   }
 
   public setInstance(instance: Type) {

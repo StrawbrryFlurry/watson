@@ -1,5 +1,5 @@
-import { Type } from '@watson/common';
-import { v4 } from 'uuid';
+import { isFunction, Type } from '@watson/common';
+import * as hash from 'object-hash';
 
 export class ModuleTokenFactory {
   private moduleTokenCache = new Map<Type, string>();
@@ -13,7 +13,7 @@ export class ModuleTokenFactory {
       return token;
     }
 
-    const moduleToken = this.generateToken();
+    const moduleToken = this.generateToken(metatype);
     this.moduleTokenCache.set(metatype, moduleToken);
 
     return moduleToken;
@@ -26,7 +26,9 @@ export class ModuleTokenFactory {
     return undefined;
   }
 
-  private generateToken() {
-    return v4();
+  private generateToken(module: Type | string) {
+    const moduleName = isFunction(module) ? (module as Type).name : module;
+
+    return hash(moduleName);
   }
 }
