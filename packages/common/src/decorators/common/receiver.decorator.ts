@@ -13,6 +13,7 @@ export interface IReceiverOptions {
   command: string;
   channel: string[];
   commandOptions?: IReceiverCommandOptions;
+  prefix?: string;
 }
 
 /**
@@ -29,7 +30,7 @@ export function Receiver(
   options["command"] = isUndefined(command)
     ? isUndefined(reciverOptions?.command)
       ? undefined
-      : reciverOptions.command
+      : reciverOptions!.command
     : command;
 
   return (target: Object) => {

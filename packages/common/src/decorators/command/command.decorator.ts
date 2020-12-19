@@ -1,15 +1,12 @@
-import { COMMAND_DESCRIPTOR_METADATA, COMMAND_OPTIONS_METADATA, COMMAND_PROPERTY_KEY_METADATA } from '../../constants';
+import { COMMAND_OPTIONS_METADATA } from '../../constants';
+import { CommandArgumentTypes } from '../../interfaces';
 import { isUndefined } from '../../utils';
 
 export interface ICommandParams {
   [index: number]: {
     optional?: boolean;
-    isUser?: boolean;
-    isTextChannel?: boolean;
-    isVoiceChannel?: boolean;
-    isWordString?: {
-      encapsulator: string;
-    };
+    type: CommandArgumentTypes;
+    encapsulator?: string;
     defautl: any;
   };
 }
@@ -33,13 +30,9 @@ export function Command(
   ) => {
     const options = isUndefined(commandOptions) ? {} : commandOptions;
     options["command"] = isUndefined(command)
-      ? isUndefined(commandOptions?.command)
-        ? (propertyKey as string)
-        : commandOptions.command
+      ? commandOptions?.command
       : command;
 
-    Reflect.defineMetadata(COMMAND_OPTIONS_METADATA, options, target);
-    Reflect.defineMetadata(COMMAND_DESCRIPTOR_METADATA, descriptor, target);
-    Reflect.defineMetadata(COMMAND_PROPERTY_KEY_METADATA, propertyKey, target);
+    Reflect.defineMetadata(COMMAND_OPTIONS_METADATA, options, descriptor.value);
   };
 }
