@@ -1,9 +1,18 @@
-import { DESIGN_PARAMETERS, isNil, TInjectable, TReceiver, Type } from '@watson/common';
+import {
+  DESIGN_PARAMETERS,
+  isNil,
+  TInjectable,
+  TReceiver,
+  Type,
+} from "@watson/common";
 
-import { CircularDependencyException, UnknownProviderException } from '../exceptions';
-import { UnknownComponentReferenceException } from '../exceptions/unknown-component-reference.exception';
-import { InstanceWrapper } from './instance-wrapper';
-import { Module } from './module';
+import {
+  CircularDependencyException,
+  UnknownProviderException,
+} from "../exceptions";
+import { UnknownComponentReferenceException } from "../exceptions/unknown-component-reference.exception";
+import { InstanceWrapper } from "./instance-wrapper";
+import { Module } from "./module";
 
 export class Injector {
   // TODO:
@@ -145,8 +154,6 @@ export class Injector {
     if (!isNil(wrapper.inject)) {
       return wrapper.inject;
     }
-
-    console.log(Reflect.getMetadata(DESIGN_PARAMETERS, wrapper.metatype));
 
     return Reflect.getMetadata(DESIGN_PARAMETERS, wrapper.metatype) || [];
   }

@@ -1,6 +1,9 @@
-import { ClientOptions } from 'discord.js';
+import { ClientOptions, Intents } from 'discord.js';
 
 export interface IWatsonApplicationOptions {
-  discordAuthToken: string;
+  discordAuthToken?: string;
   clientOptions?: ClientOptions;
+  botDescription?: string;
+  intents?: Intents;
+  acknowledgeReaction?: string;
 }

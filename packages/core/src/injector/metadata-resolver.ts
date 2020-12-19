@@ -4,14 +4,21 @@ import {
   IInjectValue,
   INJECT_DEPENDENCY_METADATA,
   INJECTABLE_OPTIONS_METADATA,
-  IReceiverOptions,
   MODULE_METADATA,
-  RECEIVER_OPTIONS_METADATA,
   Type,
 } from '@watson/common';
 
 import { CircularDependencyException } from '../exceptions';
 import { WatsonContainer } from '../watson-container';
+
+export interface IMethodDescriptors {
+  [methodName: string]: PropertyDescriptor;
+}
+
+export interface IMethodValue {
+  name: string;
+  descriptor: Function;
+}
 
 export class MetadataResolver {
   private container: WatsonContainer;
@@ -98,53 +105,20 @@ export class MetadataResolver {
     return Reflect.getMetadata(DESIGN_PARAMETERS, target, propertyKey);
   }
 
-  //public resolveConstructorParams(
-  //  module: Module,
-  //  wrapper: InstanceWrapper
-  //): void {
-  //  const params = this.resolveMetadata<Type[]>(
-  //    DESIGN_PARAMETERS,
-  //    wrapper.metatype
-  //  );
-  //
-  //  if (params.length === 0) {
-  //    return;
-  //  }
-  //
-  //  for (const [idx, metatype] of params.entries()) {
-  //    const injectedProvider = this.resolveInjectedProvider(
-  //      wrapper.metatype,
-  //      idx
-  //    );
-  //    let provider = metatype?.name;
-  //
-  //    if (!isNil(injectedProvider)) {
-  //      provider = injectedProvider;
-  //    }
-  //
-  //    if (!module.providers.has(provider)) {
-  //      throw new UnknownProviderException(metatype.name, module.name);
-  //    }
-  //
-  //    const providerRef = module.providers.get(provider);
-  //    wrapper.addCtorMetadata(idx, providerRef);
-  //  }
-  //}
-
   public resolveModuleMetadata(target: Type) {
-    const imports = this.resolveMetadata(
+    const imports = this.getArrayMetadata(
       MODULE_METADATA.IMPORTS,
       target
     ) as Type[];
-    const providers = this.resolveMetadata(
+    const providers = this.getArrayMetadata(
       MODULE_METADATA.PROVIDERS,
       target
     ) as Type[];
-    const receivers = this.resolveMetadata(
+    const receivers = this.getArrayMetadata(
       MODULE_METADATA.RECEIVER,
       target
     ) as Type[];
-    const exports = this.resolveMetadata(
+    const exports = this.getArrayMetadata(
       MODULE_METADATA.EXPORTS,
       target
     ) as Type[];
@@ -157,19 +131,25 @@ export class MetadataResolver {
     };
   }
 
-  private resolveMetadata<T>(metadataKey: any, target: Type): T | [] {
+  public getArrayMetadata<T>(metadataKey: string, target: Type): T | [] {
     return Reflect.getMetadata(metadataKey, target) || [];
   }
 
-  public resolveComponentMetadata(target: Object): IReceiverOptions {
-    return Reflect.getMetadata(
-      RECEIVER_OPTIONS_METADATA,
-      target
-    ) as IReceiverOptions;
+  public getMetadata<T>(metadataKey: string, target: Type): T;
+  public getMetadata<T>(
+    metadataKey: string,
+    target: Type,
+    propertyKey?: string
+  ): T {
+    if (propertyKey) {
+      return Reflect.getMetadata(metadataKey, target, propertyKey);
+    }
+
+    return Reflect.getMetadata(metadataKey, target);
   }
 
   public resolveInjectedProvider(target: Type, ctorIndex: number) {
-    const injectValue = this.resolveMetadata<IInjectValue>(
+    const injectValue = this.getArrayMetadata<IInjectValue>(
       INJECT_DEPENDENCY_METADATA,
       target
     );
@@ -183,5 +163,55 @@ export class MetadataResolver {
     }
 
     return null;
+  }
+
+  public resolveMethodsFromMetatype(metatype: Type) {
+    const prototypeMethods = Object.getOwnPropertyDescriptors(
+      metatype.prototype
+    );
+
+    return this.filterAndFormatPrototypeMethods(
+      metatype.name,
+      prototypeMethods
+    );
+  }
+
+  /**
+   * Removes ctor descriptor and removes unnecessairy information.
+   * @example
+   *constructor: {
+   *    value: [class CatReceiver],
+   *      writable: true,
+   *      enumerable: false,
+   *    configurable: true
+   * }
+   * getCat: {
+   *   value: [Function: getCat],
+   *   writable: true,
+   *   enumerable: false,
+   *   configurable: true
+   *  }
+   *}
+   */
+  private filterAndFormatPrototypeMethods(
+    ctorName: string,
+    prototypeMethods: IMethodDescriptors
+  ) {
+    const methods = Object.entries(prototypeMethods).filter(([name]) => {
+      if (name === "constructor") {
+        return false;
+      }
+
+      if (ctorName === name) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return methods.map(([name, descriptor]) => ({
+      name: name,
+      descriptor: descriptor.value,
+    }));
   }
 }

@@ -1,9 +1,11 @@
+import { Logger } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { Injector } from './injector';
 import { Module } from './module';
 
 export class InstanceLoader {
   private injector = new Injector();
+  private logger = new Logger("InstanceLoader");
   private container: WatsonContainer;
 
   constructor(container: WatsonContainer) {
@@ -18,6 +20,8 @@ export class InstanceLoader {
       this.createInstancesOfProviders(module);
       this.createInstancesOfReceivers(module);
     }
+
+    this.container.globalInstanceHost.applyInstances();
   }
 
   private createInstancesOfProviders(module: Module) {

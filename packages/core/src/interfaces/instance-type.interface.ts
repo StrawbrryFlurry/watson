@@ -1,1 +1,1 @@
-export type IInstanceType = "module" | "injectable" | "receiver";
+export type IInstanceType = "module" | "injectable" | "receiver" | "provider";

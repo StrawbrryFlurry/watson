@@ -5,16 +5,17 @@ import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { UnknownModuleException, UnknownProviderException } from './exceptions';
 import { ModuleTokenFactory } from './helpers/module-token-factory';
-import { Injector, Module } from './injector';
+import { Module } from './injector';
+import { GlobalInstanceHost } from './injector/global-instance-host';
 
 /**
  * Contains application state such as modules and provides an interface to get those
  */
 export class WatsonContainer {
-  private injector: Injector = new Injector();
   private readonly modules = new Map<string, Module>();
-  private config: ApplicationConfig;
+  public config: ApplicationConfig;
   private moduleTokenFactory = new ModuleTokenFactory();
+  public globalInstanceHost = new GlobalInstanceHost(this);
 
   private clientAdapter: DiscordJSAdapter;
 

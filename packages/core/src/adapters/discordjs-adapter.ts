@@ -10,6 +10,8 @@ export class DiscordJSAdapter {
   private subMessage: Subject<Message>;
   public onMessage: Observable<Message>;
 
+  private commandMap = new Map<{}, Observable<unknown>>();
+
   private clientOptions: ClientOptions;
 
   /**
@@ -53,6 +55,16 @@ export class DiscordJSAdapter {
         sub.next(args);
       });
     });
+  }
+
+  public bindCommand(command: unknown) {
+    const command$ = this.onEvent("message")
+      .pipe
+      // filter
+      // add command
+      ();
+
+    this.commandMap.set(command, command$);
   }
 
   /**

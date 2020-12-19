@@ -5,14 +5,17 @@ import { ApplicationConfig } from './application-config';
 import { MetadataResolver } from './injector';
 import { InstanceLoader } from './injector/instance-loader';
 import { IWatsonApplicationOptions } from './interfaces';
+import { Logger } from './logger';
 import { WatsonApplication } from './watson-application';
 import { WatsonContainer } from './watson-container';
 
 export class WatsonApplicationFactory {
+  private static logger = new Logger("WatsonFactory");
+
   public static async create(module: Type, options: IWatsonApplicationOptions) {
+    this.logger.log("Creating application context", "status");
     const appOptions = new ApplicationConfig(options);
     const container = new WatsonContainer(appOptions);
-
     const client = this.createClientInstance(container);
     container.applyClientAdapter(client);
 
@@ -25,6 +28,7 @@ export class WatsonApplicationFactory {
     const resolver = new MetadataResolver(container);
     const instanceLoader = new InstanceLoader(container);
 
+    this.logger.log("Resolving Modules", "status");
     resolver.resolveRootModule(module);
     instanceLoader.createInstances();
   }
