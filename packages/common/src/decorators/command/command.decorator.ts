@@ -1,7 +1,6 @@
 import { isObject, isString } from 'class-validator';
 import { MessageEmbed, Snowflake } from 'discord.js';
 
-import { CommandContext } from '../../command';
 import { COMMAND_OPTIONS_METADATA } from '../../constants';
 import { CommandArgumentType } from '../../enums';
 
@@ -64,11 +63,11 @@ export interface ICommandPromt {
   /**
    * The promt text send to the user
    */
-  text: (ctx: CommandContext) => string | MessageEmbed;
+  text: (ctx: unknown) => string | MessageEmbed;
   /**
    * The message sent to the user if the type doesn't match the param type
    */
-  retryText: (ctx: CommandContext) => string | MessageEmbed;
+  retryText: (ctx: unknown) => string | MessageEmbed;
   /**
    * Expects the user to react to the message.
    */

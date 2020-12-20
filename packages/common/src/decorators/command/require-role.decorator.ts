@@ -1,27 +1,13 @@
 import { COMMAND_PERMISSION_METADATA } from '../../constants';
 import { IBasePermissionMetadata } from '../interfaces';
 
-export interface IRequireRoleOptions {
-  allRequired?: boolean;
-  isID?: boolean;
-}
-
-export interface IRequireRoleMetadata
-  extends IBasePermissionMetadata,
-    IRequireRoleOptions {
+export interface IRequireRoleMetadata extends IBasePermissionMetadata {
   roles: string[];
 }
 
 export function RequireRole(role: string): MethodDecorator;
 export function RequireRole(roles: string[]): MethodDecorator;
-export function RequireRole(
-  roles: string | string[],
-  options?: IRequireRoleOptions
-): MethodDecorator;
-export function RequireRole(
-  roles: string | string[],
-  options?: IRequireRoleOptions
-): MethodDecorator {
+export function RequireRole(roles: string | string[]): MethodDecorator {
   return (
     target: Object,
     propertyKey: string,
@@ -35,8 +21,6 @@ export function RequireRole(
     const metadata: IRequireRoleMetadata = {
       type: "role",
       roles: rolesArray,
-      allRequired: !!options?.allRequired,
-      isID: options?.isID,
     };
 
     Reflect.defineMetadata(
