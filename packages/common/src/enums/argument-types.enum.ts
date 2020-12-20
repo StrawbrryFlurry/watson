@@ -2,7 +2,7 @@
  * Possible types of command arguments.
  * @enum {string}
  */
-export enum CommandArgumentTypes {
+export enum CommandArgumentType {
   /** Text channel mentioned by a member using'#'
    * ```
    * #general

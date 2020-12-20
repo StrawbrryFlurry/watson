@@ -1,4 +1,20 @@
-import { Receiver } from '@watson/common';
+import { Command, CommandArgumentType, Receiver } from '@watson/common';
 
-@Receiver()
-export class DogReceiver {}
+@Receiver({
+  command: "woof",
+})
+export class DogReceiver {
+  @Command({
+    command: "bark",
+    alias: ["woofies", "barkies"],
+    params: [
+      {
+        name: "user",
+        type: CommandArgumentType.USER,
+        defautl: "@user",
+        encapsulator: "asdas",
+      },
+    ],
+  })
+  woof() {}
+}

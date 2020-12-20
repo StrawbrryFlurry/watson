@@ -1,5 +1,6 @@
+import { isObject, isString } from 'class-validator';
+
 import { RECEIVER_OPTIONS_METADATA } from '../../constants';
-import { isUndefined } from '../../utils';
 
 export interface IReceiverCommandOptions {
   casesensitive?: boolean;
@@ -11,7 +12,6 @@ export interface IReceiverCommandOptions {
  */
 export interface IReceiverOptions {
   command: string;
-  channel: string[];
   commandOptions?: IReceiverCommandOptions;
   prefix?: string;
 }
@@ -22,16 +22,14 @@ export interface IReceiverOptions {
  */
 export function Receiver(): ClassDecorator;
 export function Receiver(command?: string): ClassDecorator;
-export function Receiver(
-  command?: string,
-  reciverOptions?: IReceiverOptions
-): ClassDecorator {
-  const options = isUndefined(reciverOptions) ? {} : reciverOptions;
-  options["command"] = isUndefined(command)
-    ? isUndefined(reciverOptions?.command)
-      ? undefined
-      : reciverOptions!.command
-    : command;
+export function Receiver(reciverOptions: IReceiverOptions): ClassDecorator;
+export function Receiver(arg?: string | IReceiverOptions): ClassDecorator {
+  let options: Partial<IReceiverOptions> = {};
+  if (isString(arg)) {
+    options["command"] = arg;
+  } else if (isObject(arg)) {
+    options = arg;
+  }
 
   return (target: Object) => {
     Reflect.defineMetadata(RECEIVER_OPTIONS_METADATA, options, target);

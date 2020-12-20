@@ -1,4 +1,10 @@
-import { COMMAND_OPTIONS_METADATA, ICommandOptions, IReceiverOptions, RECEIVER_OPTIONS_METADATA } from '@watson/common';
+import {
+  COMMAND_OPTIONS_METADATA,
+  ICommandOptions,
+  IReceiverOptions,
+  RECEIVER_OPTIONS_METADATA,
+  TReceiver,
+} from '@watson/common';
 
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { Logger } from '../logger';
@@ -49,7 +55,7 @@ export class CommandExplorer {
   }
 
   private resolveCommandsOfReceiver(
-    receiver: InstanceWrapper,
+    receiver: InstanceWrapper<TReceiver>,
     receiverOptions: IReceiverOptions
   ) {
     const methods = this.resolver.resolveMethodsFromMetatype(receiver.metatype);
@@ -64,12 +70,13 @@ export class CommandExplorer {
         method.descriptor
       );
 
-      new CommandHandle(
-        method,
-        receiverOptions,
-        commandOptions,
-        this.container.config
-      );
+      new CommandHandle({
+        applicationConfig: this.container.config,
+        commandOptions: commandOptions,
+        receiverOptions: receiverOptions,
+        method: method,
+        receiver: receiver,
+      });
     }
   }
 
