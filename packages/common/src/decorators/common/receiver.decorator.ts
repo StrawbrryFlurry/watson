@@ -6,27 +6,22 @@ export interface IReceiverCommandOptions {
   casesensitive?: boolean;
 }
 
-/**
- * @property command The name of the command
- * @property channel An array that contains either the ChannelID, the ChannelName or a regular expression that matches the Channel Name
- */
 export interface IReceiverOptions {
-  command: string;
   commandOptions?: IReceiverCommandOptions;
   prefix?: string;
 }
 
 /**
- * @param command The name of the command
+ * @param prefix The prefix to be used by the underlying commands
  * @param commandOptions Configurable options for the underlying commands
  */
 export function Receiver(): ClassDecorator;
-export function Receiver(command?: string): ClassDecorator;
+export function Receiver(prefix?: string): ClassDecorator;
 export function Receiver(reciverOptions: IReceiverOptions): ClassDecorator;
 export function Receiver(arg?: string | IReceiverOptions): ClassDecorator {
   let options: Partial<IReceiverOptions> = {};
   if (isString(arg)) {
-    options["command"] = arg;
+    options["prefix"] = arg;
   } else if (isObject(arg)) {
     options = arg;
   }

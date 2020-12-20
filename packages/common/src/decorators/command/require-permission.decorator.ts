@@ -4,6 +4,9 @@ import { COMMAND_PERMISSION_METADATA } from '../../constants';
 import { IBasePermissionMetadata } from '../interfaces';
 
 export interface IRequirePermissionOptions {
+  /**
+   * Will require the user to have all permissions in the list
+   */
   allRequired: boolean;
 }
 
@@ -13,6 +16,11 @@ export interface IRequirePermissionMetadata
   permissions: PermissionString[];
 }
 
+/**
+ * Adds required permissions the user needs to have to use this command
+ * @param permission Discord permission string
+ * @param options configurable options for permissions
+ */
 export function RequirePermission(
   permission: PermissionString
 ): MethodDecorator;
