@@ -1,6 +1,5 @@
-import { isObject, isString } from 'class-validator';
-
 import { RECEIVER_OPTIONS_METADATA } from '../../constants';
+import { isObject, isString } from '../../utils/shared.utils';
 
 export interface IReceiverCommandOptions {
   casesensitive?: boolean;

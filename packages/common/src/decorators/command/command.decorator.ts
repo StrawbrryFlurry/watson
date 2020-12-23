@@ -1,8 +1,8 @@
-import { isObject, isString } from 'class-validator';
 import { MessageEmbed, Snowflake } from 'discord.js';
 
 import { COMMAND_OPTIONS_METADATA } from '../../constants';
 import { CommandArgumentType } from '../../enums';
+import { isObject, isString } from '../../utils/shared.utils';
 
 export interface ICommandParam {
   /**
