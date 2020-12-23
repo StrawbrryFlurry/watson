@@ -115,3 +115,16 @@ import { HatReceiver } from './hat.receiver';
 - Differenciate Guild vs DM Commands
 - Exception Zone for executing command handles
 - Support for slash commands
+
+# Misc
+
+## Git Commit Format
+
+[🚀] [Type] [Message]
+
+### Types:
+
+- 🚀 [FEATURE] A new addition to the package
+- 💡 [UPDATE] Update existing feature
+- 🔨 [FIX] Fixing a bug
+- 📝 [DOCS] Adding comments, documentation..
