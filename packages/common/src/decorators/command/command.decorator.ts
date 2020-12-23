@@ -43,6 +43,10 @@ export interface ICommandParam {
    * @interface ICommandPromt
    */
   promt?: ICommandPromt;
+  /**
+   * If the type a date this parameter is required to parse the date.
+   */
+  dateFormat: string;
 }
 
 export interface ICommandReaction {
@@ -113,6 +117,22 @@ export interface ICommandOptions {
    * @default false
    */
   directMessage?: boolean;
+  /**
+   * Sets the prefix for the command.
+   * If no prefix was set the receiver prefix is used.
+   * If no prefix was set in the receiver the global prefix will be used.
+   */
+  prefix?: string;
+  /**
+   * Requires the format of the command message to exactly match the command name
+   * ```
+   * `@command('help')`
+   * // By default `!Help` will still work. If the option is set, it will require the command to be all lowercase.
+   *```
+   * @default false
+   *
+   */
+  caseSensitive?: boolean;
 }
 
 /**
