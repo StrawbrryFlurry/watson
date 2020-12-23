@@ -54,7 +54,7 @@ export class WatsonContainer {
 
   public addImport(token: string, metatype: Type) {
     if (!this.modules.has(token)) {
-      throw new UnknownModuleException();
+      throw new UnknownModuleException("WatsonContainer");
     }
 
     const importedModuleToken = this.moduleTokenFactory.getTokenByModuleType(
@@ -68,7 +68,7 @@ export class WatsonContainer {
 
   public addExport(token: string, metatype: Type) {
     if (!this.modules.has(token)) {
-      throw new UnknownModuleException();
+      throw new UnknownModuleException("WatsonContainer");
     }
 
     const moduleRef = this.modules.get(token);
@@ -86,7 +86,7 @@ export class WatsonContainer {
 
   public addReceiver(token: string, metatype: Type) {
     if (!this.modules.has(token)) {
-      throw new UnknownModuleException();
+      throw new UnknownModuleException("WatsonContainer");
     }
 
     const moduleRef = this.getModuleByToken(token);
@@ -95,7 +95,7 @@ export class WatsonContainer {
 
   public addInjectable(token: string, metatype: Type) {
     if (!this.modules.has(token)) {
-      throw new UnknownModuleException();
+      throw new UnknownModuleException("WatsonContainer");
     }
 
     const moduleRef = this.getModuleByToken(token);
@@ -124,7 +124,7 @@ export class WatsonContainer {
     );
 
     if (typeof moduleProviders === "undefined") {
-      throw new UnknownProviderException(metatype.name);
+      throw new UnknownProviderException("WatsonContainer", metatype.name);
     }
 
     const providerRef = moduleProviders.get(metatype.name);

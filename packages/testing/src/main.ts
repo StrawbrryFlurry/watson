@@ -7,6 +7,8 @@ const bootstrap = async () => {
     discordAuthToken: "Asdjads",
   });
 
+  app.addGlobalPrefix("!");
+
   app.start().then((res) => console.log("started"));
 };
 

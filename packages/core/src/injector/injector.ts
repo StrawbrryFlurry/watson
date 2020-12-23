@@ -1,23 +1,13 @@
-import {
-  DESIGN_PARAMETERS,
-  isNil,
-  TInjectable,
-  TReceiver,
-  Type,
-} from "@watson/common";
+import { DESIGN_PARAMETERS, isNil, TInjectable, TReceiver, Type } from '@watson/common';
 
-import {
-  CircularDependencyException,
-  UnknownProviderException,
-} from "../exceptions";
-import { UnknownComponentReferenceException } from "../exceptions/unknown-component-reference.exception";
-import { InstanceWrapper } from "./instance-wrapper";
-import { Module } from "./module";
+import { CircularDependencyException, UnknownProviderException } from '../exceptions';
+import { UnknownComponentReferenceException } from '../exceptions/unknown-component-reference.exception';
+import { InstanceWrapper } from './instance-wrapper';
+import { Module } from './module';
 
 export class Injector {
   // TODO:
   // Global dependencies such as providers, receivers and services
-  // Global module maps
 
   constructor() {}
 
@@ -39,11 +29,15 @@ export class Injector {
     const { metatype } = wrapper;
 
     if (!metatype) {
-      throw new UnknownComponentReferenceException(wrapper.name, module.name);
+      throw new UnknownComponentReferenceException(
+        "Injector",
+        wrapper.name,
+        module.name
+      );
     }
 
     if (context.includes(wrapper)) {
-      throw new CircularDependencyException(wrapper, context);
+      throw new CircularDependencyException("Injector", wrapper, context);
     }
 
     context.push(wrapper);
@@ -76,7 +70,11 @@ export class Injector {
     const importsArray = Array.from(imports);
 
     if (imports.size === 0) {
-      throw new UnknownComponentReferenceException(provider.name, module.name);
+      throw new UnknownComponentReferenceException(
+        "Injector",
+        provider.name,
+        module.name
+      );
     }
 
     const moduleRef = importsArray.find((moduleRef) =>
@@ -84,7 +82,11 @@ export class Injector {
     );
 
     if (typeof moduleRef === "undefined") {
-      throw new UnknownProviderException(provider.name, module.name);
+      throw new UnknownProviderException(
+        "Injector",
+        provider.name,
+        module.name
+      );
     }
 
     const providerRef = moduleRef.providers.get(provider.name);
@@ -111,7 +113,7 @@ export class Injector {
 
     for (const [idx, dependency] of dependencies.entries()) {
       if (typeof dependency === "undefined") {
-        throw new CircularDependencyException(wrapper, context);
+        throw new CircularDependencyException("Injector", wrapper, context);
       }
 
       if (module.providers.has(dependency.name)) {
@@ -157,4 +159,6 @@ export class Injector {
 
     return Reflect.getMetadata(DESIGN_PARAMETERS, wrapper.metatype) || [];
   }
+
+  public resolveCommandParams() {}
 }

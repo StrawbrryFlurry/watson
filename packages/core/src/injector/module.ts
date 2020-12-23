@@ -1,15 +1,11 @@
-import { TInjectable, TReceiver, Type } from "@watson/common";
-import { isFunction, isString } from "@watson/common/dist/utils";
-import { v4 } from "uuid";
+import { TInjectable, TReceiver, Type } from '@watson/common';
+import { isFunction, isString } from '@watson/common/dist/utils';
+import { v4 } from 'uuid';
 
-import {
-  CLIENT_ADAPTER_PROVIDER,
-  CURRENT_MODULE_PROVIDER,
-  WATSON_CONTAINER_PROVIDER,
-} from "../constants";
-import { UnknownExportException } from "../exceptions";
-import { WatsonContainer } from "../watson-container";
-import { InstanceWrapper } from "./instance-wrapper";
+import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';
+import { UnknownExportException } from '../exceptions';
+import { WatsonContainer } from '../watson-container';
+import { InstanceWrapper } from './instance-wrapper';
 
 /**
  * Wrapper for a class decorated with the @\Module decorator.
@@ -83,7 +79,7 @@ export class Module {
   validateExportedProvider(token: string): string {
     if (!this.providers.has(token)) {
       const { name } = this.metatype;
-      throw new UnknownExportException(token, name);
+      throw new UnknownExportException("InstanceLoader", token, name);
     }
 
     return token;

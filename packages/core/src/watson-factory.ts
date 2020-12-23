@@ -2,6 +2,7 @@ import { Type } from '@watson/common';
 
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
+import { BootstrappingZone } from './exceptions';
 import { MetadataResolver } from './injector';
 import { InstanceLoader } from './injector/instance-loader';
 import { IWatsonApplicationOptions } from './interfaces';
@@ -29,8 +30,10 @@ export class WatsonApplicationFactory {
     const instanceLoader = new InstanceLoader(container);
 
     this.logger.log("Resolving Modules", "status");
-    resolver.resolveRootModule(module);
-    instanceLoader.createInstances();
+    await BootstrappingZone.runAsync(() => {
+      resolver.resolveRootModule(module);
+      instanceLoader.createInstances();
+    }).catch();
   }
 
   private static createClientInstance(container: WatsonContainer) {

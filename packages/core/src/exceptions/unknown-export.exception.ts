@@ -1,5 +1,10 @@
-export class UnknownExportException extends Error {
-  constructor(exportName: string, moduleName: string) {
-    super(`The export ${exportName} doesn't exist in the module ${moduleName}`);
+import { BootstrappingException } from './bootstrapping.exception';
+
+export class UnknownExportException extends BootstrappingException {
+  constructor(context: string, exportName: string, moduleName: string) {
+    super(
+      context,
+      `The export ${exportName} doesn't exist in the module ${moduleName}`
+    );
   }
 }

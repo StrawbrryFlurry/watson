@@ -79,7 +79,7 @@ export class MetadataResolver {
 
     for (const module of imports) {
       if (typeof module === "undefined") {
-        throw new CircularDependencyException(metatype, context);
+        throw new CircularDependencyException("Injector", metatype, context);
       }
 
       if (this.container.hasModule(module)) {
@@ -211,7 +211,7 @@ export class MetadataResolver {
 
     return methods.map(([name, descriptor]) => ({
       name: name,
-      descriptor: descriptor.value,
+      descriptor: descriptor.value as Type,
     }));
   }
 }

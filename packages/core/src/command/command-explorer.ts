@@ -1,15 +1,27 @@
 import {
   COMMAND_OPTIONS_METADATA,
+  COMMAND_RESTRICTION_METADATA,
   ICommandOptions,
+  ICommandRestrictionMetadata,
   IReceiverOptions,
   RECEIVER_OPTIONS_METADATA,
   TReceiver,
+  Type,
 } from '@watson/common';
+import { Message, PermissionString } from 'discord.js';
 
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { Logger } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { CommandHandle } from './command-handle';
+
+export interface ICommandRestrictions {
+  permissions: PermissionString[];
+  roles: string[];
+  channels: string[];
+  channelIds: string[];
+  allPermissionsRequired: boolean;
+}
 
 /**
  * Resolves commands from the WatsonContainer instance
@@ -23,10 +35,8 @@ export class CommandExplorer {
 
   /**
    * Holds all commands registered in the application
-   * @key Name of the receiver the command from
-   * @value The command configuration
    */
-  private commands = new Map<string, unknown>();
+  private commands = new Set<CommandHandle>();
 
   constructor(container: WatsonContainer) {
     this.container = container;
@@ -35,6 +45,17 @@ export class CommandExplorer {
 
   public explore() {
     this.resolveReceiverData();
+  }
+
+  public getHandles(message: Message) {
+    const commands: CommandHandle[] = [];
+    for (const handle of this.commands) {
+      if (handle.matchesMessage(message)) {
+        commands.push(handle);
+      }
+    }
+
+    return commands;
   }
 
   private resolveReceiverData() {
@@ -70,18 +91,64 @@ export class CommandExplorer {
         method.descriptor
       );
 
-      new CommandHandle({
-        applicationConfig: this.container.config,
-        commandOptions: commandOptions,
-        receiverOptions: receiverOptions,
-        method: method,
-        receiver: receiver,
-      });
+      const restrictions = this.resolveCommandRestrictions(method.descriptor);
+
+      commandOptions["restrictions"] = restrictions;
+
+      const handle = new CommandHandle(
+        method,
+        receiverOptions,
+        commandOptions,
+        receiver,
+        this.container
+      );
+
+      this.commands.add(handle);
     }
   }
 
-  private createCommand(
-    receiverOptions: IReceiverOptions,
-    commandOptions: ICommandOptions
-  ) {}
+  private resolveCommandRestrictions(descriptor: Type) {
+    const restrictionMetadata = this.resolver.getMetadata<
+      ICommandRestrictionMetadata<any>[]
+    >(COMMAND_RESTRICTION_METADATA, descriptor);
+
+    if (typeof restrictionMetadata === "undefined") {
+      return undefined;
+    }
+
+    const permissions: PermissionString[] = [];
+    const roles: string[] = [];
+    const channels: string[] = [];
+    const channelIds: string[] = [];
+    let allPermissionsRequired: boolean;
+
+    for (let permission of restrictionMetadata) {
+      if (permission.type === "permission") {
+        const _permission = permission as ICommandRestrictionMetadata<"permission">;
+        permissions.push(..._permission.payload);
+        allPermissionsRequired = _permission.options.allRequired || false;
+      } else if (permission.type === "role") {
+        const _permission = permission as ICommandRestrictionMetadata<"role">;
+        roles.push(..._permission.payload);
+      } else if (permission.type === "channel") {
+        const _permission = permission as ICommandRestrictionMetadata<"channel">;
+        if (
+          typeof _permission.options?.isId === "undefined" ||
+          _permission.options.isId === false
+        ) {
+          return channels.push(..._permission.payload);
+        }
+
+        return channelIds.push(..._permission.payload);
+      }
+    }
+
+    return {
+      permissions,
+      channels,
+      channelIds,
+      roles,
+      allPermissionsRequired,
+    };
+  }
 }

@@ -1,1 +1,2 @@
-export * from "./permission.interface";
+export * from "./command-restriction-metadata.interafce";
+export * from "./restriction.interface";

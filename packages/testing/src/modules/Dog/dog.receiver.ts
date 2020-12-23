@@ -1,7 +1,7 @@
 import { Command, CommandArgumentType, Receiver } from '@watson/common';
 
 @Receiver({
-  command: "woof",
+  prefix: "!",
 })
 export class DogReceiver {
   @Command({
