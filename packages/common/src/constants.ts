@@ -12,7 +12,7 @@ export const COMMAND_OPTIONS_METADATA = "command:options";
  * Arguments which the command descriptor is called with
  */
 export const COMMAND_INJECT_METADATA = "command:inject";
-export const COMMAND_PERMISSION_METADATA = "command:permission";
+export const COMMAND_RESTRICTION_METADATA = "command:restriction";
 export const INJECTABLE_OPTIONS_METADATA = "injectable:options";
 
 export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
