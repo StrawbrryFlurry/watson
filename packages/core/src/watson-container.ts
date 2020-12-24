@@ -1,9 +1,7 @@
 import { Type } from '@watson/common';
-import iterate from 'iterare';
 
-import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
-import { UnknownModuleException, UnknownProviderException } from './exceptions';
+import { UnknownModuleException } from './exceptions';
 import { ModuleTokenFactory } from './helpers/module-token-factory';
 import { Module } from './injector';
 import { GlobalInstanceHost } from './injector/global-instance-host';
@@ -17,26 +15,8 @@ export class WatsonContainer {
   private moduleTokenFactory = new ModuleTokenFactory();
   public globalInstanceHost = new GlobalInstanceHost(this);
 
-  private clientAdapter: DiscordJSAdapter;
-
   constructor(config: ApplicationConfig) {
     this.config = config;
-  }
-
-  public applyClientAdapter(client: DiscordJSAdapter) {
-    this.clientAdapter = client;
-  }
-
-  public getClient() {
-    return this.clientAdapter;
-  }
-
-  public getAuthToken() {
-    return this.config.authToken;
-  }
-
-  public getClientOptions() {
-    return this.config.clientOptions;
   }
 
   public getModules() {
@@ -115,23 +95,8 @@ export class WatsonContainer {
   }
 
   public getInstanceOfProvider<T>(metatype: Type<T>): T {
-    const providers = iterate(this.modules.entries())
-      .map(([token, moduleRef]) => moduleRef.providers)
-      .toArray();
+    const data = this.globalInstanceHost.getInstance(metatype.name, "provider");
 
-    const moduleProviders = providers.find((provider) =>
-      provider.has(metatype.name)
-    );
-
-    if (typeof moduleProviders === "undefined") {
-      throw new UnknownProviderException("WatsonContainer", metatype.name);
-    }
-
-    const providerRef = moduleProviders.get(metatype.name);
-    return providerRef.instance as T;
-  }
-
-  public addGlobalPrefix(prefix: string) {
-    this.config.globalCommandPrefix = prefix;
+    return data.wrapper.instance as T;
   }
 }

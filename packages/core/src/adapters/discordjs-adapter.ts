@@ -1,47 +1,75 @@
-import { Client, ClientEvents, ClientOptions, Message } from 'discord.js';
-import { Observable, Subject } from 'rxjs';
+import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+import { RuntimeException } from '../exceptions';
 
 export class DiscordJSAdapter {
   private token: string;
   private client: Client;
-
-  private subReady: Subject<void>;
-  public onReady: Observable<void>;
-  private subMessage: Subject<Message>;
-  public onMessage: Observable<Message>;
-
-  private commandMap = new Map<{}, Observable<unknown>>();
-
   private clientOptions: ClientOptions;
+  private activity: ActivityOptions;
+
+  public ready = new BehaviorSubject<boolean>(false);
 
   /**
    * Constructs a DiscordJS adapter
    * @param token Discord API token
    */
-  constructor(token: string, options: ClientOptions) {
+  constructor(client: Client);
+  constructor(token: string, options: ClientOptions);
+  constructor(token: string | Client, options?: ClientOptions) {
+    if (token instanceof Client) {
+      this.client = token;
+    } else {
+      this.token = token;
+      this.clientOptions = options;
+    }
+  }
+
+  public initialize() {
+    this.client = this.createClientInstance();
+  }
+
+  private createClientInstance() {
+    return this.client || new Client(this.clientOptions || {});
+  }
+
+  public async start() {
+    this.initialize();
+    this.registerDefaultListeners();
+    await this.client.login(this.token);
+  }
+
+  public async stop() {
+    this.client.destroy();
+    this.ready.next(false);
+  }
+
+  public getClient() {
+    return this.client;
+  }
+
+  public setClient(client: Client) {
+    if (this.ready.value === true) {
+      throw new RuntimeException("The client cannot be set while it's running");
+    }
+
+    this.client = client;
+  }
+
+  public setAuthToken(token: string) {
     this.token = token;
-
-    this.subReady = new Subject();
-    this.onReady = this.subReady.asObservable();
-    this.subMessage = new Subject();
-    this.onMessage = this.subMessage.asObservable();
   }
 
-  /**
-   * Instantiates the DiscordJS client with the provided token
-   */
-  initialize(client?: Client) {
-    this.client = this.createClientInstance(client);
-    this.client.login(this.token);
-
-    this.client.on("ready", () => {
-      this.bindEvents();
-      this.subReady.next();
-    });
+  public setActivity(options: ActivityOptions) {
+    this.activity = options;
+    this.setUserActivity();
   }
 
-  createClientInstance(client?: Client) {
-    return client || new Client();
+  public async removeActivity() {
+    this.activity = undefined;
+
+    this.setUserActivity();
   }
 
   /**
@@ -49,29 +77,36 @@ export class DiscordJSAdapter {
    * @param name name of the event
    * @return event observable
    */
-  onEvent<K extends keyof ClientEvents>(name: K): Observable<ClientEvents[K]> {
-    return new Observable((sub) => {
-      this.client.on(name, (...args) => {
-        sub.next(args);
+  public createListener<E extends keyof ClientEvents>(
+    event: E
+  ): Observable<ClientEvents[E]> {
+    return new Observable((subscriber) => {
+      this.client.on(event, (...args) => {
+        subscriber.next(args);
       });
     });
   }
 
-  public bindCommand(command: unknown) {
-    const command$ = this.onEvent("message")
-      .pipe
-      // filter
-      // add command
-      ();
-
-    this.commandMap.set(command, command$);
+  private registerStateListener() {
+    this.createListener("ready").subscribe(() => {
+      this.ready.next(true);
+      this.setUserActivity();
+    });
   }
 
-  /**
-   * Binds discord js events internally
-   * @internal
-   */
-  private bindEvents() {
-    this.client.on("message", (msg) => this.subMessage.next(msg));
+  private registerDefaultListeners() {
+    this.registerStateListener();
+  }
+
+  private setUserActivity() {
+    if (this.ready.value !== true) {
+      return;
+    }
+
+    if (typeof this.activity !== "undefined") {
+      this.client.user.setActivity(this.activity);
+    } else {
+      this.client.user.setActivity();
+    }
   }
 }

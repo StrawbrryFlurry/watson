@@ -1,5 +1,5 @@
 import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions } from '@watson/common';
-import { PermissionString } from 'discord.js';
+import { PermissionString, TextChannel } from 'discord.js';
 
 import { ApplicationConfig } from '../application-config';
 import { CommandConfigurationException, NonExistingPrefixException } from '../exceptions';
@@ -68,7 +68,11 @@ export class CommandConfiguration {
 
   private setParams() {
     if (this.useRegex) {
-      this.params = this.commandOptions.params;
+      return (this.params = this.commandOptions.params);
+    }
+
+    if (typeof this.commandOptions.params === "undefined") {
+      return;
     }
 
     this.commandOptions.params.forEach((param) => {
@@ -151,7 +155,11 @@ export class CommandConfiguration {
   }
 
   public get isRestrictedToChannel() {
-    return this.allowedChannels.size > 0 || this.allowedChannelIds.size > 0;
+    return (
+      this.allowedChannels.size > 0 ||
+      this.allowedChannelIds.size > 0 ||
+      !this.directMessage
+    );
   }
 
   public get requiresRoles() {
@@ -205,7 +213,7 @@ export class CommandConfiguration {
       return true;
     }
 
-    if (this.allowedChannels.has(ctx.channel.name)) {
+    if (this.allowedChannels.has((ctx.channel as TextChannel).name)) {
       return true;
     }
 

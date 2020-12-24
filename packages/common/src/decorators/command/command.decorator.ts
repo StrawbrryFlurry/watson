@@ -46,7 +46,7 @@ export interface ICommandParam {
   /**
    * If the type a date this parameter is required to parse the date.
    */
-  dateFormat: string;
+  dateFormat?: string;
 }
 
 export interface ICommandReaction {

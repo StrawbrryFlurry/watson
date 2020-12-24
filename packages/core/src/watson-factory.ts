@@ -1,4 +1,5 @@
 import { Type } from '@watson/common';
+import { Client } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
@@ -15,14 +16,13 @@ export class WatsonApplicationFactory {
 
   public static async create(module: Type, options: IWatsonApplicationOptions) {
     this.logger.log("Creating application context", "status");
-    const appOptions = new ApplicationConfig(options);
+    const client = this.createClientInstance(options);
+    const appOptions = new ApplicationConfig(options, client);
     const container = new WatsonContainer(appOptions);
-    const client = this.createClientInstance(container);
-    container.applyClientAdapter(client);
 
     await this.initialize(module, container);
 
-    return new WatsonApplication(container);
+    return new WatsonApplication(appOptions, container, client);
   }
 
   private static async initialize(module: Type, container: WatsonContainer) {
@@ -36,10 +36,9 @@ export class WatsonApplicationFactory {
     }).catch();
   }
 
-  private static createClientInstance(container: WatsonContainer) {
-    const token = container.getAuthToken();
-    const options = container.getClientOptions();
-
-    return new DiscordJSAdapter(token, options);
+  private static createClientInstance(options: IWatsonApplicationOptions) {
+    return options.client instanceof Client
+      ? new DiscordJSAdapter(options.client)
+      : new DiscordJSAdapter(options.discordAuthToken, options.clientOptions);
   }
 }

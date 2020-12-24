@@ -117,7 +117,7 @@ export class Module {
         "ADAPTER",
         null,
         this,
-        this.container.getClient(),
+        this.container.config.clientAdapter,
         true
       )
     );

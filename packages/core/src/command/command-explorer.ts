@@ -86,10 +86,11 @@ export class CommandExplorer {
     }
 
     for (const method of methods) {
-      const commandOptions = this.resolver.getMetadata<ICommandOptions>(
-        COMMAND_OPTIONS_METADATA,
-        method.descriptor
-      );
+      const commandOptions =
+        this.resolver.getMetadata<ICommandOptions>(
+          COMMAND_OPTIONS_METADATA,
+          method.descriptor
+        ) || {};
 
       const restrictions = this.resolveCommandRestrictions(method.descriptor);
 
