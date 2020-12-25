@@ -10,7 +10,7 @@ export enum CommandArgumentType {
    * #music
    * ```
    */
-  CHANNEL = "arg_type_channel",
+  CHANNEL = "arg:type:channel",
   /**
    * A member mentioned by a member using '@'
    * ```
@@ -18,7 +18,7 @@ export enum CommandArgumentType {
    * !ban @User
    * ```
    */
-  USER = "arg_type_user",
+  USER = "arg:type:user",
   /**
    * A role mentioned by a member using '@'
    * ```
@@ -27,25 +27,25 @@ export enum CommandArgumentType {
    * !members @moderator
    * ```
    */
-  ROLE = "arg_type_role",
+  ROLE = "arg:type:role",
   /**
    * A single string value
    * @example
    * !
    */
-  STRING = "arg_type_string",
+  STRING = "arg:type:string",
   /**
    * A multi string value
    * @example
    * !message `Lorem ipsum dolor`
    */
-  SENTENCE = "arg_type_sentence",
+  SENTENCE = "arg:type:sentence",
   /**
    * A single number value
    * @example
    * !random 20
    */
-  NUMBER = "arg_type_number",
+  NUMBER = "arg:type:number",
   /**
    * A date string.
    * Watson will try to parse the value using dayjs.
@@ -53,5 +53,5 @@ export enum CommandArgumentType {
    * @example
    * !remind 16.10.2020-12:00
    */
-  DATE = "arg_type_date",
+  DATE = "arg:type:date",
 }
