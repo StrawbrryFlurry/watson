@@ -1,7 +1,7 @@
 import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
-import { EventProxy } from '../command';
+import { EventProxy } from '../event';
 import { RuntimeException } from '../exceptions';
 
 export class DiscordJSAdapter {
