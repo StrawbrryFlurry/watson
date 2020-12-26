@@ -1,7 +1,7 @@
 import { MessageEmbed, Snowflake } from 'discord.js';
 
 import { COMMAND_OPTIONS_METADATA } from '../../constants';
-import { CommandArgumentType } from '../../enums';
+import { CommandArgumentType, ResponseChannelType } from '../../enums';
 import { isObject, isString } from '../../utils/shared.utils';
 
 export interface ICommandParam {
@@ -88,6 +88,17 @@ export interface ICommandPromt {
   timeout?: number;
 }
 
+export interface IResponseChannelOptions {
+  /**
+   * The response channel type
+   */
+  type: ResponseChannelType;
+  /**
+   * The name of the channel in the guilde
+   */
+  name?: string;
+}
+
 export interface ICommandOptions {
   /**
    * Name of the command
@@ -133,6 +144,12 @@ export interface ICommandOptions {
    *
    */
   caseSensitive?: boolean;
+  /**
+   * Change the channel in which the bot will send the response message
+   *
+   * @default ResponseChannelType.SAME The same channel the message was sent to.
+   */
+  responseChannel?: IResponseChannelOptions;
 }
 
 /**
