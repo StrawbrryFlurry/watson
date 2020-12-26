@@ -13,7 +13,7 @@ import { Message, PermissionString } from 'discord.js';
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { Logger } from '../logger';
 import { WatsonContainer } from '../watson-container';
-import { CommandHandle } from './command-handle';
+import { CommandRoute } from './command-route';
 
 export interface ICommandRestrictions {
   permissions: PermissionString[];
@@ -36,7 +36,7 @@ export class CommandExplorer {
   /**
    * Holds all commands registered in the application
    */
-  private commands = new Set<CommandHandle>();
+  private commands = new Set<CommandRoute>();
 
   constructor(container: WatsonContainer) {
     this.container = container;
@@ -47,8 +47,8 @@ export class CommandExplorer {
     this.resolveReceiverData();
   }
 
-  public getHandles(message: Message) {
-    const commands: CommandHandle[] = [];
+  public getRoute(message: Message) {
+    const commands: CommandRoute[] = [];
     for (const handle of this.commands) {
       if (handle.matchesMessage(message)) {
         commands.push(handle);
@@ -96,7 +96,7 @@ export class CommandExplorer {
 
       commandOptions["restrictions"] = restrictions;
 
-      const handle = new CommandHandle(
+      const handle = new CommandRoute(
         method,
         receiverOptions,
         commandOptions,

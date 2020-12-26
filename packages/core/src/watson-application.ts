@@ -1,8 +1,10 @@
 import { Type } from '@watson/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
+import { Subscription } from 'rxjs';
 
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
+import { CommandContainer } from './command';
 import { CommandExplorer } from './command/command-explorer';
 import { Logger } from './logger';
 import { WatsonContainer } from './watson-container';
@@ -16,6 +18,11 @@ export class WatsonApplication {
   private config: ApplicationConfig;
   private commandExplorer: CommandExplorer;
   private clientAdapter: DiscordJSAdapter;
+  private commandProxySub: Subscription;
+  private commandContainer = new CommandContainer();
+
+  private isStarted: boolean = false;
+  private isInitialized: boolean = false;
 
   constructor(
     config: ApplicationConfig,
@@ -29,10 +36,20 @@ export class WatsonApplication {
   }
 
   public async start() {
-    this.commandExplorer.explore();
+    !this.isInitialized && (await this.init());
     await this.clientAdapter.start();
-
+    this.isStarted = true;
     return this.clientAdapter;
+  }
+
+  public async stop() {
+    this.commandProxySub.unsubscribe();
+    await this.clientAdapter.stop();
+  }
+
+  private async init() {
+    this.commandExplorer.explore();
+    this.isInitialized = true;
   }
 
   public getProviderInstance<T>(provider: Type<T>): T {
@@ -59,5 +76,11 @@ export class WatsonApplication {
   public setAuthToken(token: string) {
     this.clientAdapter.setAuthToken(token);
     this.config.authToken = token;
+  }
+
+  private registerCommandProxy() {
+    this.commandProxySub = this.clientAdapter.registerEventProxy(
+      this.commandProxy
+    );
   }
 }

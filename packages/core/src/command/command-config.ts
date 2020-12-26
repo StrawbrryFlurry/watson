@@ -1,4 +1,11 @@
-import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions } from '@watson/common';
+import {
+  CommandArgumentType,
+  ICommandOptions,
+  ICommandParam,
+  IReceiverOptions,
+  IResponseChannelOptions,
+  ResponseChannelType,
+} from '@watson/common';
 import { PermissionString, TextChannel } from 'discord.js';
 
 import { ApplicationConfig } from '../application-config';
@@ -28,6 +35,8 @@ export class CommandConfiguration {
   public alias: string[];
   public caseSensitive: boolean;
   public params?: ICommandParam[] = [];
+
+  public responseChannel: Partial<IResponseChannelOptions> = {};
 
   constructor(
     private commandOptions: ICommandOptions,
@@ -108,7 +117,6 @@ export class CommandConfiguration {
     }
 
     this.alias = this.commandOptions.alias || [];
-
     this.directMessage = this.commandOptions.directMessage || false;
 
     const regex = this.commandOptions.paramRegex;
@@ -123,6 +131,24 @@ export class CommandConfiguration {
       } else {
         this.paramDelimiter = delimiter;
       }
+    }
+
+    const responseChannelOptions = this.commandOptions.responseChannel;
+
+    if (typeof responseChannelOptions !== "undefined") {
+      if (
+        responseChannelOptions.type === ResponseChannelType.OTHER &&
+        typeof responseChannelOptions.name === "undefined"
+      ) {
+        this.responseChannel.type = ResponseChannelType.SAME;
+      } else if (typeof responseChannelOptions.name !== "undefined") {
+        this.responseChannel.name = responseChannelOptions.name;
+        this.responseChannel.type = responseChannelOptions.type;
+      } else {
+        this.responseChannel.type = responseChannelOptions.type;
+      }
+    } else {
+      this.responseChannel.type = ResponseChannelType.SAME;
     }
   }
 
@@ -182,6 +208,10 @@ export class CommandConfiguration {
     return this.params.some(
       (param) => param.type === CommandArgumentType.SENTENCE
     );
+  }
+
+  public get responseChannelType() {
+    return this.responseChannel.type;
   }
 
   public hasRoles(ctx: CommandContext) {

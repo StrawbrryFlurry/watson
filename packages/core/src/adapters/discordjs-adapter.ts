@@ -1,6 +1,7 @@
 import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
+import { EventProxy } from '../command';
 import { RuntimeException } from '../exceptions';
 
 export class DiscordJSAdapter {
@@ -8,7 +9,7 @@ export class DiscordJSAdapter {
   private client: Client;
   private clientOptions: ClientOptions;
   private activity: ActivityOptions;
-
+  private eventSubscriptions = new Map<EventProxy<any>, Subscription>();
   public ready = new BehaviorSubject<boolean>(false);
 
   /**
@@ -70,6 +71,18 @@ export class DiscordJSAdapter {
     this.activity = undefined;
 
     this.setUserActivity();
+  }
+
+  public registerEventProxy<E extends keyof ClientEvents>(
+    commandProxy: EventProxy<E>
+  ) {
+    const observable = this.createListener(commandProxy.eventType);
+    const subscriber = observable.subscribe((eventData) =>
+      commandProxy.proxy(...eventData)
+    );
+
+    this.eventSubscriptions.set(commandProxy, subscriber);
+    return subscriber;
   }
 
   /**

@@ -1,39 +1,44 @@
-import { DMChannel, Guild, Message, NewsChannel, PermissionString, Role, TextChannel, User } from 'discord.js';
+import { Client, DMChannel, Guild, Message, NewsChannel, PermissionString, Role, TextChannel, User } from 'discord.js';
 
-import { CommandHandle } from './command-handle';
+import { CommandRoute, ICommandParams } from './command-route';
 
 /**
  * Execution context of a command
  */
 export class CommandContext {
   public message: Message;
-  public author: User;
-  public params: unknown[];
+  public user: User;
+  public params: ICommandParams;
   public userRoles: Set<Role>;
   public userRoleNames: Set<string>;
   public userPermissions: Set<PermissionString>;
-  public commandHandle: CommandHandle;
+  public commandHandle: CommandRoute;
   public channel: TextChannel | DMChannel | NewsChannel;
   public guild: Guild;
+  public client: Client;
 
   public isDm: boolean;
 
   constructor(message: Message) {
     this.message = message;
     this.channel = message.channel;
-    this.author = message.author;
+    this.user = message.author;
+    this.client = message.client;
   }
 
   public async init() {
     await this.resolveParams();
 
     if (this.message.channel.type === "dm") {
+      this.guild = undefined;
       return (this.isDm = true);
     }
 
     this.isDm = false;
+    this.guild = this.message.guild;
+    const member = this.message.member;
 
-    Object.entries(this.message.member.permissions.serialize()).forEach(
+    Object.entries(member.permissions.serialize()).forEach(
       ([permission, hasPermission]) => {
         if (!!hasPermission) {
           this.userPermissions.add(permission as PermissionString);
@@ -41,7 +46,7 @@ export class CommandContext {
       }
     );
 
-    this.message.member.roles.cache.forEach((role) => {
+    member.roles.cache.forEach((role) => {
       this.userRoleNames.add(role.name);
       this.userRoles.add(role);
     });
