@@ -37,7 +37,7 @@ export interface ICommandParam {
   /**
    * The default value if none was given
    */
-  defautl?: any;
+  default?: any;
   /**
    * Promt the user for an action
    * @interface ICommandPromt
