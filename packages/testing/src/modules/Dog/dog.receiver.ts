@@ -1,4 +1,4 @@
-import { Command, CommandArgumentType, Receiver } from '@watson/common';
+import { Command, CommandArgumentType, Param, Receiver, User } from '@watson/common';
 
 @Receiver({
   prefix: "!",
@@ -9,12 +9,15 @@ export class DogReceiver {
     alias: ["woofies", "barkies"],
     params: [
       {
-        name: "user",
+        name: "User",
         type: CommandArgumentType.USER,
-        defautl: "@user",
+        default: "@user",
         encapsulator: "asdas",
       },
     ],
   })
-  woof() {}
+  woof(@User() user, @Param() param) {
+    console.log(param);
+    console.log(user);
+  }
 }

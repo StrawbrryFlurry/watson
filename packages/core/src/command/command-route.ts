@@ -3,6 +3,7 @@ import {
   CommandArgumentType,
   ICommandOptions,
   ICommandParam,
+  IParamDecoratorMetadata,
   IReceiverOptions,
   TReceiver,
   UnatuhorizedException,
@@ -11,29 +12,34 @@ import * as dayjs from 'dayjs';
 import { Message } from 'discord.js';
 
 import { IMethodValue, InstanceWrapper } from '../injector';
+import { CommandExecutionContext } from '../lifecycle/execution-context';
 import { WatsonContainer } from '../watson-container';
 import { CommandConfiguration } from './command-config';
-import { CommandContext } from './command-context';
 
 export interface ICommandParams {
   [name: string]: unknown;
 }
 
+export interface IParamDecorator extends IParamDecoratorMetadata {}
+
 export class CommandRoute extends CommandConfiguration {
   public configuration: CommandConfiguration;
   public host: InstanceWrapper<TReceiver>;
   public descriptor: Function;
+  public routeArgs: IParamDecorator[];
   private container: WatsonContainer;
 
   constructor(
     method: IMethodValue,
     receiverOptions: IReceiverOptions,
     commandOptions: ICommandOptions,
+    routeArgs: IParamDecorator[],
     receiver: InstanceWrapper<TReceiver>,
     container: WatsonContainer
   ) {
     super(commandOptions, receiverOptions, container.config, method);
 
+    this.routeArgs = routeArgs;
     this.descriptor = method.descriptor;
     this.host = receiver;
     this.container = container;
@@ -53,13 +59,17 @@ export class CommandRoute extends CommandConfiguration {
         return false;
       }
 
+      if (!this.matchesChannel(message)) {
+        return false;
+      }
+
       return true;
     } catch {
       return false;
     }
   }
 
-  public async checkAndParse(ctx: CommandContext) {
+  public async checkAndParse(ctx: CommandExecutionContext) {
     this.checkRestrictions(ctx);
     return await this.getParamsFromMessage(ctx);
   }
@@ -89,7 +99,7 @@ export class CommandRoute extends CommandConfiguration {
   private extractMessageData(message: Message) {
     let messageContent = message.content;
 
-    if (messageContent.startsWith(this.prefix)) {
+    if (!messageContent.startsWith(this.prefix)) {
       return undefined;
     }
 
@@ -103,24 +113,20 @@ export class CommandRoute extends CommandConfiguration {
     };
   }
 
-  private checkRestrictions(ctx: CommandContext) {
+  private checkRestrictions(ctx: CommandExecutionContext) {
     if (!this.hasPermissions(ctx)) {
-      throw new UnatuhorizedException();
+      throw new UnatuhorizedException("Permission");
     }
 
     if (!this.hasRoles(ctx)) {
-      throw new UnatuhorizedException();
-    }
-
-    if (!this.matchesChannel(ctx)) {
-      throw new UnatuhorizedException();
+      throw new UnatuhorizedException("Role");
     }
 
     return true;
   }
 
   private async getParamsFromMessage(
-    ctx: CommandContext
+    ctx: CommandExecutionContext
   ): Promise<ICommandParams> {
     if (!this.hasParams) {
       return null;
@@ -151,6 +157,7 @@ export class CommandRoute extends CommandConfiguration {
           remainingParams[idx],
           param
         );
+
         return { [param.name]: parsedParam };
       })
     );
@@ -163,18 +170,24 @@ export class CommandRoute extends CommandConfiguration {
   }
 
   private parseParamType(
-    ctx: CommandContext,
+    ctx: CommandExecutionContext,
     value: string,
     param: ICommandParam
   ) {
     let result: unknown;
+
+    if (!value && param.default) {
+      value = param.default;
+    }
+
     switch (param.type) {
       case CommandArgumentType.USER:
         try {
           const [match] = value.match(/^<@.*>$/);
-          result = ctx.guild.members.fetch(ctx.message);
-        } catch {
-          throw new BadArgumentException("");
+          result = ctx.message.guild.members.fetch(ctx.message);
+        } catch (err) {
+          console.log(err);
+          throw new BadArgumentException(param);
         }
         break;
       case CommandArgumentType.CHANNEL:
@@ -182,9 +195,9 @@ export class CommandRoute extends CommandConfiguration {
       case CommandArgumentType.ROLE:
         try {
           const [match] = value.match(/^<@&.*>$/);
-          result = ctx.guild.roles.fetch(value);
+          result = ctx.message.guild.roles.fetch(value);
         } catch {
-          throw new BadArgumentException("");
+          throw new BadArgumentException(param);
         }
         break;
       case CommandArgumentType.DATE:
@@ -192,7 +205,7 @@ export class CommandRoute extends CommandConfiguration {
         const date = dayjs(value, format);
 
         if (date.isValid() === false) {
-          throw new BadArgumentException("");
+          throw new BadArgumentException(param);
         }
 
         result = date;
@@ -228,7 +241,7 @@ export class CommandRoute extends CommandConfiguration {
 
           params[idx] = data;
         } catch {
-          throw new BadArgumentException("");
+          throw new BadArgumentException(param);
         }
       }
     });

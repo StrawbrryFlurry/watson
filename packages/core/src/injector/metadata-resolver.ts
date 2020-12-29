@@ -140,6 +140,11 @@ export class MetadataResolver {
     metadataKey: string,
     target: Type,
     propertyKey?: string
+  ): T;
+  public getMetadata<T>(
+    metadataKey: string,
+    target: Type,
+    propertyKey?: string
   ): T {
     if (propertyKey) {
       return Reflect.getMetadata(metadataKey, target, propertyKey);

@@ -1,4 +1,4 @@
-import { DESIGN_PARAMETERS, isNil, TInjectable, TReceiver, Type } from '@watson/common';
+import { DESIGN_PARAMETERS, isEmpty, isNil, TInjectable, TReceiver, Type } from '@watson/common';
 
 import { CircularDependencyException, UnknownProviderException } from '../exceptions';
 import { UnknownComponentReferenceException } from '../exceptions/unknown-component-reference.exception';
@@ -44,7 +44,7 @@ export class Injector {
     const dependencies = this.resolveDependencies(wrapper);
     let ctorDependencies = [];
 
-    if (dependencies.length !== 0) {
+    if (!isEmpty(dependencies)) {
       ctorDependencies = this.resolveConstructorParam(
         wrapper,
         dependencies,

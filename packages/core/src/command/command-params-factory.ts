@@ -1,10 +1,12 @@
 import { CommandParam } from '@watson/common';
 
-import { CommandContext } from './command-context';
+import { AsyncContextResolver, CommandExecutionContext } from '../lifecycle';
 
 export class CommandParamsFactory {
+  private asyncResolver = new AsyncContextResolver();
+
   public getParamFromContext(
-    ctx: CommandContext,
+    ctx: CommandExecutionContext,
     param: CommandParam,
     options: unknown
   ) {
@@ -37,5 +39,9 @@ export class CommandParamsFactory {
     }
 
     return paramValue;
+  }
+
+  public resolvePramFactory(factory: Function) {
+    return this.asyncResolver.resolveAsyncValue(factory);
   }
 }

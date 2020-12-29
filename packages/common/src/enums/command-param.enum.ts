@@ -6,4 +6,5 @@ export enum CommandParam {
   CHANNEL = "param:channel",
   USER = "pram:user",
   GUILD = "pram:guild",
+  FACTORY = "param:factory",
 }

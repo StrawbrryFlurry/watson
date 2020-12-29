@@ -1,15 +1,19 @@
 import {
+  COMMAND_ARGUMENTS,
   COMMAND_OPTIONS_METADATA,
   COMMAND_RESTRICTION_METADATA,
   ICommandOptions,
   ICommandRestrictionMetadata,
+  IParamDecoratorMetadata,
   IReceiverOptions,
+  isEmpty,
   RECEIVER_OPTIONS_METADATA,
   TReceiver,
   Type,
 } from '@watson/common';
-import { Message, PermissionString } from 'discord.js';
+import { PermissionString } from 'discord.js';
 
+import { EventRoute } from '../event';
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { Logger } from '../logger';
 import { WatsonContainer } from '../watson-container';
@@ -36,7 +40,8 @@ export class CommandExplorer {
   /**
    * Holds all commands registered in the application
    */
-  private commands = new Set<CommandRoute>();
+  private _commands = new Set<CommandRoute>();
+  private _events = new Set<EventRoute<any>>();
 
   constructor(container: WatsonContainer) {
     this.container = container;
@@ -47,15 +52,8 @@ export class CommandExplorer {
     this.resolveReceiverData();
   }
 
-  public getRoute(message: Message) {
-    const commands: CommandRoute[] = [];
-    for (const handle of this.commands) {
-      if (handle.matchesMessage(message)) {
-        commands.push(handle);
-      }
-    }
-
-    return commands;
+  public get commands() {
+    return this._commands;
   }
 
   private resolveReceiverData() {
@@ -81,7 +79,7 @@ export class CommandExplorer {
   ) {
     const methods = this.resolver.resolveMethodsFromMetatype(receiver.metatype);
 
-    if (methods.length === 0) {
+    if (isEmpty(methods)) {
       return;
     }
 
@@ -93,13 +91,17 @@ export class CommandExplorer {
         ) || {};
 
       const restrictions = this.resolveCommandRestrictions(method.descriptor);
-
+      const commandArgs = this.resolveCommandArgs(
+        receiver.metatype,
+        method.name
+      );
       commandOptions["restrictions"] = restrictions;
 
       const handle = new CommandRoute(
         method,
         receiverOptions,
         commandOptions,
+        commandArgs,
         receiver,
         this.container
       );
@@ -151,5 +153,16 @@ export class CommandExplorer {
       roles,
       allPermissionsRequired,
     };
+  }
+
+  private resolveCommandArgs(receiver: Type, propertyKey: string) {
+    const metadata =
+      this.resolver.getMetadata<IParamDecoratorMetadata[]>(
+        COMMAND_ARGUMENTS,
+        receiver,
+        propertyKey
+      ) || [];
+
+    return metadata;
   }
 }

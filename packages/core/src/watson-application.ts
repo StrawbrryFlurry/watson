@@ -1,10 +1,9 @@
 import { Type } from '@watson/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
-import { Subscription } from 'rxjs';
 
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
-import { CommandContainer } from './command';
+import { ApplicationProxy } from './application-proxy';
 import { CommandExplorer } from './command/command-explorer';
 import { Logger } from './logger';
 import { WatsonContainer } from './watson-container';
@@ -17,9 +16,8 @@ export class WatsonApplication {
   private container: WatsonContainer;
   private config: ApplicationConfig;
   private commandExplorer: CommandExplorer;
+  private applicationProxy: ApplicationProxy;
   private clientAdapter: DiscordJSAdapter;
-  private commandProxySub: Subscription;
-  private commandContainer = new CommandContainer();
 
   private isStarted: boolean = false;
   private isInitialized: boolean = false;
@@ -43,12 +41,14 @@ export class WatsonApplication {
   }
 
   public async stop() {
-    this.commandProxySub.unsubscribe();
     await this.clientAdapter.stop();
   }
 
   private async init() {
     this.commandExplorer.explore();
+    this.clientAdapter.initialize();
+    this.applicationProxy = new ApplicationProxy(this.commandExplorer);
+    await this.applicationProxy.init(this.clientAdapter);
     this.isInitialized = true;
   }
 
@@ -76,11 +76,5 @@ export class WatsonApplication {
   public setAuthToken(token: string) {
     this.clientAdapter.setAuthToken(token);
     this.config.authToken = token;
-  }
-
-  private registerCommandProxy() {
-    this.commandProxySub = this.clientAdapter.registerEventProxy(
-      this.commandProxy
-    );
   }
 }

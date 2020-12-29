@@ -1,11 +1,13 @@
+import { COMMAND_ARGUMENTS } from '../constants';
 import { CommandParam } from '../enums';
-import { ExecutionContext } from '../interfaces/execution-context.interface';
+import { ExecutionContext } from '../interfaces';
 
-export type ParamFactoryFunction = (ctx: ExecutionContext) => unknown;
+export type ParamFactoryFunction = (ctx: ExecutionContext<unknown>) => unknown;
 
 export interface IParamDecoratorMetadata<O = any> {
-  type: string;
-  options: O;
+  type: CommandParam;
+  paramIndex: number;
+  options?: O;
   factory?: ParamFactoryFunction;
 }
 
@@ -14,17 +16,48 @@ export function createParamDecorator<O = any>(
   options?: O
 ): ParameterDecorator {
   return (target: Object, propertyKey: string, parameterIndex: number) => {
-    const existing: ParamFactoryFunction[] =
-      Reflect.getMetadata("", target.constructor, propertyKey) || [];
-    Reflect.defineMetadata("", {}, target.constructor, propertyKey);
+    const existing: IParamDecoratorMetadata[] =
+      Reflect.getMetadata(COMMAND_ARGUMENTS, target.constructor, propertyKey) ||
+      [];
+
+    const args = [
+      ...existing,
+      {
+        paramIndex: parameterIndex,
+        type: parm,
+        options: options,
+      } as IParamDecoratorMetadata,
+    ];
+
+    Reflect.defineMetadata(
+      COMMAND_ARGUMENTS,
+      args,
+      target.constructor,
+      propertyKey
+    );
   };
 }
 
 export function createCustomParamDecorator(paramFactory: ParamFactoryFunction) {
   return (target: Object, propertyKey: string, parameterIndex: number) => {
-    Reflect.getMetadata("", target.constructor, propertyKey);
-    Reflect.defineMetadata("", {}, target.constructor, propertyKey);
+    const existing: IParamDecoratorMetadata[] =
+      Reflect.getMetadata(COMMAND_ARGUMENTS, target.constructor, propertyKey) ||
+      [];
+
+    const args = [
+      ...existing,
+      {
+        type: "param:factory",
+        paramIndex: parameterIndex,
+        factory: paramFactory,
+      } as IParamDecoratorMetadata,
+    ];
+
+    Reflect.defineMetadata(
+      COMMAND_ARGUMENTS,
+      args,
+      target.constructor,
+      propertyKey
+    );
   };
 }
-
-function applyParamMetadata() {}

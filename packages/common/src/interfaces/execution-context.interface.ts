@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-export interface ExecutionContext {
-  getHandler<T = any>(): T;
+export interface ExecutionContext<RouteType> {
+  getRouteConfig(): RouteType;
   getMessage(): Message;
 }

@@ -1,3 +1,4 @@
+export * from "./async-resolution.exception";
 export * from "./bootstrapping.exception";
 export * from "./circular-dependency.exception";
 export * from "./command-configuration.exception";
@@ -8,3 +9,4 @@ export * from "./unknown-component-reference.exception";
 export * from "./unknown-export.exception";
 export * from "./unknown-module.exception";
 export * from "./unknown-provider.exception";
+export * from "./unknown-channel.exception";

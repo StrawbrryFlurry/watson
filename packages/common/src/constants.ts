@@ -6,7 +6,7 @@ export const MODULE_METADATA = {
 };
 
 export const RECEIVER_OPTIONS_METADATA = "reciver:options";
-
+export const EVENT_OPTIONS_METADATA = "event:options";
 export const COMMAND_OPTIONS_METADATA = "command:options";
 /**
  * Arguments which the command descriptor is called with

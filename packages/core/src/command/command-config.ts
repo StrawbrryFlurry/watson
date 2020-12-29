@@ -4,14 +4,15 @@ import {
   ICommandParam,
   IReceiverOptions,
   IResponseChannelOptions,
+  isEmpty,
   ResponseChannelType,
 } from '@watson/common';
-import { PermissionString, TextChannel } from 'discord.js';
+import { Message, PermissionString, TextChannel } from 'discord.js';
 
 import { ApplicationConfig } from '../application-config';
 import { CommandConfigurationException, NonExistingPrefixException } from '../exceptions';
 import { IMethodValue } from '../injector';
-import { CommandContext } from './command-context';
+import { CommandExecutionContext } from '../lifecycle';
 import { ICommandRestrictions } from './command-explorer';
 
 export class CommandConfiguration {
@@ -103,6 +104,10 @@ export class CommandConfiguration {
         }
       }
 
+      if (typeof param.optional === "undefined") {
+        param.optional = false;
+      }
+
       this.params.push(param);
     });
   }
@@ -184,7 +189,7 @@ export class CommandConfiguration {
     return (
       this.allowedChannels.size > 0 ||
       this.allowedChannelIds.size > 0 ||
-      !this.directMessage
+      this.directMessage === true
     );
   }
 
@@ -197,11 +202,11 @@ export class CommandConfiguration {
   }
 
   public get hasParams() {
-    return this.params.length !== 0 || this.useRegex;
+    return !isEmpty(this.params) || this.useRegex;
   }
 
   public get useRegex() {
-    return typeof this.paramRegex !== "undefined" && this.params.length !== 0;
+    return typeof this.paramRegex !== "undefined" && !isEmpty(this.params);
   }
 
   public get hasSentence() {
@@ -214,7 +219,7 @@ export class CommandConfiguration {
     return this.responseChannel.type;
   }
 
-  public hasRoles(ctx: CommandContext) {
+  public hasRoles(ctx: CommandExecutionContext) {
     if (!this.requiresRoles) {
       return true;
     }
@@ -222,7 +227,7 @@ export class CommandConfiguration {
     return this.corssMatchSet(this.requiredRoles, ctx.userRoleNames);
   }
 
-  public hasPermissions(ctx: CommandContext) {
+  public hasPermissions(ctx: CommandExecutionContext) {
     if (!this.requiresPermission) {
       return true;
     }
@@ -234,16 +239,16 @@ export class CommandConfiguration {
     );
   }
 
-  public matchesChannel(ctx: CommandContext) {
+  public matchesChannel(message: Message) {
     if (!this.isRestrictedToChannel) {
       return true;
     }
 
-    if (this.allowedChannelIds.has(ctx.channel.id)) {
+    if (this.allowedChannelIds.has(message.channel.id)) {
       return true;
     }
 
-    if (this.allowedChannels.has((ctx.channel as TextChannel).name)) {
+    if (this.allowedChannels.has((message.channel as TextChannel).name)) {
       return true;
     }
 
