@@ -30,8 +30,8 @@ export class WatsonApplicationFactory {
     const instanceLoader = new InstanceLoader(container);
 
     this.logger.log("Resolving Modules", "status");
-    await BootstrappingZone.runAsync(() => {
-      resolver.resolveRootModule(module);
+    await BootstrappingZone.runAsync(async () => {
+      await resolver.resolveRootModule(module);
       instanceLoader.createInstances();
     }).catch();
   }

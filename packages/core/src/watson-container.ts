@@ -1,4 +1,4 @@
-import { Type } from '@watson/common';
+import { CustomProvider, DynamicModule, Type } from '@watson/common';
 
 import { ApplicationConfig } from './application-config';
 import { UnknownModuleException } from './exceptions';
@@ -14,6 +14,7 @@ export class WatsonContainer {
   public config: ApplicationConfig;
   private moduleTokenFactory = new ModuleTokenFactory();
   public globalInstanceHost = new GlobalInstanceHost(this);
+  private dynamicModuleMetadata = new Map<string, Partial<DynamicModule>>();
 
   constructor(config: ApplicationConfig) {
     this.config = config;
@@ -23,13 +24,31 @@ export class WatsonContainer {
     return this.modules;
   }
 
-  public addModule(metatype: Type) {
+  public addModule(metatype: Type | DynamicModule) {
     const token = this.moduleTokenFactory.generateModuleToken(metatype);
-    const module = new Module(metatype, this);
 
-    this.modules.set(token, module);
+    if (this.isDynamicModule(metatype)) {
+      this.addDynamicModule(token, metatype as DynamicModule);
+    } else {
+      const module = new Module(metatype as Type, this);
+      this.modules.set(token, module);
+    }
 
     return token;
+  }
+
+  public addDynamicModule(token: string, module: DynamicModule) {
+    const { module: metatype, exports, imports, receivers, providers } = module;
+
+    this.dynamicModuleMetadata.set(token, {
+      exports,
+      imports,
+      receivers,
+      providers,
+    });
+
+    const moduleRef = new Module(metatype, this);
+    this.modules.set(token, moduleRef);
   }
 
   public addImport(token: string, metatype: Type) {
@@ -73,13 +92,26 @@ export class WatsonContainer {
     moduleRef.addReceiver(metatype);
   }
 
-  public addInjectable(token: string, metatype: Type) {
+  public addProvider(token: string, metatype: Type | CustomProvider) {
     if (!this.modules.has(token)) {
       throw new UnknownModuleException("WatsonContainer");
     }
 
     const moduleRef = this.getModuleByToken(token);
-    moduleRef.addInjectable(metatype);
+    moduleRef.addProvider(metatype);
+  }
+
+  public getDynamicModuleMetadataByToken<T extends keyof DynamicModule>(
+    token: string,
+    metadataKey: T
+  ): DynamicModule[T] | [] {
+    const metadata = this.dynamicModuleMetadata.get(token);
+
+    if (metadata && metadata[metadataKey]) {
+      return metadata[metadataKey] as DynamicModule[T];
+    }
+
+    return [];
   }
 
   public getModuleByToken(token: string): Module {
@@ -92,6 +124,10 @@ export class WatsonContainer {
 
   public hasModule(metatype: Type) {
     return !!this.moduleTokenFactory.getTokenByModuleType(metatype);
+  }
+
+  private isDynamicModule(module: Type | DynamicModule) {
+    return module && "module" in module;
   }
 
   public getInstanceOfProvider<T>(metatype: Type<T>): T {

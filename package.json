@@ -53,6 +53,7 @@
     "uuid": "^8.3.1"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/cli-color": "^2.0.0",
     "@types/dotenv": "^8.2.0",
     "@types/node": "^14.14.11",

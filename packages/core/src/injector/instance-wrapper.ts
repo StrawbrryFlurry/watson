@@ -2,6 +2,15 @@ import { Type } from '@watson/common';
 
 import { Module } from './module';
 
+export interface IInstanceWrapperArgs<T = any> {
+  name: string;
+  metatype: Type | Function | any;
+  host: Module;
+  isResolved?: boolean;
+  instance?: T;
+  inject?: unknown[];
+}
+
 /**
  * Wraps around Provicer, Receiver and Module instaces
  * Provides init options and dependencies
@@ -14,18 +23,14 @@ export class InstanceWrapper<T = any> {
   public instance: T;
   public inject?: Type[];
 
-  constructor(
-    name: string,
-    metatype: Type,
-    host: Module,
-    instance: T,
-    isResolved: boolean = false
-  ) {
-    this.name = name;
-    this.metatype = metatype;
-    this.host = host;
-    this.instance = instance;
-    this.isResolved = isResolved;
+  constructor(args: IInstanceWrapperArgs) {
+    this.init(args);
+  }
+
+  private init(withData: IInstanceWrapperArgs) {
+    const isResolved = withData.isResolved || false;
+
+    Object.assign(this, { ...withData, isResolved });
   }
 
   public setInstance(instance: Type) {

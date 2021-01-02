@@ -1,4 +1,4 @@
-import { TInjectable, TReceiver, Type } from '@watson/common';
+import { CustomProvider, TInjectable, TReceiver, Type } from '@watson/common';
 import { isFunction, isString } from '@watson/common/dist/utils';
 import { v4 } from 'uuid';
 
@@ -31,8 +31,6 @@ export class Module {
   public readonly name: string;
 
   private container: WatsonContainer;
-  private commands: any;
-
   private readonly _metatype: Type;
 
   constructor(metatype: Type, container: WatsonContainer) {
@@ -46,37 +44,37 @@ export class Module {
 
   initProperties() {}
 
-  addImport(module: Module) {
+  public addImport(module: Module) {
     if (this.imports.has(module)) {
       return;
     }
 
-    this.imports.add(module);
+    this._imports.add(module);
   }
 
-  addExportedProvider(provider: String | Type<TInjectable>) {
+  public addExportedProvider(provider: String | Type<TInjectable>) {
     if (isString(provider)) {
       if (!this.exports.has(provider as string)) {
-        this.exports.add(provider);
+        this._exports.add(provider);
       }
     }
 
     if (isFunction(provider)) {
-      this.exports.add(this.validateExportedProvider((provider as Type).name));
+      this._exports.add(this.validateExportedProvider((provider as Type).name));
     }
   }
 
-  addExportedModule(moduleRef: Module) {
+  public addExportedModule(moduleRef: Module) {
     const { providers } = moduleRef;
 
     for (const [token, wrapper] of providers.entries()) {
       if (!this.exports.has(token)) {
-        this.exports.add(token);
+        this._exports.add(token);
       }
     }
   }
 
-  validateExportedProvider(token: string): string {
+  private validateExportedProvider(token: string): string {
     if (!this.providers.has(token)) {
       const { name } = this.metatype;
       throw new UnknownExportException("InstanceLoader", token, name);
@@ -85,46 +83,139 @@ export class Module {
     return token;
   }
 
-  addReceiver(receiver: Type) {
-    this.receivers.set(
+  public addReceiver(receiver: Type) {
+    this._receivers.set(
       receiver.name,
-      new InstanceWrapper<TReceiver>(receiver.name, receiver, this, null, false)
+      new InstanceWrapper<TReceiver>({
+        name: receiver.name,
+        metatype: receiver,
+        host: this,
+      })
     );
   }
 
-  addInjectable(injectable: Type) {
-    const instanceWrapper = new InstanceWrapper<TInjectable>(
-      injectable.name,
-      injectable,
-      this,
-      null,
-      false
-    );
+  public addInjectable(injectable: Type) {
+    const instanceWrapper = new InstanceWrapper<TInjectable>({
+      name: injectable.name,
+      metatype: injectable,
+      host: this,
+    });
 
     this._injectables.set(injectable.name, instanceWrapper);
     this._providers.set(injectable.name, instanceWrapper);
   }
 
+  public addProvider(provider: Type | CustomProvider) {
+    const isCustomProvider = this.isCustomProvider(provider as CustomProvider);
+
+    if (isCustomProvider) {
+      return this.addCustomProvider(provider as CustomProvider);
+    }
+
+    this.addInjectable(provider as Type);
+  }
+
+  private addCustomProvider(provider: CustomProvider) {
+    if (this.isClassProvider(provider)) {
+      return this.addCalssProvider(provider);
+    } else if (this.isValueProvider(provider)) {
+      return this.addValueProvider(provider);
+    } else if (this.isFactoryProvider(provider)) {
+      return this.addFactoryProvider(provider);
+    }
+  }
+
+  private addFactoryProvider(provider: CustomProvider) {
+    const { provide, useFactory, inject, useValue } = provider;
+
+    this._providers.set(
+      provider.provide,
+      new InstanceWrapper({
+        name: provide,
+        metatype: useFactory,
+        host: this,
+        inject,
+      })
+    );
+  }
+
+  private addValueProvider(provider: CustomProvider) {
+    const { provide, useValue } = provider;
+
+    this._providers.set(
+      provider.provide,
+      new InstanceWrapper({
+        name: provide,
+        metatype: useValue,
+        host: this,
+        instance: useValue,
+        isResolved: true,
+      })
+    );
+  }
+
+  private addCalssProvider(provider: CustomProvider) {
+    const { provide, useClass, inject } = provider;
+
+    this._providers.set(
+      provider.provide,
+      new InstanceWrapper({
+        name: provide,
+        metatype: useClass,
+        host: this,
+        inject,
+      })
+    );
+  }
+
+  private isClassProvider(provider: CustomProvider) {
+    return provider && "useClass" in provider;
+  }
+
+  private isFactoryProvider(provider: CustomProvider) {
+    return provider && "useFactory" in provider;
+  }
+
+  private isValueProvider(provider: CustomProvider) {
+    return provider && "useValue" in provider;
+  }
+
+  private isCustomProvider(provider: CustomProvider) {
+    return provider && "provide" in provider;
+  }
+
   private registerDefaultProviders() {
     this.providers.set(
       WATSON_CONTAINER_PROVIDER,
-      new InstanceWrapper("CONTAINER", null, this, this.container, true)
+      new InstanceWrapper({
+        name: "CONTAINER",
+        host: this,
+        metatype: null,
+        instance: this.container,
+        isResolved: true,
+      })
     );
 
     this.providers.set(
       CLIENT_ADAPTER_PROVIDER,
-      new InstanceWrapper(
-        "ADAPTER",
-        null,
-        this,
-        this.container.config.clientAdapter,
-        true
-      )
+      new InstanceWrapper({
+        name: "ADAPTER",
+        host: this,
+        metatype: null,
+        instance: this.container.config.clientAdapter,
+        isResolved: true,
+      })
     );
 
     this.providers.set(
       CURRENT_MODULE_PROVIDER,
-      new InstanceWrapper("MODULE", this.metatype, this, this, true)
+      new InstanceWrapper({
+        name: "MODULE",
+        metatype: null,
+        instance: this,
+        host: this,
+        isResolved: true,
+      })
     );
   }
 

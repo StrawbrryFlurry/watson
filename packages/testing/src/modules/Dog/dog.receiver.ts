@@ -4,6 +4,8 @@ import { Command, CommandArgumentType, Param, Receiver, User } from '@watson/com
   prefix: "!",
 })
 export class DogReceiver {
+  //  constructor(private http: HttpClient) {}
+
   @Command({
     command: "bark",
     alias: ["woofies", "barkies"],
@@ -12,12 +14,13 @@ export class DogReceiver {
         name: "User",
         type: CommandArgumentType.USER,
         default: "@user",
+        optional: true,
         encapsulator: "asdas",
       },
     ],
   })
   woof(@User() user, @Param() param) {
-    console.log(param);
-    console.log(user);
+    return "Hey";
+    //  this.http.get("https://google.ch").subscribe((e) => console.log(e));
   }
 }

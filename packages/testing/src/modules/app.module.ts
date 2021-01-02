@@ -4,6 +4,6 @@ import { CatModule } from './Cat/cat.module';
 import { DogModule } from './Dog/dog.module';
 
 @Module({
-  imports: [DogModule, CatModule],
+  imports: [DogModule.register(), CatModule],
 })
 export class ApplicationModule {}

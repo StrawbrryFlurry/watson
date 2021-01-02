@@ -1,9 +1,9 @@
-import { Type } from '../../interfaces';
+import { CustomProvider, DynamicModule, Type } from '../../interfaces';
 import { isUndefined } from '../../utils';
 
 export interface IModuleOptions {
-  imports?: Type[];
-  receivers?: Type[];
+  imports?: (Type | DynamicModule)[];
+  receivers?: (Type | CustomProvider)[];
   providers?: Type[];
   exports?: Type[];
 }

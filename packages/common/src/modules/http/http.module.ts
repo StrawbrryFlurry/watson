@@ -1,8 +1,8 @@
 import { Module } from '../../decorators';
-import { HTTPService } from './http.service';
+import { HttpClient } from './http.service';
 
 @Module({
-  providers: [HTTPService],
-  exports: [HTTPService],
+  providers: [HttpClient],
+  exports: [HttpClient],
 })
-export class HTTPModule {}
+export class HttpModule {}

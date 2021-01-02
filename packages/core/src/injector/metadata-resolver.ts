@@ -1,5 +1,7 @@
 import {
+  CustomProvider,
   DESIGN_PARAMETERS,
+  DynamicModule,
   IInjectableOptions,
   IInjectValue,
   INJECT_DEPENDENCY_METADATA,
@@ -9,6 +11,7 @@ import {
 } from '@watson/common';
 
 import { CircularDependencyException } from '../exceptions';
+import { InvalidDynamicModuleException } from '../exceptions/invalid-dynamic-module.exception';
 import { WatsonContainer } from '../watson-container';
 
 export interface IMethodDescriptors {
@@ -30,12 +33,12 @@ export class MetadataResolver {
   /**
    * Resolves the root module to recursively add its imports to the container
    */
-  public resolveRootModule(metatype: Type) {
-    this.scanForModuleImports(metatype);
-    this.resolveModuleProperties();
+  public async resolveRootModule(metatype: Type) {
+    await this.scanForModuleImports(metatype);
+    await this.resolveModuleProperties();
   }
 
-  private resolveModuleProperties() {
+  private async resolveModuleProperties() {
     const modules = this.container.getModules();
 
     for (const [token, { metatype }] of modules) {
@@ -44,40 +47,50 @@ export class MetadataResolver {
         exports,
         providers,
         receivers,
-      } = this.resolveModuleMetadata(metatype);
+      } = await this.resolveModuleMetadata(metatype);
 
-      this.addInjectables(token, providers);
+      this.addProviders(token, providers);
       this.addReceivers(token, receivers);
       this.addImports(token, imports);
       this.addExports(token, exports);
     }
   }
 
-  private addImports(token: string, metatypes: Type[]) {
-    metatypes.forEach((metatype) => this.container.addImport(token, metatype));
+  private addImports(token: string, imports: Type[]) {
+    [
+      ...imports,
+      ...this.container.getDynamicModuleMetadataByToken(token, "imports"),
+    ].forEach((_import) => this.container.addImport(token, _import));
   }
 
-  private addExports(token: string, metatypes: Type[]) {
-    metatypes.forEach((metatype) => this.container.addExport(token, metatype));
+  private addExports(token: string, exports: Type[]) {
+    [
+      ...exports,
+      ...this.container.getDynamicModuleMetadataByToken(token, "exports"),
+    ].forEach((_export) => this.container.addExport(token, _export));
   }
 
-  private addInjectables(token: string, metatypes: Type[]) {
-    metatypes.forEach((metatype) =>
-      this.container.addInjectable(token, metatype)
-    );
+  private addProviders(token: string, providers: (Type | CustomProvider)[]) {
+    [
+      ...providers,
+      ...this.container.getDynamicModuleMetadataByToken(token, "providers"),
+    ].forEach((metatype) => this.container.addProvider(token, metatype));
   }
 
-  private addReceivers(token: string, metatypes: Type[]) {
-    metatypes.forEach((metatype) =>
-      this.container.addReceiver(token, metatype)
-    );
+  private addReceivers(token: string, receivers: Type[]) {
+    [
+      ...receivers,
+      ...this.container.getDynamicModuleMetadataByToken(token, "receivers"),
+    ].forEach((receiver) => this.container.addReceiver(token, receiver));
   }
 
-  private scanForModuleImports(metatype: Type, context: Type[] = []) {
+  private async scanForModuleImports(metatype: Type, context: Type[] = []) {
     context.push(metatype);
-    const { imports } = this.resolveModuleMetadata(metatype);
+    this.container.addModule(metatype);
 
-    for (const module of imports) {
+    const { imports } = await this.resolveModuleMetadata(metatype);
+
+    for (let module of imports) {
       if (typeof module === "undefined") {
         throw new CircularDependencyException("Injector", metatype, context);
       }
@@ -87,7 +100,7 @@ export class MetadataResolver {
       }
 
       this.container.addModule(module);
-      this.scanForModuleImports(module, context);
+      await this.scanForModuleImports(module, context);
     }
   }
 
@@ -106,6 +119,10 @@ export class MetadataResolver {
   }
 
   public resolveModuleMetadata(target: Type) {
+    if (this.isDynamicModule(target as any)) {
+      return this.resolveDynamicModule(target as any);
+    }
+
     const imports = this.getArrayMetadata(
       MODULE_METADATA.IMPORTS,
       target
@@ -129,6 +146,25 @@ export class MetadataResolver {
       receivers,
       exports,
     };
+  }
+
+  private async resolveDynamicModule(dynamicModule: DynamicModule & Type) {
+    const moduleData = await dynamicModule;
+
+    if (!moduleData) {
+      throw new InvalidDynamicModuleException(
+        "MetadataResolver",
+        `The dynamic module ${dynamicModule.name} did not return valid module metadata.`
+      );
+    }
+
+    const metatype = moduleData.module;
+    const imports = moduleData.imports || [];
+    const exports = moduleData.exports || [];
+    const providers = moduleData.providers || [];
+    const receivers = moduleData.receivers || [];
+
+    return { metatype, imports, exports, providers, receivers };
   }
 
   public getArrayMetadata<T>(metadataKey: string, target: Type): T | [] {
@@ -218,5 +254,9 @@ export class MetadataResolver {
       name: name,
       descriptor: descriptor.value as Type,
     }));
+  }
+
+  private isDynamicModule(module: DynamicModule) {
+    return module && "module" in module;
   }
 }

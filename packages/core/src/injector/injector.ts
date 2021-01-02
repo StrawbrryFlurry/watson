@@ -160,5 +160,5 @@ export class Injector {
     return Reflect.getMetadata(DESIGN_PARAMETERS, wrapper.metatype) || [];
   }
 
-  public resolveCommandParams() {}
+  private isCustomProvider(provider: InstanceWrapper) {}
 }

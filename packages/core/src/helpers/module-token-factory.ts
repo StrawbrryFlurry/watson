@@ -1,4 +1,4 @@
-import { isFunction, Type } from '@watson/common';
+import { DynamicModule, isFunction, Type } from '@watson/common';
 import * as hash from 'object-hash';
 
 export class ModuleTokenFactory {
@@ -6,7 +6,8 @@ export class ModuleTokenFactory {
 
   constructor() {}
 
-  public generateModuleToken(metatype: Type) {
+  public generateModuleToken(metatype: Type | DynamicModule) {
+    metatype = this.getMetatype(metatype);
     const token = this.getTokenByModuleType(metatype);
 
     if (token) {
@@ -26,9 +27,27 @@ export class ModuleTokenFactory {
     return undefined;
   }
 
-  private generateToken(module: Type | string) {
-    const moduleName = isFunction(module) ? (module as Type).name : module;
+  private generateToken(module: Type | DynamicModule) {
+    const moduleName = this.getModuleName(module);
 
     return hash(moduleName);
+  }
+
+  private getMetatype(module: Type | DynamicModule): Type {
+    return this.isDynamicModule(module as DynamicModule)
+      ? (module as DynamicModule).module
+      : (module as Type);
+  }
+
+  private getModuleName(module: Type | DynamicModule) {
+    if (this.isDynamicModule(module as DynamicModule)) {
+      return (module as DynamicModule).module.name;
+    } else {
+      return isFunction(module) ? (module as Type).name : module;
+    }
+  }
+
+  private isDynamicModule(module: DynamicModule) {
+    return module && "module" in module;
   }
 }

@@ -97,7 +97,7 @@ export class CommandExplorer {
       );
       commandOptions["restrictions"] = restrictions;
 
-      const handle = new CommandRoute(
+      const route = new CommandRoute(
         method,
         receiverOptions,
         commandOptions,
@@ -106,7 +106,7 @@ export class CommandExplorer {
         this.container
       );
 
-      this.commands.add(handle);
+      this.commands.add(route);
     }
   }
 

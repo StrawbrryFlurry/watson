@@ -13,7 +13,9 @@ const bootstrap = async () => {
   const app = await WatsonApplicationFactory.create(ApplicationModule, {
     discordAuthToken: token,
   });
+
   app.addGlobalPrefix("!");
+
   app.setActivity({
     name: "doing stuff",
     type: "PLAYING",
