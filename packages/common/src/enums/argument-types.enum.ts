@@ -54,4 +54,9 @@ export enum CommandArgumentType {
    * !remind 16.10.2020-12:00
    */
   DATE = "arg:type:date",
+  // TODO:
+  /**
+   * ANY
+   */
+  ANY = "arg:type:any",
 }
