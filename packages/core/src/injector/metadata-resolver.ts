@@ -190,17 +190,14 @@ export class MetadataResolver {
   }
 
   public resolveInjectedProvider(target: Type, ctorIndex: number) {
-    const injectValue = this.getArrayMetadata<IInjectValue>(
-      INJECT_DEPENDENCY_METADATA,
-      target
-    );
+    const injectValue =
+      this.getMetadata<IInjectValue[]>(INJECT_DEPENDENCY_METADATA, target) ||
+      [];
 
-    if (Array.isArray(injectValue)) {
-      return null;
-    }
-
-    if (injectValue.parameterIndex === ctorIndex) {
-      return injectValue.token;
+    for (const value of injectValue) {
+      if (value.parameterIndex === ctorIndex) {
+        return value.provide;
+      }
     }
 
     return null;

@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from '@watson/common';
+import { CustomProvider, DynamicModule, Module } from '@watson/common';
 
 import { CatService } from '../Cat/cat.service';
 import { DogReceiver } from './dog.receiver';
@@ -10,9 +10,17 @@ export class DogModule {
     return {
       module: DogModule,
       imports: [],
-      providers: [DogService, CatService],
+      providers: [DogService, CatService, customProvider],
       receivers: [DogReceiver],
       exports: [DogService],
     };
   }
 }
+
+const customProvider: CustomProvider = {
+  provide: "CUSTOM",
+  useFactory: (dogService: any) => {
+    return dogService.toString();
+  },
+  inject: [DogService],
+};

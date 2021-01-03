@@ -1,11 +1,11 @@
-import { INJECT_DEPENDENCY_METADATA } from "../../constants";
-import { Type } from "../../interfaces";
-import { isFunction } from "../../utils";
+import { INJECT_DEPENDENCY_METADATA } from '../../constants';
+import { Type } from '../../interfaces';
+import { isFunction } from '../../utils';
 
 export interface IInjectValue {
   propertyKey: string;
   parameterIndex: number;
-  token: string;
+  provide: string;
 }
 
 export function Inject(token: Type | string): ParameterDecorator {
@@ -16,11 +16,16 @@ export function Inject(token: Type | string): ParameterDecorator {
   }
 
   return (target: Object, propertyKey: string, parameterIndex: number) => {
+    const existing =
+      Reflect.getMetadata(INJECT_DEPENDENCY_METADATA, target.constructor) || [];
+
     const value: IInjectValue = {
-      token: injectionToken as string,
+      provide: injectionToken as string,
       propertyKey: propertyKey,
       parameterIndex: parameterIndex,
     };
-    Reflect.defineMetadata(INJECT_DEPENDENCY_METADATA, value, target);
+
+    const metadata = [...existing, value];
+    Reflect.defineMetadata(INJECT_DEPENDENCY_METADATA, metadata, target);
   };
 }

@@ -32,7 +32,7 @@ export class WatsonApplicationFactory {
     this.logger.log("Resolving Modules", "status");
     await BootstrappingZone.runAsync(async () => {
       await resolver.resolveRootModule(module);
-      instanceLoader.createInstances();
+      await instanceLoader.createInstances();
     }).catch();
   }
 

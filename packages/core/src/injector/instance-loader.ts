@@ -1,38 +1,42 @@
 import { Logger } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { Injector } from './injector';
+import { MetadataResolver } from './metadata-resolver';
 import { Module } from './module';
 
 export class InstanceLoader {
-  private injector = new Injector();
+  private resolver: MetadataResolver;
+  private injector: Injector;
   private logger = new Logger("InstanceLoader");
   private container: WatsonContainer;
 
   constructor(container: WatsonContainer) {
     this.container = container;
+    this.resolver = new MetadataResolver(this.container);
+    this.injector = new Injector(this.resolver);
   }
 
-  public createInstances() {
+  public async createInstances() {
     const modules = this.container.getModules();
 
     for (const [token, module] of modules) {
-      this.createInstancesOfInjectables(module);
-      this.createInstancesOfProviders(module);
-      this.createInstancesOfReceivers(module);
+      await this.createInstancesOfInjectables(module);
+      await this.createInstancesOfProviders(module);
+      await this.createInstancesOfReceivers(module);
     }
 
     this.container.globalInstanceHost.applyInstances();
   }
 
-  private createInstancesOfProviders(module: Module) {
+  private async createInstancesOfProviders(module: Module) {
     const { providers } = module;
 
     for (const [name, provider] of providers) {
-      this.injector.loadProvider(provider, module);
+      await this.injector.loadProvider(provider, module);
     }
   }
 
-  private createInstancesOfReceivers(module: Module) {
+  private async createInstancesOfReceivers(module: Module) {
     const { receivers } = module;
 
     for (const [name, receiver] of receivers) {
@@ -40,7 +44,7 @@ export class InstanceLoader {
     }
   }
 
-  private createInstancesOfInjectables(module: Module) {
+  private async createInstancesOfInjectables(module: Module) {
     const { injectables } = module;
 
     for (const [name, injectable] of injectables) {

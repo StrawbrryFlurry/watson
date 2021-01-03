@@ -21,7 +21,7 @@ export class ContextRunner {
       const args = await this.resolveArguments(ctx);
       const { host, descriptor } = ctx.getRouteConfig();
       const responseChannel = ctx.responseChannel;
-      const response = descriptor.apply(host, args);
+      const response = descriptor.apply(host.instance, args);
       const clientResponse = await this.responseParser.parse(response);
 
       if (typeof clientResponse !== "undefined") {

@@ -125,7 +125,7 @@ export class Module {
   }
 
   private addFactoryProvider(provider: CustomProvider) {
-    const { provide, useFactory, inject, useValue } = provider;
+    const { provide, useFactory, inject } = provider;
 
     this._providers.set(
       provider.provide,
