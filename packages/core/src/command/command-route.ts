@@ -186,7 +186,6 @@ export class CommandRoute extends CommandConfiguration {
           const [match] = value.match(/^<@.*>$/);
           result = ctx.message.guild.members.fetch(ctx.message);
         } catch (err) {
-          console.log(err);
           throw new BadArgumentException(param);
         }
         break;

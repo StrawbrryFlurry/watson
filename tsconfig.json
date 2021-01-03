@@ -15,10 +15,8 @@
     "baseUrl": ".",
     "outDir": "dist",
     "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@watson/common": ["./packages/common"],
-      "@watson/core": ["./packages/core"]
-    },
     "types": ["node"]
   },
+  "include": ["packages/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

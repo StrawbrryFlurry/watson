@@ -66,8 +66,6 @@ export class GlobalInstanceHost {
       }
 
       for (const [name, wrapper] of receivers) {
-        console.log(wrapper);
-
         this.addInstanceOfType(wrapper, "receiver");
       }
     }

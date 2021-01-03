@@ -1,17 +1,10 @@
 {
   "name": "@watson/common",
-  "version": "1.0.0",
-  "description": "> TODO: description",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "0.0.1",
+  "description": "A NestJS inspired framework for building DiscordJS applications (@common)",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
-  },
-  "scripts": {
-    "build": "yarn run clean && yarn run compile",
-    "clean": "rimraf -rf ./dist tsconfig.tsbuildinfo",
-    "compile": "tsc --build"
   },
   "keywords": [
     "discord"
@@ -23,22 +16,14 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.0",
-    "class-transformer": "^0.3.1",
-    "class-validator": "^0.12.2",
-    "cli-color": "^2.0.0",
-    "discord.js": "^12.5.1",
-    "object-hash": "^2.0.3",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.6.3",
-    "socket.io": "^3.0.4",
     "tslib": "^2.0.3",
     "uuid": "^8.3.1"
   },
   "peerDependencies": {
     "reflect-metadata": "^0.1.12",
-    "rxjs": "^6.0.0"
+    "rxjs": "^6.6.3"
   },
-  "homepage": "https://github.com/M1CH3L1US/Watson",
+  "homepage": "https://watsonjs.io",
   "files": [
     "dist"
   ],

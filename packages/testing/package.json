@@ -1,17 +1,13 @@
 {
   "name": "@watson/testing",
-  "version": "1.0.0",
-  "description": "> TODO: description",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "0.0.1",
+  "description": "Test project",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
   },
   "scripts": {
-    "build": "yarn run clean && yarn run compile",
-    "clean": "rimraf -rf ./dist tsconfig.tsbuildinfo",
-    "compile": "tsc --build"
+    "compile": "tsc"
   },
   "keywords": [
     "discord"
@@ -22,8 +18,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@watson/common": "1.0.0",
-    "@watson/core": "1.0.0",
+    "@watson/common": "0.0.1",
+    "@watson/core": "0.0.1",
     "axios": "^0.21.0",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",

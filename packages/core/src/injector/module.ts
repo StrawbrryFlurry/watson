@@ -1,5 +1,4 @@
-import { CustomProvider, TInjectable, TReceiver, Type } from '@watson/common';
-import { isFunction, isString } from '@watson/common/dist/utils';
+import { CustomProvider, isFunction, isString, TInjectable, TReceiver, Type } from '@watson/common';
 import { v4 } from 'uuid';
 
 import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';
@@ -52,10 +51,10 @@ export class Module {
     this._imports.add(module);
   }
 
-  public addExportedProvider(provider: String | Type<TInjectable>) {
+  public addExportedProvider(provider: string | Type<TInjectable>) {
     if (isString(provider)) {
       if (!this.exports.has(provider as string)) {
-        this._exports.add(provider);
+        this._exports.add(provider as string);
       }
     }
 
