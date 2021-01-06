@@ -92,6 +92,15 @@ export class WatsonContainer {
     moduleRef.addReceiver(metatype);
   }
 
+  public addInjectable(token: string, metatype: Type) {
+    if (!this.modules.has(token)) {
+      throw new UnknownModuleException("WatsonContainer");
+    }
+
+    const moduleRef = this.getModuleByToken(token);
+    moduleRef.addInjectable(metatype);
+  }
+
   public addProvider(token: string, metatype: Type | CustomProvider) {
     if (!this.modules.has(token)) {
       throw new UnknownModuleException("WatsonContainer");

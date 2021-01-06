@@ -20,13 +20,20 @@ export class Module {
   private readonly _exports = new Set<string>();
   private readonly _receivers = new Map<any, InstanceWrapper<TReceiver>>();
   /**
-   * Injectables are services that can be injected during the instance creation of a controller, service and such.
+   * Injectables are services such as guards and filters.
    */
   private readonly _injectables = new Map<any, InstanceWrapper<TInjectable>>();
   /**
    * Providers are a map of InstanceWrappers that can be used by the injector to inject parameters for methods and or construcotrs.
    */
   private readonly _providers = new Map<any, InstanceWrapper<TInjectable>>();
+  /**
+   * @provisional
+   * Contains metadata for components such as receiver events
+   * @key metadataKey
+   * @value the metadata value
+   */
+  private readonly _componentMetadata = new Map<string, any>();
   public readonly name: string;
 
   private container: WatsonContainer;
@@ -101,7 +108,6 @@ export class Module {
     });
 
     this._injectables.set(injectable.name, instanceWrapper);
-    this._providers.set(injectable.name, instanceWrapper);
   }
 
   public addProvider(provider: Type | CustomProvider) {

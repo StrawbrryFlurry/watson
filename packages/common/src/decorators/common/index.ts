@@ -1,3 +1,4 @@
+export * from "./command.decorator";
 export * from "./event.decorator";
 export * from "./inject.decorator";
 export * from "./injectable.decorator";

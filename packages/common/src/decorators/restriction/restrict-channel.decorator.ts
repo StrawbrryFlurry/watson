@@ -1,4 +1,4 @@
-import { createRestrictionDecorator } from './create-restriction-decorator.factory';
+import { createRestrictionDecorator } from '.';
 
 export interface IChannelRestrictionOptions {
   isId: boolean;

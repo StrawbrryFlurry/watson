@@ -1,4 +1,4 @@
-import { createRestrictionDecorator } from './';
+import { createRestrictionDecorator } from '.';
 
 export function RestrictRole(role: string): MethodDecorator;
 export function RestrictRole(roles: string[]): MethodDecorator;

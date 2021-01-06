@@ -69,15 +69,15 @@ export class CommandExplorer {
         wrapper.metatype
       );
 
-      this.resolveCommandsOfReceiver(wrapper, receiverOptions);
+      this.reflectCommandsOfReceiver(wrapper, receiverOptions);
     }
   }
 
-  private resolveCommandsOfReceiver(
+  private reflectCommandsOfReceiver(
     receiver: InstanceWrapper<TReceiver>,
     receiverOptions: IReceiverOptions
   ) {
-    const methods = this.resolver.resolveMethodsFromMetatype(receiver.metatype);
+    const methods = this.resolver.reflectMethodsFromMetatype(receiver.metatype);
 
     if (isEmpty(methods)) {
       return;
@@ -90,8 +90,8 @@ export class CommandExplorer {
           method.descriptor
         ) || {};
 
-      const restrictions = this.resolveCommandRestrictions(method.descriptor);
-      const commandArgs = this.resolveCommandArgs(
+      const restrictions = this.reflectCommandRestrictions(method.descriptor);
+      const commandArgs = this.reflectCommandArgs(
         receiver.metatype,
         method.name
       );
@@ -110,7 +110,7 @@ export class CommandExplorer {
     }
   }
 
-  private resolveCommandRestrictions(descriptor: Type) {
+  private reflectCommandRestrictions(descriptor: Type) {
     const restrictionMetadata = this.resolver.getMetadata<
       ICommandRestrictionMetadata<any>[]
     >(COMMAND_RESTRICTION_METADATA, descriptor);
@@ -155,7 +155,7 @@ export class CommandExplorer {
     };
   }
 
-  private resolveCommandArgs(receiver: Type, propertyKey: string) {
+  private reflectCommandArgs(receiver: Type, propertyKey: string) {
     const metadata =
       this.resolver.getMetadata<IParamDecoratorMetadata[]>(
         COMMAND_ARGUMENTS,

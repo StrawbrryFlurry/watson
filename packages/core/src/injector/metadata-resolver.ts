@@ -2,10 +2,11 @@ import {
   CustomProvider,
   DESIGN_PARAMETERS,
   DynamicModule,
-  IInjectableOptions,
+  FILTER_METADATA,
+  GUARD_METADATA,
   IInjectValue,
   INJECT_DEPENDENCY_METADATA,
-  INJECTABLE_OPTIONS_METADATA,
+  isFunction,
   MODULE_METADATA,
   Type,
 } from '@watson/common';
@@ -47,48 +48,94 @@ export class MetadataResolver {
         exports,
         providers,
         receivers,
-      } = await this.resolveModuleMetadata(metatype);
+      } = await this.reflectModuleMetadata(metatype);
 
-      this.addProviders(token, providers);
-      this.addReceivers(token, receivers);
-      this.addImports(token, imports);
-      this.addExports(token, exports);
+      this.reflectProviders(token, providers);
+      this.reflectReceivers(token, receivers);
+      this.reflectImports(token, imports);
+      this.reflectExports(token, exports);
     }
   }
 
-  private addImports(token: string, imports: Type[]) {
+  private reflectImports(token: string, imports: Type[]) {
     [
       ...imports,
       ...this.container.getDynamicModuleMetadataByToken(token, "imports"),
     ].forEach((_import) => this.container.addImport(token, _import));
   }
 
-  private addExports(token: string, exports: Type[]) {
+  private reflectExports(token: string, exports: Type[]) {
     [
       ...exports,
       ...this.container.getDynamicModuleMetadataByToken(token, "exports"),
     ].forEach((_export) => this.container.addExport(token, _export));
   }
 
-  private addProviders(token: string, providers: (Type | CustomProvider)[]) {
+  private reflectProviders(
+    token: string,
+    providers: (Type | CustomProvider)[]
+  ) {
     [
       ...providers,
       ...this.container.getDynamicModuleMetadataByToken(token, "providers"),
-    ].forEach((metatype) => this.container.addProvider(token, metatype));
+    ].forEach((provider) => {
+      this.reflectDynamicMetadata(provider as any, token);
+      this.container.addProvider(token, provider);
+    });
   }
 
-  private addReceivers(token: string, receivers: Type[]) {
+  private reflectReceivers(token: string, receivers: Type[]) {
     [
       ...receivers,
       ...this.container.getDynamicModuleMetadataByToken(token, "receivers"),
-    ].forEach((receiver) => this.container.addReceiver(token, receiver));
+    ].forEach((receiver) => {
+      this.reflectDynamicMetadata(receiver, token);
+      this.container.addReceiver(token, receiver);
+    });
+  }
+
+  private reflectDynamicMetadata(metatype: Type, token: string) {
+    if (!metatype || !metatype.prototype) {
+      return;
+    }
+
+    this.reflectComponentInjectables(metatype, token, GUARD_METADATA);
+    this.reflectComponentInjectables(metatype, token, FILTER_METADATA);
+  }
+
+  private reflectComponentInjectables(
+    metatype: Type,
+    token: string,
+    metadataKey: string
+  ) {
+    const prototypeInjectables = this.getArrayMetadata<any[]>(
+      metadataKey,
+      metatype
+    );
+    const prototypeMethods = this.reflectMethodsFromMetatype(metatype);
+
+    const methodInjectables = prototypeMethods
+      .map((method) => this.getArrayMetadata(metadataKey, method.descriptor))
+      .filter((e) => typeof e !== "undefined");
+
+    const flattenMethodInjectables = this.flatten(
+      methodInjectables as unknown[][]
+    );
+    const injectables = [
+      ...prototypeInjectables,
+      ...flattenMethodInjectables,
+    ].filter(isFunction);
+
+    injectables.forEach((injectable) => {
+      this.container.addInjectable(token, injectable);
+    });
   }
 
   private async scanForModuleImports(metatype: Type, context: Type[] = []) {
     context.push(metatype);
     this.container.addModule(metatype);
 
-    const { imports } = await this.resolveModuleMetadata(metatype);
+    const { imports } = await this.reflectModuleMetadata(metatype);
 
     for (let module of imports) {
       if (typeof module === "undefined") {
@@ -104,23 +151,16 @@ export class MetadataResolver {
     }
   }
 
-  public resolveInjectableMetadata(target: Object): IInjectableOptions {
-    return Reflect.getMetadata(
-      INJECTABLE_OPTIONS_METADATA,
-      target
-    ) as IInjectableOptions;
-  }
-
-  public resolveMethodPrams(
+  public reflectMethodParams(
     target: Type,
     propertyKey: string | symbol
   ): unknown[] {
     return Reflect.getMetadata(DESIGN_PARAMETERS, target, propertyKey);
   }
 
-  public resolveModuleMetadata(target: Type) {
+  public reflectModuleMetadata(target: Type) {
     if (this.isDynamicModule(target as any)) {
-      return this.resolveDynamicModule(target as any);
+      return this.reflectDynamicModule(target as any);
     }
 
     const imports = this.getArrayMetadata(
@@ -148,7 +188,7 @@ export class MetadataResolver {
     };
   }
 
-  private async resolveDynamicModule(dynamicModule: DynamicModule & Type) {
+  private async reflectDynamicModule(dynamicModule: DynamicModule & Type) {
     const moduleData = await dynamicModule;
 
     if (!moduleData) {
@@ -167,6 +207,9 @@ export class MetadataResolver {
     return { metatype, imports, exports, providers, receivers };
   }
 
+  /**
+   * The same as getMetadata but provides an empty array as fallback
+   */
   public getArrayMetadata<T>(metadataKey: string, target: Type): T | [] {
     return Reflect.getMetadata(metadataKey, target) || [];
   }
@@ -189,7 +232,7 @@ export class MetadataResolver {
     return Reflect.getMetadata(metadataKey, target);
   }
 
-  public resolveInjectedProvider(target: Type, ctorIndex: number) {
+  public reflectInjectedProvider(target: Type, ctorIndex: number) {
     const injectValue =
       this.getMetadata<IInjectValue[]>(INJECT_DEPENDENCY_METADATA, target) ||
       [];
@@ -203,7 +246,11 @@ export class MetadataResolver {
     return null;
   }
 
-  public resolveMethodsFromMetatype(metatype: Type) {
+  public reflectMethodsFromMetatype(metatype: Type) {
+    if (typeof metatype.prototype === "undefined") {
+      return;
+    }
+
     const prototypeMethods = Object.getOwnPropertyDescriptors(
       metatype.prototype
     );
@@ -255,5 +302,9 @@ export class MetadataResolver {
 
   private isDynamicModule(module: DynamicModule) {
     return module && "module" in module;
+  }
+
+  private flatten<T>(arr: T[][]): T[] {
+    return arr.reduce((a: T[], b: T[]) => [...a, ...b], []);
   }
 }

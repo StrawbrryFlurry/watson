@@ -194,7 +194,7 @@ export class Injector {
       [];
 
     return dependencies.reduce((deps: (Type | string)[], dep: Type, idx) => {
-      const resolved = this.resolver.resolveInjectedProvider(
+      const resolved = this.resolver.reflectInjectedProvider(
         wrapper.metatype,
         idx
       );
