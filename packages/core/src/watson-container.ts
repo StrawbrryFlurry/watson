@@ -1,4 +1,4 @@
-import { CustomProvider, DynamicModule, Type } from '@watson/common';
+import { CustomProvider, DynamicModule, MODULE_GLOBAL_METADATA, Type } from '@watson/common';
 
 import { ApplicationConfig } from './application-config';
 import { UnknownModuleException } from './exceptions';
@@ -14,6 +14,7 @@ export class WatsonContainer {
   public config: ApplicationConfig;
   private moduleTokenFactory = new ModuleTokenFactory();
   public globalInstanceHost = new GlobalInstanceHost(this);
+  private readonly globalModules = new Set<Module>();
   private dynamicModuleMetadata = new Map<string, Partial<DynamicModule>>();
 
   constructor(config: ApplicationConfig) {
@@ -26,15 +27,28 @@ export class WatsonContainer {
 
   public addModule(metatype: Type | DynamicModule) {
     const token = this.moduleTokenFactory.generateModuleToken(metatype);
+    let module: Module;
 
     if (this.isDynamicModule(metatype)) {
-      this.addDynamicModule(token, metatype as DynamicModule);
+      module = this.addDynamicModule(token, metatype as DynamicModule);
     } else {
-      const module = new Module(metatype as Type, this);
+      module = new Module(metatype as Type, this);
       this.modules.set(token, module);
     }
 
+    if (this.isGlobalModule(metatype)) {
+      this.globalModules.add(module);
+    }
+
     return token;
+  }
+
+  public isGlobalModule(module: Type | DynamicModule) {
+    if (this.isDynamicModule(module) && (module as DynamicModule).global) {
+      return true;
+    }
+
+    return Reflect.getMetadata(MODULE_GLOBAL_METADATA, module);
   }
 
   public addDynamicModule(token: string, module: DynamicModule) {
@@ -49,6 +63,8 @@ export class WatsonContainer {
 
     const moduleRef = new Module(metatype, this);
     this.modules.set(token, moduleRef);
+
+    return moduleRef;
   }
 
   public addImport(token: string, metatype: Type) {
@@ -108,6 +124,20 @@ export class WatsonContainer {
 
     const moduleRef = this.getModuleByToken(token);
     moduleRef.addProvider(metatype);
+  }
+
+  public bindGlobalModules() {
+    for (const [token, module] of this.modules) {
+      this.addGlobalModulesAsImport(module);
+    }
+  }
+
+  private addGlobalModulesAsImport(moduleRef: Module) {
+    this.globalModules.forEach((module) => {
+      if (module !== moduleRef) {
+        module.addImport(moduleRef);
+      }
+    });
   }
 
   public getDynamicModuleMetadataByToken<T extends keyof DynamicModule>(

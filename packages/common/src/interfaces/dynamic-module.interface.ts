@@ -7,4 +7,5 @@ export interface DynamicModule {
   providers?: (Type | CustomProvider)[];
   imports?: Type[];
   exports?: Type[];
+  global?: boolean;
 }

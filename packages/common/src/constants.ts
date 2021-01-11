@@ -5,9 +5,12 @@ export const MODULE_METADATA = {
   EXPORTS: "module:exports",
 };
 
+export const MODULE_GLOBAL_METADATA = "module:global";
+
 export const RECEIVER_OPTIONS_METADATA = "reciver:options";
 export const EVENT_OPTIONS_METADATA = "event:options";
 export const COMMAND_OPTIONS_METADATA = "command:options";
+export const SLASH_COMMAND_OPTIONS_METADATA = "slashcommands:options";
 export const COMMAND_RESTRICTION_METADATA = "command:restriction";
 export const COMMAND_ARGUMENTS = "command:arguments";
 export const INJECTABLE_OPTIONS_METADATA = "injectable:options";

@@ -37,6 +37,8 @@ export class MetadataResolver {
   public async resolveRootModule(metatype: Type) {
     await this.scanForModuleImports(metatype);
     await this.resolveModuleProperties();
+
+    this.container.bindGlobalModules();
   }
 
   private async resolveModuleProperties() {
