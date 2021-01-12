@@ -117,7 +117,9 @@ export class MetadataResolver {
     const prototypeMethods = this.reflectMethodsFromMetatype(metatype);
 
     const methodInjectables = prototypeMethods
-      .map((method) => this.getArrayMetadata(metadataKey, method.descriptor))
+      .map((method) =>
+        this.getArrayMetadata(metadataKey, method.descriptor as Type)
+      )
       .filter((e) => typeof e !== "undefined");
 
     const flattenMethodInjectables = this.flatten(
@@ -216,7 +218,7 @@ export class MetadataResolver {
     return Reflect.getMetadata(metadataKey, target) || [];
   }
 
-  public getMetadata<T>(metadataKey: string, target: Type): T;
+  public getMetadata<T>(metadataKey: string, target: Type | Function): T;
   public getMetadata<T>(
     metadataKey: string,
     target: Type,
@@ -248,7 +250,7 @@ export class MetadataResolver {
     return null;
   }
 
-  public reflectMethodsFromMetatype(metatype: Type) {
+  public reflectMethodsFromMetatype(metatype: Type): IMethodValue[] {
     if (typeof metatype.prototype === "undefined") {
       return;
     }

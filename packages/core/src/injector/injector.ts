@@ -47,9 +47,6 @@ export class Injector {
       context
     );
 
-    console.log(wrapper.name);
-    console.log({ ctorDependencies });
-    console.log(wrapper.inject);
     await this.instanciateClass(wrapper, module, ctorDependencies);
   }
 

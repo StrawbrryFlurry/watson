@@ -1,4 +1,4 @@
-import { RECEIVER_OPTIONS_METADATA } from '../../constants';
+import { RECEIVER_METADATA } from '../../constants';
 import { isObject, isString } from '../../utils/shared.utils';
 
 export interface IReceiverCommandOptions {
@@ -26,6 +26,6 @@ export function Receiver(arg?: string | IReceiverOptions): ClassDecorator {
   }
 
   return (target: Object) => {
-    Reflect.defineMetadata(RECEIVER_OPTIONS_METADATA, options, target);
+    Reflect.defineMetadata(RECEIVER_METADATA, options, target);
   };
 }

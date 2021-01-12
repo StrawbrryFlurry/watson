@@ -1,13 +1,13 @@
 import {
-  COMMAND_ARGUMENTS,
-  COMMAND_OPTIONS_METADATA,
+  COMMAND_METADATA,
   COMMAND_RESTRICTION_METADATA,
   ICommandOptions,
   ICommandRestrictionMetadata,
   IParamDecoratorMetadata,
   IReceiverOptions,
   isEmpty,
-  RECEIVER_OPTIONS_METADATA,
+  PROPERTY_KEY_METADATA,
+  RECEIVER_METADATA,
   TReceiver,
   Type,
 } from '@watson/common';
@@ -16,8 +16,8 @@ import { PermissionString } from 'discord.js';
 import { EventRoute } from '../event';
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { Logger } from '../logger';
+import { CommandRoute } from '../routes/command/command-route';
 import { WatsonContainer } from '../watson-container';
-import { CommandRoute } from './command-route';
 
 export interface ICommandRestrictions {
   permissions: PermissionString[];
@@ -65,7 +65,7 @@ export class CommandExplorer {
       const { wrapper, host } = receiver;
 
       const receiverOptions = this.resolver.getMetadata<IReceiverOptions>(
-        RECEIVER_OPTIONS_METADATA,
+        RECEIVER_METADATA,
         wrapper.metatype
       );
 
@@ -86,7 +86,7 @@ export class CommandExplorer {
     for (const method of methods) {
       const commandOptions =
         this.resolver.getMetadata<ICommandOptions>(
-          COMMAND_OPTIONS_METADATA,
+          COMMAND_METADATA,
           method.descriptor
         ) || {};
 
@@ -158,7 +158,7 @@ export class CommandExplorer {
   private reflectCommandArgs(receiver: Type, propertyKey: string) {
     const metadata =
       this.resolver.getMetadata<IParamDecoratorMetadata[]>(
-        COMMAND_ARGUMENTS,
+        PROPERTY_KEY_METADATA,
         receiver,
         propertyKey
       ) || [];

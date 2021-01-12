@@ -1,5 +1,6 @@
 import { CommandException, CommandParam } from '@watson/common';
 import { Message, MessageEmbed } from 'discord.js';
+import { EventExecutionContext } from 'event/event-execution-context';
 
 import { CommandParamsFactory, CommandRoute } from '../command';
 import { ErrorHost } from '../errors';
@@ -19,7 +20,7 @@ export class ContextRunner {
     try {
       !ctx.isInitialized && (await ctx.init());
       const args = await this.resolveArguments(ctx);
-      const { host, descriptor } = ctx.getRouteConfig();
+      const { host, descriptor } = ctx.getContext();
       const responseChannel = ctx.responseChannel;
       const response = descriptor.apply(host.instance, args);
       const clientResponse = await this.responseParser.parse(response);
@@ -45,7 +46,7 @@ export class ContextRunner {
   }
 
   private async resolveArguments(ctx: CommandExecutionContext) {
-    const routeConfig = ctx.getRouteConfig();
+    const routeConfig = ctx.getContext();
     const { routeArgs } = routeConfig;
 
     const args = [];
@@ -74,4 +75,31 @@ export class ContextRunner {
 
     return args;
   }
+
+  public async run(ctx: EventExecutionContext<any>, fn: () => Promise<any>) {
+    try {
+      await fn();
+    } catch (ctxException) {}
+  }
+
+  private async handleSlashException() {}
+
+  private async handleCommandException(
+    ctx: CommandExecutionContext,
+    exception: Error
+  ) {
+    if (exception instanceof CommandException) {
+      return await this.errorHost.handleCommandException(ctx, exception);
+    }
+
+    if (exception instanceof MessageEmbed) {
+      return await this.errorHost.handleMessageEmbedException(ctx, exception);
+    }
+
+    if (exception instanceof Error) {
+      return this.logger.log(exception.message, "error");
+    }
+  }
+
+  private async handleEventException() {}
 }

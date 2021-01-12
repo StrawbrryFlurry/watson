@@ -7,16 +7,16 @@ export const MODULE_METADATA = {
 
 export const MODULE_GLOBAL_METADATA = "module:global";
 
-export const RECEIVER_OPTIONS_METADATA = "reciver:options";
-export const EVENT_OPTIONS_METADATA = "event:options";
-export const COMMAND_OPTIONS_METADATA = "command:options";
-export const SLASH_COMMAND_OPTIONS_METADATA = "slashcommands:options";
-export const COMMAND_RESTRICTION_METADATA = "command:restriction";
-export const COMMAND_ARGUMENTS = "command:arguments";
-export const INJECTABLE_OPTIONS_METADATA = "injectable:options";
+export const RECEIVER_METADATA = "reciver:meta";
+export const EVENT_METADATA = "event:meta";
+export const COMMAND_METADATA = "command:meta";
+export const SLASH_COMMAND_METADATA = "slashcommands:meta";
+export const PROPERTY_KEY_METADATA = "command:arguments";
+export const INJECTABLE_METADATA = "injectable:meta";
 
-export const GUARD_METADATA = "guard:options";
-export const FILTER_METADATA = "filter:options";
+export const PIPE_METADATA = "pipe:meta";
+export const GUARD_METADATA = "guard:meta";
+export const FILTER_METADATA = "filter:meta";
 
 export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
 

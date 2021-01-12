@@ -4,7 +4,8 @@ import { Client, DMChannel, Guild, Message, NewsChannel, PermissionString, Role,
 import { CommandRoute, ICommandParams } from '../command';
 import { UnknownChannelException } from '../exceptions';
 
-export class CommandExecutionContext implements ExecutionContext<CommandRoute> {
+export class CommandExecutionContext
+  implements ExecutionContext<CommandRoute, Message> {
   private commandRoute: CommandRoute;
   public message: Message;
   public user: User;
@@ -26,6 +27,12 @@ export class CommandExecutionContext implements ExecutionContext<CommandRoute> {
     this.channel = message.channel;
     this.user = message.author;
     this.client = message.client;
+  }
+  getContextData<T = any>() {
+    throw new Error("Method not implemented.");
+  }
+  getType(): Message {
+    throw new Error("Method not implemented.");
   }
 
   public async init() {
@@ -106,11 +113,11 @@ export class CommandExecutionContext implements ExecutionContext<CommandRoute> {
     }
   }
 
-  public getRouteConfig() {
+  public getContext() {
     return this.commandRoute;
   }
 
-  public getMessage() {
+  public getEvent() {
     return this.message;
   }
 }

@@ -1,15 +1,23 @@
+import { sub } from 'cli-color/beep';
 import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { EventProxy } from '../event';
 import { RuntimeException } from '../exceptions';
+import { SlashCommandAdapter } from './slash-adapter';
+
+export type IWSEvent<T extends {}> = [data: T, shardID: number];
 
 export class DiscordJSAdapter {
   private token: string;
   private client: Client;
   private clientOptions: ClientOptions;
   private activity: ActivityOptions;
-  private eventSubscriptions = new Map<EventProxy<any>, Subscription>();
+  private eventSubscriptions = new Map<
+    EventProxy<any>,
+    { sub: Subscription; obsv: Observable<any> }
+  >();
+  private slashCommandAdapter: SlashCommandAdapter;
   public ready = new BehaviorSubject<boolean>(false);
 
   /**
@@ -27,18 +35,30 @@ export class DiscordJSAdapter {
     }
   }
 
-  public initialize() {
-    this.client = this.createClientInstance();
+  public async initialize() {
+    await this.createClientInstance();
   }
 
-  private createClientInstance() {
-    return this.client || new Client(this.clientOptions || {});
+  private async initializeSlashCommands() {
+    const clientID = this.client.user.id;
+
+    this.slashCommandAdapter = new SlashCommandAdapter({
+      applicationId: clientID,
+      authToken: this.token,
+    });
+
+    const commands = await this.slashCommandAdapter.getApplicationCommands();
+  }
+
+  private async createClientInstance() {
+    this.client = this.client || new Client(this.clientOptions || {});
   }
 
   public async start() {
     this.initialize();
     this.registerDefaultListeners();
     await this.client.login(this.token);
+    await this.initializeSlashCommands();
   }
 
   public async stop() {
@@ -74,14 +94,21 @@ export class DiscordJSAdapter {
   }
 
   public registerEventProxy<E extends keyof ClientEvents>(
-    commandProxy: EventProxy<E>
+    eventProxy: EventProxy<E>
   ) {
-    const observable = this.createListener(commandProxy.eventType);
-    const subscriber = observable.subscribe((eventData) =>
-      commandProxy.proxy(...eventData)
+    const observable = eventProxy.isWSEvent
+      ? this.createWSListener(eventProxy.eventType)
+      : this.createListener(eventProxy.eventType);
+
+    const subscriber = observable.subscribe((observer) =>
+      eventProxy.proxy(...observer)
     );
 
-    this.eventSubscriptions.set(commandProxy, subscriber);
+    this.eventSubscriptions.set(eventProxy, {
+      obsv: observable,
+      sub: subscriber,
+    });
+
     return subscriber;
   }
 
@@ -95,6 +122,21 @@ export class DiscordJSAdapter {
   ): Observable<ClientEvents[E]> {
     return new Observable((subscriber) => {
       this.client.on(event, (...args) => {
+        subscriber.next(args);
+      });
+    });
+  }
+
+  /**
+   * Subscribe to a Websocket event on the DiscordJS client. The observable emits each time the event occurs.
+   * @param name name of the event
+   * @return event observable
+   */
+  public createWSListener<T extends {}, E extends string>(
+    event: E
+  ): Observable<any> {
+    return new Observable<IWSEvent<T>>((subscriber) => {
+      this.client.ws.on(event as any, (...args) => {
         subscriber.next(args);
       });
     });

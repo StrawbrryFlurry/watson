@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Intents } from 'discord.js';
+import { Client, ClientOptions, Intents, Snowflake } from 'discord.js';
 
 export interface IWatsonApplicationOptions {
   discordAuthToken?: string;
@@ -7,4 +7,5 @@ export interface IWatsonApplicationOptions {
   intents?: Intents;
   acknowledgeReaction?: string;
   client?: Client;
+  acknowledgementReaction?: string | Snowflake;
 }

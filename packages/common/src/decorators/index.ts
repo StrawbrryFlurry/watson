@@ -1,4 +1,4 @@
 export * from "./command";
 export * from "./common";
-export * from "./interfaces";
+export * from "./apply-stackable-metadata";
 export * from "./create-param-decorator";

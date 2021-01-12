@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-import { CommandRoute } from './command-route';
+import { CommandRoute } from '../routes/command/command-route';
 
 export class CommandContainer {
   private commandBucket = new Set<CommandRoute>();
@@ -9,9 +9,9 @@ export class CommandContainer {
     const matchingCommands: CommandRoute[] = [];
 
     for (const route of this.commandBucket) {
-      if (route.matchesMessage(message)) {
-        matchingCommands.push(route);
-      }
+      // if (route.matchesMessage(message)) {
+      //   matchingCommands.push(route);
+      // }
     }
 
     return matchingCommands;

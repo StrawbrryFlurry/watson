@@ -1,4 +1,5 @@
 import { Command, CommandArgumentType, Inject, Param, Receiver, User } from '@watson/common';
+import { User as DiscordUser } from 'discord.js';
 
 @Receiver({
   prefix: "!",
@@ -8,7 +9,7 @@ export class DogReceiver {
 
   @Command({
     command: "bark",
-    alias: ["woofies", "barkies"],
+    alias: ["woof"],
     params: [
       {
         name: "User",
@@ -19,9 +20,5 @@ export class DogReceiver {
       },
     ],
   })
-  woof(@User() user, @Param() param) {
-    console.log(this.custom);
-    return "Hey";
-    //  this.http.get("https://google.ch").subscribe((e) => console.log(e));
-  }
+  woof(@User() user: DiscordUser, @Param() param: string[]) {}
 }

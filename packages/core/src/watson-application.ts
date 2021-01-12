@@ -46,7 +46,7 @@ export class WatsonApplication {
 
   private async init() {
     this.commandExplorer.explore();
-    this.clientAdapter.initialize();
+    await this.clientAdapter.initialize();
     this.applicationProxy = new ApplicationProxy(this.commandExplorer);
     await this.applicationProxy.init(this.clientAdapter);
     this.isInitialized = true;
@@ -63,7 +63,9 @@ export class WatsonApplication {
   /**
    * @param reaction A unicode Emote [✔] or Emote snowflake
    */
-  public setAcknowledgeReaction(reaction: string | Snowflake) {}
+  public setAcknowledgeReaction(reaction: string | Snowflake) {
+    this.config.acknowledgementReaction = reaction;
+  }
 
   public setActivity(options: ActivityOptions) {
     this.clientAdapter.setActivity(options);

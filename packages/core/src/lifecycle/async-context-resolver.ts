@@ -10,13 +10,13 @@ export type IAsyncType<T = any> = Observable<T> | Promise<T> | IAsyncType[];
 export class AsyncContextResolver {
   public async resolveAsyncValue<T = any, R = any>(
     result: IAsyncType<T> | T
-  ): Promise<R | R[] | T> {
+  ): Promise<R | T> {
     if (result instanceof Promise) {
       return await this.resolveFromPromise(result);
     } else if (result instanceof Observable) {
       return await this.resolveFromObservable(result);
     } else if (Array.isArray(result)) {
-      return await this.resolveAsyncArray(result);
+      return (await this.resolveAsyncArray(result)) as any;
     } else if (typeof result === "function") {
       this.resolveAsyncFunction(result);
     } else {

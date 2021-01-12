@@ -1,6 +1,6 @@
 import { MessageEmbed, Snowflake } from 'discord.js';
 
-import { COMMAND_OPTIONS_METADATA } from '../../constants';
+import { COMMAND_METADATA } from '../../constants';
 import { CommandArgumentType, ResponseChannelType } from '../../enums';
 import { isObject, isString } from '../../utils/shared.utils';
 
@@ -176,6 +176,6 @@ export function Command(command?: string | ICommandOptions): MethodDecorator {
       options = command;
     }
 
-    Reflect.defineMetadata(COMMAND_OPTIONS_METADATA, options, descriptor.value);
+    Reflect.defineMetadata(COMMAND_METADATA, options, descriptor.value);
   };
 }

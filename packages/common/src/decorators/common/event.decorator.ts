@@ -1,6 +1,6 @@
-import { ClientEvents } from 'discord.js';
+import { IClientEvent } from 'interfaces';
 
-import { EVENT_OPTIONS_METADATA } from '../../constants';
+import { EVENT_METADATA } from '../../constants';
 import { isUndefined } from '../../utils';
 
 /**
@@ -11,10 +11,8 @@ import { isUndefined } from '../../utils';
  * If no event type is specified the method will be called with all `raw` event values.
  */
 export function Event(): MethodDecorator;
-export function Event<Event extends keyof ClientEvents>(
-  type: Event
-): MethodDecorator;
-export function Event<Event extends keyof ClientEvents>(
+export function Event<Event extends IClientEvent>(type: Event): MethodDecorator;
+export function Event<Event extends IClientEvent>(
   type?: Event
 ): MethodDecorator {
   return (
@@ -23,6 +21,6 @@ export function Event<Event extends keyof ClientEvents>(
     descriptor: PropertyDescriptor
   ) => {
     const eventType = isUndefined(type) ? "raw" : type;
-    Reflect.defineMetadata(EVENT_OPTIONS_METADATA, eventType, descriptor.value);
+    Reflect.defineMetadata(EVENT_METADATA, eventType, descriptor.value);
   };
 }

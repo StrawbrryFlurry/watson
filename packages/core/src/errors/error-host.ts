@@ -36,13 +36,13 @@ export class ErrorHost {
         clientUser: ctx.client.user,
         color: this.messageColor,
         param: exception.param,
-        route: ctx.getRouteConfig(),
+        route: ctx.getContext(),
       });
     } else if (exception instanceof UnatuhorizedException) {
       message = UNAUTHORIZED_ERROR({
         clientUser: ctx.client.user,
         color: this.messageColor,
-        route: ctx.getRouteConfig(),
+        route: ctx.getContext(),
       });
     } else {
       message =
