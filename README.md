@@ -125,6 +125,6 @@ import { HatReceiver } from './hat.receiver';
 ### Types:
 
 - 🚀 [FEATURE] A new addition to the package
-- 💡 [UPDATE] Update existing feature
+- ✏ [UPDATE] Update existing feature
 - 🔨 [FIX] Fixing a bug
 - 📝 [DOCS] Adding comments, documentation..
