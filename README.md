@@ -128,3 +128,4 @@ import { HatReceiver } from './hat.receiver';
 - ✏ [UPDATE] Update existing feature
 - 🔨 [FIX] Fixing a bug
 - 📝 [DOCS] Adding comments, documentation..
+- 🗑 [REMOVED] Removing files / Changes
