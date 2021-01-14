@@ -10,7 +10,7 @@
   "scripts": {
     "build": "gulp build:dev --dist node_modules/@watson",
     "clean": "gulp clean",
-    "test": "gulp build --dist node_modules/@watson && lerna run compile --scope @watson/testing && node ./packages/testing/dist/main.js"
+    "test": "gulp build --dist node_modules/@watson && lerna run compile --scope @watson/example && node ./packages/example/dist/main.js"
   },
   "keywords": [
     "discord"

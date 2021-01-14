@@ -1,7 +1,7 @@
 {
-  "name": "@watson/testing",
+  "name": "@watson/example",
   "version": "0.0.1",
-  "description": "Test project",
+  "description": "Example project using the Watson framework",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
