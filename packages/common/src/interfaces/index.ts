@@ -1,4 +1,4 @@
-export * from "./common";
+export * from "./changeable";
 export * from "./context";
 export * from "./slash";
 export * from "./client-events.interface";

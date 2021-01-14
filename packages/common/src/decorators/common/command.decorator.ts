@@ -1,7 +1,5 @@
-import { MessageEmbed, Snowflake } from 'discord.js';
-
 import { COMMAND_METADATA } from '../../constants';
-import { CommandArgumentType, ResponseChannelType } from '../../enums';
+import { CommandArgumentType } from '../../enums';
 import { isObject, isString } from '../../utils/shared.utils';
 
 export interface ICommandParam {
@@ -39,66 +37,10 @@ export interface ICommandParam {
    */
   default?: any;
   /**
-   * Promt the user for an action
-   * @interface ICommandPromt
-   */
-  promt?: ICommandPromt;
-  /**
    * If the type a date this parameter is required to parse the date.
    */
   dateFormat?: string;
 }
-
-export interface ICommandReaction {
-  /**
-   * The emote expected
-   * If the value if Falsy watson will listen to all reactions until the timeout runs out.
-   * The param will then consits of an array containing all reactions
-   */
-  emote: Snowflake | string | boolean;
-  /**
-   * Listen for commands by all users not only the author
-   * @default false
-   */
-  multiUser?: boolean;
-}
-
-export interface ICommandPromt {
-  /**
-   * The promt text send to the user
-   */
-  text: (ctx: unknown) => string | MessageEmbed;
-  /**
-   * The message sent to the user if the type doesn't match the param type
-   */
-  retryText: (ctx: unknown) => string | MessageEmbed;
-  /**
-   * Expects the user to react to the message.
-   */
-  reaction?: ICommandReaction;
-  /**
-   * Retry attpemts the user will be given
-   * @default 4
-   */
-  tries?: number;
-  /**
-   * Time in ms the bot is waiting for the user to respond
-   * @default 4000
-   */
-  timeout?: number;
-}
-
-export interface IResponseChannelOptions {
-  /**
-   * The response channel type
-   */
-  type: ResponseChannelType;
-  /**
-   * The name of the channel in the guilde
-   */
-  name?: string;
-}
-
 export interface ICommandOptions {
   /**
    * Name of the command
@@ -115,19 +57,10 @@ export interface ICommandOptions {
    */
   pramDelimiter?: string;
   /**
-   * A regular expression used to parse the command arguments
-   */
-  paramRegex?: RegExp;
-  /**
    * Parameters of the command
    * @interface ICommandParam
    */
   params?: ICommandParam[];
-  /**
-   * Sets the command to only be available in direct messages
-   * @default false
-   */
-  directMessage?: boolean;
   /**
    * Sets the prefix for the command.
    * If no prefix was set the receiver prefix is used.
@@ -144,12 +77,6 @@ export interface ICommandOptions {
    *
    */
   caseSensitive?: boolean;
-  /**
-   * Change the channel in which the bot will send the response message
-   *
-   * @default ResponseChannelType.SAME The same channel the message was sent to.
-   */
-  responseChannel?: IResponseChannelOptions;
 }
 
 /**

@@ -12,25 +12,25 @@ export class CommandParamsFactory {
   ) {
     let paramValue: unknown;
     switch (param) {
-      case CommandParam.CHANNEL:
+      case RouteParamType.CHANNEL:
         paramValue = ctx.channel;
         break;
-      case CommandParam.CLIENT:
+      case RouteParamType.CLIENT:
         paramValue = ctx.client;
         break;
-      case CommandParam.CONTEXT:
+      case RouteParamType.CONTEXT:
         paramValue = ctx;
         break;
-      case CommandParam.GUILD:
+      case RouteParamType.GUILD:
         paramValue = ctx.guild || null;
         break;
-      case CommandParam.MESSAGE:
+      case RouteParamType.MESSAGE:
         paramValue = ctx.message;
         break;
-      case CommandParam.USER:
+      case RouteParamType.USER:
         paramValue = ctx.user;
         break;
-      case CommandParam.PARAM:
+      case RouteParamType.PARAM:
         paramValue =
           options === undefined ? ctx.params : ctx.params[options as string];
         break;

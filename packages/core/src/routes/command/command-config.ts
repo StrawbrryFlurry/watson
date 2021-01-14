@@ -1,44 +1,17 @@
-import {
-  CommandArgumentType,
-  ICommandOptions,
-  ICommandParam,
-  IReceiverOptions,
-  IResponseChannelOptions,
-  isEmpty,
-  ResponseChannelType,
-} from '@watson/common';
-import { Message, PermissionString, TextChannel } from 'discord.js';
+import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions, isEmpty, isNil } from '@watson/common';
 import { EventConfiguration } from 'routes/event.configuration';
 
 import { ApplicationConfig } from '../../application-config';
-import { ICommandRestrictions } from '../../command/command-explorer';
-import { CommandConfigurationException, NonExistingPrefixException } from '../../exceptions';
+import { CommandConfigurationException } from '../../exceptions';
 import { IMethodValue } from '../../injector';
-import { CommandExecutionContext } from '../../lifecycle';
 
 export class CommandConfiguration extends EventConfiguration {
   public prefix: string;
   public name: string;
-  public paramRegex?: RegExp;
-  public paramDelimiter: string;
-
-  public directMessage: boolean;
-
-  public allowedChannelIds = new Set<string>();
-  public allowedChannels = new Set<string>();
-
-  public disallowedChannelIds = new Set<string>();
-  public disallowedChannels = new Set<string>();
-
-  public requiredRoles = new Set<string>();
-  public requiredPermissions = new Set<PermissionString>();
-  public requiresAllPermissions: boolean;
-
   public alias: string[];
+  public paramDelimiter: string;
   public caseSensitive: boolean;
   public params?: ICommandParam[] = [];
-
-  public responseChannel: Partial<IResponseChannelOptions> = {};
 
   constructor(
     private commandOptions: ICommandOptions,
@@ -46,11 +19,10 @@ export class CommandConfiguration extends EventConfiguration {
     private config: ApplicationConfig,
     private method: IMethodValue
   ) {
-    super();
+    super("message");
 
     this.setName();
     this.setPrefix();
-    this.setRestrictions();
     this.setConfiguration();
     this.setParams();
   }
@@ -76,19 +48,15 @@ export class CommandConfiguration extends EventConfiguration {
       return (this.prefix = this.config.globalCommandPrefix);
     }
 
-    throw new NonExistingPrefixException("CommandExplorer", this.name);
+    this.prefix = undefined;
   }
 
   private setParams() {
-    if (this.useRegex) {
-      return (this.params = this.commandOptions.params);
-    }
-
     if (typeof this.commandOptions.params === "undefined") {
       return;
     }
 
-    this.commandOptions.params.forEach((param) => {
+    this.commandOptions.params.forEach((param, idx) => {
       if (param.type === CommandArgumentType.SENTENCE) {
         if (typeof param.encapsulator === "undefined") {
           throw new CommandConfigurationException(
@@ -105,6 +73,13 @@ export class CommandConfiguration extends EventConfiguration {
             `Param ${param.name} is of type date but doesn't have a format set`
           );
         }
+      }
+
+      if (param.hungry && idx !== this.commandOptions.params.length - 1) {
+        throw new CommandConfigurationException(
+          "CommandLoader",
+          `A hungry parameter has to be the last parameter for a command.`
+        );
       }
 
       if (typeof param.optional === "undefined") {
@@ -125,158 +100,27 @@ export class CommandConfiguration extends EventConfiguration {
     }
 
     this.alias = this.commandOptions.alias || [];
-    this.directMessage = this.commandOptions.directMessage || false;
 
-    const regex = this.commandOptions.paramRegex;
+    const delimiter = this.commandOptions.pramDelimiter;
 
-    if (typeof regex !== "undefined" && regex instanceof RegExp) {
-      this.paramRegex = regex;
+    if (typeof delimiter === "undefined") {
+      this.paramDelimiter = " ";
     } else {
-      const delimiter = this.commandOptions.pramDelimiter;
-
-      if (typeof delimiter === "undefined") {
-        this.paramDelimiter = " ";
-      } else {
-        this.paramDelimiter = delimiter;
-      }
-    }
-
-    const responseChannelOptions = this.commandOptions.responseChannel;
-
-    if (typeof responseChannelOptions !== "undefined") {
-      if (
-        responseChannelOptions.type === ResponseChannelType.OTHER &&
-        typeof responseChannelOptions.name === "undefined"
-      ) {
-        this.responseChannel.type = ResponseChannelType.SAME;
-      } else if (typeof responseChannelOptions.name !== "undefined") {
-        this.responseChannel.name = responseChannelOptions.name;
-        this.responseChannel.type = responseChannelOptions.type;
-      } else {
-        this.responseChannel.type = responseChannelOptions.type;
-      }
-    } else {
-      this.responseChannel.type = ResponseChannelType.SAME;
+      this.paramDelimiter = delimiter;
     }
   }
 
-  private setRestrictions() {
-    const restrictions: ICommandRestrictions = this.commandOptions[
-      "restrictions"
-    ];
-
-    this.requiresAllPermissions = restrictions?.allPermissionsRequired || false;
-
-    if (typeof restrictions === "undefined") {
-      return;
-    }
-
-    for (const role of restrictions.roles) {
-      this.requiredRoles.add(role);
-    }
-
-    for (const permission of restrictions.permissions) {
-      this.requiredPermissions.add(permission);
-    }
-
-    for (const channelId in restrictions.channelIds) {
-      this.allowedChannelIds.add(channelId);
-    }
-
-    for (const channel in restrictions.channels) {
-      this.allowedChannelIds.add(channel);
-    }
+  public hasParams() {
+    return !isEmpty(this.params);
   }
 
-  public get isRestrictedToChannel() {
-    return (
-      this.allowedChannels.size > 0 ||
-      this.allowedChannelIds.size > 0 ||
-      this.directMessage === true
-    );
+  public hasPrefix() {
+    return !isNil(this.prefix);
   }
 
-  public get requiresRoles() {
-    return this.requiredRoles.size > 0;
-  }
-
-  public get requiresPermission() {
-    return this.requiredPermissions.size > 0;
-  }
-
-  public get hasParams() {
-    return !isEmpty(this.params) || this.useRegex;
-  }
-
-  public get useRegex() {
-    return typeof this.paramRegex !== "undefined" && !isEmpty(this.params);
-  }
-
-  public get hasSentence() {
+  public hasSentence() {
     return this.params.some(
       (param) => param.type === CommandArgumentType.SENTENCE
     );
-  }
-
-  public get responseChannelType() {
-    return this.responseChannel.type;
-  }
-
-  public hasRoles(ctx: CommandExecutionContext) {
-    if (!this.requiresRoles) {
-      return true;
-    }
-
-    return this.corssMatchSet(this.requiredRoles, ctx.userRoleNames);
-  }
-
-  public hasPermissions(ctx: CommandExecutionContext) {
-    if (!this.requiresPermission) {
-      return true;
-    }
-
-    return this.corssMatchSet(
-      this.requiredPermissions,
-      ctx.userPermissions,
-      this.requiresAllPermissions
-    );
-  }
-
-  public matchesChannel(message: Message) {
-    if (!this.isRestrictedToChannel) {
-      return true;
-    }
-
-    if (this.allowedChannelIds.has(message.channel.id)) {
-      return true;
-    }
-
-    if (this.allowedChannels.has((message.channel as TextChannel).name)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  private corssMatchSet<T>(
-    targetSet: Set<T>,
-    matchingSet: Set<T>,
-    fullMatch?: boolean
-  ): boolean {
-    if (targetSet.size === 0) {
-      return true;
-    }
-
-    for (const value of targetSet) {
-      if (matchingSet.has(value)) {
-        continue;
-      }
-
-      if (typeof fullMatch !== "undefined" && fullMatch === true) {
-        return false;
-      }
-    }
-
-    return true;
   }
 }

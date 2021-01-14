@@ -1,4 +1,4 @@
-export enum CommandParam {
+export enum RouteParamType {
   PARAM = "param:param",
   MESSAGE = "pram:message",
   CONTEXT = "param:context",

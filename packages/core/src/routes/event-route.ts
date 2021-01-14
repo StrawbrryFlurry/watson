@@ -28,7 +28,7 @@ export abstract class EventRoute<Event extends IClientEvent> {
   ): IAsynchronousResolvable<boolean>;
 
   public abstract createContextData(
-    ...eventArgs: unknown[]
+    eventArgs: unknown[]
   ): IAsynchronousResolvable<any>;
 
   public get eventType() {

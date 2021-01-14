@@ -1,7 +1,10 @@
+import { ClientEvents } from 'discord.js';
+import { IClientEvent } from 'interfaces/client-events.interface';
+import { Type } from 'interfaces/type.interface';
 import { ConditionalAny } from 'utils';
 
-import { CommandContextData } from './command-context-data';
-import { EventContextData } from './event-context-data';
+import { CommandContextData } from './command-context-data.interface';
+import { EventContextData } from './event-context-data.interface';
 import { SlashContextData } from './slash-context-data';
 
 export type ContextEventTypes = "event" | "command" | "slash";
@@ -12,10 +15,11 @@ export type ContextDataTypes =
 
 export interface ExecutionContext<
   ContextData extends ContextDataTypes = ContextDataTypes,
-  EventType extends ContextEventTypes = ContextEventTypes
+  ContextType extends ContextEventTypes = ContextEventTypes,
+  EventType extends IClientEvent = IClientEvent
 > {
   /**
-   * Returns the current context data present for the event.
+   * @returns the current context data present for the event.
    * Depending on the context type you can apply one of the following interfaces as a generic:
    * @interface EventContextData
    * Use this interface for Event handlers
@@ -25,17 +29,44 @@ export interface ExecutionContext<
    * Use this interface for Slash Command handlers
    */
   getContextData<T = any>(): ConditionalAny<ContextData, T>;
+
   /**
-   * Returns the base event emitted by the client.
+   * @returns the base event emitted by the client.
    * Use a generic to fit what you exprect to get from the event e.g.
    *```
-   * \@Event('message')
-   * handleMessage(@Context() ctx: ExecutionContext) {
-   *  const message = ctx.getEvent<Message>();
+   * `@Event('message')`
+   * handleMessage(`@Context() ctx: ExecutionContext`) {
+   *  const [message] = ctx.getEvent<'message'>();
    * }
    * ```
    */
-  getEvent<T = any>(): ConditionalAny<EventType, T>;
+  getEvent<T extends keyof ClientEvents>(): ClientEvents[T];
 
-  getType(): EventType;
+  /**
+   * @param name The name of the instance to return in lowercase
+   * @returns a parsed object of the client event data.
+   * @key The full lowercase name of the type.
+   * If a name is provided the value of the object with that name is returned instead
+   * @value The instance of that type
+   * ```
+   * `@Event('message)`
+   *  handleMessage(`@Context() ctx: ExecutionContext`) {
+   *    const message = ctx.getEventObj('message');
+   *    const { message } = ctx.getEventObj();
+   *  }
+   * ```
+   */
+  getEventObj<T extends Type>(): { [key: string]: InstanceType<T> };
+  getEventObj<T extends Type>(name: string): InstanceType<T>;
+
+  /**
+   * @returns the event type of this context:
+   * @type `command`
+   * For a command execution context
+   * @type `slash`
+   * For a slash command execution context
+   * @type `event`
+   * For a generic event execution context
+   */
+  getType(): ContextType;
 }

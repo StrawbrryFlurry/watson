@@ -1,7 +1,7 @@
 import { CommandContextData, isEmpty } from '@watson/common';
 import { Message, Snowflake } from 'discord.js';
-import { IContextFactory } from 'lifecycle/execution-context-factory';
 import { CommandRoute } from 'routes';
+import { IContextFactory } from 'routes/route-context-factory';
 
 import { CommandContainer } from '../command/command-container';
 import { EventProxy } from '../event';
@@ -20,7 +20,7 @@ export class CommandProxy extends EventProxy<"message"> {
     this.contextRunner = contextRunner;
     this.commandContainer = container;
 
-    this.configure(options);
+    this.configure("");
   }
 
   public async proxy(message: Message) {

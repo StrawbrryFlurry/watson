@@ -39,12 +39,7 @@ export class AsyncContextResolver {
   }
 
   private async resolveFromObservable<T = any>(observable: Observable<T>) {
-    const asPromise = new Promise<T>((resolve, reject) => {
-      observable.subscribe(
-        (observer) => resolve(observer),
-        (err) => reject(err)
-      );
-    });
+    const asPromise = observable.toPromise();
     return await this.resolveAsyncValue(asPromise);
   }
 

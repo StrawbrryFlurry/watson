@@ -1,27 +1,24 @@
-import { PROPERTY_KEY_METADATA } from '../constants';
-import { CommandParam } from '../enums';
+import { PARAM_METADATA } from '../constants';
+import { RouteParamType } from '../enums';
 import { ExecutionContext } from '../interfaces';
 
 export type ParamFactoryFunction = (ctx: ExecutionContext) => unknown;
 
 export interface IParamDecoratorMetadata<O = any> {
-  type: CommandParam;
+  type: RouteParamType;
   paramIndex: number;
   options?: O;
   factory?: ParamFactoryFunction;
 }
 
 export function createParamDecorator<O = any>(
-  parm: CommandParam,
+  parm: RouteParamType,
   options?: O
 ): ParameterDecorator {
   return (target: Object, propertyKey: string, parameterIndex: number) => {
     const existing: IParamDecoratorMetadata[] =
-      Reflect.getMetadata(
-        PROPERTY_KEY_METADATA,
-        target.constructor,
-        propertyKey
-      ) || [];
+      Reflect.getMetadata(PARAM_METADATA, target.constructor, propertyKey) ||
+      [];
 
     const args = [
       ...existing,
@@ -33,7 +30,7 @@ export function createParamDecorator<O = any>(
     ];
 
     Reflect.defineMetadata(
-      PROPERTY_KEY_METADATA,
+      PARAM_METADATA,
       args,
       target.constructor,
       propertyKey
@@ -44,11 +41,8 @@ export function createParamDecorator<O = any>(
 export function createCustomParamDecorator(paramFactory: ParamFactoryFunction) {
   return (target: Object, propertyKey: string, parameterIndex: number) => {
     const existing: IParamDecoratorMetadata[] =
-      Reflect.getMetadata(
-        PROPERTY_KEY_METADATA,
-        target.constructor,
-        propertyKey
-      ) || [];
+      Reflect.getMetadata(PARAM_METADATA, target.constructor, propertyKey) ||
+      [];
 
     const args = [
       ...existing,
@@ -60,7 +54,7 @@ export function createCustomParamDecorator(paramFactory: ParamFactoryFunction) {
     ];
 
     Reflect.defineMetadata(
-      PROPERTY_KEY_METADATA,
+      PARAM_METADATA,
       args,
       target.constructor,
       propertyKey

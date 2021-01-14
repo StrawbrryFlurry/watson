@@ -1,4 +1,4 @@
-import { CommandException, CommandParam } from '@watson/common';
+import { CommandException } from '@watson/common';
 import { Message, MessageEmbed } from 'discord.js';
 import { EventExecutionContext } from 'event/event-execution-context';
 
@@ -53,7 +53,7 @@ export class ContextRunner {
 
     for (const argument of routeArgs) {
       if (
-        argument.type === CommandParam.FACTORY ||
+        argument.type === RouteParamType.FACTORY ||
         typeof argument.factory !== "undefined"
       ) {
         const arg = await this.paramsFactory.resolvePramFactory(

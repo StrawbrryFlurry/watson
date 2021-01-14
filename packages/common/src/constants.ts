@@ -11,7 +11,7 @@ export const RECEIVER_METADATA = "reciver:meta";
 export const EVENT_METADATA = "event:meta";
 export const COMMAND_METADATA = "command:meta";
 export const SLASH_COMMAND_METADATA = "slashcommands:meta";
-export const PROPERTY_KEY_METADATA = "command:arguments";
+export const PARAM_METADATA = "param:meta";
 export const INJECTABLE_METADATA = "injectable:meta";
 
 export const PIPE_METADATA = "pipe:meta";

@@ -174,4 +174,8 @@ export class WatsonContainer {
 
     return data.wrapper.instance as T;
   }
+
+  public getClientAdapter() {
+    return this.config.clientAdapter;
+  }
 }

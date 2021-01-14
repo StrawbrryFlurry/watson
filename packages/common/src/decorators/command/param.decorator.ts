@@ -1,4 +1,5 @@
-import { CommandParam } from '../../enums';
+import { RouteParamType } from 'enums';
+
 import { createParamDecorator } from '../create-param-decorator';
 
 /**
@@ -14,28 +15,28 @@ import { createParamDecorator } from '../create-param-decorator';
 export function Param(): ParameterDecorator;
 export function Param(param: string): ParameterDecorator;
 export function Param(options?: string): ParameterDecorator {
-  return createParamDecorator(CommandParam.PARAM, options);
+  return createParamDecorator(RouteParamType.PARAM, options);
 }
 
 /**
  * Injects the channel the command was used in to the argument in the command handler method.
  */
 export function Channel(): ParameterDecorator {
-  return createParamDecorator(CommandParam.CHANNEL);
+  return createParamDecorator(RouteParamType.CHANNEL);
 }
 
 /**
  * Injects the original message object to the argument in the command handler method.
  */
 export function Message(): ParameterDecorator {
-  return createParamDecorator(CommandParam.MESSAGE);
+  return createParamDecorator(RouteParamType.MESSAGE);
 }
 
 /**
  * Injects the DiscordJS client instance to the argument in the command handler method.
  */
 export function Client(): ParameterDecorator {
-  return createParamDecorator(CommandParam.CLIENT);
+  return createParamDecorator(RouteParamType.CLIENT);
 }
 
 /**
@@ -44,19 +45,19 @@ export function Client(): ParameterDecorator {
  * If the command was used in a direct message the value will be `undefined`.
  */
 export function Guild(): ParameterDecorator {
-  return createParamDecorator(CommandParam.GUILD);
+  return createParamDecorator(RouteParamType.GUILD);
 }
 
 /**
  * Injects the user from whom the message was sent from to the argument in the command handler method.
  */
 export function User(): ParameterDecorator {
-  return createParamDecorator(CommandParam.USER);
+  return createParamDecorator(RouteParamType.USER);
 }
 
 /**
  * Injects the full command context to the argument in the command handler method.
  */
 export function Context(): ParameterDecorator {
-  return createParamDecorator(CommandParam.CONTEXT);
+  return createParamDecorator(RouteParamType.CONTEXT);
 }
