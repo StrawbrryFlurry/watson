@@ -60,12 +60,12 @@ export class Module {
 
   initProperties() {}
 
-  public addImport(module: Module) {
-    if (this.imports.has(module)) {
+  public addImport(moduleRef: Module) {
+    if (this.imports.has(moduleRef)) {
       return;
     }
 
-    this._imports.add(module);
+    this._imports.add(moduleRef);
   }
 
   public addExportedProvider(provider: string | Type<TInjectable>) {
@@ -81,6 +81,14 @@ export class Module {
   }
 
   public addExportedModule(moduleRef: Module) {
+    if (!this._imports.has(moduleRef) && moduleRef._id !== this._id) {
+      throw new UnknownExportException(
+        "InstanceLoader",
+        moduleRef.name,
+        this.name
+      );
+    }
+
     const { providers } = moduleRef;
 
     for (const [token, wrapper] of providers.entries()) {
