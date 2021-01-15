@@ -1,4 +1,14 @@
-import { CustomProvider, isFunction, isString, TInjectable, TReceiver, Type } from '@watson/common';
+import {
+  ClassProvider,
+  CustomProvider,
+  FactoryProvider,
+  isFunction,
+  isString,
+  TInjectable,
+  TReceiver,
+  Type,
+  ValueProvider,
+} from '@watson/common';
 import { v4 } from 'uuid';
 
 import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';
@@ -101,13 +111,17 @@ export class Module {
   }
 
   public addInjectable(injectable: Type) {
-    const instanceWrapper = new InstanceWrapper<TInjectable>({
-      name: injectable.name,
-      metatype: injectable,
-      host: this,
-    });
+    const wrapper = this._injectables.get(injectable);
 
-    this._injectables.set(injectable.name, instanceWrapper);
+    if (!wrapper) {
+      const instanceWrapper = new InstanceWrapper<TInjectable>({
+        name: injectable.name,
+        metatype: injectable,
+        host: this,
+      });
+
+      this._injectables.set(injectable.name, instanceWrapper);
+    }
   }
 
   public addProvider(provider: Type | CustomProvider) {
@@ -117,7 +131,7 @@ export class Module {
       return this.addCustomProvider(provider as CustomProvider);
     }
 
-    this.addInjectable(provider as Type);
+    this.addProvider(provider as Type);
   }
 
   private addCustomProvider(provider: CustomProvider) {
@@ -130,13 +144,14 @@ export class Module {
     }
   }
 
-  private addFactoryProvider(provider: CustomProvider) {
-    const { provide, useFactory, inject } = provider;
+  private addFactoryProvider(provider: FactoryProvider) {
+    const { useFactory, inject } = provider;
+    const name = this.getCustomProviderName(provider);
 
     this._providers.set(
-      provider.provide,
+      name,
       new InstanceWrapper({
-        name: provide,
+        name: name,
         metatype: useFactory,
         host: this,
         inject,
@@ -144,13 +159,14 @@ export class Module {
     );
   }
 
-  private addValueProvider(provider: CustomProvider) {
-    const { provide, useValue } = provider;
+  private addValueProvider(provider: ValueProvider) {
+    const { useValue } = provider;
+    const name = this.getCustomProviderName(provider);
 
     this._providers.set(
-      provider.provide,
+      name,
       new InstanceWrapper({
-        name: provide,
+        name: name,
         metatype: useValue,
         host: this,
         instance: useValue,
@@ -159,18 +175,25 @@ export class Module {
     );
   }
 
-  private addCalssProvider(provider: CustomProvider) {
+  private addCalssProvider(provider: ClassProvider) {
     const { provide, useClass, inject } = provider;
+    const name = this.getCustomProviderName(provider);
 
     this._providers.set(
-      provider.provide,
+      name,
       new InstanceWrapper({
-        name: provide,
+        name: name,
         metatype: useClass,
         host: this,
         inject,
       })
     );
+  }
+
+  private getCustomProviderName(provider: CustomProvider) {
+    return isFunction(provider.provide)
+      ? (provider.provide as string)
+      : (provider.provide as Function).name;
   }
 
   private isClassProvider(provider: CustomProvider) {

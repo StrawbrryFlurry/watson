@@ -2,11 +2,11 @@ import { CommandException } from '@watson/common';
 import { Message, MessageEmbed } from 'discord.js';
 import { EventExecutionContext } from 'event/event-execution-context';
 
-import { CommandParamsFactory, CommandRoute } from '../command';
-import { ErrorHost } from '../errors';
-import { Logger } from '../logger';
+import { CommandParamsFactory, CommandRoute } from '../../command';
+import { ErrorHost } from '../../errors';
+import { Logger } from '../../logger';
+import { ResponseParser } from '../response-parser';
 import { CommandExecutionContext } from './execution-context';
-import { ResponseParser } from './response-parser';
 
 export class ContextRunner {
   private paramsFactory = new CommandParamsFactory();

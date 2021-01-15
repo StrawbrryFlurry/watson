@@ -29,23 +29,23 @@ import { WatsonContainer } from 'watson-container';
 import { AsyncContextResolver } from '../lifecycle/async-context-resolver';
 import { ResponseController } from '../lifecycle/response-controller';
 
-export type IContextFactory<CT extends ContextDataTypes, A = any> = (
+export type IHandlerFunction<CT extends ContextDataTypes, A = any> = (
   ...eventData: A[]
 ) => Promise<void>;
 
-export class RouteContextFactory {
+export class RouteHandlerFactory {
   private paramsFactory: RouteParamsFactory;
   private responseController = new ResponseController();
   private asyncResolver = new AsyncContextResolver();
 
   constructor(private container: WatsonContainer) {}
 
-  public async createCommandContext(
+  public async createCommandHandler(
     route: CommandRoute,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
-  ): Promise<IContextFactory<CommandContextData>> {
+  ): Promise<IHandlerFunction<CommandContextData>> {
     const { filters, guards, paramsFactory, pipes } = this.getMetadata(
       route,
       handle,
@@ -69,12 +69,12 @@ export class RouteContextFactory {
     });
   }
 
-  public async createSlashContext(
+  public async createSlashHandler(
     route: CommandRoute,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
-  ): Promise<IContextFactory<SlashContextData>> {
+  ): Promise<IHandlerFunction<SlashContextData>> {
     const { filters, guards, paramsFactory, pipes } = this.getMetadata(
       route,
       handle,
@@ -98,12 +98,12 @@ export class RouteContextFactory {
     });
   }
 
-  public async createEventContext(
+  public async createEventHandler(
     route: CommandRoute,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
-  ): Promise<IContextFactory<EventContextData>> {
+  ): Promise<IHandlerFunction<EventContextData>> {
     const { filters, paramsFactory, pipes } = this.getMetadata(
       route,
       handle,
@@ -440,9 +440,10 @@ export class RouteContextFactory {
         ctx.applyTransformation(transformedContext);
 
         const params = await paramsFactory(ctx);
-
         const resolvable = handle.apply(receiver.instance, params);
-        const result = await this.asyncResolver.resolveAsyncValue(resolvable);
+        const result = (await this.asyncResolver.resolveAsyncValue(
+          resolvable
+        )) as RouteResult;
         await this.responseController.apply(ctx, result);
       } catch (err) {
         rethrowWithContext(err, ctx);

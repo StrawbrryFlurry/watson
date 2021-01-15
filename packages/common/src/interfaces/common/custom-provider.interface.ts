@@ -1,4 +1,4 @@
-import { Type } from './type.interface';
+import { Type } from '../type.interface';
 
 export type IProviderFactory<T = any> = (
   ...injectArgs: unknown[]
@@ -16,7 +16,7 @@ export interface FactoryProvider {
   /**
    * The name of the provider. This name can then be used as the injection token for the @inject decorator.
    */
-  provide: string;
+  provide: string | Function;
   /**
    * A factory function that returns the instance of the provider.
    */
@@ -35,7 +35,7 @@ export interface ClassProvider {
   /**
    * The name of the provider. This name can then be used as the injection token for the @inject decorator.
    */
-  provide: string;
+  provide: string | Function;
   /**
    * A value that should whose instance should be set as the instance of the provider.
    */
@@ -49,7 +49,7 @@ export interface ValueProvider {
   /**
    * The name of the provider. This name can then be used as the injection token for the @inject decorator.
    */
-  provide: string;
+  provide: string | Function;
   /**
    * A value that should be set as the instance of the provider.
    */

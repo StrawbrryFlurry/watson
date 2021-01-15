@@ -10,7 +10,6 @@ import {
   Type,
 } from '@watson/common';
 import { InstanceWrapper, MetadataResolver } from 'injector';
-import { RouteContextFactory } from 'routes/route-context-factory';
 import { WatsonContainer } from 'watson-container';
 
 import { CommandRoute } from './command';
@@ -25,12 +24,10 @@ export class RouteExplorer {
   private _eventRoutes = new Set<EventRoute<any>>();
   private _commandRoutes = new Set<CommandRoute>();
   private _slashRoutes = new Set<any>();
-  private contextFactory: RouteContextFactory;
 
   constructor(container: WatsonContainer) {
     this.constainer = container;
     this.resolver = new MetadataResolver(container);
-    this.contextFactory = new RouteContextFactory(container);
   }
 
   public explore() {

@@ -24,8 +24,7 @@ export const GUILD_CHANNEL_TYPES = [
 export class CommandParser {
   constructor(private config: CommandConfiguration) {}
 
-  public async parse(messageEvent: [Message]): Promise<CommandContextData> {
-    const [message] = messageEvent;
+  public async parse(message: Message): Promise<CommandContextData> {
     const { content, client, channel, guild, author: user } = message;
     const { command, prefix, rest } = this.extractMessageParts(content);
     const isFromGuild = this.isFromGuild(channel);

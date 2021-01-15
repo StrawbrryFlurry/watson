@@ -1,5 +1,5 @@
-import { IClientEvent, TReceiver } from '@watson/common';
-import { ClientEvents } from 'discord.js';
+import { EventContextData, IClientEvent, TReceiver } from '@watson/common';
+import { Base, ClientEvents, Guild } from 'discord.js';
 import { EventRoute } from 'event';
 import { InstanceWrapper } from 'injector';
 import { WatsonContainer } from 'watson-container';
@@ -24,11 +24,26 @@ export class ConcreteEventRoute<T extends IClientEvent> extends EventRoute<T> {
     this.handler = handler;
   }
 
-  public async matchEvent(...eventData: ClientEvents[T]) {
+  public async matchEvent(eventData: ClientEvents[T]) {
     return true;
   }
 
-  public createContextData(...eventArgs: unknown[]) {
-    throw new Error("Method not implemented.");
+  public createContextData(eventArgs: Base[]): EventContextData {
+    if (this.eventType === ("raw" as any)) {
+      return eventArgs as any;
+    } else {
+      let guild: Guild;
+
+      eventArgs.forEach((e: any) => {
+        if ("guild" in e) {
+          guild = e.guild;
+        }
+      });
+
+      return {
+        client: eventArgs[0].client,
+        guild: guild,
+      };
+    }
   }
 }

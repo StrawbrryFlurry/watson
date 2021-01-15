@@ -8,6 +8,7 @@ import {
   INJECT_DEPENDENCY_METADATA,
   isFunction,
   MODULE_METADATA,
+  PIPE_METADATA,
   Type,
 } from '@watson/common';
 
@@ -102,6 +103,7 @@ export class MetadataResolver {
     }
 
     this.reflectComponentInjectables(metatype, token, GUARD_METADATA);
+    this.reflectComponentInjectables(metatype, token, PIPE_METADATA);
     this.reflectComponentInjectables(metatype, token, FILTER_METADATA);
   }
 

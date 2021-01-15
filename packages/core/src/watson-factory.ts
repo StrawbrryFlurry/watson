@@ -11,7 +11,7 @@ import { Logger } from './logger';
 import { WatsonApplication } from './watson-application';
 import { WatsonContainer } from './watson-container';
 
-export class WatsonApplicationFactory {
+export class WatsonFactory {
   private static logger = new Logger("WatsonFactory");
 
   public static async create(module: Type, options: IWatsonApplicationOptions) {
