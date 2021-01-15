@@ -1,7 +1,7 @@
 import { WatsonApplicationFactory } from '@watson/core';
 import { config } from 'dotenv';
 
-import { ApplicationModule } from './modules/app.module';
+import { ApplicationModule } from './app.module';
 
 const bootstrap = async () => {
   const {

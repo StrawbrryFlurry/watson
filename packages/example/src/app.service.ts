@@ -1,6 +1,4 @@
 import { Injectable } from '@watson/common';
 
 @Injectable()
-export class DogService {
-  constructor() {}
-}
+export class AppService {}
