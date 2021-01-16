@@ -7,4 +7,5 @@ export enum RouteParamType {
   USER = "pram:user",
   GUILD = "pram:guild",
   FACTORY = "param:factory",
+  INQUIRABLE = "param:inquirable",
 }
