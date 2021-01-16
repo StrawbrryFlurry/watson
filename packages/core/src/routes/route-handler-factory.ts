@@ -17,17 +17,17 @@ import {
   TReceiver,
   UnatuhorizedException,
 } from '@watson/common';
-import { Base } from 'discord.js';
-import { EventExecutionContext } from 'event/event-execution-context';
+import { Base, ClientEvents } from 'discord.js';
 import { ModuleInitException } from 'exceptions';
-import { rethrowWithContext } from 'helpers/rethrow-with-context';
 import { InstanceWrapper, Module } from 'injector';
 import { badChangeableImplementation, changeableNotFound } from 'logger';
 import { CommandRoute, EventRoute, RouteParamsFactory } from 'routes';
 import { WatsonContainer } from 'watson-container';
 
-import { AsyncContextResolver } from '../lifecycle/async-context-resolver';
-import { ResponseController } from '../lifecycle/response-controller';
+import { rethrowWithContext } from '../helpers';
+import { AsyncContextResolver, EventExecutionContext, ResponseController } from '../lifecycle';
+import { ConcreteEventRoute } from './event';
+import { SlashRoute } from './slash';
 
 export type IHandlerFunction<CT extends ContextDataTypes, A = any> = (
   ...eventData: A[]
@@ -70,7 +70,7 @@ export class RouteHandlerFactory {
   }
 
   public async createSlashHandler(
-    route: CommandRoute,
+    route: SlashRoute,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
@@ -98,8 +98,8 @@ export class RouteHandlerFactory {
     });
   }
 
-  public async createEventHandler(
-    route: CommandRoute,
+  public async createEventHandler<T extends keyof ClientEvents>(
+    route: ConcreteEventRoute<T>,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
@@ -180,7 +180,7 @@ export class RouteHandlerFactory {
     return resolvedGuards;
   }
 
-  public createGuardsFn(guards: CanActivate[]) {
+  private createGuardsFn(guards: CanActivate[]) {
     if (isEmpty(guards)) {
       return null;
     }
@@ -251,7 +251,7 @@ export class RouteHandlerFactory {
     return resolvedFilters;
   }
 
-  public createFiltersFn(filters: Filter[]) {
+  private createFiltersFn(filters: Filter[]) {
     if (isEmpty(filters)) {
       return null;
     }
@@ -371,7 +371,7 @@ export class RouteHandlerFactory {
   }
 
   private getMetadata(
-    route: CommandRoute,
+    route: EventRoute<any>,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module

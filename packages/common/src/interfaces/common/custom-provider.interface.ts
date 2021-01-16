@@ -40,6 +40,11 @@ export interface ClassProvider {
    * A value that should whose instance should be set as the instance of the provider.
    */
   useClass?: Type;
+  /**
+   * Providers that should be injected to the factory | class constructor function when it's called.
+   * inejct: ['a'] => factory(...['a'])
+   */
+  inject?: (Type | string)[];
 }
 
 /**

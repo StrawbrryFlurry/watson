@@ -1,8 +1,8 @@
-import { BadArgumentException, CommandException, UnatuhorizedException } from '@watson/common';
+import { BadArgumentException, CommandContextData, EventException, UnatuhorizedException } from '@watson/common';
 import { ClientUser, MessageEmbed } from 'discord.js';
+import { EventExecutionContext } from 'lifecycle';
+import { CommandRoute } from 'routes';
 
-import { CommandRoute } from '../command';
-import { CommandExecutionContext } from '../lifecycle';
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
 import { UNAUTHORIZED_ERROR } from './unauthorized.error';
 
@@ -17,18 +17,10 @@ export class ErrorHost {
 
   public configure() {}
 
-  public handleMessageEmbedException(
-    ctx: CommandExecutionContext,
-    embed: MessageEmbed
+  public async handleCommonException(
+    exception: EventException,
+    ctx: EventExecutionContext<CommandContextData>
   ) {
-    return this.sendToChannel(embed, ctx);
-  }
-
-  public async handleCommandException(
-    ctx: CommandExecutionContext,
-    exception: CommandException
-  ) {
-    exception.setContext(ctx);
     let message: MessageEmbed | string;
 
     if (exception instanceof BadArgumentException) {
@@ -36,26 +28,17 @@ export class ErrorHost {
         clientUser: ctx.client.user,
         color: this.messageColor,
         param: exception.param,
-        route: ctx.getContext(),
+        route: ctx.getRoute() as CommandRoute,
       });
     } else if (exception instanceof UnatuhorizedException) {
       message = UNAUTHORIZED_ERROR({
         clientUser: ctx.client.user,
         color: this.messageColor,
-        route: ctx.getContext(),
+        route: ctx.getRoute() as CommandRoute,
       });
-    } else {
-      message =
-        "An error occured while executing the command! Please contact the owner of the bot for additional information";
     }
 
-    await this.sendToChannel(message, ctx);
-  }
-
-  private async sendToChannel(
-    message: string | MessageEmbed,
-    { responseChannel }: CommandExecutionContext
-  ) {
-    await responseChannel.send(message);
+    const { channel } = ctx.getContextData();
+    await channel.send(message);
   }
 }

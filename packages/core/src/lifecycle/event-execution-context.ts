@@ -60,6 +60,10 @@ export class EventExecutionContext<
     return this.contextType;
   }
 
+  public getRoute(): EventRoute<any> {
+    return this.eventRoute;
+  }
+
   private parseEventData() {
     this.parsedEventData = {};
 

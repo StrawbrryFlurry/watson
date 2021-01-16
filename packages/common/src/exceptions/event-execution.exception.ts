@@ -4,13 +4,13 @@ import { ExecutionContext } from 'interfaces';
 /**
  * Base class that is extended by exceptions that are thrown during event execution.
  */
-export abstract class EventExecutionException extends Error {
+export abstract class EventException extends Error {
   protected _context: ExecutionContext;
   public readonly isMessageEmbed: boolean;
   public readonly data: string | MessageEmbed;
 
   constructor(message: string);
-  constructor(message: string);
+  constructor(message: MessageEmbed);
   constructor(args: string | MessageEmbed) {
     const isMessageEmbed = args instanceof MessageEmbed;
     const message = isMessageEmbed ? "" : args;

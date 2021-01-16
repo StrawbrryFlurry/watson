@@ -1,4 +1,5 @@
 import { CustomProvider, DynamicModule, MODULE_GLOBAL_METADATA, Type } from '@watson/common';
+import iterate from 'iterare';
 
 import { ApplicationConfig } from './application-config';
 import { UnknownModuleException } from './exceptions';
@@ -173,6 +174,10 @@ export class WatsonContainer {
     const data = this.globalInstanceHost.getInstance(metatype.name, "provider");
 
     return data.wrapper.instance as T;
+  }
+
+  public getGlobalExceptionHandlers() {
+    return iterate(this.config.globalExceptionHandlers).toArray();
   }
 
   public getClientAdapter() {

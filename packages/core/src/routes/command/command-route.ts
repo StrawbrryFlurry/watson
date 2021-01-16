@@ -51,6 +51,18 @@ export class CommandRoute extends EventRoute<"message"> {
     );
   }
 
+  public get name() {
+    return this.config.name;
+  }
+
+  public get params() {
+    return this.config.params || [];
+  }
+
+  public get prefix() {
+    return this.config.prefix || "";
+  }
+
   public createContextData(message: any) {
     if (isArray(message)) {
       [message] = message;

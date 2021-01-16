@@ -216,7 +216,10 @@ export class MetadataResolver {
   /**
    * The same as getMetadata but provides an empty array as fallback
    */
-  public getArrayMetadata<T>(metadataKey: string, target: Type): T | [] {
+  public getArrayMetadata<T>(
+    metadataKey: string,
+    target: Type | Function
+  ): T | [] {
     return Reflect.getMetadata(metadataKey, target) || [];
   }
 
