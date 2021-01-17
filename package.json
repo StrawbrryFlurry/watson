@@ -1,11 +1,11 @@
 {
-  "name": "@watson/core",
+  "name": "@watsonjs/core",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
+    "url": "https://github.com/M1CH3L1US/watson/tree/watson"
   },
   "scripts": {
     "build": "gulp build:dev --dist node_modules/@watson",

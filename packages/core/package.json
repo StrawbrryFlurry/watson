@@ -1,5 +1,5 @@
 {
-  "name": "@watson/core",
+  "name": "@watsonjs/core",
   "version": "0.0.1",
   "description": "A NestJS inspired framework for building DiscordJS applications (@core)",
   "repository": {
