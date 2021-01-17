@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 
 export * from "./command";
+export * from "./components";
 export * from "./decorators";
 export * from "./enums";
 export * from "./exceptions";
