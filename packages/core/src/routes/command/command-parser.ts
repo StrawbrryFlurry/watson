@@ -52,7 +52,9 @@ export class CommandParser {
   }
 
   public matchesPrefix(content: string) {
-    return this.config.hasPrefix() && content.startsWith(this.config.prefix);
+    return this.config.hasPrefix()
+      ? content.startsWith(this.config.prefix)
+      : true;
   }
 
   public matchesCommand(command: string) {
@@ -65,17 +67,17 @@ export class CommandParser {
 
   public extractMessageParts(messageContent: string): IMessageParts {
     let prefix = "";
-    let rest: string;
+    let withoutPrefix = messageContent;
     let command: string;
+    let rest: string;
 
     if (this.config.hasPrefix()) {
       prefix = this.config.prefix;
-      const withoutPrefix = messageContent.replace(this.config.prefix, "");
-      [command, ...rest as any] = withoutPrefix.split(
-        this.config.paramDelimiter
-      );
-      rest = (rest as any).join(this.config.paramDelimiter);
+      withoutPrefix = messageContent.replace(this.config.prefix, "");
     }
+
+    [command, ...rest as any] = withoutPrefix.split(this.config.paramDelimiter);
+    rest = (rest as any).join(this.config.paramDelimiter);
 
     return {
       command,

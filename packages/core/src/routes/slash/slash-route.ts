@@ -31,4 +31,8 @@ export class SlashRoute extends EventRoute<any> {
   public createContextData(...eventArgs: unknown[]) {
     throw new Error("Method not implemented.");
   }
+
+  public get name() {
+    return this.config.name;
+  }
 }

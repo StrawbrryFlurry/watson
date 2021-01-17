@@ -4,6 +4,7 @@ import {
   ContextDataTypes,
   ContextEventTypes,
   EventContextData,
+  EventException,
   ExecutionContext,
   Filter,
   FILTER_METADATA,
@@ -11,6 +12,7 @@ import {
   IParamDecoratorMetadata,
   isEmpty,
   isFunction,
+  isNil,
   PARAM_METADATA,
   PipeTransform,
   SlashContextData,
@@ -24,7 +26,7 @@ import { ModuleInitException } from '../exceptions';
 import { rethrowWithContext } from '../helpers';
 import { InstanceWrapper, Module } from '../injector';
 import { AsyncContextResolver, EventExecutionContext, ResponseController } from '../lifecycle';
-import { badChangeableImplementation, changeableNotFound } from '../logger';
+import { BAD_CHANGEALE_IMPLEMENTATION, CHANGEABLE_NOT_FOUND } from '../logger';
 import { RouteParamsFactory } from '../routes';
 import { CommandRoute } from './command';
 import { ConcreteEventRoute } from './event';
@@ -40,7 +42,9 @@ export class RouteHandlerFactory {
   private responseController = new ResponseController();
   private asyncResolver = new AsyncContextResolver();
 
-  constructor(private container: WatsonContainer) {}
+  constructor(private container: WatsonContainer) {
+    this.paramsFactory = new RouteParamsFactory();
+  }
 
   public async createCommandHandler(
     route: CommandRoute,
@@ -144,7 +148,7 @@ export class RouteHandlerFactory {
     const checkActivate = (guard: CanActivate) => {
       if (typeof guard.canActivate === "undefined") {
         throw new ModuleInitException(
-          badChangeableImplementation(
+          BAD_CHANGEALE_IMPLEMENTATION(
             "guard",
             (guard as any).name,
             handler,
@@ -161,7 +165,7 @@ export class RouteHandlerFactory {
 
         if (typeof wrapper === "undefined") {
           throw new ModuleInitException(
-            changeableNotFound(
+            CHANGEABLE_NOT_FOUND(
               "guard",
               (guard as Function).name,
               handler,
@@ -215,7 +219,7 @@ export class RouteHandlerFactory {
     const checkFilter = (filter: Filter) => {
       if (typeof filter.filter === "undefined") {
         throw new ModuleInitException(
-          badChangeableImplementation(
+          BAD_CHANGEALE_IMPLEMENTATION(
             "filter",
             (filter as any).name,
             handler,
@@ -232,7 +236,7 @@ export class RouteHandlerFactory {
 
         if (typeof wrapper === "undefined") {
           throw new ModuleInitException(
-            changeableNotFound(
+            CHANGEABLE_NOT_FOUND(
               "filter",
               (filter as Function).name,
               handler,
@@ -294,7 +298,7 @@ export class RouteHandlerFactory {
     const checkTransform = (pipe: PipeTransform) => {
       if (typeof pipe.transform === "undefined") {
         throw new ModuleInitException(
-          badChangeableImplementation(
+          BAD_CHANGEALE_IMPLEMENTATION(
             "pipe",
             (pipe as any).name,
             handler,
@@ -311,7 +315,7 @@ export class RouteHandlerFactory {
 
         if (typeof wrapper === "undefined") {
           throw new ModuleInitException(
-            changeableNotFound(
+            CHANGEABLE_NOT_FOUND(
               "pipe",
               (pipe as Function).name,
               handler,
@@ -382,7 +386,7 @@ export class RouteHandlerFactory {
     const filters = this.reflectFilters(handle, receiver);
     const pipes = this.reflectPipes(handle, receiver);
 
-    const params = this.reflectParams(handle);
+    const params = this.reflectParams(receiver, handle);
 
     const paramsFactory = (ctx: ExecutionContext) => {
       return this.paramsFactory.createFromContext(params, ctx);
@@ -430,7 +434,7 @@ export class RouteHandlerFactory {
 
         const compliesFilter = applyFilterFn && (await applyFilterFn(ctx));
 
-        if (applyFilterFn !== undefined && !compliesFilter) {
+        if (!isNil(applyFilterFn) && !compliesFilter) {
           return null;
         }
 
@@ -439,7 +443,9 @@ export class RouteHandlerFactory {
         const transformedContext =
           applyPipesFn && (await applyPipesFn(ctx.getContextData()));
 
-        ctx.applyTransformation(transformedContext);
+        if (!isNil(transformedContext)) {
+          ctx.applyTransformation(transformedContext);
+        }
 
         const params = await paramsFactory(ctx);
         const resolvable = handle.apply(receiver.instance, params);
@@ -448,15 +454,25 @@ export class RouteHandlerFactory {
         )) as RouteResult;
         await this.responseController.apply(ctx, result);
       } catch (err) {
-        rethrowWithContext(err, ctx);
+        if (err instanceof EventException) {
+          rethrowWithContext(err, ctx);
+        } else {
+          throw err;
+        }
       }
     };
   }
 
-  private reflectParams(handle: Function) {
-    return Reflect.getMetadata(
-      PARAM_METADATA,
-      handle
-    ) as IParamDecoratorMetadata[];
+  private reflectParams(
+    receiver: InstanceWrapper<TReceiver>,
+    handle: Function
+  ) {
+    return (
+      (Reflect.getMetadata(
+        PARAM_METADATA,
+        receiver.metatype,
+        handle.name
+      ) as IParamDecoratorMetadata[]) || []
+    );
   }
 }

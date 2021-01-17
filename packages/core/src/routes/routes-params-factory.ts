@@ -34,7 +34,6 @@ export class RouteParamsFactory {
   ) {
     const data = ctx.getContextData<ContextData>();
     const params: unknown[] = [];
-
     for (const type of paramTypes) {
       const idx = type.paramIndex;
       switch (type.type) {
@@ -63,15 +62,16 @@ export class RouteParamsFactory {
           params[idx] = (data as CommandContextData).user;
           break;
         case RouteParamType.FACTORY:
-          param[idx] = await this.fromParamFactory(ctx, type.factory);
+          params[idx] = await this.fromParamFactory(ctx, type.factory);
           break;
         case RouteParamType.INQUIRABLE:
-          param[idx] = this.fromInquirable(
+          params[idx] = this.fromInquirable(
             ctx as EventExecutionContext<CommandContextData>,
             (type.options as IInquirableMetadata).type
           );
+          break;
         default:
-          param[idx] = undefined;
+          params[idx] = undefined;
       }
     }
 

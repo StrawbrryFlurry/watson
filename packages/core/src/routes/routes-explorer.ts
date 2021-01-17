@@ -15,6 +15,7 @@ import iterate from 'iterare';
 
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
+import { Logger, MAP_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { CommandRoute } from './command';
 import { ConcreteEventRoute } from './event';
@@ -24,6 +25,8 @@ import { SlashRoute } from './slash';
 export class RouteExplorer {
   private constainer: WatsonContainer;
   private resolver: MetadataResolver;
+
+  private logger = new Logger("RouteExplorer");
 
   private eventRoutes = new Set<ConcreteEventRoute<any>>();
   private commandRoutes = new Set<CommandRoute>();
@@ -126,6 +129,7 @@ export class RouteExplorer {
       );
 
       this.commandRoutes.add(routeRef);
+      this.logger.logMessage(MAP_COMMAND(routeRef));
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,
