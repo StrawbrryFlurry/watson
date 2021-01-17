@@ -1,4 +1,4 @@
-import { isConstructor, isUndefined, Type } from '@watson/common';
+import { isConstructor, isUndefined, Type } from '@watsonjs/common';
 
 import { InstanceWrapper, Module } from '../injector';
 import { BootstrappingException } from './bootstrapping.exception';

@@ -1,4 +1,4 @@
-import { IClientEvent } from '@watson/common';
+import { IClientEvent } from '@watsonjs/common';
 import { ClientEvents } from 'discord.js';
 import iterate from 'iterare';
 

@@ -1,4 +1,4 @@
-import { EventException, EventExceptionHandler } from '@watson/common';
+import { EventException, EventExceptionHandler } from '@watsonjs/common';
 
 import { Logger } from '../logger';
 

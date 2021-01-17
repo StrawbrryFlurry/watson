@@ -1,4 +1,4 @@
-import { CustomProvider, DynamicModule, MODULE_GLOBAL_METADATA, Type } from '@watson/common';
+import { CustomProvider, DynamicModule, MODULE_GLOBAL_METADATA, Type } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { ApplicationConfig } from './application-config';

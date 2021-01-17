@@ -1,4 +1,4 @@
-import { CommandArgumentType } from '@watson/common';
+import { CommandArgumentType } from '@watsonjs/common';
 
 export const ReadableArgumentTypeHelper = (type: CommandArgumentType) => {
   let readableName: string;

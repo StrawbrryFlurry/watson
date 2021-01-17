@@ -1,4 +1,4 @@
-import { WatsonFactory } from '@watson/core';
+import { WatsonFactory } from '@watsonjs/core';
 import { config } from 'dotenv';
 
 import { ApplicationModule } from './app.module';
@@ -13,8 +13,6 @@ const bootstrap = async () => {
   const app = await WatsonFactory.create(ApplicationModule, {
     discordAuthToken: token,
   });
-
-  app.addGlobalPrefix("!");
 
   app.setActivity({
     name: "doing stuff",

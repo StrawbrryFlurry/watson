@@ -1,4 +1,4 @@
-import { DynamicModule, Global, Module } from '@watson/common';
+import { DynamicModule, Global, Module } from '@watsonjs/common';
 import { CoreModuleRegister } from 'interfaces';
 
 /**

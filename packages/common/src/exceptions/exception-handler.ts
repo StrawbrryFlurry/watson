@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { EventException } from './event-execution.exception';
+import { EventException } from './event.exception';
 
 export abstract class EventExceptionHandler<T extends EventException[]> {
   exceptions: T;

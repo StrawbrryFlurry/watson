@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@watson/common';
+import { ExecutionContext } from '@watsonjs/common';
 
 export class ResponseController {
   public apply<CtxResult = any>(ctx: ExecutionContext, result: CtxResult) {

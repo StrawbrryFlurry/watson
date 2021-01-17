@@ -1,10 +1,10 @@
-import { Type } from '@watson/common';
+import { Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
-import { Logger } from './logger';
+import { APP_STRATED, Logger } from './logger';
 import { RouteExplorer } from './routes';
 import { WatsonContainer } from './watson-container';
 
@@ -38,6 +38,7 @@ export class WatsonApplication {
     !this.isInitialized && (await this.init());
     await this.clientAdapter.start();
     this.isStarted = true;
+    this.logger.logMessage(APP_STRATED());
     return this.clientAdapter;
   }
 

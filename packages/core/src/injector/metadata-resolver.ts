@@ -10,10 +10,18 @@ import {
   MODULE_METADATA,
   PIPE_METADATA,
   Type,
-} from '@watson/common';
+} from '@watsonjs/common';
 
 import { CircularDependencyException } from '../exceptions';
 import { InvalidDynamicModuleException } from '../exceptions/invalid-dynamic-module.exception';
+import {
+  ADD_MODULE,
+  BIND_GLOBAL_MODULES,
+  COMPLETED,
+  Logger,
+  REFLECT_MODULE_COMPONENTS,
+  REFLECT_MODULE_IMPORTS,
+} from '../logger';
 import { WatsonContainer } from '../watson-container';
 
 export interface IMethodDescriptors {
@@ -27,6 +35,7 @@ export interface IMethodValue {
 
 export class MetadataResolver {
   private container: WatsonContainer;
+  private logger = new Logger("ModuleLoader");
 
   constructor(container: WatsonContainer) {
     this.container = container;
@@ -36,9 +45,12 @@ export class MetadataResolver {
    * Resolves the root module to recursively add its imports to the container
    */
   public async resolveRootModule(metatype: Type) {
+    this.logger.logMessage(REFLECT_MODULE_IMPORTS());
     await this.scanForModuleImports(metatype);
+    this.logger.logMessage(COMPLETED());
+    this.logger.logMessage(REFLECT_MODULE_COMPONENTS());
     await this.resolveModuleProperties();
-
+    this.logger.logMessage(BIND_GLOBAL_MODULES());
     this.container.bindGlobalModules();
   }
 
@@ -140,6 +152,7 @@ export class MetadataResolver {
   private async scanForModuleImports(metatype: Type, context: Type[] = []) {
     context.push(metatype);
     this.container.addModule(metatype);
+    this.logger.logMessage(ADD_MODULE(metatype));
 
     const { imports } = await this.reflectModuleMetadata(metatype);
 

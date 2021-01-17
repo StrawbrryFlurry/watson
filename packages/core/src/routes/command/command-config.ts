@@ -1,4 +1,4 @@
-import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions, isEmpty, isNil } from '@watson/common';
+import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions, isEmpty, isNil } from '@watsonjs/common';
 
 import { ApplicationConfig } from '../../application-config';
 import { CommandConfigurationException } from '../../exceptions';

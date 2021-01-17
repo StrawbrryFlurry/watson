@@ -1,4 +1,4 @@
-import { IClientEvent } from '@watson/common';
+import { IClientEvent } from '@watsonjs/common';
 import { Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';

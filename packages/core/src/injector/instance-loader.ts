@@ -1,4 +1,4 @@
-import { Logger } from '../logger';
+import { COMPLETED, CREATING_COMPONENT_INSTANCES, Logger } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { Injector } from './injector';
 import { MetadataResolver } from './metadata-resolver';
@@ -19,6 +19,8 @@ export class InstanceLoader {
   public async createInstances() {
     const modules = this.container.getModules();
 
+    this.logger.logMessage(CREATING_COMPONENT_INSTANCES());
+
     for (const [token, module] of modules) {
       await this.createInstancesOfInjectables(module);
       await this.createInstancesOfProviders(module);
@@ -26,6 +28,7 @@ export class InstanceLoader {
     }
 
     this.container.globalInstanceHost.applyInstances();
+    this.logger.logMessage(COMPLETED());
   }
 
   private async createInstancesOfProviders(module: Module) {

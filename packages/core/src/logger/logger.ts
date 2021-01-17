@@ -1,4 +1,4 @@
-import { green, red, yellow } from 'cli-color';
+import { green, red, white, yellow } from 'cli-color';
 import * as dayjs from 'dayjs';
 
 /**
@@ -14,7 +14,7 @@ export type ILogInformationType = "status" | "information" | "error";
 export type IlogContext = string;
 
 export class Logger {
-  private messagePrefix = `${yellow("[Watson]")} ${green(
+  private messagePrefix = `${yellow("[Watson]")} ${white(
     `[${(() => this.getDateString())()}] ${yellow(`[${this.context || ""}]`)}`
   )}`;
 
@@ -43,7 +43,7 @@ export class Logger {
    * For logging internal status and error messages
    */
   public logMessage(message: string) {
-    process.stdout.write(`${this.messagePrefix} ${message}\n`);
+    process.stdout.write(green(`${this.messagePrefix} ${message}\n`));
   }
 
   public logException(message: string, stack: any) {
@@ -62,6 +62,6 @@ export class Logger {
   }
 
   private getDateString() {
-    return dayjs().format("DD.MM.YYYY-HH:mm:ss").toString();
+    return dayjs().format("DD/MM/YYYY, HH:mm:ss").toString();
   }
 }

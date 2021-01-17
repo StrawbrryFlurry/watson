@@ -12,7 +12,7 @@ import {
   ParamFactoryFunction,
   ReactFunction,
   RouteParamType,
-} from '@watson/common';
+} from '@watsonjs/common';
 import {
   AwaitMessagesOptions,
   AwaitReactionsOptions,

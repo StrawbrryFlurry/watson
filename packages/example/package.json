@@ -1,5 +1,5 @@
 {
-  "name": "@watson/example",
+  "name": "@watsonjs/example",
   "version": "0.0.1",
   "description": "Example project using the Watson framework",
   "repository": {

@@ -34,7 +34,7 @@ Im this file we're going to bootsrap the application:
 
 ```TS
 // main.ts
-import { WatsonApplicationFactory } from '@watson/core';
+import { WatsonApplicationFactory } from '@watsonjs/core';
 import { ApplicationModule } from './app.module';
 
 const bootstrap = async () => {

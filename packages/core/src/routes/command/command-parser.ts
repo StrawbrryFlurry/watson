@@ -1,4 +1,4 @@
-import { BadArgumentException, CommandArgumentType, CommandContextData, ICommandParam } from '@watson/common';
+import { BadArgumentException, CommandArgumentType, CommandContextData, ICommandParam } from '@watsonjs/common';
 import * as dayjs from 'dayjs';
 import { Channel, Message, PermissionString, Role } from 'discord.js';
 

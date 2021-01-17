@@ -18,7 +18,7 @@ import {
   SlashContextData,
   TReceiver,
   UnatuhorizedException,
-} from '@watson/common';
+} from '@watsonjs/common';
 import { Base, ClientEvents } from 'discord.js';
 import { WatsonContainer } from 'watson-container';
 

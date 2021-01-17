@@ -1,4 +1,4 @@
-import { Type } from '@watson/common';
+import { Type } from '@watsonjs/common';
 
 import { Module } from './module';
 

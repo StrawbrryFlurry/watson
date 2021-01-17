@@ -1,4 +1,4 @@
-import { ContextDataTypes, ContextEventTypes, ExecutionContext, Type, ValuesOf } from '@watson/common';
+import { ContextDataTypes, ContextEventTypes, ExecutionContext, Type, ValuesOf } from '@watsonjs/common';
 import { Base as DjsBaseClass, Client, ClientEvents } from 'discord.js';
 
 import { EventRoute } from '../routes';

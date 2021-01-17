@@ -1,4 +1,4 @@
-import { DynamicModule, isFunction, Type } from '@watson/common';
+import { DynamicModule, isFunction, Type } from '@watsonjs/common';
 import * as hash from 'object-hash';
 
 export class ModuleTokenFactory {

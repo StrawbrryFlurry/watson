@@ -1,4 +1,4 @@
-import { CustomProvider, Type } from '@watson/common';
+import { CustomProvider, Type } from '@watsonjs/common';
 
 /**
  * Type definitions for the `register` method arguments

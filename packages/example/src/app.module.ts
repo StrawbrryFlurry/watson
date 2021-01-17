@@ -1,4 +1,4 @@
-import { Module } from '@watson/common';
+import { Module } from '@watsonjs/common';
 
 import { AppReceiver } from './app.receiver';
 import { AppService } from './app.service';

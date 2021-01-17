@@ -1,4 +1,4 @@
-import { BadArgumentException, CommandContextData, EventException, UnatuhorizedException } from '@watson/common';
+import { BadArgumentException, CommandContextData, EventException, UnatuhorizedException } from '@watsonjs/common';
 import { ClientUser, MessageEmbed } from 'discord.js';
 
 import { EventExecutionContext } from '../lifecycle';

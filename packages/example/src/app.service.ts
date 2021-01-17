@@ -1,4 +1,4 @@
-import { Injectable } from '@watson/common';
+import { Injectable } from '@watsonjs/common';
 
 @Injectable()
 export class AppService {}

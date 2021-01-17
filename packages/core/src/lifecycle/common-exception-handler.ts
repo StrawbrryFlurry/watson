@@ -1,4 +1,4 @@
-import { BadArgumentException, EventException, EventExceptionHandler, UnatuhorizedException } from '@watson/common';
+import { BadArgumentException, EventException, EventExceptionHandler, UnatuhorizedException } from '@watsonjs/common';
 
 import { ErrorHost } from '../errors';
 

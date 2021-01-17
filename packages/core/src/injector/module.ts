@@ -8,7 +8,7 @@ import {
   TReceiver,
   Type,
   ValueProvider,
-} from '@watson/common';
+} from '@watsonjs/common';
 import { v4 } from 'uuid';
 
 import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';

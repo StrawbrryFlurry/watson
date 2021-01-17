@@ -1,4 +1,4 @@
-import { PartialApplicationCommand, TReceiver } from '@watson/common';
+import { PartialApplicationCommand, TReceiver } from '@watsonjs/common';
 
 import { InstanceWrapper } from '../../injector';
 import { IAsynchronousResolvable } from '../../interfaces';

@@ -1,4 +1,4 @@
-import { EventException, ExecutionContext } from '@watson/common';
+import { EventException, ExecutionContext } from '@watsonjs/common';
 
 export const rethrowWithContext = (
   err: EventException,

@@ -8,9 +8,9 @@
     "url": "https://github.com/M1CH3L1US/watson/tree/watson"
   },
   "scripts": {
-    "build": "gulp build:dev --dist node_modules/@watson",
+    "build": "gulp build:dev --dist node_modules/@watsonjs",
     "clean": "gulp clean",
-    "test": "gulp build --dist node_modules/@watson && lerna run compile --scope @watson/example && node ./packages/example/dist/main.js"
+    "test": "gulp build --dist node_modules/@watsonjs && lerna run compile --scope @watsonjs/example && node ./packages/example/dist/main.js"
   },
   "keywords": [
     "discord"

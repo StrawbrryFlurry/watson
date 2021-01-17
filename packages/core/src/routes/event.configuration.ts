@@ -1,4 +1,4 @@
-import { IClientEvent } from '@watson/common';
+import { IClientEvent } from '@watsonjs/common';
 
 export abstract class EventConfiguration {
   public readonly clientEvent: IClientEvent;

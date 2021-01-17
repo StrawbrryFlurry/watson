@@ -1,4 +1,4 @@
-import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, TReceiver } from '@watson/common';
+import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, TReceiver } from '@watsonjs/common';
 import { isArray } from 'class-validator';
 import { Message } from 'discord.js';
 import { IAsynchronousResolvable } from 'interfaces';

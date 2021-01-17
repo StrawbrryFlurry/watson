@@ -1,4 +1,4 @@
-import { ICommandParam } from '@watson/common';
+import { ICommandParam } from '@watsonjs/common';
 import { EmbedFieldData } from 'discord.js';
 
 import { ReadableArgumentTypeHelper } from '../helpers';

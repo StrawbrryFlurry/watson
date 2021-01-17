@@ -1,4 +1,4 @@
-import { EventContextData, IClientEvent, TReceiver } from '@watson/common';
+import { EventContextData, IClientEvent, TReceiver } from '@watsonjs/common';
 import { Base, ClientEvents, Guild } from 'discord.js';
 
 import { InstanceWrapper } from '../../injector';

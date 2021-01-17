@@ -1,4 +1,4 @@
-import { IClientEvent, TReceiver } from '@watson/common';
+import { IClientEvent, TReceiver } from '@watsonjs/common';
 
 import { InstanceWrapper } from '../injector';
 import { IAsynchronousResolvable } from '../interfaces';

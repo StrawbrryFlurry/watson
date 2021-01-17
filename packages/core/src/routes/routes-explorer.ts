@@ -10,12 +10,12 @@ import {
   SLASH_COMMAND_METADATA,
   TReceiver,
   Type,
-} from '@watson/common';
+} from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { InstanceWrapper, MetadataResolver } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
-import { Logger, MAP_COMMAND } from '../logger';
+import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND, MAP_EVENT, MAP_SLASH_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { CommandRoute } from './command';
 import { ConcreteEventRoute } from './event';
@@ -42,6 +42,7 @@ export class RouteExplorer {
   }
 
   public async explore() {
+    this.logger.logMessage(EXPLORE_START());
     const receivers = this.constainer.globalInstanceHost.getAllInstancesOfType(
       "receiver"
     );
@@ -49,10 +50,14 @@ export class RouteExplorer {
     for (const receiver of receivers) {
       const { wrapper } = receiver;
 
+      this.logger.logMessage(EXPLORE_RECEIVER(receiver.wrapper));
+
       await this.reflectEventRoutes(wrapper);
       await this.reflectCommandRoutes(wrapper);
       await this.reflectSlashRoutes(wrapper);
     }
+
+    this.logger.logMessage(COMPLETED());
   }
 
   private async reflectEventRoutes(receiver: InstanceWrapper<TReceiver>) {
@@ -85,6 +90,7 @@ export class RouteExplorer {
       );
 
       this.eventRoutes.add(routeRef);
+      this.logger.logMessage(MAP_EVENT(routeRef));
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,
@@ -170,6 +176,7 @@ export class RouteExplorer {
       );
 
       this.slashRoutes.add(routeRef);
+      this.logger.logMessage(MAP_SLASH_COMMAND(routeRef));
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,

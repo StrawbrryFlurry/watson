@@ -1,4 +1,4 @@
-import { ApplicationCommandOption, PartialApplicationCommand } from '@watson/common';
+import { ApplicationCommandOption, PartialApplicationCommand } from '@watsonjs/common';
 
 import { EventConfiguration } from '../event.configuration';
 

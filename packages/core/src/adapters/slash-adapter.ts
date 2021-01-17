@@ -1,4 +1,4 @@
-import { ApplicationCommand, PartialApplicationCommand } from '@watson/common';
+import { ApplicationCommand, PartialApplicationCommand } from '@watsonjs/common';
 import Axios, { AxiosInstance } from 'axios';
 import { Snowflake } from 'discord.js';
 

@@ -1,12 +1,15 @@
-import { CustomProvider, DESIGN_PARAMETERS, isNil, isString, TInjectable, TReceiver, Type } from '@watson/common';
+import { CustomProvider, DESIGN_PARAMETERS, isNil, isString, TInjectable, TReceiver, Type } from '@watsonjs/common';
 
 import { CircularDependencyException, UnknownProviderException } from '../exceptions';
 import { UnknownComponentReferenceException } from '../exceptions/unknown-component-reference.exception';
+import { CREATE_INSTANCE, Logger } from '../logger';
 import { InstanceWrapper } from './instance-wrapper';
 import { MetadataResolver } from './metadata-resolver';
 import { Module } from './module';
 
 export class Injector {
+  private logger = new Logger("InstanceLoader");
+
   constructor(private resolver: MetadataResolver) {}
 
   /**
@@ -47,6 +50,7 @@ export class Injector {
       context
     );
 
+    this.logger.logMessage(CREATE_INSTANCE(wrapper));
     await this.instanciateClass(wrapper, module, ctorDependencies);
   }
 
