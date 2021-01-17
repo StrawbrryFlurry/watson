@@ -8,4 +8,5 @@ export enum RouteParamType {
   GUILD = "pram:guild",
   FACTORY = "param:factory",
   INQUIRABLE = "param:inquirable",
+  EVENT = "param:event",
 }
