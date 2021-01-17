@@ -1,6 +1,5 @@
-import { createParamDecorator } from 'decorators/create-param-decorator';
-import { InquirableType, RouteParamType } from 'enums';
-
+import { InquirableType, RouteParamType } from '../../enums';
+import { createParamDecorator } from '../create-param-decorator';
 import { IInquirableMetadata } from './interfaces/inquirable-metadata.interface';
 
 export function createInquirableDecorator(

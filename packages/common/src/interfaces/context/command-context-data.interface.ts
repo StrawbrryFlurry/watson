@@ -1,6 +1,6 @@
 import { DMChannel, NewsChannel, PermissionString, Role, TextChannel, User } from 'discord.js';
-import { CommandArgumentType } from 'enums';
 
+import { CommandArgumentType } from '../../enums';
 import { ContextData } from './context-data.interface';
 
 export interface CommandParam<T = any> {

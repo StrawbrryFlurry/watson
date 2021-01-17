@@ -1,7 +1,7 @@
-import { applyStackableMetadata } from 'decorators/apply-stackable-metadata';
 import { Filter } from 'interfaces';
 
 import { FILTER_METADATA } from '../../constants';
+import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 export function UseFilters(
   ...filters: (Filter | Function)[]

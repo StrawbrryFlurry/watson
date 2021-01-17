@@ -1,9 +1,9 @@
 import { EventContextData, IClientEvent, TReceiver } from '@watson/common';
 import { Base, ClientEvents, Guild } from 'discord.js';
-import { EventRoute } from 'event';
-import { InstanceWrapper } from 'injector';
-import { WatsonContainer } from 'watson-container';
 
+import { InstanceWrapper } from '../../injector';
+import { WatsonContainer } from '../../watson-container';
+import { EventRoute } from '../event-route';
 import { ConcreteEventConfiguration } from './concrete-event-configuration';
 
 export class ConcreteEventRoute<T extends IClientEvent> extends EventRoute<T> {

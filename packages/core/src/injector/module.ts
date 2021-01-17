@@ -128,7 +128,7 @@ export class Module {
         host: this,
       });
 
-      this._injectables.set(injectable.name, instanceWrapper);
+      this._injectables.set(injectable, instanceWrapper);
     }
   }
 
@@ -139,7 +139,17 @@ export class Module {
       return this.addCustomProvider(provider as CustomProvider);
     }
 
-    this.addProvider(provider as Type);
+    const wrapper = this._providers.get(provider);
+
+    if (!wrapper) {
+      const instanceWrapper = new InstanceWrapper<TInjectable>({
+        name: (provider as Type).name,
+        metatype: provider,
+        host: this,
+      });
+
+      this._providers.set(provider, instanceWrapper);
+    }
   }
 
   private addCustomProvider(provider: CustomProvider) {

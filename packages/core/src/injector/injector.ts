@@ -154,7 +154,9 @@ export class Injector {
     if (isString(dependency)) {
       return dependency;
     } else if ("provide" in (dependency as CustomProvider)) {
-      return (dependency as CustomProvider).provide;
+      return isString((dependency as CustomProvider).provide)
+        ? ((dependency as CustomProvider).provide as string)
+        : ((dependency as CustomProvider).provide as Function).name;
     } else {
       return (dependency as Type).name;
     }

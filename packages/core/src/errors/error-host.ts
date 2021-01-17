@@ -1,8 +1,8 @@
 import { BadArgumentException, CommandContextData, EventException, UnatuhorizedException } from '@watson/common';
 import { ClientUser, MessageEmbed } from 'discord.js';
-import { EventExecutionContext } from 'lifecycle';
-import { CommandRoute } from 'routes';
 
+import { EventExecutionContext } from '../lifecycle';
+import { CommandRoute } from '../routes';
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
 import { UNAUTHORIZED_ERROR } from './unauthorized.error';
 

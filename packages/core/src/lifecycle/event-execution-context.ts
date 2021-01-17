@@ -1,7 +1,8 @@
 import { ContextDataTypes, ContextEventTypes, ExecutionContext, Type, ValuesOf } from '@watson/common';
 import { Base as DjsBaseClass, Client, ClientEvents } from 'discord.js';
-import { EventRoute } from 'routes';
-import { WatsonContainer } from 'watson-container';
+
+import { EventRoute } from '../routes';
+import { WatsonContainer } from '../watson-container';
 
 type ParsedEventData<K extends keyof ClientEvents = any> = {
   [P in ValuesOf<ClientEvents[K]>]: InstanceType<ClientEvents[K][P]>;

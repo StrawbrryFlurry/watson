@@ -1,9 +1,9 @@
 import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions, isEmpty, isNil } from '@watson/common';
-import { EventConfiguration } from 'routes/event.configuration';
 
 import { ApplicationConfig } from '../../application-config';
 import { CommandConfigurationException } from '../../exceptions';
 import { IMethodValue } from '../../injector';
+import { EventConfiguration } from '../event.configuration';
 
 export class CommandConfiguration extends EventConfiguration {
   public prefix: string;

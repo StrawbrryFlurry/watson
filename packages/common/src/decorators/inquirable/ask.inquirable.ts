@@ -1,6 +1,6 @@
 import { AwaitMessagesOptions, MessageEmbed } from 'discord.js';
-import { InquirableType } from 'enums';
 
+import { InquirableType } from '../../enums';
 import { createInquirableDecorator } from './create-inquirable-decorator';
 
 /**

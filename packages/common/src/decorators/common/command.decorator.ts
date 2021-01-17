@@ -33,7 +33,7 @@ export interface ICommandParam {
    */
   encapsulator?: string;
   /**
-   * The default value if none was given
+   * The default value if none was provided
    */
   default?: any;
   /**

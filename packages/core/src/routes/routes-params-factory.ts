@@ -22,7 +22,8 @@ import {
   MessageReaction,
   User,
 } from 'discord.js';
-import { AsyncContextResolver, EventExecutionContext } from 'lifecycle';
+
+import { AsyncContextResolver, EventExecutionContext } from '../lifecycle';
 
 export class RouteParamsFactory {
   private asyncResolver = new AsyncContextResolver();

@@ -1,5 +1,6 @@
 import { EventException, EventExceptionHandler } from '@watson/common';
-import { Logger } from 'logger';
+
+import { Logger } from '../logger';
 
 export class ExceptionHandler {
   private handlers: EventExceptionHandler<any>[];

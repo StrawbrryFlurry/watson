@@ -1,7 +1,7 @@
-import { Module } from 'decorators';
 import { DotenvConfigOptions } from 'dotenv';
 import { DynamicModule, ValueProvider } from 'interfaces';
 
+import { Module } from '../../decorators';
 import { ConfigService } from './config.service';
 
 export interface IConfigModuleOptions<T = any> {

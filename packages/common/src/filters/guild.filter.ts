@@ -1,5 +1,6 @@
-import { Injectable } from 'decorators';
 import { ExecutionContext, Filter } from 'interfaces';
+
+import { Injectable } from '../decorators';
 
 /**
  * Default filter for specifing guilds whose events should call the handler method.

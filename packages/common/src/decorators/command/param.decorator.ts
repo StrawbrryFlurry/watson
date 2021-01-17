@@ -1,5 +1,4 @@
-import { RouteParamType } from 'enums';
-
+import { RouteParamType } from '../../enums';
 import { createParamDecorator } from '../create-param-decorator';
 
 /**

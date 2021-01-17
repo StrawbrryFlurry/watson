@@ -11,11 +11,11 @@ import {
   TReceiver,
   Type,
 } from '@watson/common';
-import { EventProxy } from 'event';
-import { InstanceWrapper, MetadataResolver } from 'injector';
-import { CommonExceptionHandler, ExceptionHandler } from 'lifecycle';
-import { WatsonContainer } from 'watson-container';
+import iterate from 'iterare';
 
+import { InstanceWrapper, MetadataResolver } from '../injector';
+import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
+import { WatsonContainer } from '../watson-container';
 import { CommandRoute } from './command';
 import { ConcreteEventRoute } from './event';
 import { IHandlerFunction, RouteHandlerFactory } from './route-handler-factory';
@@ -29,7 +29,7 @@ export class RouteExplorer {
   private commandRoutes = new Set<CommandRoute>();
   private slashRoutes = new Set<SlashRoute>();
 
-  private eventProxies: Map<IClientEvent, EventProxy<any>>;
+  private eventProxies = new Map<IClientEvent, EventProxy<any>>();
   private routeHanlderFactory: RouteHandlerFactory;
 
   constructor(container: WatsonContainer) {
@@ -82,7 +82,13 @@ export class RouteExplorer {
       );
 
       this.eventRoutes.add(routeRef);
-      this.bindHandler(metadata, handler);
+
+      const exceptionHandler = this.createExceptionHandler(
+        receiver.metatype,
+        method.descriptor
+      );
+
+      this.bindHandler(metadata, handler, exceptionHandler);
     }
   }
 
@@ -120,7 +126,13 @@ export class RouteExplorer {
       );
 
       this.commandRoutes.add(routeRef);
-      this.bindHandler("message", handler);
+
+      const exceptionHandler = this.createExceptionHandler(
+        receiver.metatype,
+        method.descriptor
+      );
+
+      this.bindHandler("message", handler, exceptionHandler);
     }
   }
 
@@ -154,7 +166,18 @@ export class RouteExplorer {
       );
 
       this.slashRoutes.add(routeRef);
-      this.bindHandler("INTERACTION_CREATE" as any, handler, true);
+
+      const exceptionHandler = this.createExceptionHandler(
+        receiver.metatype,
+        method.descriptor
+      );
+
+      this.bindHandler(
+        "INTERACTION_CREATE" as any,
+        handler,
+        exceptionHandler,
+        true
+      );
     }
   }
 
@@ -178,8 +201,12 @@ export class RouteExplorer {
     return validHandlers;
   }
 
-  public getEventProxyies() {
+  public getEventProxies() {
     return this.eventProxies;
+  }
+
+  public getEventProxiesArray() {
+    return iterate(this.eventProxies).toArray();
   }
 
   public getEventProxy(event: IClientEvent) {
@@ -189,6 +216,7 @@ export class RouteExplorer {
   private bindHandler(
     event: IClientEvent,
     handler: IHandlerFunction<any>,
+    exceptionHandler: ExceptionHandler,
     isWsEvent?: boolean
   ) {
     if (!this.eventProxies.has(event)) {
@@ -196,7 +224,7 @@ export class RouteExplorer {
     }
 
     const proxyRef = this.eventProxies.get(event);
-    proxyRef.bind(handler);
+    proxyRef.bind(handler, exceptionHandler);
   }
 
   private createExceptionHandler(receiver: Type, method: Function) {

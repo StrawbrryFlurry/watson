@@ -1,5 +1,6 @@
 import { TReceiver } from '@watson/common';
-import { InstanceWrapper, Module } from 'injector';
+
+import { InstanceWrapper, Module } from '../injector';
 
 export const AddingCommand = () => ``;
 export const AddingSlashCommand = () => ``;

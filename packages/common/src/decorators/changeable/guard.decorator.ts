@@ -1,7 +1,7 @@
-import { applyStackableMetadata } from 'decorators/apply-stackable-metadata';
 import { CanActivate } from 'interfaces';
 
 import { GUARD_METADATA } from '../../constants';
+import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 export function UseGuards(
   ...guards: (CanActivate | Function)[]

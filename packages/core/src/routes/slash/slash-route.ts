@@ -1,9 +1,9 @@
 import { PartialApplicationCommand, TReceiver } from '@watson/common';
-import { EventRoute } from 'event';
-import { InstanceWrapper } from 'injector';
-import { IAsynchronousResolvable } from 'interfaces';
-import { WatsonContainer } from 'watson-container';
 
+import { InstanceWrapper } from '../../injector';
+import { IAsynchronousResolvable } from '../../interfaces';
+import { WatsonContainer } from '../../watson-container';
+import { EventRoute } from '../event-route';
 import { SlashConfiguration } from './slash-config';
 
 export class SlashRoute extends EventRoute<any> {

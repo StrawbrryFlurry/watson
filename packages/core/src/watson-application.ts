@@ -4,8 +4,8 @@ import { ActivityOptions, Client, Snowflake } from 'discord.js';
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
-import { CommandExplorer } from './command/command-explorer';
 import { Logger } from './logger';
+import { RouteExplorer } from './routes';
 import { WatsonContainer } from './watson-container';
 
 /**
@@ -15,7 +15,7 @@ export class WatsonApplication {
   private logger = new Logger("WatsonApplication");
   private container: WatsonContainer;
   private config: ApplicationConfig;
-  private commandExplorer: CommandExplorer;
+  private routeExplorer: RouteExplorer;
   private applicationProxy: ApplicationProxy;
   private clientAdapter: DiscordJSAdapter;
 
@@ -29,7 +29,8 @@ export class WatsonApplication {
   ) {
     this.config = config;
     this.container = container;
-    this.commandExplorer = new CommandExplorer(this.container);
+    this.routeExplorer = new RouteExplorer(this.container);
+    this.applicationProxy = new ApplicationProxy();
     this.clientAdapter = client;
   }
 
@@ -45,10 +46,10 @@ export class WatsonApplication {
   }
 
   private async init() {
-    this.commandExplorer.explore();
+    await this.routeExplorer.explore();
     await this.clientAdapter.initialize();
-    this.applicationProxy = new ApplicationProxy(this.commandExplorer);
-    await this.applicationProxy.init(this.clientAdapter);
+    this.applicationProxy.initFromRouteExplorer(this.routeExplorer);
+    await this.applicationProxy.initAdapter(this.clientAdapter);
     this.isInitialized = true;
   }
 

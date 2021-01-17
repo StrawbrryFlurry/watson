@@ -1,4 +1,4 @@
-import { WatsonApplicationFactory } from '@watson/core';
+import { WatsonFactory } from '@watson/core';
 import { config } from 'dotenv';
 
 import { ApplicationModule } from './app.module';
@@ -10,7 +10,7 @@ const bootstrap = async () => {
     path: __dirname + "/../.env",
   }) as any;
 
-  const app = await WatsonApplicationFactory.create(ApplicationModule, {
+  const app = await WatsonFactory.create(ApplicationModule, {
     discordAuthToken: token,
   });
 

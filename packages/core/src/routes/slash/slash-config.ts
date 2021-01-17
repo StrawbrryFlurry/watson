@@ -1,5 +1,6 @@
 import { ApplicationCommandOption, PartialApplicationCommand } from '@watson/common';
-import { EventConfiguration } from 'routes/event.configuration';
+
+import { EventConfiguration } from '../event.configuration';
 
 export class SlashConfiguration extends EventConfiguration {
   public readonly name: string;

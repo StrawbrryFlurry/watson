@@ -1,11 +1,11 @@
 import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, TReceiver } from '@watson/common';
 import { isArray } from 'class-validator';
 import { Message } from 'discord.js';
-import { EventRoute } from 'event';
 import { IAsynchronousResolvable } from 'interfaces';
 
 import { IMethodValue, InstanceWrapper } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
+import { EventRoute } from '../event-route';
 import { CommandConfiguration } from './command-config';
 import { CommandParser } from './command-parser';
 
@@ -42,8 +42,8 @@ export class CommandRoute extends EventRoute<"message"> {
     this.parser = new CommandParser(this.config);
   }
 
-  public matchEvent(message: Message): IAsynchronousResolvable<boolean> {
-    const { content } = message;
+  public matchEvent(message: [Message]): IAsynchronousResolvable<boolean> {
+    const { content } = message[0];
     const { command } = this.parser.extractMessageParts(content);
 
     return (

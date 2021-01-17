@@ -18,15 +18,17 @@ import {
   UnatuhorizedException,
 } from '@watson/common';
 import { Base, ClientEvents } from 'discord.js';
-import { ModuleInitException } from 'exceptions';
-import { InstanceWrapper, Module } from 'injector';
-import { badChangeableImplementation, changeableNotFound } from 'logger';
-import { CommandRoute, EventRoute, RouteParamsFactory } from 'routes';
 import { WatsonContainer } from 'watson-container';
 
+import { ModuleInitException } from '../exceptions';
 import { rethrowWithContext } from '../helpers';
+import { InstanceWrapper, Module } from '../injector';
 import { AsyncContextResolver, EventExecutionContext, ResponseController } from '../lifecycle';
+import { badChangeableImplementation, changeableNotFound } from '../logger';
+import { RouteParamsFactory } from '../routes';
+import { CommandRoute } from './command';
 import { ConcreteEventRoute } from './event';
+import { EventRoute } from './event-route';
 import { SlashRoute } from './slash';
 
 export type IHandlerFunction<CT extends ContextDataTypes, A = any> = (

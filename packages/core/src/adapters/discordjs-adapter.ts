@@ -2,8 +2,8 @@ import { sub } from 'cli-color/beep';
 import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
-import { EventProxy } from '../event';
 import { RuntimeException } from '../exceptions';
+import { EventProxy } from '../lifecycle';
 import { SlashCommandAdapter } from './slash-adapter';
 
 export type IWSEvent<T extends {}> = [data: T, shardID: number];
@@ -101,7 +101,7 @@ export class DiscordJSAdapter {
       : this.createListener(eventProxy.eventType);
 
     const subscriber = observable.subscribe((observer) =>
-      eventProxy.proxy(...observer)
+      eventProxy.proxy(observer)
     );
 
     this.eventSubscriptions.set(eventProxy, {

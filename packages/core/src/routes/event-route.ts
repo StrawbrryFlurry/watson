@@ -1,8 +1,8 @@
 import { IClientEvent, TReceiver } from '@watson/common';
-import { InstanceWrapper } from 'injector';
-import { IAsynchronousResolvable } from 'interfaces';
-import { WatsonContainer } from 'watson-container';
 
+import { InstanceWrapper } from '../injector';
+import { IAsynchronousResolvable } from '../interfaces';
+import { WatsonContainer } from '../watson-container';
 import { EventConfiguration } from './event.configuration';
 
 export type IExecutionContextType = "slash" | "event" | "command";

@@ -1,6 +1,6 @@
 import { MessageEmbed, MessageReaction, User } from 'discord.js';
-import { InquirableType } from 'enums';
 
+import { InquirableType } from '../../enums';
 import { createInquirableDecorator } from './create-inquirable-decorator';
 
 export interface IReactOptions {}

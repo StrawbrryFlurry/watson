@@ -1,4 +1,4 @@
-import { CommandRoute } from '../command';
+import { CommandRoute } from '../routes';
 import { RuntimeException } from './runtime-exception';
 
 export class UnknownChannelException extends RuntimeException {

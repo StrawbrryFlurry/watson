@@ -1,5 +1,6 @@
-import { Injectable } from 'decorators';
-import { config, DotenvConfigOptions } from 'dotenv/types';
+import { config, DotenvConfigOptions } from 'dotenv';
+
+import { Injectable } from '../../decorators';
 
 @Injectable()
 export class ConfigService {

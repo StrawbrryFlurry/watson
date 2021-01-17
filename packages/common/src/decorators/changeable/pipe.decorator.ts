@@ -1,7 +1,7 @@
-import { applyStackableMetadata } from 'decorators/apply-stackable-metadata';
 import { PipeTransform } from 'interfaces';
 
 import { PIPE_METADATA } from '../../constants';
+import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 export function UsePipes(
   ...pipes: (PipeTransform | Function)[]
