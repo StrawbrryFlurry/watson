@@ -43,7 +43,12 @@ export class Logger {
    * For logging internal status and error messages
    */
   public logMessage(message: string) {
-    process.stdout.write(`${this.messagePrefix} ${message}`);
+    process.stdout.write(`${this.messagePrefix} ${message}\n`);
+  }
+
+  public logException(message: string, stack: any) {
+    process.stdout.write(`${this.messagePrefix} ${red(message)}\n`);
+    console.error(stack);
   }
 
   private colorMessage(message: string, type: ILogInformationType) {

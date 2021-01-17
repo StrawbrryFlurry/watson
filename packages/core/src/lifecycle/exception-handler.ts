@@ -15,23 +15,23 @@ export class ExceptionHandler {
 
   public handle(exception: EventException | Error) {
     if (!(exception instanceof EventException)) {
-      return this.handleUnknownException(exception.message);
+      return this.handleUnknownException(exception.message, exception.stack);
     }
 
     const handler = this.handlers.find((handler) => handler.match(exception));
 
     if (!handler) {
-      this.handleUnknownException(exception.message);
+      this.handleUnknownException(exception.message, exception.stack);
     }
 
     try {
       handler.catch(exception);
     } catch (err) {
-      this.handleUnknownException(err);
+      this.handleUnknownException(err, err.stack);
     }
   }
 
-  private handleUnknownException(message: string) {
-    this.logger.log(message, "error");
+  private handleUnknownException(message: string, stack: any) {
+    this.logger.logException(message, stack);
   }
 }
