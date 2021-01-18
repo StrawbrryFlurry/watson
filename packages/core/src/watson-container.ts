@@ -82,14 +82,14 @@ export class WatsonContainer {
     moduleRef.addImport(importedModuleRef);
   }
 
-  public addExport(token: string, metatype: Type) {
+  public addExport(token: string, metatype: Type | CustomProvider) {
     if (!this.modules.has(token)) {
       throw new UnknownModuleException("WatsonContainer");
     }
 
     const moduleRef = this.modules.get(token);
     const exportedModuleToken = this.moduleTokenFactory.getTokenByModuleType(
-      metatype
+      metatype as Type
     );
 
     if (exportedModuleToken) {

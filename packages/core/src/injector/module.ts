@@ -68,11 +68,18 @@ export class Module {
     this._imports.add(moduleRef);
   }
 
-  public addExportedProvider(provider: string | Type<TInjectable>) {
+  public addExportedProvider(
+    provider: string | Type<TInjectable> | CustomProvider
+  ) {
     if (isString(provider)) {
       if (!this.exports.has(provider as string)) {
         this._exports.add(provider as string);
       }
+    }
+
+    if (this.isCustomProvider(provider as CustomProvider)) {
+      const name = this.getCustomProviderName(provider as CustomProvider);
+      this._exports.add(name);
     }
 
     if (isFunction(provider)) {

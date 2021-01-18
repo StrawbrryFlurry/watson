@@ -3,9 +3,9 @@ import { isUndefined } from '../../utils';
 
 export interface IModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
-  receivers?: (Type | CustomProvider)[];
-  providers?: Type[];
-  exports?: Type[];
+  receivers?: Type[];
+  providers?: (Type | CustomProvider)[];
+  exports?: (Type | CustomProvider)[];
 }
 
 export function Module(moduleOptions?: IModuleOptions): ClassDecorator {

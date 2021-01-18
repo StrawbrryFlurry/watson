@@ -6,6 +6,6 @@ export interface DynamicModule {
   receivers?: Type[];
   providers?: (Type | CustomProvider)[];
   imports?: Type[];
-  exports?: Type[];
+  exports?: (Type | CustomProvider)[];
   global?: boolean;
 }
