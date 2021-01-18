@@ -154,11 +154,11 @@ export class Module {
 
   private addCustomProvider(provider: CustomProvider) {
     if (this.isClassProvider(provider)) {
-      return this.addCalssProvider(provider);
+      return this.addCalssProvider(provider as ClassProvider);
     } else if (this.isValueProvider(provider)) {
-      return this.addValueProvider(provider);
+      return this.addValueProvider(provider as ValueProvider);
     } else if (this.isFactoryProvider(provider)) {
-      return this.addFactoryProvider(provider);
+      return this.addFactoryProvider(provider as FactoryProvider);
     }
   }
 
