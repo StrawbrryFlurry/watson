@@ -1,7 +1,7 @@
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { from, Observable } from 'rxjs';
 
-import { Injectable } from '../../decorators';
+import { Inject, Injectable } from '../../decorators';
 
 export type HTTPBody = { [key: string]: any };
 
@@ -9,7 +9,7 @@ export type HTTPBody = { [key: string]: any };
 export class HttpClient {
   private httpClientInstance: AxiosInstance;
 
-  constructor(config?: AxiosRequestConfig) {
+  constructor(@Inject("HTTP_CONFIG") config: AxiosRequestConfig) {
     this.httpClientInstance = Axios.create(config);
   }
 
