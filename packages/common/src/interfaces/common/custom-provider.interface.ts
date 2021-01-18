@@ -20,7 +20,7 @@ export interface FactoryProvider {
   /**
    * A factory function that returns the instance of the provider.
    */
-  useFactory?: IProviderFactory;
+  useFactory: IProviderFactory;
   /**
    * Providers that should be injected to the factory | class constructor function when it's called.
    * inejct: ['a'] => factory(...['a'])
@@ -39,7 +39,7 @@ export interface ClassProvider {
   /**
    * A value that should whose instance should be set as the instance of the provider.
    */
-  useClass?: Type;
+  useClass: Type;
   /**
    * Providers that should be injected to the factory | class constructor function when it's called.
    * inejct: ['a'] => factory(...['a'])
@@ -58,5 +58,5 @@ export interface ValueProvider {
   /**
    * A value that should be set as the instance of the provider.
    */
-  useValue?: unknown;
+  useValue: unknown;
 }
