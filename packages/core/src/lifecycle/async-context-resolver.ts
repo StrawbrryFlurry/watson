@@ -1,7 +1,5 @@
 import { Observable } from 'rxjs';
 
-import { AsyncResolutionException } from '../exceptions';
-
 export type IAsyncType<T = any> = Observable<T> | Promise<T> | IAsyncType[];
 
 /**
@@ -17,20 +15,8 @@ export class AsyncContextResolver {
       return await this.resolveFromObservable(result);
     } else if (Array.isArray(result)) {
       return (await this.resolveAsyncArray(result)) as any;
-    } else if (typeof result === "function") {
-      this.resolveAsyncFunction(result);
     } else {
       return result;
-    }
-  }
-
-  private async resolveAsyncFunction(fn: Function) {
-    try {
-      return fn();
-    } catch {
-      throw new AsyncResolutionException(
-        `An error occured while resolving the async function: ${fn.name}`
-      );
     }
   }
 
