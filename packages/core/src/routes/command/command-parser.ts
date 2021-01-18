@@ -25,7 +25,7 @@ export class CommandParser {
   constructor(private config: CommandConfiguration) {}
 
   public async parse(message: Message): Promise<CommandContextData> {
-    const { content, client, channel, guild, author: user } = message;
+    const { content, channel, guild, author: user } = message;
     const { command, prefix, rest } = this.extractMessageParts(content);
     const isFromGuild = this.isFromGuild(channel);
     const params = await this.parseArguments(message, rest);
@@ -38,7 +38,6 @@ export class CommandParser {
     return {
       messageContent: content,
       channel,
-      client,
       command,
       guild,
       isFromGuild,

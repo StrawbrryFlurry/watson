@@ -1,5 +1,5 @@
 import { EventContextData, IClientEvent, TReceiver } from '@watsonjs/common';
-import { Base, ClientEvents, Guild } from 'discord.js';
+import { Base, ClientEvents } from 'discord.js';
 
 import { InstanceWrapper } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
@@ -32,18 +32,13 @@ export class ConcreteEventRoute<T extends IClientEvent> extends EventRoute<T> {
     if (this.eventType === ("raw" as any)) {
       return eventArgs as any;
     } else {
-      let guild: Guild;
+      let parsedEventData = {};
 
-      eventArgs.forEach((e: any) => {
-        if ("guild" in e) {
-          guild = e.guild;
-        }
-      });
+      for (const data of eventArgs) {
+        parsedEventData[data.constructor.name.toLowerCase()] = data;
+      }
 
-      return {
-        client: eventArgs[0].client,
-        guild: guild,
-      };
+      return parsedEventData;
     }
   }
 }

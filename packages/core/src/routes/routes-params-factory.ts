@@ -2,7 +2,6 @@ import {
   AskFunction,
   CollectFunction,
   CommandContextData,
-  ContextData,
   ExecutionContext,
   IInquirableMetadata,
   InquirableType,
@@ -30,9 +29,9 @@ export class RouteParamsFactory {
 
   public async createFromContext(
     paramTypes: IParamDecoratorMetadata[],
-    ctx: ExecutionContext
+    ctx: EventExecutionContext
   ) {
-    const data = ctx.getContextData<ContextData>();
+    const data = ctx.getContextData();
     const params: unknown[] = [];
     for (const type of paramTypes) {
       const idx = type.paramIndex;
@@ -41,13 +40,13 @@ export class RouteParamsFactory {
           params[idx] = (data as CommandContextData).channel;
           break;
         case RouteParamType.CLIENT:
-          params[idx] = data.client;
+          params[idx] = ctx.getClient();
           break;
         case RouteParamType.CONTEXT:
           params[idx] = ctx;
           break;
         case RouteParamType.GUILD:
-          params[idx] = data.guild;
+          params[idx] = (data as CommandContextData)?.guild;
           break;
         case RouteParamType.MESSAGE:
           params[idx] = data as CommandContextData;

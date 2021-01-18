@@ -1,4 +1,5 @@
 import { IClientEvent } from '@watsonjs/common';
+import { DiscordJSAdapter } from 'adapters';
 import { ClientEvents } from 'discord.js';
 import iterate from 'iterare';
 
@@ -9,7 +10,7 @@ export class EventProxy<Event extends IClientEvent> {
   public readonly eventType: Event;
   public readonly isWSEvent: boolean;
   public readonly handlerFunctions = new Map<
-    IHandlerFunction<any>,
+    IHandlerFunction,
     ExceptionHandler
   >();
 
@@ -18,11 +19,14 @@ export class EventProxy<Event extends IClientEvent> {
     this.isWSEvent = isWSEvent;
   }
 
-  public async proxy(args: ClientEvents[Event]): Promise<void> {
+  public async proxy(
+    adapter: DiscordJSAdapter,
+    args: ClientEvents[Event]
+  ): Promise<void> {
     Promise.all(
       this.getHandlerFns().map(async ([eventHandler, excpetionHandler]) => {
         try {
-          await eventHandler(args);
+          await eventHandler(adapter, args);
         } catch (err) {
           excpetionHandler.handle(err);
         }
@@ -31,7 +35,7 @@ export class EventProxy<Event extends IClientEvent> {
   }
 
   public bind(
-    eventHandler: IHandlerFunction<any>,
+    eventHandler: IHandlerFunction,
     exceptionHandler: ExceptionHandler
   ) {
     this.handlerFunctions.set(eventHandler, exceptionHandler);

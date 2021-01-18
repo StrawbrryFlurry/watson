@@ -1,4 +1,5 @@
 import { ContextDataTypes, ContextEventTypes, ExecutionContext, Type, ValuesOf } from '@watsonjs/common';
+import { DiscordJSAdapter } from 'adapters';
 import { Base as DjsBaseClass, Client, ClientEvents } from 'discord.js';
 
 import { EventRoute } from '../routes';
@@ -20,13 +21,16 @@ export class EventExecutionContext<
   private readonly eventData: EventData;
   private readonly contextType: CtxEventType;
   private parsedEventData: ParsedEventData;
+  public readonly adapter: DiscordJSAdapter;
 
   constructor(
     ctxType: CtxEventType,
     eventData: EventData,
     route: EventRoute<any>,
+    adapter: DiscordJSAdapter,
     container: WatsonContainer
   ) {
+    this.adapter = adapter;
     this.contextType = ctxType;
     this.eventData = eventData;
     this.eventRoute = route;
@@ -63,6 +67,14 @@ export class EventExecutionContext<
 
   public getRoute(): EventRoute<any> {
     return this.eventRoute;
+  }
+
+  public getAdapter<T extends any = DiscordJSAdapter>(): T {
+    return this.adapter as T;
+  }
+
+  public getClient(): Client {
+    return this.adapter.getClient();
   }
 
   private parseEventData() {

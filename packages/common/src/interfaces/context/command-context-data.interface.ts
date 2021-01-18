@@ -1,14 +1,13 @@
-import { DMChannel, NewsChannel, PermissionString, Role, TextChannel, User } from 'discord.js';
+import { DMChannel, Guild, NewsChannel, PermissionString, Role, TextChannel, User } from 'discord.js';
 
 import { CommandArgumentType } from '../../enums';
-import { ContextData } from './context-data.interface';
 
 export interface CommandParam<T = any> {
   type: CommandArgumentType;
   value: T;
 }
 
-export interface CommandContextData extends ContextData {
+export interface CommandContextData {
   /**
    * Command arguments that were parsed from the original message
    * @key The name of the param as specified in the command configuration
@@ -57,4 +56,9 @@ export interface CommandContextData extends ContextData {
    * Whether the message is from a guild channel or not.
    */
   isFromGuild: boolean;
+  /**
+   * Guild the message was sent from
+   * `undefined` if the message is from a direct message channel.
+   */
+  guild: Guild;
 }

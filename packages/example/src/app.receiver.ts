@@ -1,4 +1,4 @@
-import { Command, Event, InjectChannel, Receiver, WatsonPaginator } from '@watsonjs/common';
+import { Command, Event, ExecutionContext, InjectChannel, InjectContext, Receiver, WatsonPaginator } from '@watsonjs/common';
 import { MessageEmbed, TextChannel } from 'discord.js';
 
 @Receiver({
@@ -31,12 +31,7 @@ export class AppReceiver {
   }
 
   @Event("message")
-  async handleEvent() {
-    console.log("Hey");
-  }
-
-  @Event("message")
-  async handleeEvent() {
-    console.log("Hey");
+  async handleeEvent(@InjectContext() ctx: ExecutionContext) {
+    console.log(ctx.getContextData());
   }
 }

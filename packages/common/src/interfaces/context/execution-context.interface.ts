@@ -1,4 +1,4 @@
-import { ClientEvents } from 'discord.js';
+import { Client, ClientEvents } from 'discord.js';
 import { IClientEvent } from 'interfaces/client-events.interface';
 import { Type } from 'interfaces/type.interface';
 import { ConditionalAny } from 'utils';
@@ -69,4 +69,14 @@ export interface ExecutionContext<
    * For a generic event execution context
    */
   getType(): ContextType;
+
+  /**
+   * @returns The Watson client adapter instance
+   */
+  getAdapter<T extends any = any>(): T;
+
+  /**
+   * @returns The client that has emitted the event.
+   */
+  getClient(): Client;
 }

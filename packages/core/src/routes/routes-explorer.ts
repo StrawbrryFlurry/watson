@@ -226,7 +226,7 @@ export class RouteExplorer {
 
   private bindHandler(
     event: IClientEvent,
-    handler: IHandlerFunction<any>,
+    handler: IHandlerFunction,
     exceptionHandler: ExceptionHandler,
     isWsEvent?: boolean
   ) {

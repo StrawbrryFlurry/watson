@@ -5,7 +5,6 @@ import {
   ContextEventTypes,
   EventContextData,
   EventException,
-  ExecutionContext,
   Filter,
   FILTER_METADATA,
   GUARD_METADATA,
@@ -19,6 +18,7 @@ import {
   TReceiver,
   UnatuhorizedException,
 } from '@watsonjs/common';
+import { DiscordJSAdapter } from 'adapters';
 import { Base, ClientEvents } from 'discord.js';
 import { WatsonContainer } from 'watson-container';
 
@@ -33,25 +33,24 @@ import { ConcreteEventRoute } from './event';
 import { EventRoute } from './event-route';
 import { SlashRoute } from './slash';
 
-export type IHandlerFunction<CT extends ContextDataTypes, A = any> = (
-  ...eventData: A[]
+export type IHandlerFunction = (
+  adapter: DiscordJSAdapter,
+  eventData: unknown[]
 ) => Promise<void>;
 
 export class RouteHandlerFactory {
-  private paramsFactory: RouteParamsFactory;
+  private paramsFactory = new RouteParamsFactory();
   private responseController = new ResponseController();
   private asyncResolver = new AsyncContextResolver();
 
-  constructor(private container: WatsonContainer) {
-    this.paramsFactory = new RouteParamsFactory();
-  }
+  constructor(private container: WatsonContainer) {}
 
   public async createCommandHandler(
     route: CommandRoute,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
-  ): Promise<IHandlerFunction<CommandContextData>> {
+  ): Promise<IHandlerFunction> {
     const { filters, guards, paramsFactory, pipes } = this.getMetadata(
       route,
       handle,
@@ -80,7 +79,7 @@ export class RouteHandlerFactory {
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
-  ): Promise<IHandlerFunction<SlashContextData>> {
+  ): Promise<IHandlerFunction> {
     const { filters, guards, paramsFactory, pipes } = this.getMetadata(
       route,
       handle,
@@ -109,7 +108,7 @@ export class RouteHandlerFactory {
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
-  ): Promise<IHandlerFunction<EventContextData>> {
+  ): Promise<IHandlerFunction> {
     const { filters, paramsFactory, pipes } = this.getMetadata(
       route,
       handle,
@@ -191,7 +190,7 @@ export class RouteHandlerFactory {
       return null;
     }
 
-    return async (ctx: ExecutionContext) => {
+    return async (ctx: EventExecutionContext) => {
       for (const guard of guards) {
         const res = guard.canActivate(ctx);
         const activationRes = await this.asyncResolver.resolveAsyncValue<
@@ -262,7 +261,7 @@ export class RouteHandlerFactory {
       return null;
     }
 
-    return async (ctx: ExecutionContext) => {
+    return async (ctx: EventExecutionContext) => {
       for (const filter of filters) {
         const res = filter.filter(ctx);
         const filterResult = await this.asyncResolver.resolveAsyncValue<
@@ -388,7 +387,7 @@ export class RouteHandlerFactory {
 
     const params = this.reflectParams(receiver, handle);
 
-    const paramsFactory = (ctx: ExecutionContext) => {
+    const paramsFactory = (ctx: EventExecutionContext) => {
       return this.paramsFactory.createFromContext(params, ctx);
     };
 
@@ -411,22 +410,28 @@ export class RouteHandlerFactory {
     route,
   }: {
     applyPipesFn?: (ctx: ContextDataTypes) => Promise<any>;
-    applyGuardsFn?: (ctx: ExecutionContext) => Promise<void>;
-    applyFilterFn?: (ctx: ExecutionContext) => Promise<boolean>;
-    paramsFactory: (ctx: ExecutionContext) => Promise<unknown[]>;
+    applyGuardsFn?: (ctx: EventExecutionContext) => Promise<void>;
+    applyFilterFn?: (ctx: EventExecutionContext) => Promise<boolean>;
+    paramsFactory: (ctx: EventExecutionContext) => Promise<unknown[]>;
     receiver: InstanceWrapper<TReceiver>;
     handle: Function;
     type: ContextEventTypes;
     route: EventRoute<any>;
   }) {
-    return async (event: Base[]) => {
+    return async (adapter: DiscordJSAdapter, event: Base[]) => {
       const matches = route.matchEvent(event);
 
       if (!matches) {
         return null;
       }
 
-      const ctx = new EventExecutionContext(type, event, route, this.container);
+      const ctx = new EventExecutionContext(
+        type,
+        event,
+        route,
+        adapter,
+        this.container
+      );
 
       try {
         const data = await route.createContextData(event);

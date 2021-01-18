@@ -101,7 +101,7 @@ export class DiscordJSAdapter {
       : this.createListener(eventProxy.eventType);
 
     const subscriber = observable.subscribe((observer) =>
-      eventProxy.proxy(observer)
+      eventProxy.proxy(this, observer)
     );
 
     this.eventSubscriptions.set(eventProxy, {
