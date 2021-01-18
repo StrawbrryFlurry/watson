@@ -1,9 +1,7 @@
-import { MessageEmbed, MessageReaction, User } from 'discord.js';
+import { AwaitMessagesOptions, MessageEmbed, MessageReaction, User } from 'discord.js';
 
 import { InquirableType } from '../../enums';
 import { createInquirableDecorator } from './create-inquirable-decorator';
-
-export interface IReactOptions {}
 
 /**
  * @param message The message or message embed to send.
@@ -13,7 +11,7 @@ export interface IReactOptions {}
  */
 export type ReactFunction<T = any> = (
   message: string | MessageEmbed,
-  options?: IReactOptions,
+  options?: AwaitMessagesOptions,
   customReactionFilter?: (reaction: MessageReaction, user: User) => boolean
 ) => Promise<T>;
 
