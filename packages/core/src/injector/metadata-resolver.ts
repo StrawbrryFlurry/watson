@@ -79,7 +79,7 @@ export class MetadataResolver {
     ].forEach((_import) => this.container.addImport(token, _import));
   }
 
-  private reflectExports(token: string, exports: Type[]) {
+  private reflectExports(token: string, exports: (Type | CustomProvider)[]) {
     [
       ...exports,
       ...this.container.getDynamicModuleMetadataByToken(token, "exports"),

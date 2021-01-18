@@ -17,6 +17,6 @@ export type AskFunction<T = any> = (
 /**
  * Injects the `ask` function to the command handler.
  */
-export function Ask(): ParameterDecorator {
+export function InjectAsk(): ParameterDecorator {
   return createInquirableDecorator(InquirableType.ASK);
 }

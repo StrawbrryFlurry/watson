@@ -20,6 +20,6 @@ export type CollectFunction<T = any> = (
 /**
  * Injects the `collect` function to the command handler.
  */
-export function Collect() {
+export function InjectCollect() {
   return createInquirableDecorator(InquirableType.COLLECT);
 }

@@ -20,6 +20,6 @@ export type ReactFunction<T = any> = (
 /**
  * Injects the `react` function to the command handler.
  */
-export function React() {
+export function InjectReact() {
   return createInquirableDecorator(InquirableType.REACT);
 }
