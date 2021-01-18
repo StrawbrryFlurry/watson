@@ -2,6 +2,7 @@ import {
   ClassProvider,
   CustomProvider,
   FactoryProvider,
+  isConstructor,
   isFunction,
   isString,
   TInjectable,
@@ -61,7 +62,7 @@ export class Module {
   initProperties() {}
 
   public addImport(moduleRef: Module) {
-    if (this.imports.has(moduleRef)) {
+    if (this._imports.has(moduleRef)) {
       return;
     }
 
@@ -155,7 +156,7 @@ export class Module {
         host: this,
       });
 
-      this._providers.set(provider, instanceWrapper);
+      this._providers.set((provider as Type).name, instanceWrapper);
     }
   }
 
@@ -179,7 +180,7 @@ export class Module {
         name: name,
         metatype: useFactory,
         host: this,
-        inject,
+        inject: inject || [],
       })
     );
   }
@@ -201,7 +202,7 @@ export class Module {
   }
 
   private addCalssProvider(provider: ClassProvider) {
-    const { provide, useClass, inject } = provider;
+    const { useClass } = provider;
     const name = this.getCustomProviderName(provider);
 
     this._providers.set(
@@ -210,15 +211,17 @@ export class Module {
         name: name,
         metatype: useClass,
         host: this,
-        inject,
       })
     );
   }
 
   private getCustomProviderName(provider: CustomProvider) {
-    return isFunction(provider.provide)
-      ? (provider.provide as string)
-      : (provider.provide as Function).name;
+    const { provide } = provider;
+    return isFunction(provide)
+      ? (provide as Function).name
+      : isConstructor(provide as Function)
+      ? (provide as Function).name.replace(/class.*{.*}.*/, "")
+      : (provide as Function).name;
   }
 
   private isClassProvider(provider: CustomProvider) {
