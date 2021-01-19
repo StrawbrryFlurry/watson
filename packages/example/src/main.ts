@@ -1,19 +1,16 @@
+import { ConfigService } from '@watsonjs/common';
 import { WatsonFactory } from '@watsonjs/core';
-import { config } from 'dotenv';
 
 import { ApplicationModule } from './app.module';
 
 const bootstrap = async () => {
-  const {
-    parsed: { DISCORD_TOKEN: token },
-  } = config({
-    path: __dirname + "/../.env",
-  }) as any;
+  const app = await WatsonFactory.create(ApplicationModule);
 
-  const app = await WatsonFactory.create(ApplicationModule, {
-    discordAuthToken: token,
-  });
+  const configService = app.getProviderInstance(ConfigService);
 
+  const token = configService.get("DISCORD_TOKEN");
+
+  app.setAuthToken(token);
   app.setActivity({
     name: "doing stuff",
     type: "PLAYING",

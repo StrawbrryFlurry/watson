@@ -2,21 +2,26 @@ import { DotenvConfigOptions } from 'dotenv';
 import { DynamicModule, ValueProvider } from 'interfaces';
 
 import { Module } from '../../decorators';
+import { isNil } from '../../utils';
 import { ConfigService } from './config.service';
 
 export interface IConfigModuleOptions<T = any> {
-  dotEnv: DotenvConfigOptions;
-  global: boolean;
-  withConfig: T[];
+  dotEnv?: DotenvConfigOptions;
+  global?: boolean;
+  withConfig?: T[];
 }
 
 @Module()
 export class ConfigModule {
-  public static forRoot({
-    dotEnv,
-    global = false,
-    withConfig = [],
-  }: IConfigModuleOptions): DynamicModule {
+  public static forConfig(): DynamicModule;
+  public static forConfig(options?: IConfigModuleOptions): DynamicModule;
+  public static forConfig(options?: IConfigModuleOptions): DynamicModule {
+    if (isNil(options)) {
+      options = {};
+    }
+
+    const { dotEnv = undefined, global = false, withConfig = [] } = options;
+
     return {
       module: ConfigModule,
       providers: [
