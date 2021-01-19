@@ -1,5 +1,9 @@
 import { BootstrappingException } from './bootstrapping.exception';
 
+const UNKNOWN_COMPONENT_REFERENCE_SUGGESTIONS = [
+  "Make sure the referenced module / provider is exported from the module.",
+];
+
 export class UnknownExportException extends BootstrappingException {
   constructor(context: string, exportName: string, moduleName: string) {
     super(
