@@ -1,12 +1,18 @@
+import { isNil, RuntimeException } from '@watsonjs/common';
 import { sub } from 'cli-color/beep';
 import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
-import { RuntimeException } from '../exceptions';
+import { BootstrappingException } from '../exceptions';
 import { EventProxy } from '../lifecycle';
 import { SlashCommandAdapter } from './slash-adapter';
 
 export type IWSEvent<T extends {}> = [data: T, shardID: number];
+
+export const DISCORDJS_ADAPTER_SUGGESTIONS = [
+  "Add the token as an option to the WatsonFactory",
+  "Set the token to the WatsonApplication instance using the setToken method.",
+];
 
 export class DiscordJSAdapter {
   private token: string;
@@ -24,9 +30,10 @@ export class DiscordJSAdapter {
    * Constructs a DiscordJS adapter
    * @param token Discord API token
    */
+  constructor();
   constructor(client: Client);
   constructor(token: string, options: ClientOptions);
-  constructor(token: string | Client, options?: ClientOptions) {
+  constructor(token?: string | Client, options?: ClientOptions) {
     if (token instanceof Client) {
       this.client = token;
     } else {
@@ -36,6 +43,14 @@ export class DiscordJSAdapter {
   }
 
   public async initialize() {
+    if (isNil(this.token)) {
+      throw new BootstrappingException(
+        "DiscordJsAdapter",
+        "No auth token was provided",
+        DISCORDJS_ADAPTER_SUGGESTIONS
+      );
+    }
+
     await this.createClientInstance();
   }
 
@@ -62,6 +77,9 @@ export class DiscordJSAdapter {
   }
 
   public async stop() {
+    for (const [proxy, { sub }] of this.eventSubscriptions.entries()) {
+      sub.unsubscribe();
+    }
     this.client.destroy();
     this.ready.next(false);
   }

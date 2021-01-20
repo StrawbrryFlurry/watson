@@ -1,4 +1,4 @@
-import { EventException, EventExceptionHandler } from '@watsonjs/common';
+import { EventException, EventExceptionHandler, isNil } from '@watsonjs/common';
 import { ClientOptions, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
@@ -14,6 +14,11 @@ export class ApplicationConfig {
 
   constructor(options: IWatsonApplicationOptions, client: DiscordJSAdapter) {
     this.clientAdapter = client;
+
+    if (isNil(options)) {
+      return;
+    }
+
     this.authToken = options.discordAuthToken;
     this.clientOptions = options.clientOptions;
     this.acknowledgementReaction = options.acknowledgeReaction;

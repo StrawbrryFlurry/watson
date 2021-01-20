@@ -1,4 +1,4 @@
-import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, TReceiver } from '@watsonjs/common';
+import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, isString, TReceiver } from '@watsonjs/common';
 import { isArray } from 'class-validator';
 import { Message } from 'discord.js';
 import { IAsynchronousResolvable } from 'interfaces';
@@ -21,6 +21,8 @@ export class CommandRoute extends EventRoute<"message"> {
   public readonly host: InstanceWrapper<TReceiver>;
   private readonly parser: CommandParser;
 
+  private readonly acknowledgementReaction: string;
+
   constructor(
     commandOptions: ICommandOptions,
     receiverOptions: IReceiverOptions,
@@ -39,6 +41,7 @@ export class CommandRoute extends EventRoute<"message"> {
 
     this.handler = handler.descriptor;
     this.host = receiver;
+    this.acknowledgementReaction = this.container.config.acknowledgementReaction;
     this.parser = new CommandParser(this.config);
   }
 
@@ -46,9 +49,18 @@ export class CommandRoute extends EventRoute<"message"> {
     const { content } = message[0];
     const { command } = this.parser.extractMessageParts(content);
 
-    return (
-      this.parser.matchesPrefix(content) && this.parser.matchesCommand(command)
-    );
+    const matches =
+      this.parser.matchesPrefix(content) && this.parser.matchesCommand(command);
+
+    if (!matches) {
+      return false;
+    }
+
+    if (isString(this.acknowledgementReaction)) {
+      message[0].react(this.acknowledgementReaction);
+    }
+
+    return true;
   }
 
   public get name() {

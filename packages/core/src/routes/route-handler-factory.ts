@@ -199,7 +199,7 @@ export class RouteHandlerFactory {
         >(res);
 
         if (activationRes) {
-          throw new UnatuhorizedException(ctx);
+          throw new UnatuhorizedException();
         }
       }
     };

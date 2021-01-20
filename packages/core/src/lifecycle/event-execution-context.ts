@@ -57,8 +57,8 @@ export class EventExecutionContext<
     return this.parsedEventData;
   }
 
-  public getContextData(): CtxData {
-    return this.contextData;
+  public getContextData<T extends CtxData>(): T {
+    return this.contextData as T;
   }
 
   public getType(): CtxEventType {

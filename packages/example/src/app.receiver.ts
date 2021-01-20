@@ -28,10 +28,9 @@ export class AppReceiver {
     });
 
     await paginator.send(channel);
+    return "Heys";
   }
 
   @Event("message")
-  async handleeEvent(@InjectContext() ctx: ExecutionContext) {
-    console.log(ctx.getContextData());
-  }
+  async handleeEvent(@InjectContext() ctx: ExecutionContext) {}
 }

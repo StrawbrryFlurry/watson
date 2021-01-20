@@ -1,4 +1,4 @@
-import { CustomProvider, DynamicModule, MODULE_GLOBAL_METADATA, Type } from '@watsonjs/common';
+import { CustomProvider, DynamicModule, isString, MODULE_GLOBAL_METADATA, Type } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { ApplicationConfig } from './application-config';
@@ -170,8 +170,9 @@ export class WatsonContainer {
     return module && "module" in module;
   }
 
-  public getInstanceOfProvider<T>(metatype: Type<T>): T {
-    const data = this.globalInstanceHost.getInstance(metatype.name, "provider");
+  public getInstanceOfProvider<T>(metatype: Type<T> | string): T {
+    const token = isString(metatype) ? metatype : metatype.name;
+    const data = this.globalInstanceHost.getInstance(token, "provider");
 
     return data.wrapper.instance as T;
   }

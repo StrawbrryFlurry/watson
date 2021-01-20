@@ -152,9 +152,12 @@ export class MetadataResolver {
   private async scanForModuleImports(metatype: Type, context: Type[] = []) {
     context.push(metatype);
     this.container.addModule(metatype);
-    this.logger.logMessage(ADD_MODULE(metatype));
 
-    const { imports } = await this.reflectModuleMetadata(metatype);
+    const { imports, metatype: type } = await this.reflectModuleMetadata(
+      metatype
+    );
+
+    this.logger.logMessage(ADD_MODULE(type));
 
     for (let module of imports) {
       if (typeof module === "undefined") {
@@ -204,6 +207,7 @@ export class MetadataResolver {
       providers,
       receivers,
       exports,
+      metatype: target,
     };
   }
 

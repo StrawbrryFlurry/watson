@@ -1,7 +1,7 @@
-import { isString } from 'class-validator';
+import { isNil, isString } from '@watsonjs/common';
 import { MessageEmbed } from 'discord.js';
-import { RuntimeException } from 'exceptions';
 
+import { NotParsableException } from '../exceptions/not-parsable.exception';
 import { AsyncContextResolver } from './async-context-resolver';
 import { EventExecutionContext } from './event-execution-context';
 
@@ -14,26 +14,28 @@ export class ResponseParser {
     ctx: EventExecutionContext,
     commandData: ICommandResponse
   ) {
-    if (typeof commandData === "undefined") {
+    if (isNil(commandData)) {
       return;
     }
 
     if (!(ctx.getType() === "command")) {
-      throw new RuntimeException(
-        "Cannot return from an event listener that is not a command. Use an returnable instead to resolve this issue."
-      );
+      return;
     }
 
-    return this.asyncResolver.resolveAsyncValue(commandData);
+    if (!this.isSendableMessage(commandData)) {
+      throw new NotParsableException(commandData, ctx);
+    }
+
+    return commandData;
   }
 
   private isSendableMessage(message: unknown) {
     return (
       isString(message) ||
       typeof message === "number" ||
+      typeof message === "boolean" ||
+      typeof message === "bigint" ||
       message instanceof MessageEmbed
     );
   }
-
-  private isReturnable(result: unknown) {}
 }
