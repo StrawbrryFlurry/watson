@@ -1,7 +1,6 @@
 import { Client, ClientEvents } from 'discord.js';
 import { IClientEvent } from 'interfaces/client-events.interface';
 import { Type } from 'interfaces/type.interface';
-import { ConditionalAny } from 'utils';
 
 import { CommandContextData } from './command-context-data.interface';
 import { EventContextData } from './event-context-data.interface';
@@ -28,7 +27,7 @@ export interface ExecutionContext<
    * @interface SlashContextData
    * Use this interface for Slash Command handlers
    */
-  getContextData<T = any>(): ConditionalAny<ContextData, T>;
+  getContextData<T = any>(): T;
 
   /**
    * @returns the base event emitted by the client.
@@ -79,4 +78,18 @@ export interface ExecutionContext<
    * @returns The client that has emitted the event.
    */
   getClient(): Client;
+
+  /**
+   * Returns the event route that matched this event.
+   *
+   * @example
+   * For commands use the `CommandRoute` interface from `@watsonjs/core`
+   *
+   * @example
+   * For events use the `ConcreteEventRoute` interface from`@watsonjs/core`
+   *
+   * @example
+   * For slash commands use the `SlashRoute` interface from `@watsonjs/core`
+   */
+  getRoute<T = any>(): T;
 }

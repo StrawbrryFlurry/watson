@@ -7,6 +7,7 @@ import {
   InquirableType,
   IParamDecoratorMetadata,
   isFunction,
+  isNil,
   isString,
   ParamFactoryFunction,
   ReactFunction,
@@ -32,6 +33,7 @@ export class RouteParamsFactory {
     ctx: EventExecutionContext
   ) {
     const data = ctx.getContextData();
+
     const params: unknown[] = [];
     for (const type of paramTypes) {
       const idx = type.paramIndex;
@@ -53,6 +55,10 @@ export class RouteParamsFactory {
           break;
         case RouteParamType.PARAM:
           const param = type.options;
+          if (isNil((data as CommandContextData).params)) {
+            params[idx] = undefined;
+            break;
+          }
           params[idx] = isString(param)
             ? (data as CommandContextData).params[param]
             : (data as CommandContextData).params;
@@ -108,7 +114,7 @@ export class RouteParamsFactory {
   ): AskFunction {
     const { channel } = ctx.getContextData();
     const askFilter = (message: Message) =>
-      message.author.id === ctx.getContextData().user.id;
+      message.author.id === ctx.getContextData<CommandContextData>().user.id;
 
     return async (
       message: string | MessageEmbed,
@@ -147,7 +153,7 @@ export class RouteParamsFactory {
       const reactionFilter = customReactionFilter
         ? customReactionFilter
         : (reaction: MessageReaction, user: User) =>
-            user.id === ctx.getContextData().user.id;
+            user.id === ctx.getContextData<CommandContextData>().user.id;
 
       const result = await messageRef.awaitReactions(reactionFilter, {
         ...options,

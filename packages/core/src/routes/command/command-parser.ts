@@ -1,4 +1,12 @@
-import { BadArgumentException, CommandArgumentType, CommandContextData, ICommandParam } from '@watsonjs/common';
+import {
+  BadArgumentException,
+  CHANNEL_MENTION_REGEXP,
+  CommandArgumentType,
+  CommandContextData,
+  ICommandParam,
+  ROLE_MENTION_REGEXP,
+  USER_MENTION_REGEXP,
+} from '@watsonjs/common';
 import * as dayjs from 'dayjs';
 import { Channel, Message, PermissionString, Role } from 'discord.js';
 
@@ -10,9 +18,6 @@ interface IMessageParts {
   rest: string;
 }
 
-export const USER_MENTION_REGEXP = /^<@.*>$/;
-export const CHANNEL_MENTION_REGEXP = /^<#.*>$/;
-export const ROLE_MENTION_REGEXP = /^<@&.*>$/;
 export const GUILD_CHANNEL_TYPES = [
   "text",
   "voice",

@@ -1,15 +1,27 @@
+import { MessageEmbed } from 'discord.js';
+
 import { ICommandParam } from '../decorators';
-import { CommandException } from './command.exception';
+import { isString } from '../utils';
+import { EventException } from './event.exception';
 
 /**
  * Sends a default message to the channel with information about the correct usage of the command.
  */
-export class BadArgumentException extends CommandException {
+export class BadArgumentException extends EventException {
   param: ICommandParam;
 
-  constructor(param: ICommandParam) {
-    super();
+  constructor(message: string | MessageEmbed);
+  constructor(param: ICommandParam);
+  constructor(param: ICommandParam | string | MessageEmbed) {
+    if (BadArgumentException.isCustomMessage(param)) {
+      super(param as string);
+    } else {
+      super();
+      this.param = param as ICommandParam;
+    }
+  }
 
-    this.param = param;
+  private static isCustomMessage(param: ICommandParam | string | MessageEmbed) {
+    return isString(param) || param instanceof MessageEmbed;
   }
 }

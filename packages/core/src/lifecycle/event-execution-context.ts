@@ -57,16 +57,16 @@ export class EventExecutionContext<
     return this.parsedEventData;
   }
 
-  public getContextData<T extends CtxData>(): T {
-    return this.contextData as T;
+  public getContextData<T>(): T {
+    return (this.contextData as any) as T;
   }
 
   public getType(): CtxEventType {
     return this.contextType;
   }
 
-  public getRoute(): EventRoute<any> {
-    return this.eventRoute;
+  public getRoute<T>() {
+    return (this.eventRoute as any) as T;
   }
 
   public getAdapter<T extends any = DiscordJSAdapter>(): T {

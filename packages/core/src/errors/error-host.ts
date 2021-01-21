@@ -4,6 +4,7 @@ import { ClientUser, MessageEmbed } from 'discord.js';
 import { EventExecutionContext } from '../lifecycle';
 import { CommandRoute } from '../routes';
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
+import { CUSTOM_ERROR } from './custom.error';
 import { UNAUTHORIZED_ERROR } from './unauthorized.error';
 
 export interface IErrorOptions {
@@ -23,7 +24,16 @@ export class ErrorHost {
   ) {
     let message: MessageEmbed | string;
 
-    if (exception instanceof BadArgumentException) {
+    if (exception.isMessageEmbed) {
+      message = exception.data;
+    } else if (exception.message) {
+      message = CUSTOM_ERROR({
+        message: exception.message,
+        color: this.messageColor,
+        route: ctx.getRoute(),
+        clientUser: ctx.client.user,
+      });
+    } else if (exception instanceof BadArgumentException) {
       message = BAD_ARGUMENT_ERROR({
         clientUser: ctx.client.user,
         color: this.messageColor,
@@ -38,7 +48,7 @@ export class ErrorHost {
       });
     }
 
-    const { channel } = ctx.getContextData();
+    const { channel } = ctx.getContextData<CommandContextData>();
     await channel.send(message);
   }
 }

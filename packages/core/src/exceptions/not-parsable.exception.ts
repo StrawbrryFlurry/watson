@@ -1,5 +1,6 @@
 import { RuntimeException } from '@watsonjs/common';
 import { EventExecutionContext } from 'lifecycle';
+import { CommandRoute } from 'routes';
 
 const NOT_PARSABLE_SUGGESTIONS = [
   "Refer to the docs for valid return types from Commands.",
@@ -7,7 +8,7 @@ const NOT_PARSABLE_SUGGESTIONS = [
 
 export class NotParsableException extends RuntimeException {
   constructor(value: unknown, ctx: EventExecutionContext) {
-    const route = ctx.getRoute();
+    const route = ctx.getRoute<CommandRoute>();
     const handlerName = route.handler.name;
 
     super(

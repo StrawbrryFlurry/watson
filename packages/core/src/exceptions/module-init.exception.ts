@@ -1,7 +1,7 @@
-import { WatsonException } from '@watsonjs/common/exceptions/watson-exception';
+import { BootstrappingException } from './bootstrapping.exception';
 
-export class ModuleInitException extends WatsonException {
+export class ModuleInitException extends BootstrappingException {
   constructor(message: string) {
-    super(message);
+    super("ModuleInit", message);
   }
 }

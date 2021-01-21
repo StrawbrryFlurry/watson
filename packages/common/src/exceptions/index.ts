@@ -1,5 +1,4 @@
 export * from "./bad-argument.exception";
-export * from "./command.exception";
 export * from "./custom-component.exception";
 export * from "./event.exception";
 export * from "./exception-handler";
