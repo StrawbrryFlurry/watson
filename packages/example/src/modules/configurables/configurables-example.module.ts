@@ -1,4 +1,8 @@
 import { Module } from '@watsonjs/common';
 
-@Module()
+import { KickUserReceiver } from './kick-user.receiver';
+
+@Module({
+  receivers: [KickUserReceiver],
+})
 export class ConfigurablesExampleModule {}

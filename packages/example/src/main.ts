@@ -11,6 +11,7 @@ const bootstrap = async () => {
   const token = configService.get("DISCORD_TOKEN");
 
   app.setAuthToken(token);
+  app.addGlobalPrefix("!");
   app.setActivity({
     name: "doing stuff",
     type: "PLAYING",
