@@ -5,7 +5,7 @@ import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 export function UseFilters(
   ...filters: (Filter | Function)[]
-): MethodDecorator | ClassDecorator {
+): MethodDecorator & ClassDecorator {
   return (
     target: any,
     propertykey?: string,

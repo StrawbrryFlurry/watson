@@ -13,6 +13,7 @@ import {
   isFunction,
   isNil,
   PARAM_METADATA,
+  PIPE_METADATA,
   PipeTransform,
   SlashContextData,
   TReceiver,
@@ -160,7 +161,7 @@ export class RouteHandlerFactory {
 
     for (const guard of guards) {
       if (isFunction(guard)) {
-        const wrapper = module.injectables.get((guard as Function).name);
+        const wrapper = module.injectables.get(guard);
 
         if (typeof wrapper === "undefined") {
           throw new ModuleInitException(
@@ -198,7 +199,7 @@ export class RouteHandlerFactory {
           boolean
         >(res);
 
-        if (activationRes) {
+        if (activationRes === false) {
           throw new UnatuhorizedException();
         }
       }
@@ -231,7 +232,7 @@ export class RouteHandlerFactory {
 
     for (const filter of filters) {
       if (isFunction(filter)) {
-        const wrapper = module.injectables.get((filter as Function).name);
+        const wrapper = module.injectables.get(filter);
 
         if (typeof wrapper === "undefined") {
           throw new ModuleInitException(
@@ -287,7 +288,7 @@ export class RouteHandlerFactory {
     const { host: module } = receiver;
 
     const pipes = this.reflectKey<PipeTransform>(
-      FILTER_METADATA,
+      PIPE_METADATA,
       handler,
       receiver
     );
@@ -310,7 +311,7 @@ export class RouteHandlerFactory {
 
     for (const pipe of pipes) {
       if (isFunction(pipe)) {
-        const wrapper = module.injectables.get((pipe as Function).name);
+        const wrapper = module.injectables.get(pipe);
 
         if (typeof wrapper === "undefined") {
           throw new ModuleInitException(
@@ -343,16 +344,20 @@ export class RouteHandlerFactory {
     return async (
       ctx: CommandContextData | SlashContextData | EventContextData
     ) => {
-      const transformStack = [ctx];
+      const pipeResults = [];
       for (const pipe of pipes) {
-        const currentCtx = transformStack[-1];
-        const res = pipe.transform(currentCtx);
+        const res = pipe.transform(ctx);
         const transformedCtx = await this.asyncResolver.resolveAsyncValue(res);
 
-        transformStack.push(transformedCtx);
+        pipeResults.push(transformedCtx);
       }
 
-      return transformStack[-1];
+      const transformation = pipeResults.reduce(
+        (changes, change) => ({ ...changes, ...change }),
+        {}
+      );
+
+      return transformation;
     };
   }
 
@@ -445,11 +450,11 @@ export class RouteHandlerFactory {
 
         applyGuardsFn && (await applyGuardsFn(ctx));
 
-        const transformedContext =
-          applyPipesFn && (await applyPipesFn(ctx.getContextData()));
+        const transfromedParams = applyPipesFn && (await applyPipesFn(ctx));
 
-        if (!isNil(transformedContext)) {
-          ctx.applyTransformation(transformedContext);
+        if (!isNil(transfromedParams)) {
+          data.params = transfromedParams;
+          ctx.applyTransformation(data);
         }
 
         const params = await paramsFactory(ctx);
