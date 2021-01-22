@@ -1,36 +1,13 @@
-import { Command, Event, ExecutionContext, InjectChannel, InjectContext, Receiver, WatsonPaginator } from '@watsonjs/common';
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { Command, Receiver } from '@watsonjs/common';
 
-@Receiver({
-  prefix: "!",
-})
+import { AppService } from './app.service';
+
+@Receiver()
 export class AppReceiver {
-  @Command()
-  async help(@InjectChannel() channel: TextChannel) {
-    const message1 = new MessageEmbed({
-      title: "Help page 1",
-      description: "Some help",
-    });
+  constructor(private readonly appService: AppService) {}
 
-    const message2 = new MessageEmbed({
-      title: "Help page 2",
-      description: "Some more help",
-    });
-
-    const message3 = new MessageEmbed({
-      title: "Help page 3",
-      description: "Even more help",
-    });
-
-    const paginator = new WatsonPaginator([message1, message2, message3], {
-      timeReactive: 20000,
-      delete: true,
-    });
-
-    await paginator.send(channel);
-    return "Heys";
+  @Command("ping")
+  ping() {
+    return this.appService.ping();
   }
-
-  @Event("message")
-  async handleeEvent(@InjectContext() ctx: ExecutionContext) {}
 }

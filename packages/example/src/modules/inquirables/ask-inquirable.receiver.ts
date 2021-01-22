@@ -3,7 +3,7 @@ import { Message, TextChannel } from 'discord.js';
 
 @Receiver()
 export class AskInquirableReceiver {
-  @Command("ping")
+  @Command("askping")
   async askCommand(
     @InjectAsk() ask: AskFunction<Message>,
     @InjectChannel() channel: TextChannel

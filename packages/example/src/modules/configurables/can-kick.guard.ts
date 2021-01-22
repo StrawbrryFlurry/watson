@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnatuhorizedException } from '@watsonjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@watsonjs/common';
 
 @Injectable()
 export class CanKickGuard implements CanActivate {
@@ -12,7 +12,7 @@ export class CanKickGuard implements CanActivate {
       return true;
     }
 
-    throw new UnatuhorizedException(
+    throw new UnauthorizedException(
       "You don't have permissions to use this command"
     );
   }

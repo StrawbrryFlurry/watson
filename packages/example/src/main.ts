@@ -7,7 +7,6 @@ const bootstrap = async () => {
   const app = await WatsonFactory.create(ApplicationModule);
 
   const configService = app.getProviderInstance(ConfigService);
-
   const token = configService.get("DISCORD_TOKEN");
 
   app.setAuthToken(token);
