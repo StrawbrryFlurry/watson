@@ -1,7 +1,7 @@
 import { Client, ClientEvents } from 'discord.js';
-import { IClientEvent } from 'interfaces/client-events.interface';
-import { Type } from 'interfaces/type.interface';
 
+import { IClientEvent } from '../client-events.interface';
+import { Type } from '../type.interface';
 import { CommandContextData } from './command-context-data.interface';
 import { EventContextData } from './event-context-data.interface';
 import { SlashContextData } from './slash-context-data';

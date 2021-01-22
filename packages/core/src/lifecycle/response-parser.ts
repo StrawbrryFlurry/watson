@@ -23,6 +23,8 @@ export class ResponseParser {
     }
 
     if (!this.isSendableMessage(commandData)) {
+      return;
+      // Might be annoying for returning `channel.send`
       throw new NotParsableException(commandData, ctx);
     }
 

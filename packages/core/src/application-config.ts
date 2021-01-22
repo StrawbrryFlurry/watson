@@ -1,4 +1,4 @@
-import { EventException, EventExceptionHandler, isNil } from '@watsonjs/common';
+import { EventExceptionHandler, isNil } from '@watsonjs/common';
 import { ClientOptions, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
@@ -10,7 +10,7 @@ export class ApplicationConfig {
   public authToken: string;
   public acknowledgementReaction: string | Snowflake;
   public clientAdapter: DiscordJSAdapter;
-  public globalExceptionHandlers = new Set<EventExceptionHandler<any>>();
+  public globalExceptionHandlers = new Set<EventExceptionHandler>();
 
   constructor(options: IWatsonApplicationOptions, client: DiscordJSAdapter) {
     this.clientAdapter = client;
@@ -24,9 +24,7 @@ export class ApplicationConfig {
     this.acknowledgementReaction = options.acknowledgeReaction;
   }
 
-  public addGlobalExceptionHandler<T extends EventException[]>(
-    handler: EventExceptionHandler<T>
-  ) {
+  public addGlobalExceptionHandler(handler: EventExceptionHandler) {
     this.globalExceptionHandlers.add(handler);
   }
 }

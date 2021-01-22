@@ -17,6 +17,7 @@ export const INJECTABLE_METADATA = "injectable:meta";
 export const PIPE_METADATA = "pipe:meta";
 export const GUARD_METADATA = "guard:meta";
 export const FILTER_METADATA = "filter:meta";
+export const EXCEPTION_HANDLER_METADATA = "exceptionhandler:meta";
 
 export const RECEIVER_ERROR_HANDLER_METADATA = "receiver:error:meta";
 export const COMMAND_ERROR_HANDLER_METADATA = "command:error:meta";

@@ -1,6 +1,6 @@
 import { EventException } from './event.exception';
 
-export class UnatuhorizedException extends EventException {
+export class UnauthorizedException extends EventException {
   constructor(message?: string) {
     super(message);
   }

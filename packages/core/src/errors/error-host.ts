@@ -1,4 +1,4 @@
-import { BadArgumentException, CommandContextData, EventException, UnatuhorizedException } from '@watsonjs/common';
+import { BadArgumentException, CommandContextData, EventException, UnauthorizedException } from '@watsonjs/common';
 import { ClientUser, MessageEmbed } from 'discord.js';
 
 import { EventExecutionContext } from '../lifecycle';
@@ -16,7 +16,13 @@ export interface IErrorOptions {
 export class ErrorHost {
   private messageColor: string;
 
-  public configure() {}
+  constructor() {
+    this.configure();
+  }
+
+  public configure() {
+    this.messageColor = "#ffd149";
+  }
 
   public async handleCommonException(
     exception: EventException,
@@ -40,7 +46,7 @@ export class ErrorHost {
         param: exception.param,
         route: ctx.getRoute() as CommandRoute,
       });
-    } else if (exception instanceof UnatuhorizedException) {
+    } else if (exception instanceof UnauthorizedException) {
       message = UNAUTHORIZED_ERROR({
         clientUser: ctx.client.user,
         color: this.messageColor,
@@ -48,7 +54,8 @@ export class ErrorHost {
       });
     }
 
-    const { channel } = ctx.getContextData<CommandContextData>();
+    const [msgEvent] = ctx.getEvent<"message">();
+    const { channel } = msgEvent;
     await channel.send(message);
   }
 }

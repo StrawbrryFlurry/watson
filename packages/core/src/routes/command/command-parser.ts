@@ -4,6 +4,7 @@ import {
   CommandArgumentType,
   CommandContextData,
   ICommandParam,
+  isNil,
   ROLE_MENTION_REGEXP,
   USER_MENTION_REGEXP,
 } from '@watsonjs/common';
@@ -259,6 +260,10 @@ export class CommandParser {
 
   private paraseStringParam(content: string, param: ICommandParam) {
     const [s, ...rest] = content.split(this.config.paramDelimiter);
+
+    if (isNil(s) || s === "") {
+      throw new BadArgumentException(param);
+    }
 
     return {
       remaining: rest.join(this.config.paramDelimiter),

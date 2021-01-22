@@ -1,4 +1,4 @@
-import { RuntimeException, Type } from '@watsonjs/common';
+import { EventExceptionHandler, RuntimeException, Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
@@ -91,6 +91,13 @@ export class WatsonApplication {
    */
   public addGlobalPrefix(prefix: string) {
     this.config.globalCommandPrefix = prefix;
+  }
+
+  /**
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public addGlobalExceptionsHandler(handler: EventExceptionHandler) {
+    this.config.addGlobalExceptionHandler(handler);
   }
 
   /**

@@ -2,6 +2,7 @@ import {
   CustomProvider,
   DESIGN_PARAMETERS,
   DynamicModule,
+  EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
   IInjectValue,
@@ -117,6 +118,11 @@ export class MetadataResolver {
     this.reflectComponentInjectables(metatype, token, GUARD_METADATA);
     this.reflectComponentInjectables(metatype, token, PIPE_METADATA);
     this.reflectComponentInjectables(metatype, token, FILTER_METADATA);
+    this.reflectComponentInjectables(
+      metatype,
+      token,
+      EXCEPTION_HANDLER_METADATA
+    );
   }
 
   private reflectComponentInjectables(

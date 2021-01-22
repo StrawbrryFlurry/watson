@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
-import { ExecutionContext } from 'interfaces';
 
+import { ExecutionContext } from '../interfaces';
 import { RuntimeException } from './runtime-exception';
 
 /**
@@ -30,7 +30,7 @@ export abstract class EventException extends RuntimeException {
     this._context = ctx;
   }
 
-  public get context() {
+  public get context(): ExecutionContext {
     return this._context;
   }
 }

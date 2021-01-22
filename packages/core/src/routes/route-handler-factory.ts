@@ -17,7 +17,7 @@ import {
   PipeTransform,
   SlashContextData,
   TReceiver,
-  UnatuhorizedException,
+  UnauthorizedException,
 } from '@watsonjs/common';
 import { DiscordJSAdapter } from 'adapters';
 import { Base, ClientEvents } from 'discord.js';
@@ -200,7 +200,7 @@ export class RouteHandlerFactory {
         >(res);
 
         if (activationRes === false) {
-          throw new UnatuhorizedException();
+          throw new UnauthorizedException();
         }
       }
     };

@@ -2,10 +2,11 @@ import {
   COMMAND_METADATA,
   EVENT_METADATA,
   EventExceptionHandler,
+  EXCEPTION_HANDLER_METADATA,
   IClientEvent,
   ICommandOptions,
+  isFunction,
   PartialApplicationCommand,
-  RECEIVER_ERROR_HANDLER_METADATA,
   RECEIVER_METADATA,
   SLASH_COMMAND_METADATA,
   TReceiver,
@@ -13,7 +14,7 @@ import {
 } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { InstanceWrapper, MetadataResolver } from '../injector';
+import { InstanceWrapper, MetadataResolver, Module } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
 import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND, MAP_EVENT, MAP_SLASH_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
@@ -94,7 +95,8 @@ export class RouteExplorer {
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,
-        method.descriptor
+        method.descriptor,
+        receiver.host
       );
 
       this.bindHandler(metadata, handler, exceptionHandler);
@@ -139,7 +141,8 @@ export class RouteExplorer {
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,
-        method.descriptor
+        method.descriptor,
+        receiver.host
       );
 
       this.bindHandler("message", handler, exceptionHandler);
@@ -180,7 +183,8 @@ export class RouteExplorer {
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,
-        method.descriptor
+        method.descriptor,
+        receiver.host
       );
 
       this.bindHandler(
@@ -198,18 +202,25 @@ export class RouteExplorer {
 
   private reflectExceptionHandlers(
     metadataKey: string,
-    reflectee: Type | Function
+    reflectee: Type | Function,
+    module: Module
   ) {
     const handlerMetadata = this.resolver.getArrayMetadata<
-      EventExceptionHandler<any>[]
+      EventExceptionHandler[]
     >(metadataKey, reflectee);
 
-    const validHandlers = handlerMetadata.filter(
-      (e: EventExceptionHandler<any>) =>
-        e instanceof EventExceptionHandler && typeof e.catch !== "undefined"
+    const instances = handlerMetadata.filter(
+      (e: EventExceptionHandler) => e instanceof EventExceptionHandler
+    );
+    const injectables = handlerMetadata.filter(isFunction);
+    const injectableInstances = injectables.map(
+      (injectable) =>
+        module.injectables.get(injectable).instance as EventExceptionHandler
     );
 
-    return validHandlers;
+    const hanlders = [...injectableInstances, ...instances];
+
+    return hanlders;
   }
 
   public getEventProxies() {
@@ -238,16 +249,22 @@ export class RouteExplorer {
     proxyRef.bind(handler, exceptionHandler);
   }
 
-  private createExceptionHandler(receiver: Type, method: Function) {
+  private createExceptionHandler(
+    receiver: Type,
+    method: Function,
+    module: Module
+  ) {
     const defaultHandlers = [new CommonExceptionHandler()];
     const customGlobalHandlers = this.constainer.getGlobalExceptionHandlers();
     const customReceiverHandlers = this.reflectExceptionHandlers(
-      RECEIVER_ERROR_HANDLER_METADATA,
-      receiver
+      EXCEPTION_HANDLER_METADATA,
+      receiver,
+      module
     );
     const customCommandHandlers = this.reflectExceptionHandlers(
-      RECEIVER_ERROR_HANDLER_METADATA,
-      method
+      EXCEPTION_HANDLER_METADATA,
+      method,
+      module
     );
 
     const customHandlers = [
