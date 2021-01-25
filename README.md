@@ -8,3 +8,17 @@
 Watson is a Discord bot framework heavily inspired by the architecture of <a href="https://github.com/nestjs/nest">NestJS</a> and <a href="https://github.com/angular/angular">Angular</a>. It uses TypeScript to provide an easy to use API to scale along with the growth and complexity of your service.
 
 As an interface to the Discord API we use <a href="https://discord.js.org">DiscordJS</a> though we also plan to support other client frameworks in the future.
+
+# Misc
+
+## Git Commit Format
+
+[🚀] [Type] [Message]
+
+### Types:
+
+- 🚀 [FEATURE] A new addition to the package
+- ✏ [UPDATE] Update existing feature
+- 🔨 [FIX] Fixing a bug
+- 📝 [DOCS] Adding comments, documentation..
+- 🗑 [REMOVED] Removing files / Changes
