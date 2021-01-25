@@ -1,7 +1,6 @@
-import { PipeTransform } from 'interfaces';
-
-import { PIPE_METADATA } from '../../constants';
-import { applyStackableMetadata } from '../apply-stackable-metadata';
+import { PIPE_METADATA } from "../../constants";
+import { PipeTransform } from "../../interfaces";
+import { applyStackableMetadata } from "../apply-stackable-metadata";
 
 /**
  * Use pipes to parse command arguments without relying on Watsons command parser.

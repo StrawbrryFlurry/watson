@@ -18,16 +18,13 @@
     "axios": "^0.21.0",
     "tslib": "^2.0.3",
     "uuid": "^8.3.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "reflect-metadata": "^0.1.12"
   },
   "peerDependencies": {
-    "reflect-metadata": "^0.1.12",
     "rxjs": "^6.6.3"
   },
   "homepage": "https://watsonjs.io",
-  "files": [
-    "dist"
-  ],
   "publishConfig": {
     "access": "public"
   },

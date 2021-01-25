@@ -7,11 +7,11 @@ import {
   isNil,
   ROLE_MENTION_REGEXP,
   USER_MENTION_REGEXP,
-} from '@watsonjs/common';
-import * as dayjs from 'dayjs';
-import { Channel, Message, PermissionString, Role } from 'discord.js';
+} from "@watsonjs/common";
+import * as dayjs from "dayjs";
+import { Channel, Message, PermissionString, Role } from "discord.js";
 
-import { CommandConfiguration } from './command-config';
+import { CommandConfiguration } from "./command-config";
 
 interface IMessageParts {
   command: string;
@@ -65,7 +65,7 @@ export class CommandParser {
   public matchesCommand(command: string) {
     command = this.config.caseSensitive ? command.toLowerCase() : command;
     return (
-      command === this.config.name ||
+      command === this.config.name.toLowerCase() ||
       this.config.alias.some((e) => e.toLowerCase() === command)
     );
   }

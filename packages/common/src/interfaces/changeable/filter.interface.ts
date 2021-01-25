@@ -1,5 +1,6 @@
-import { ExecutionContext } from 'interfaces/context';
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
+
+import { ExecutionContext } from "../../interfaces";
 
 /**
  * Filters work in a similar way to guards. Their difference being that they will not throw an error if the command shouldn't be run.

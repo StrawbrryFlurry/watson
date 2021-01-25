@@ -1,10 +1,10 @@
-import { IClientEvent } from '@watsonjs/common';
-import { DiscordJSAdapter } from 'adapters';
-import { ClientEvents } from 'discord.js';
-import iterate from 'iterare';
+import { IClientEvent } from "@watsonjs/common";
+import { ClientEvents } from "discord.js";
+import iterate from "iterare";
 
-import { ExceptionHandler } from '../lifecycle';
-import { IHandlerFunction } from '../routes';
+import { DiscordJSAdapter } from "../adapters";
+import { ExceptionHandler } from "../lifecycle";
+import { IHandlerFunction } from "../routes";
 
 export class EventProxy<Event extends IClientEvent> {
   public readonly eventType: Event;

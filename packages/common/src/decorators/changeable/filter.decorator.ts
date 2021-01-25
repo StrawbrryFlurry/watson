@@ -1,7 +1,6 @@
-import { Filter } from 'interfaces';
-
-import { FILTER_METADATA } from '../../constants';
-import { applyStackableMetadata } from '../apply-stackable-metadata';
+import { FILTER_METADATA } from "../../constants";
+import { Filter } from "../../interfaces";
+import { applyStackableMetadata } from "../apply-stackable-metadata";
 
 export function UseFilters(
   ...filters: (Filter | Function)[]

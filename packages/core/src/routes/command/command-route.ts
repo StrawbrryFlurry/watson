@@ -1,13 +1,18 @@
-import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, isString, TReceiver } from '@watsonjs/common';
-import { isArray } from 'class-validator';
-import { Message } from 'discord.js';
-import { IAsynchronousResolvable } from 'interfaces';
+import {
+  ICommandOptions,
+  IParamDecoratorMetadata,
+  IReceiverOptions,
+  isString,
+  TReceiver,
+} from "@watsonjs/common";
+import { Message } from "discord.js";
 
-import { IMethodValue, InstanceWrapper } from '../../injector';
-import { WatsonContainer } from '../../watson-container';
-import { EventRoute } from '../event-route';
-import { CommandConfiguration } from './command-config';
-import { CommandParser } from './command-parser';
+import { IMethodValue, InstanceWrapper } from "../../injector";
+import { IAsynchronousResolvable } from "../../interfaces";
+import { WatsonContainer } from "../../watson-container";
+import { EventRoute } from "../event-route";
+import { CommandConfiguration } from "./command-config";
+import { CommandParser } from "./command-parser";
 
 export interface ICommandParams {
   [name: string]: unknown;
@@ -76,7 +81,7 @@ export class CommandRoute extends EventRoute<"message"> {
   }
 
   public createContextData(message: any) {
-    if (isArray(message)) {
+    if (Array.isArray(message)) {
       [message] = message;
     }
 

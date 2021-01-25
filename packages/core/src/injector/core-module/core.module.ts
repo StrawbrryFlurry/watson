@@ -1,5 +1,6 @@
-import { DynamicModule, Global, Module } from '@watsonjs/common';
-import { CoreModuleRegister } from 'interfaces';
+import { DynamicModule, Global, Module } from "@watsonjs/common";
+
+import { CoreModuleRegister } from "../../interfaces";
 
 /**
  * The core module must have a static method called `register` which will

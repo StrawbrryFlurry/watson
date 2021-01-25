@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from '@watsonjs/common';
+import { isEmpty, isNil } from "../utils";
 
 export abstract class WatsonException extends Error {
   public readonly suggestions: string[];

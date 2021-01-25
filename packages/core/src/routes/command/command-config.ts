@@ -1,9 +1,16 @@
-import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions, isEmpty, isNil } from '@watsonjs/common';
+import {
+  CommandArgumentType,
+  ICommandOptions,
+  ICommandParam,
+  IReceiverOptions,
+  isEmpty,
+  isNil,
+} from "@watsonjs/common";
 
-import { ApplicationConfig } from '../../application-config';
-import { CommandConfigurationException } from '../../exceptions';
-import { IMethodValue } from '../../injector';
-import { EventConfiguration } from '../event.configuration';
+import { ApplicationConfig } from "../../application-config";
+import { CommandConfigurationException } from "../../exceptions";
+import { IMethodValue } from "../../injector";
+import { EventConfiguration } from "../event.configuration";
 
 export class CommandConfiguration extends EventConfiguration {
   public prefix: string;
@@ -91,12 +98,12 @@ export class CommandConfiguration extends EventConfiguration {
   }
 
   private setConfiguration() {
-    if (this.commandOptions?.caseSensitive) {
-      this.caseSensitive = true;
-    } else if (this.receiverOptions.commandOptions?.casesensitive) {
-      this.caseSensitive = true;
-    } else {
+    if (this.commandOptions?.caseSensitive === false) {
       this.caseSensitive = false;
+    } else if (this.receiverOptions.commandOptions?.casesensitive === false) {
+      this.caseSensitive = false;
+    } else {
+      this.caseSensitive = true;
     }
 
     this.alias = this.commandOptions.alias || [];

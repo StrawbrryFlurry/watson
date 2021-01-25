@@ -1,8 +1,7 @@
-import { Type } from 'interfaces';
-
-import { RouteParamType } from '../../enums';
-import { isFunction } from '../../utils';
-import { createParamDecorator } from '../create-param-decorator';
+import { RouteParamType } from "../../enums";
+import { Type } from "../../interfaces";
+import { isFunction } from "../../utils";
+import { createParamDecorator } from "../create-param-decorator";
 
 /**
  * Injects the parameters of a command to the argument in the command handler method.

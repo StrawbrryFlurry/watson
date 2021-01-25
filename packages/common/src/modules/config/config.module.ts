@@ -1,9 +1,9 @@
-import { DotenvConfigOptions } from 'dotenv';
-import { DynamicModule, ValueProvider } from 'interfaces';
+import { DotenvConfigOptions } from "dotenv";
 
-import { Module } from '../../decorators';
-import { isNil } from '../../utils';
-import { ConfigService } from './config.service';
+import { Module } from "../../decorators";
+import { DynamicModule, ValueProvider } from "../../interfaces";
+import { isNil } from "../../utils";
+import { ConfigService } from "./config.service";
 
 export interface IConfigModuleOptions<T = any> {
   dotEnv?: DotenvConfigOptions;

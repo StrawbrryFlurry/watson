@@ -1,6 +1,7 @@
-import { RuntimeException } from '@watsonjs/common';
-import { EventExecutionContext } from 'lifecycle';
-import { CommandRoute } from 'routes';
+import { RuntimeException } from "@watsonjs/common";
+import { CommandRoute } from "routes";
+
+import { EventExecutionContext } from "../lifecycle";
 
 const NOT_PARSABLE_SUGGESTIONS = [
   "Refer to the docs for valid return types from Commands.",

@@ -1,6 +1,6 @@
-import { Command, Receiver } from '@watsonjs/common';
+import { Command, Receiver } from "@watsonjs/common";
 
-import { AppService } from './app.service';
+import { AppService } from "./app.service";
 
 @Receiver()
 export class AppReceiver {

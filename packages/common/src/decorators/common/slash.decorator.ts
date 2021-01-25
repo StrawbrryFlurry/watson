@@ -1,6 +1,5 @@
-import { PartialApplicationCommand } from 'interfaces';
-
-import { SLASH_COMMAND_METADATA } from '../../constants';
+import { SLASH_COMMAND_METADATA } from "../../constants";
+import { PartialApplicationCommand } from "../../interfaces";
 
 export interface ISlashCommandConfig extends PartialApplicationCommand {}
 

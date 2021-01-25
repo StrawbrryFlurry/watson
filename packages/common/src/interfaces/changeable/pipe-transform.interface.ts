@@ -1,5 +1,10 @@
-import { CommandContextData, EventContextData, SlashContextData } from 'interfaces/context';
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
+
+import {
+  CommandContextData,
+  EventContextData,
+  SlashContextData,
+} from "../../interfaces";
 
 /**
  * Pipe transforms allow you to alter context data directly.
