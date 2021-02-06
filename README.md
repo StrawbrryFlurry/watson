@@ -1,13 +1,47 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/M1CH3L1US/Watson/master/.github/assets/logo.png" width="250">
+  <img src="https://watsonjs.io/static/logo.png" width="500" />
 </p>
- <p align="center">A scalable <a href="https://nodejs.org">Node.js</a> framework for building <a href="https://discord.com">Discord</a> Bots</p>
+<p align="center">
+  A scalable <a href="https://nodejs.org">Node.js</a> framework for building <a href="https://discord.com">Discord</a> applications
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/~watsonjs"
+    ><img
+      src="https://img.shields.io/github/stars/M1CH3L1US/watson?style=flat-square"
+  /></a>
+  <a href="https://www.npmjs.com/~watsonjs"
+    ><img
+      src="https://img.shields.io/npm/v/@watsonjs/core.svg?style=flat-square"
+      alt="NPM Version"
+  /></a>
+  <a href="https://www.npmjs.com/~watsonjs"
+    ><img
+      src="https://img.shields.io/npm/l/@watsonjs/core.svg?style=flat-square"
+      alt="Package License"
+  /></a>
+  <a href="https://www.npmjs.com/~watsonjs"
+    ><img
+      src="https://img.shields.io/npm/dm/@watsonjs/core.svg?style=flat-square"
+      alt="NPM Downloads"
+  /></a>
+</p>
 
 # Description
 
-Watson is a Discord bot framework heavily inspired by the architecture of <a href="https://github.com/nestjs/nest">NestJS</a> and <a href="https://github.com/angular/angular">Angular</a>. It uses TypeScript to provide an easy to use API to scale along with the growth and complexity of your service.
+Watson is a framework for building scalable Discord application in <a href="https://nodejs.org">Node.js</a>. It uses <a href="https://www.typescriptlang.org/">TypeScript</a> to provide an easy to use API to scale along with the growth and complexity of your app.
 
-As an interface to the Discord API we use <a href="https://discord.js.org">DiscordJS</a> though we also plan to support other client frameworks in the future.
+As an interface to the Discord API we use <a href="https://discord.js.org">DiscordJS</a> however we also plan to support other libraries in the future.
+
+# Usage
+
+Please read the docs at <a href=https://watsonjs.io/>watsonjs.io</a>.
+
+# Credits and references
+
+Hat fanart by: <a href="https://twitter.com/maka_hayashi">@maka_hayashi</a>
+
+The architecture of this project is inspired by <a href="https://github.com/nestjs/nest">NestJS</a>
 
 # Misc
 
@@ -22,3 +56,7 @@ As an interface to the Discord API we use <a href="https://discord.js.org">Disco
 - 🔨 [FIX] Fixing a bug
 - 📝 [DOCS] Adding comments, documentation..
 - 🗑 [REMOVED] Removing files / Changes
+
+# License
+
+Watson is MIT licensed.
