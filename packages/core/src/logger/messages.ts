@@ -54,7 +54,7 @@ export const CREATE_INSTANCE = (instance: InstanceWrapper) =>
 
 // *END
 
-// GLOAL
+// GLOBAL
 export const COMPLETED = () => `Completed`;
 
 type Changeable = "guard" | "pipe" | "filter";

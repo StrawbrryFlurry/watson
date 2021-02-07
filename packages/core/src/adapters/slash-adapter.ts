@@ -1,33 +1,46 @@
-import { ApplicationCommand, PartialApplicationCommand } from '@watsonjs/common';
-import Axios, { AxiosInstance } from 'axios';
+import { ApplicationCommand, HttpClient, PartialApplicationCommand } from '@watsonjs/common';
 import { Snowflake } from 'discord.js';
+import { map } from 'rxjs/operators';
+
+import { DISCORD_API_URL, DISCORD_GATEWAY_VERSION, DISCORD_TOKEN_PREFIX, DISCORD_URL } from '../constants';
+import { containerInstanceHelper } from '../helpers';
+import { WatsonContainer } from '../watson-container';
 
 export class SlashCommandAdapter {
-  private readonly DISCORD_ENDPOINT = "https://discord.com/api/v8";
-  private readonly httpClient: AxiosInstance;
-  private readonly tokenPrefix = "Bot ";
   private readonly applicationid: Snowflake;
+  private readonly authToken: string;
+
+  private http: HttpClient;
 
   constructor(config: { applicationId: Snowflake; authToken: string }) {
     this.applicationid = config.applicationId;
-    this.httpClient = Axios.create({
-      headers: { Authorization: `${this.tokenPrefix}${config.authToken}` },
-    });
+    this.authToken = config.authToken;
   }
 
-  public async getApplicationCommands(guildId?: string) {
-    const res = await this.httpClient.get<ApplicationCommand[]>(
-      this.getEndpoint(
-        guildId
-          ? `applications/${this.applicationid}/guilds/${guildId}/commands`
-          : `applications/${this.applicationid}/commands`
-      )
+  public async init(container: WatsonContainer) {
+    this.http = await containerInstanceHelper(container, HttpClient);
+    await this.http.updateInstance(
+      (instance) =>
+        (instance.defaults.headers = {
+          Authorization: `${DISCORD_TOKEN_PREFIX}${this.authToken}`,
+        })
     );
-
-    return res.data;
   }
 
-  public async createApplicationCommand(
+  public getApplicationCommands(guildId?: string) {
+    return this.http
+      .get<ApplicationCommand[]>(
+        this.getEndpoint(
+          guildId
+            ? `applications/${this.applicationid}/guilds/${guildId}/commands`
+            : `applications/${this.applicationid}/commands`
+        )
+      )
+      .pipe(map((res) => res.data))
+      .toPromise();
+  }
+
+  public createApplicationCommand(
     command: PartialApplicationCommand,
     guildId?: string,
     commandId?: string
@@ -40,34 +53,38 @@ export class SlashCommandAdapter {
         : `applications/${this.applicationid}/commands/${suffix}`
     );
 
-    const req = await (method === "POST"
-      ? this.httpClient.post<ApplicationCommand>(endpoint, command)
-      : this.httpClient.patch(endpoint, command));
+    const res =
+      method === "POST"
+        ? this.http.post<ApplicationCommand>(endpoint, command)
+        : this.http.patch(endpoint, command);
 
-    return req.data;
+    res.pipe(map((res) => res.data)).toPromise();
   }
 
-  async editApplicationCommand(
+  public async editApplicationCommand(
     commandId: string,
     command: PartialApplicationCommand,
     guildId?: string
   ) {
-    return await this.createApplicationCommand(command, guildId, commandId);
+    return this.createApplicationCommand(command, guildId, commandId);
   }
 
   public async deleteApplicationCommand(commandId: string, guildId?: string) {
-    const request = await this.httpClient.delete(
-      this.getEndpoint(
-        guildId
-          ? `applications/${this.applicationid}/guilds/${guildId}/commands/${commandId}`
-          : `applications/${this.applicationid}/commands/${commandId}`
+    const status = await this.http
+      .delete(
+        this.getEndpoint(
+          guildId
+            ? `applications/${this.applicationid}/guilds/${guildId}/commands/${commandId}`
+            : `applications/${this.applicationid}/commands/${commandId}`
+        )
       )
-    );
+      .pipe(map((res) => res.status))
+      .toPromise();
 
-    return request.status == 204;
+    return status == 204;
   }
 
   private getEndpoint(endpoint: string) {
-    return `${this.DISCORD_ENDPOINT}/${endpoint}`;
+    return `${DISCORD_URL}/${DISCORD_API_URL}/${DISCORD_GATEWAY_VERSION}/${endpoint}`;
   }
 }
