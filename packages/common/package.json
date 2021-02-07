@@ -1,7 +1,7 @@
 {
   "name": "@watsonjs/common",
-  "version": "0.0.1",
-  "description": "A NestJS inspired framework for building DiscordJS applications (@common)",
+  "version": "0.0.5",
+  "description": "Fast, scalable framework for building Discord applications (@common)",
   "repository": {
     "type": "git",
     "url": "https://github.com/M1CH3L1US/watson/tree/Watson"
@@ -10,8 +10,7 @@
     "discord"
   ],
   "authors": [
-    "Michael S.",
-    "Colin P."
+    "Michael S."
   ],
   "license": "MIT",
   "dependencies": {
@@ -27,6 +26,5 @@
   "homepage": "https://watsonjs.io",
   "publishConfig": {
     "access": "public"
-  },
-  "private": false
+  }
 }

@@ -10,14 +10,14 @@
   "scripts": {
     "build": "gulp build:dev --dist node_modules/@watsonjs",
     "clean": "gulp clean",
+    "build:release": "gulp build --dist node_modules/@watsonjs",
     "test": "gulp build --dist node_modules/@watsonjs && lerna run compile --scope @watsonjs/example && node ./packages/example/dist/main.js"
   },
   "keywords": [
     "discord"
   ],
   "authors": [
-    "Michael S.",
-    "Colin P."
+    "Michael S."
   ],
   "license": "MIT",
   "dependencies": {
