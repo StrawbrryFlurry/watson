@@ -1,4 +1,4 @@
-import { CustomProvider, DynamicModule, isString, MODULE_GLOBAL_METADATA, Type } from '@watsonjs/common';
+import { CustomProvider, DynamicModule, isEmpty, isNil, isString, MODULE_GLOBAL_METADATA, Type } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { ApplicationConfig } from './application-config';
@@ -18,6 +18,8 @@ export class WatsonContainer {
   private readonly globalModules = new Set<Module>();
   private dynamicModuleMetadata = new Map<string, Partial<DynamicModule>>();
 
+  private rootModule: Module;
+
   constructor(config: ApplicationConfig) {
     this.config = config;
   }
@@ -26,7 +28,10 @@ export class WatsonContainer {
     return this.modules;
   }
 
-  public addModule(metatype: Type | DynamicModule) {
+  public addModule(
+    metatype: Type | DynamicModule,
+    forwardRef: Type[] | DynamicModule[] | Type
+  ) {
     const token = this.moduleTokenFactory.generateModuleToken(metatype);
     let module: Module;
 
@@ -41,6 +46,10 @@ export class WatsonContainer {
       this.globalModules.add(module);
     }
 
+    if (this.isRootModule(forwardRef)) {
+      this.setRootModule(token);
+    }
+
     return token;
   }
 
@@ -50,6 +59,18 @@ export class WatsonContainer {
     }
 
     return Reflect.getMetadata(MODULE_GLOBAL_METADATA, module);
+  }
+
+  private isRootModule(forwardRef: Type[] | DynamicModule[] | Type) {
+    if (isNil(forwardRef)) {
+      return true;
+    }
+
+    if (Array.isArray(forwardRef) && isEmpty(forwardRef)) {
+      return true;
+    }
+
+    return false;
   }
 
   public addDynamicModule(token: string, module: DynamicModule) {
@@ -162,6 +183,15 @@ export class WatsonContainer {
     return undefined;
   }
 
+  public setRootModule(token: string) {
+    if (!this.modules.has(token)) {
+      throw new UnknownModuleException("WatsonContainer");
+    }
+
+    const moduleRef = this.getModuleByToken(token);
+    this.rootModule = moduleRef;
+  }
+
   public hasModule(metatype: Type) {
     return !!this.moduleTokenFactory.getTokenByModuleType(metatype);
   }
@@ -177,11 +207,24 @@ export class WatsonContainer {
     return data.wrapper.instance as T;
   }
 
+  public getInstanceInRootModule<T extends Type>(metatype: T) {
+    const instance = this.globalInstanceHost.getInstanceInModule(
+      this.rootModule,
+      metatype
+    );
+
+    return instance;
+  }
+
   public getGlobalExceptionHandlers() {
     return iterate(this.config.globalExceptionHandlers).toArray();
   }
 
   public getClientAdapter() {
     return this.config.clientAdapter;
+  }
+
+  public getRootModule() {
+    return this.rootModule;
   }
 }

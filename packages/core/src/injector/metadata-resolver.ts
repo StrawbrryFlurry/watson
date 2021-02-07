@@ -156,8 +156,9 @@ export class MetadataResolver {
   }
 
   private async scanForModuleImports(metatype: Type, context: Type[] = []) {
+    this.container.addModule(metatype, context);
+
     context.push(metatype);
-    this.container.addModule(metatype);
 
     const { imports, metatype: type } = await this.reflectModuleMetadata(
       metatype
@@ -174,7 +175,7 @@ export class MetadataResolver {
         continue;
       }
 
-      this.container.addModule(module);
+      this.container.addModule(module, context);
       await this.scanForModuleImports(module, context);
     }
   }

@@ -1,3 +1,4 @@
+import { Type } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { IInstanceType } from '../interfaces';
@@ -95,5 +96,26 @@ export class GlobalInstanceHost {
     ];
 
     this.instanceMap.set(name, data);
+  }
+
+  public getInstanceInModule<T extends Type>(
+    module: Module,
+    metatype: T
+  ): InstanceType<T> {
+    const { name } = metatype;
+
+    if (!this.instanceMap.has(name)) {
+      return undefined;
+    }
+
+    const instanceData = this.instanceMap.get(name);
+
+    for (const data of instanceData) {
+      if (data.host === module) {
+        return data.wrapper.instance;
+      }
+    }
+
+    return undefined;
   }
 }

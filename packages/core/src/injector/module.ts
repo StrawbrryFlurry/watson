@@ -12,9 +12,11 @@ import {
 } from '@watsonjs/common';
 import { v4 } from 'uuid';
 
+import { MetadataResolver } from '.';
 import { CLIENT_ADAPTER_PROVIDER, CURRENT_MODULE_PROVIDER, WATSON_CONTAINER_PROVIDER } from '../constants';
 import { UnknownExportException } from '../exceptions';
 import { WatsonContainer } from '../watson-container';
+import { Injector } from './injector';
 import { InstanceWrapper } from './instance-wrapper';
 
 /**
@@ -47,14 +49,21 @@ export class Module {
   private readonly _componentMetadata = new Map<string, any>();
   public readonly name: string;
 
-  private container: WatsonContainer;
+  private readonly container: WatsonContainer;
   private readonly _metatype: Type;
+
+  private instance: InstanceType<Type>;
+
+  private readonly injector: Injector;
 
   constructor(metatype: Type, container: WatsonContainer) {
     this._id = v4();
     this._metatype = metatype;
     this.container = container;
     this.name = this.metatype.name;
+
+    const resolver = new MetadataResolver(container);
+    this.injector = new Injector(resolver);
 
     this.registerDefaultProviders();
   }
@@ -158,6 +167,43 @@ export class Module {
 
       this._providers.set((provider as Type).name, instanceWrapper);
     }
+  }
+
+  public async createInstanceOfType<T extends Type>(
+    metatype: T
+  ): Promise<InstanceType<T>> {
+    const wrapper = new InstanceWrapper({
+      host: this,
+      metatype: metatype,
+      name: metatype.name,
+    });
+
+    await this.injector.createInstance(wrapper, this);
+
+    if (wrapper.isResolved) {
+      return wrapper.instance;
+    }
+
+    return undefined;
+  }
+
+  public async getInstance<T extends Type>(): Promise<T> {
+    if (typeof this.instance !== "undefined") {
+      return this.instance;
+    }
+
+    const moduleWrapper = new InstanceWrapper({
+      host: this,
+      metatype: this.metatype,
+      name: this.name,
+    });
+
+    await this.injector.createInstance(moduleWrapper, this);
+
+    const { instance } = moduleWrapper;
+    this.instance = instance;
+
+    return instance;
   }
 
   private addCustomProvider(provider: CustomProvider) {

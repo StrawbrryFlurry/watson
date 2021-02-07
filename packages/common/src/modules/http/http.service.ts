@@ -5,9 +5,16 @@ import { Inject, Injectable } from '../../decorators';
 
 export type HTTPBody = { [key: string]: any };
 
+export type HttpRequestInterceptor = (
+  req: AxiosRequestConfig
+) => AxiosRequestConfig;
+export type HttpResponseInterceptor = (req: AxiosResponse) => AxiosResponse;
+
 @Injectable()
 export class HttpClient {
   private httpClientInstance: AxiosInstance;
+  private requestInterceptors: HttpRequestInterceptor[] = [];
+  private responseInterceptors: HttpResponseInterceptor[] = [];
 
   constructor(@Inject("HTTP_CONFIG") config: AxiosRequestConfig) {
     this.httpClientInstance = Axios.create(config);
@@ -49,5 +56,15 @@ export class HttpClient {
     config?: AxiosRequestConfig
   ): Observable<AxiosResponse<T>> {
     return from(this.httpClientInstance.patch<T>(uri, body, config));
+  }
+
+  public registerRequestInterceptor(interceptor: HttpRequestInterceptor) {}
+
+  public registerResponseInterceptor(interceptor: HttpResponseInterceptor) {}
+
+  protected handleInterceptors(type: "request" | "response") {}
+
+  public async updateInstance(updateFn: (instance: AxiosInstance) => void) {
+    await updateFn(this.httpClientInstance);
   }
 }

@@ -13,7 +13,8 @@ export class Injector {
   constructor(private resolver: MetadataResolver) {}
 
   /**
-   * Creates an instance of the wrapper provided in the argument resolving dependencies using the module provided.
+   * Creates an instance of the wrapper type in the argument resolving dependencies using the module provided.
+   * The resulting instance will then be applied to the wrapper and can be retrieved from said wrapper.
    * @param wrapper The instance wrapper used to create the instnace
    * @param module The module to get the dependencies from
    * @param context The dependency resolving context. It is used to decect wether a dependency of a provider circularly references itself.
@@ -79,7 +80,7 @@ export class Injector {
    * @param provider The instance wrapper of a provider that should be looked up in  the exports of the target module
    * @param module The target module
    */
-  public async lookupProviderInImports(
+  private async lookupProviderInImports(
     provider: Type | string,
     module: Module,
     context: InstanceWrapper[]
@@ -118,7 +119,7 @@ export class Injector {
    * @param wrapper The instance wrapper which dependencies should be resolved
    * @param module The host module of the wrapper
    */
-  public async resolveConstructorParam(
+  private async resolveConstructorParam(
     wrapper: InstanceWrapper,
     dependencies: (Type | string)[],
     module: Module,
