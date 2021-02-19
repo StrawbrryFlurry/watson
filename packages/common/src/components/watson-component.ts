@@ -11,6 +11,7 @@ import {
 import { Observable, Subject } from 'rxjs';
 
 import { CustomComponentException } from '../exceptions/custom-component.exception';
+import { isNil } from '../utils';
 
 export interface IReactiveOptions {
   /**
@@ -126,5 +127,10 @@ export abstract class WatsonComponent<O extends IReactiveOptions> {
     }
 
     return this._messageRef.delete();
+  }
+
+  public commandify(content: string, type?: string) {
+    type = isNil(type) ? "" : type;
+    return `\`\`\`${type}\n` + content + "\n```";
   }
 }
