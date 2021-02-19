@@ -19,7 +19,7 @@ export class CommonExceptionHandler extends EventExceptionHandler {
   catch(err: EventException) {
     this.errorHost.handleCommonException(
       err,
-      err.context as EventExecutionContext<CommandContextData>
+      (err.context as any) as EventExecutionContext<CommandContextData>
     );
   }
 }

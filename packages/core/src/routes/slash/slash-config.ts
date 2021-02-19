@@ -1,8 +1,8 @@
 import { ApplicationCommandOption, PartialApplicationCommand } from '@watsonjs/common';
 
-import { EventConfiguration } from '../event.configuration';
+import { AbstractEventConfiguration } from '../event.configuration';
 
-export class SlashConfiguration extends EventConfiguration {
+export class SlashConfiguration extends AbstractEventConfiguration {
   public readonly name: string;
   public readonly description: string;
   public readonly options: ApplicationCommandOption[];

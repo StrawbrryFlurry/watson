@@ -16,11 +16,11 @@ export const ReadableArgumentTypeHelper = (type: CommandArgumentType) => {
     case CommandArgumentType.ROLE:
       readableName = "Guild Role";
       break;
-    case CommandArgumentType.SENTENCE:
-      readableName = "Sentence (Multi word text)";
-      break;
     case CommandArgumentType.STRING:
-      readableName = "String (Text)";
+      readableName = "String (Multi word text marked with '\"')";
+      break;
+    case CommandArgumentType.TEXT:
+      readableName = "Plain text";
       break;
     case CommandArgumentType.USER:
       readableName = "Guild Member";

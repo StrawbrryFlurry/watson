@@ -2,18 +2,21 @@ import { CustomProvider, DynamicModule, isEmpty, isNil, isString, MODULE_GLOBAL_
 import iterate from 'iterare';
 
 import { ApplicationConfig } from './application-config';
+import { CommandContainer } from './command';
 import { UnknownModuleException } from './exceptions';
-import { ModuleTokenFactory } from './helpers/module-token-factory';
-import { Module } from './injector';
-import { GlobalInstanceHost } from './injector/global-instance-host';
+import { CommandTokenFactory, ModuleTokenFactory } from './helpers';
+import { GlobalInstanceHost, Module } from './injector';
+import { CommandRoute } from './routes';
 
 /**
- * Contains application state such as modules and provides an interface to get those
+ * Contains application state such as modules and provides an interface to get update / retrieve them
  */
 export class WatsonContainer {
   private readonly modules = new Map<string, Module>();
+  private readonly commands: CommandContainer;
   public config: ApplicationConfig;
   private moduleTokenFactory = new ModuleTokenFactory();
+  private commandTokenFactory = new CommandTokenFactory();
   public globalInstanceHost = new GlobalInstanceHost(this);
   private readonly globalModules = new Set<Module>();
   private dynamicModuleMetadata = new Map<string, Partial<DynamicModule>>();
@@ -22,10 +25,15 @@ export class WatsonContainer {
 
   constructor(config: ApplicationConfig) {
     this.config = config;
+    this.commands = new CommandContainer(this.commandTokenFactory);
   }
 
   public getModules() {
     return this.modules;
+  }
+
+  public getCommands() {
+    return this.commands;
   }
 
   public addModule(
@@ -51,6 +59,15 @@ export class WatsonContainer {
     }
 
     return token;
+  }
+
+  public addCommand(command: CommandRoute) {
+    this.commands.apply(command);
+  }
+
+  public hasCommand(command: CommandRoute) {
+    const token = this.commandTokenFactory.create(command);
+    return this.commands.get(token);
   }
 
   public isGlobalModule(module: Type | DynamicModule) {

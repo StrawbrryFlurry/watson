@@ -2,7 +2,7 @@ import { TReceiver, Type } from '@watsonjs/common';
 import { blue, cyan, yellow } from 'cli-color';
 
 import { InstanceWrapper, Module } from '../injector';
-import { CommandRoute, ConcreteEventRoute, SlashRoute } from '../routes';
+import { CommandRoute, EventRoute, SlashRoute } from '../routes';
 
 // WATSON FACTORY
 export const CREATE_APP_CONTEXT = () => `Creating application context...`;
@@ -27,7 +27,7 @@ export const MAP_COMMAND = (route: CommandRoute) =>
     route.host.name
   )}`;
 
-export const MAP_EVENT = (route: ConcreteEventRoute<any>) =>
+export const MAP_EVENT = (route: EventRoute<any>) =>
   `Mapped event ${yellow(route.eventType)} in ${blue(route.host.name)}`;
 
 export const MAP_SLASH_COMMAND = (route: SlashRoute) =>

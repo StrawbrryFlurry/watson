@@ -1,8 +1,8 @@
 import { IClientEvent } from '@watsonjs/common';
 
-import { EventConfiguration } from '../event.configuration';
+import { AbstractEventConfiguration } from '../event.configuration';
 
-export class ConcreteEventConfiguration extends EventConfiguration {
+export class EventConfiguration extends AbstractEventConfiguration {
   constructor(event: IClientEvent) {
     super(event);
   }

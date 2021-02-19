@@ -2,7 +2,7 @@ import { DynamicModule, isFunction, Type } from '@watsonjs/common';
 import * as hash from 'object-hash';
 
 export class ModuleTokenFactory {
-  private moduleTokenCache = new Map<Type, string>();
+  private moduleTokenCache = new WeakMap<Type, string>();
 
   constructor() {}
 

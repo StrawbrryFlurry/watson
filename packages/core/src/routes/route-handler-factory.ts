@@ -18,25 +18,21 @@ import {
   SlashContextData,
   TReceiver,
   UnauthorizedException,
-} from "@watsonjs/common";
-import { Base, ClientEvents } from "discord.js";
+} from '@watsonjs/common';
+import { Base, ClientEvents } from 'discord.js';
 
-import { DiscordJSAdapter } from "../adapters";
-import { ModuleInitException } from "../exceptions";
-import { rethrowWithContext } from "../helpers";
-import { InstanceWrapper, Module } from "../injector";
-import {
-  AsyncContextResolver,
-  EventExecutionContext,
-  ResponseController,
-} from "../lifecycle";
-import { BAD_CHANGEALE_IMPLEMENTATION, CHANGEABLE_NOT_FOUND } from "../logger";
-import { RouteParamsFactory } from "../routes";
-import { WatsonContainer } from "../watson-container";
-import { CommandRoute } from "./command";
-import { ConcreteEventRoute } from "./event";
-import { EventRoute } from "./event-route";
-import { SlashRoute } from "./slash";
+import { DiscordJSAdapter } from '../adapters';
+import { ModuleInitException } from '../exceptions';
+import { rethrowWithContext } from '../helpers';
+import { InstanceWrapper, Module } from '../injector';
+import { AsyncContextResolver, EventExecutionContext, ResponseController } from '../lifecycle';
+import { BAD_CHANGEALE_IMPLEMENTATION, CHANGEABLE_NOT_FOUND } from '../logger';
+import { RouteParamsFactory } from '../routes';
+import { WatsonContainer } from '../watson-container';
+import { CommandRoute } from './command';
+import { EventRoute } from './event';
+import { AbstractEventRoute } from './event-route';
+import { SlashRoute } from './slash';
 
 export type IHandlerFunction = (
   adapter: DiscordJSAdapter,
@@ -109,7 +105,7 @@ export class RouteHandlerFactory {
   }
 
   public async createEventHandler<T extends keyof ClientEvents>(
-    route: ConcreteEventRoute<T>,
+    route: EventRoute<T>,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
@@ -195,7 +191,7 @@ export class RouteHandlerFactory {
       return null;
     }
 
-    return async (ctx: EventExecutionContext) => {
+    return async (ctx: any) => {
       for (const guard of guards) {
         const res = guard.canActivate(ctx);
         const activationRes = await this.asyncResolver.resolveAsyncValue<
@@ -268,7 +264,7 @@ export class RouteHandlerFactory {
 
     return async (ctx: EventExecutionContext) => {
       for (const filter of filters) {
-        const res = filter.filter(ctx);
+        const res = filter.filter(ctx as any);
         const filterResult = await this.asyncResolver.resolveAsyncValue<
           boolean,
           boolean
@@ -385,7 +381,7 @@ export class RouteHandlerFactory {
   }
 
   private getMetadata(
-    route: EventRoute<any>,
+    route: AbstractEventRoute<any>,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
     module: Module
@@ -425,7 +421,7 @@ export class RouteHandlerFactory {
     receiver: InstanceWrapper<TReceiver>;
     handle: Function;
     type: ContextEventTypes;
-    route: EventRoute<any>;
+    route: AbstractEventRoute<any>;
   }) {
     return async (adapter: DiscordJSAdapter, event: Base[]) => {
       const matches = route.matchEvent(event);
@@ -469,7 +465,7 @@ export class RouteHandlerFactory {
         await this.responseController.apply(ctx, result);
       } catch (err) {
         if (err instanceof EventException) {
-          rethrowWithContext(err, ctx);
+          rethrowWithContext(err, ctx as any);
         } else {
           throw err;
         }

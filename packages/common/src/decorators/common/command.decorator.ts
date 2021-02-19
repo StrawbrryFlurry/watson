@@ -1,6 +1,9 @@
+import { PermissionResolvable } from 'discord.js';
+
+import { CommandPrefix } from '../../command/common/command-prefix';
 import { COMMAND_METADATA } from '../../constants';
 import { CommandArgumentType } from '../../enums';
-import { isObject, isString } from '../../utils/shared.utils';
+import { isNil, isObject, isString } from '../../utils/shared.utils';
 
 export interface ICommandParam {
   /**
@@ -9,9 +12,14 @@ export interface ICommandParam {
    */
   name: string;
   /**
-   * Internal type the parameter should be parsed as
+   * Lable that describes the parameter
    */
-  type: CommandArgumentType;
+  label?: string;
+  /**
+   * Internal type the parameter should be parsed as
+   * @default CommandArgumentType.TEXT
+   */
+  type?: CommandArgumentType;
   /**
    * Makes the parameter optional.
    * Optional parameters cannot be followed by mandatory ones.
@@ -26,13 +34,6 @@ export interface ICommandParam {
    */
   hungry?: boolean;
   /**
-   * If the hungry options was not set and the command should listen for a sentence you'll need to specify an encapsulator for the sentence
-   * @example
-   * !set description "I like dogs! :3"
-   * @default '"'
-   */
-  encapsulator?: string;
-  /**
    * The default value if none was provided
    */
   default?: any;
@@ -40,25 +41,96 @@ export interface ICommandParam {
    * If the type a date this parameter is required to parse the date.
    */
   dateFormat?: string;
+  /**
+   * The promt that will be used to ask for this parameter
+   * if it was not specified
+   */
+  promt?: string;
+  /**
+   * An array of options the user can choose from
+   * for this argument.
+   */
+  choices?: string[];
 }
+
+export interface ICommandCooldown {
+  /**
+   * The timeout in seconds
+   * @default 5
+   */
+  timeout?: number;
+  /**
+   * Is the cooldown user specific for
+   * a user or anyone in a guild
+   * @default true
+   */
+  user?: boolean;
+}
+
 export interface ICommandOptions {
   /**
    * Name of the command
    * @default The descriptor name will be used.
    */
-  command?: string;
+  name?: string;
   /**
    * Aliases under which the command is available
+   * @default none
    */
   alias?: string[];
   /**
-   * The delimiter used to parse arguments
-   * @default \s e.g. " "
+   * Description of the command.
+   * @default none
    */
-  pramDelimiter?: string;
+  description?: string;
+  /**
+   * Tags of the command
+   * @example
+   * NSFW, Fun
+   * @default none
+   */
+  tags?: string[];
+  /**
+   * Makes the channel available in guilds.
+   * @default true
+   */
+  guild?: boolean;
+  /**
+   * Makes the channel available in dms
+   * @default false
+   */
+  dm?: boolean;
+  /**
+   * The permissions required by the client to run this command
+   * @default none
+   */
+  clientPermissions?: PermissionResolvable[];
+  /**
+   * Adds a cooldown for this command
+   * @see ICommandCooldown
+   * @default none
+   */
+  cooldown?: ICommandCooldown;
+  /**
+   * Promt for arguments if one was not provided
+   * @default false
+   */
+  promt?: boolean;
+  /**
+   * The maximum number of argument promts per agument
+   * @default 1
+   */
+  maxPromts?: number;
+  /**
+   * Seconds to wait for a user to provide the
+   * argument promted for
+   * @default 10
+   */
+  promtTimeout?: number;
   /**
    * Parameters of the command
-   * @interface ICommandParam
+   * @see ICommandParam
+   * @default none
    */
   params?: ICommandParam[];
   /**
@@ -66,7 +138,7 @@ export interface ICommandOptions {
    * If no prefix was set the receiver prefix is used.
    * If no prefix was set in the receiver the global prefix will be used.
    */
-  prefix?: string;
+  prefix?: string | CommandPrefix;
   /**
    * Requires the format of the command message to exactly match the command name
    * ```
@@ -77,6 +149,12 @@ export interface ICommandOptions {
    *
    */
   caseSensitive?: boolean;
+  /**
+   * Hides the command from the builtin
+   * help command.
+   * @default false
+   */
+  hidden?: boolean;
 }
 
 /**
@@ -89,7 +167,14 @@ export interface ICommandOptions {
 export function Command(): MethodDecorator;
 export function Command(command: string): MethodDecorator;
 export function Command(commandOptions: ICommandOptions): MethodDecorator;
-export function Command(command?: string | ICommandOptions): MethodDecorator {
+export function Command(
+  command: string,
+  commandOptions: ICommandOptions
+): MethodDecorator;
+export function Command(
+  command?: string | ICommandOptions,
+  commandOptions?: ICommandOptions
+): MethodDecorator {
   return (
     target: Object,
     propertyKey: string | Symbol,
@@ -97,7 +182,9 @@ export function Command(command?: string | ICommandOptions): MethodDecorator {
   ) => {
     let options: ICommandOptions = {};
 
-    if (isString(command)) {
+    if (!isNil(commandOptions)) {
+      options["command"] = command as string;
+    } else if (isString(command)) {
       options["command"] = command;
     } else if (isObject(command)) {
       options = command;

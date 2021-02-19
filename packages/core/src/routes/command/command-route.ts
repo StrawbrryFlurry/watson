@@ -1,18 +1,12 @@
-import {
-  ICommandOptions,
-  IParamDecoratorMetadata,
-  IReceiverOptions,
-  isString,
-  TReceiver,
-} from "@watsonjs/common";
-import { Message } from "discord.js";
+import { ICommandOptions, IParamDecoratorMetadata, IReceiverOptions, TReceiver } from '@watsonjs/common';
+import { Message } from 'discord.js';
 
-import { IMethodValue, InstanceWrapper } from "../../injector";
-import { IAsynchronousResolvable } from "../../interfaces";
-import { WatsonContainer } from "../../watson-container";
-import { EventRoute } from "../event-route";
-import { CommandConfiguration } from "./command-config";
-import { CommandParser } from "./command-parser";
+import { IMethodValue, InstanceWrapper } from '../../injector';
+import { IAsynchronousResolvable } from '../../interfaces';
+import { WatsonContainer } from '../../watson-container';
+import { AbstractEventRoute } from '../event-route';
+import { CommandConfiguration } from './command-config';
+import { CommandParser } from './command-parser';
 
 export interface ICommandParams {
   [name: string]: unknown;
@@ -20,7 +14,7 @@ export interface ICommandParams {
 
 export interface IParamDecorator extends IParamDecoratorMetadata {}
 
-export class CommandRoute extends EventRoute<"message"> {
+export class CommandRoute extends AbstractEventRoute<"message"> {
   public readonly config: CommandConfiguration;
   public readonly handler: Function;
   public readonly host: InstanceWrapper<TReceiver>;
@@ -38,6 +32,7 @@ export class CommandRoute extends EventRoute<"message"> {
     super("command", container);
 
     this.config = new CommandConfiguration(
+      this,
       commandOptions,
       receiverOptions,
       container.config,
@@ -53,19 +48,19 @@ export class CommandRoute extends EventRoute<"message"> {
   public matchEvent(message: [Message]): IAsynchronousResolvable<boolean> {
     const { content } = message[0];
     const { command } = this.parser.extractMessageParts(content);
-
-    const matches =
-      this.parser.matchesPrefix(content) && this.parser.matchesCommand(command);
-
-    if (!matches) {
-      return false;
-    }
-
-    if (isString(this.acknowledgementReaction)) {
-      message[0].react(this.acknowledgementReaction);
-    }
-
     return true;
+    //  const matches =
+    //    this.parser.matchesPrefix(content) && this.parser.matchesCommand(command);
+    //
+    //  if (!matches) {
+    //    return false;
+    //  }
+    //
+    //  if (isString(this.acknowledgementReaction)) {
+    //    message[0].react(this.acknowledgementReaction);
+    //  }
+    //
+    //  return true;
   }
 
   public get name() {
@@ -77,7 +72,15 @@ export class CommandRoute extends EventRoute<"message"> {
   }
 
   public get prefix() {
-    return this.config.prefix || "";
+    return this.config.prefix.prefix || undefined;
+  }
+
+  public get alias() {
+    return this.config.alias || [];
+  }
+
+  public hasName(name: string) {
+    return this.alias.includes(name) || this.name === name;
   }
 
   public createContextData(message: any) {

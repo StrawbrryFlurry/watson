@@ -38,6 +38,9 @@ export class RouteParamsFactory {
     for (const type of paramTypes) {
       const idx = type.paramIndex;
       switch (type.type) {
+        case RouteParamType.EVENT:
+          params[idx] = ctx.getEvent();
+          break;
         case RouteParamType.CHANNEL:
           params[idx] = (data as CommandContextData).channel;
           break;
@@ -67,7 +70,7 @@ export class RouteParamsFactory {
           params[idx] = (data as CommandContextData).user;
           break;
         case RouteParamType.FACTORY:
-          params[idx] = await this.fromParamFactory(ctx, type.factory);
+          params[idx] = await this.fromParamFactory(ctx as any, type.factory);
           break;
         case RouteParamType.INQUIRABLE:
           params[idx] = this.fromInquirable(

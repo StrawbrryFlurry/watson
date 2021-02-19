@@ -18,6 +18,8 @@ export interface ExecutionContext<
   EventType extends IClientEvent = IClientEvent
 > {
   /**
+   * @deprecated Use `ExecutionContext.switchToPipe()` instead
+   *
    * @returns the current context data present for the event.
    * Depending on the context type you can apply one of the following interfaces as a generic:
    * @interface EventContextData
@@ -92,4 +94,10 @@ export interface ExecutionContext<
    * For slash commands use the `SlashRoute` interface from `@watsonjs/core`
    */
   getRoute<T = any>(): T;
+
+  /**
+   * Returns the executing pipe for this context
+   * @type `command` => `CommandPipe`
+   */
+  swichToPipe<T = any>(): T;
 }

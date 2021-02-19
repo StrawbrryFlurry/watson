@@ -29,17 +29,19 @@ export enum CommandArgumentType {
    */
   ROLE = "arg:type:role",
   /**
+   * A named switch param repressents a boolean value
+   * @example
+   * !members -config
+   * Will set config to true
+   * if the swich is omitted the value is false
+   */
+  SWITCH = "arg:type:switch",
+  /**
    * A single string value
    * @example
-   * !
+   * !say "command and stuff"
    */
   STRING = "arg:type:string",
-  /**
-   * A multi string value
-   * @example
-   * !message `Lorem ipsum dolor`
-   */
-  SENTENCE = "arg:type:sentence",
   /**
    * A single number value
    * @example
@@ -54,9 +56,14 @@ export enum CommandArgumentType {
    * !remind 16.10.2020-12:00
    */
   DATE = "arg:type:date",
-  // TODO:
   /**
-   * ANY
+   * A string value without markers
+   * !help command
    */
-  ANY = "arg:type:any",
+  TEXT = "arg:type:text",
+  /**
+   * Represents a custom type that can be parsed by a pipe
+   * or a parser specified within the command declaration.
+   */
+  CUSTOM = "arg:type:custom",
 }

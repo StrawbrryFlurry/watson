@@ -3,13 +3,13 @@ import { Base, ClientEvents } from 'discord.js';
 
 import { InstanceWrapper } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
-import { EventRoute } from '../event-route';
-import { ConcreteEventConfiguration } from './concrete-event-configuration';
+import { AbstractEventRoute } from '../event-route';
+import { EventConfiguration } from './concrete-event-configuration';
 
-export class ConcreteEventRoute<T extends IClientEvent> extends EventRoute<T> {
+export class EventRoute<T extends IClientEvent> extends AbstractEventRoute<T> {
   public handler: Function;
   public host: InstanceWrapper<TReceiver>;
-  public config: ConcreteEventConfiguration;
+  public config: EventConfiguration;
 
   constructor(
     event: T,
@@ -19,7 +19,7 @@ export class ConcreteEventRoute<T extends IClientEvent> extends EventRoute<T> {
   ) {
     super("event", container);
 
-    this.config = new ConcreteEventConfiguration(event);
+    this.config = new EventConfiguration(event);
     this.host = receiver;
     this.handler = handler;
   }

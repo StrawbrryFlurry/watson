@@ -1,26 +1,31 @@
-import {
-  CommandArgumentType,
-  ICommandOptions,
-  ICommandParam,
-  IReceiverOptions,
-  isEmpty,
-  isNil,
-} from "@watsonjs/common";
+import { CommandArgumentType, ICommandOptions, ICommandParam, IReceiverOptions, isEmpty, isNil } from '@watsonjs/common';
+import { CommandPrefix } from '@watsonjs/common/command/common/command-prefix';
 
-import { ApplicationConfig } from "../../application-config";
-import { CommandConfigurationException } from "../../exceptions";
-import { IMethodValue } from "../../injector";
-import { EventConfiguration } from "../event.configuration";
+import { ApplicationConfig } from '../../application-config';
+import { CommandConfigurationException } from '../../exceptions';
+import { IMethodValue } from '../../injector';
+import { AbstractEventConfiguration } from '../event.configuration';
+import { CommandRoute } from './command-route';
 
-export class CommandConfiguration extends EventConfiguration {
-  public prefix: string;
+export class CommandConfiguration extends AbstractEventConfiguration {
+  public prefix: CommandPrefix;
   public name: string;
   public alias: string[];
-  public paramDelimiter: string;
   public caseSensitive: boolean;
   public params?: ICommandParam[] = [];
+  public description?: string;
+  public tags?: string[];
+  public guild?: boolean;
+  public dm?: boolean;
+  // public clientPermissions: PermissionResolvable[];
+  // public cooldown: ICommandCooldown;
+  public promt: boolean;
+  public maxPromts: number;
+  public promtTimeout: number;
+  public hidden: boolean;
 
   constructor(
+    public host: CommandRoute,
     private commandOptions: ICommandOptions,
     private receiverOptions: IReceiverOptions,
     private config: ApplicationConfig,
@@ -35,8 +40,8 @@ export class CommandConfiguration extends EventConfiguration {
   }
 
   private setName() {
-    if (this.commandOptions.command) {
-      return (this.name = this.commandOptions.command);
+    if (this.commandOptions.name) {
+      return (this.name = this.commandOptions.name);
     }
 
     this.name = this.method.name;
@@ -44,18 +49,26 @@ export class CommandConfiguration extends EventConfiguration {
 
   private setPrefix() {
     if (this.commandOptions.prefix) {
-      return (this.prefix = this.commandOptions.prefix);
+      return this.applyPrefix(this.commandOptions.prefix);
     }
 
     if (this.receiverOptions.prefix) {
-      return (this.prefix = this.receiverOptions.prefix);
+      return this.applyPrefix(this.receiverOptions.prefix);
     }
 
     if (this.config.globalCommandPrefix) {
-      return (this.prefix = this.config.globalCommandPrefix);
+      return this.applyPrefix(this.config.globalCommandPrefix);
     }
 
     this.prefix = undefined;
+  }
+
+  private applyPrefix(prefix: string | CommandPrefix) {
+    if (prefix instanceof CommandPrefix) {
+      this.prefix = prefix;
+    } else {
+      this.prefix = new CommandPrefix(prefix);
+    }
   }
 
   private setParams() {
@@ -64,15 +77,6 @@ export class CommandConfiguration extends EventConfiguration {
     }
 
     this.commandOptions.params.forEach((param, idx) => {
-      if (param.type === CommandArgumentType.SENTENCE) {
-        if (typeof param.encapsulator === "undefined") {
-          throw new CommandConfigurationException(
-            "CommandLoader",
-            `Param ${param.name} is of type sentece but doesn't have an encapsulator set`
-          );
-        }
-      }
-
       if (param.type === CommandArgumentType.DATE) {
         if (typeof param.dateFormat === "undefined") {
           throw new CommandConfigurationException(
@@ -100,21 +104,11 @@ export class CommandConfiguration extends EventConfiguration {
   private setConfiguration() {
     if (this.commandOptions?.caseSensitive === false) {
       this.caseSensitive = false;
-    } else if (this.receiverOptions.commandOptions?.casesensitive === false) {
-      this.caseSensitive = false;
     } else {
       this.caseSensitive = true;
     }
 
     this.alias = this.commandOptions.alias || [];
-
-    const delimiter = this.commandOptions.pramDelimiter;
-
-    if (typeof delimiter === "undefined") {
-      this.paramDelimiter = " ";
-    } else {
-      this.paramDelimiter = delimiter;
-    }
   }
 
   public hasParams() {
@@ -123,11 +117,5 @@ export class CommandConfiguration extends EventConfiguration {
 
   public hasPrefix() {
     return !isNil(this.prefix);
-  }
-
-  public hasSentence() {
-    return this.params.some(
-      (param) => param.type === CommandArgumentType.SENTENCE
-    );
   }
 }

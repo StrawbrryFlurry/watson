@@ -4,12 +4,17 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { EventProxy } from '../lifecycle';
 import { SlashCommandAdapter } from './slash-adapter';
+import { WatsonDiscordMessage } from './types';
 
-export abstract class AbstractDiscordAdapter<C = any, O = any> {
+export abstract class AbstractDiscordAdapter<
+  TClient = any,
+  TOptions = any,
+  TMessage = any
+> {
   protected token: string;
-  protected client: C;
+  protected client: TClient;
 
-  protected clientOptions: O;
+  protected clientOptions: TOptions;
   protected activity: ActivityOptions;
 
   protected eventSubscriptions = new Map<
@@ -23,6 +28,8 @@ export abstract class AbstractDiscordAdapter<C = any, O = any> {
 
   public abstract init(): Promise<void>;
   public abstract initializeSlashCommands(): Promise<void>;
+
+  public abstract createWatsonMessage(message: TMessage): WatsonDiscordMessage;
 
   protected abstract setUserActivity(): void;
   protected abstract login(): Promise<void>;
@@ -85,7 +92,7 @@ export abstract class AbstractDiscordAdapter<C = any, O = any> {
     return this.client;
   }
 
-  public setClient(client: C) {
+  public setClient(client: TClient) {
     if (this.ready.value === true) {
       throw new RuntimeException("The client cannot be set while it's running");
     }

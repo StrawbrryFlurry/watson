@@ -19,7 +19,7 @@ import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecyc
 import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND, MAP_EVENT, MAP_SLASH_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { CommandRoute } from './command';
-import { ConcreteEventRoute } from './event';
+import { EventRoute } from './event';
 import { IHandlerFunction, RouteHandlerFactory } from './route-handler-factory';
 import { SlashRoute } from './slash';
 
@@ -29,7 +29,7 @@ export class RouteExplorer {
 
   private logger = new Logger("RouteExplorer");
 
-  private eventRoutes = new Set<ConcreteEventRoute<any>>();
+  private eventRoutes = new Set<EventRoute<any>>();
   private commandRoutes = new Set<CommandRoute>();
   private slashRoutes = new Set<SlashRoute>();
 
@@ -76,7 +76,7 @@ export class RouteExplorer {
         continue;
       }
 
-      const routeRef = new ConcreteEventRoute(
+      const routeRef = new EventRoute(
         metadata,
         receiver,
         descriptor,
@@ -137,6 +137,7 @@ export class RouteExplorer {
       );
 
       this.commandRoutes.add(routeRef);
+      this.constainer.addCommand(routeRef);
       this.logger.logMessage(MAP_COMMAND(routeRef));
 
       const exceptionHandler = this.createExceptionHandler(

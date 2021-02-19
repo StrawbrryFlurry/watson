@@ -1,17 +1,7 @@
-import {
-  BadArgumentException,
-  CHANNEL_MENTION_REGEXP,
-  CommandArgumentType,
-  CommandContextData,
-  ICommandParam,
-  isNil,
-  ROLE_MENTION_REGEXP,
-  USER_MENTION_REGEXP,
-} from "@watsonjs/common";
-import * as dayjs from "dayjs";
-import { Channel, Message, PermissionString, Role } from "discord.js";
+import { CommandContextData } from '@watsonjs/common';
+import { Channel, Message, PermissionString, Role } from 'discord.js';
 
-import { CommandConfiguration } from "./command-config";
+import { CommandConfiguration } from './command-config';
 
 interface IMessageParts {
   command: string;
@@ -56,11 +46,11 @@ export class CommandParser {
     };
   }
 
-  public matchesPrefix(content: string) {
-    return this.config.hasPrefix()
-      ? content.startsWith(this.config.prefix)
-      : true;
-  }
+  // public matchesPrefix(content: string) {
+  //   return this.config.hasPrefix()
+  //     ? content.startsWith(this.config.prefix)
+  //     : true;
+  // }
 
   public matchesCommand(command: string) {
     command = this.config.caseSensitive ? command.toLowerCase() : command;
@@ -76,13 +66,13 @@ export class CommandParser {
     let command: string;
     let rest: string;
 
-    if (this.config.hasPrefix()) {
-      prefix = this.config.prefix;
-      withoutPrefix = messageContent.replace(this.config.prefix, "");
-    }
+    // if (this.config.hasPrefix()) {
+    //   prefix = this.config.prefix;
+    //   withoutPrefix = messageContent.replace(this.config.prefix, "");
+    // }
 
-    [command, ...rest as any] = withoutPrefix.split(this.config.paramDelimiter);
-    rest = (rest as any).join(this.config.paramDelimiter);
+    [command, ...rest as any] = withoutPrefix.split("");
+    rest = (rest as any).join("");
 
     return {
       command,
@@ -132,181 +122,5 @@ export class CommandParser {
     }
 
     let params = {};
-
-    for (const param of this.config.params) {
-      content = this.removeLeadingDelimiter(content);
-      const name = param.name;
-
-      if (param.hungry) {
-        const { parsed, remaining } = this.parseHungryParam(content, param);
-
-        params[name] = parsed;
-        content = remaining;
-        continue;
-      }
-
-      try {
-        let res: any;
-
-        switch (param.type) {
-          case CommandArgumentType.USER:
-            content = this.parseRegexParm(
-              USER_MENTION_REGEXP,
-              content,
-              param
-            ) as string;
-            params[name] = author;
-            break;
-          case CommandArgumentType.CHANNEL:
-            content = this.parseRegexParm(
-              CHANNEL_MENTION_REGEXP,
-              content,
-              param
-            ) as string;
-            params[name] = channel;
-            break;
-          case CommandArgumentType.ROLE:
-            res = this.parseRegexParm(ROLE_MENTION_REGEXP, content, param);
-            params[name] = await guild.roles.fetch(res.parsed);
-            content = res.remaining;
-            break;
-          case CommandArgumentType.STRING:
-            res = this.paraseStringParam(content, param);
-            params[name] = res.parsed;
-            content = res.remaining;
-            break;
-          case CommandArgumentType.NUMBER:
-            res = this.parseNumberParam(content, param);
-            params[name] = res.parsed;
-            content = res.remaining;
-            break;
-          case CommandArgumentType.SENTENCE:
-            res = this.parseSentence(content, param);
-            params[name] = res.parsed;
-            content = res.remaining;
-            break;
-          case CommandArgumentType.DATE:
-            res = this.parseDateParam(content, param);
-            params[name] = res.parsed;
-            content = res.remaining;
-            break;
-          case CommandArgumentType.ANY:
-            res = this.parseAnyParam(content, param);
-            params[name] = res.parsed;
-            content = res.remaining;
-            break;
-        }
-      } catch {
-        throw new BadArgumentException(param);
-      }
-    }
-
-    return params;
-  }
-
-  private parseHungryParam(content: string, param: ICommandParam) {
-    return {
-      remaining: "",
-      parsed: content,
-    };
-  }
-
-  private parseSentence(content: string, param: ICommandParam) {
-    const { encapsulator } = param;
-
-    if (!content.startsWith(encapsulator)) {
-      throw new BadArgumentException(param);
-    }
-
-    content = content.replace(encapsulator, "");
-    const closingIndex = content.indexOf(encapsulator);
-
-    if (closingIndex === -1) {
-      throw new BadArgumentException(param);
-    }
-
-    const parsed = content.substring(0, closingIndex);
-    content = content.substring(closingIndex + 1);
-
-    return {
-      remaining: content,
-      parsed: parsed,
-    };
-  }
-
-  private parseRegexParm(regex: RegExp, content: string, param: ICommandParam) {
-    const [sus, ...rest] = content.split(this.config.paramDelimiter);
-    const matchResult = sus.match(regex);
-
-    if (matchResult === null) {
-      throw new BadArgumentException(param);
-    }
-
-    if (param.type === CommandArgumentType.ROLE) {
-      const [parsed] = sus.match(/(\d+)/);
-      return { remaining: rest.join(this.config.paramDelimiter), parsed };
-    }
-
-    return rest.join(this.config.paramDelimiter);
-  }
-
-  private removeLeadingDelimiter(content: string) {
-    while (content.startsWith(this.config.paramDelimiter)) {
-      content = content.replace(this.config.paramDelimiter, "");
-    }
-
-    return content;
-  }
-
-  private paraseStringParam(content: string, param: ICommandParam) {
-    const [s, ...rest] = content.split(this.config.paramDelimiter);
-
-    if (isNil(s) || s === "") {
-      throw new BadArgumentException(param);
-    }
-
-    return {
-      remaining: rest.join(this.config.paramDelimiter),
-      parsed: String(s),
-    };
-  }
-
-  private parseNumberParam(content: string, param: ICommandParam) {
-    const [n, ...rest] = content.split(this.config.paramDelimiter);
-    const num = Number(n);
-
-    if (num === NaN) {
-      throw new BadArgumentException(param);
-    }
-
-    return {
-      remaining: rest.join(this.config.paramDelimiter),
-      parsed: num,
-    };
-  }
-
-  private parseDateParam(content: string, param: ICommandParam) {
-    const [d, ...rest] = content.split(this.config.paramDelimiter);
-
-    const format = param.dateFormat;
-    const date = dayjs(d, format);
-
-    if (date.isValid() === false) {
-      throw new BadArgumentException(param);
-    }
-
-    return {
-      remaining: rest.join(this.config.paramDelimiter),
-      parsed: date,
-    };
-  }
-
-  private parseAnyParam(content: string, param: ICommandParam) {
-    const [a, ...rest] = content.split(this.config.paramDelimiter);
-
-    return {
-      parsed: a,
-      remaining: rest.join(this.config.paramDelimiter),
-    };
   }
 }

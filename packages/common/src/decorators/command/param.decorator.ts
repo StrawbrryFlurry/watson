@@ -1,7 +1,5 @@
-import { RouteParamType } from "../../enums";
-import { Type } from "../../interfaces";
-import { isFunction } from "../../utils";
-import { createParamDecorator } from "../create-param-decorator";
+import { RouteParamType } from '../../enums';
+import { createParamDecorator } from '../create-param-decorator';
 
 /**
  * Injects the parameters of a command to the argument in the command handler method.
@@ -19,14 +17,20 @@ export function InjectParam(options?: string): ParameterDecorator {
   return createParamDecorator(RouteParamType.PARAM, options);
 }
 
-export function InjectEvent(): ParameterDecorator;
-export function InjectEvent(property: string | Type): ParameterDecorator;
-export function InjectEvent(options?: string | Type): ParameterDecorator {
-  if (isFunction(options)) {
-    options = (options as Function).name;
-  }
-
-  return createParamDecorator(RouteParamType.EVENT, options);
+/**
+ * Injects the base event data for the current event to the parameter.
+ * Be careful though, as the event data is an array of objects even if the
+ * event emits only one object.
+ *
+ * ```
+ * \@Event("message")
+ * handleMessage(@InjectEvent() [message]: [Message]) {
+ *  console.log(message.content);
+ * }
+ * ```
+ */
+export function InjectEvent(): ParameterDecorator {
+  return createParamDecorator(RouteParamType.EVENT);
 }
 
 /**
