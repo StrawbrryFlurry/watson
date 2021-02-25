@@ -1,23 +1,18 @@
-export enum CommandTokenType {
-  PARAMETER = "command:token:parameter",
-  ARGUMENT = "tokenizer:type:argument",
-  STRING_ARGUMENT = "tokenizer:type:string.argument",
-  BASE = "tokenizer:type:base",
-}
+import { CommandToken, CommandTokenType } from '@watsonjs/common';
 
-export class CommandToken {
-  public content: string;
+export class CommandTokenHost implements CommandToken {
+  public rawContent: string;
   public type: CommandTokenType;
   public startIndex: number;
   public endIndex: number;
   public tokenIndex: number;
 
   constructor(initialChar: string = "") {
-    this.content = initialChar;
+    this.rawContent = initialChar;
   }
 
   public append(char: string) {
-    this.content = String(this.content) + String(char);
+    this.rawContent = String(this.rawContent) + String(char);
   }
 
   public markAsCompleted(lineIdx: number) {
@@ -25,7 +20,13 @@ export class CommandToken {
   }
 
   public getCharAtIndex(idx: number) {
-    return this.content.charAt(idx);
+    return this.rawContent.charAt(idx);
+  }
+
+  public get content() {
+    return this.type === CommandTokenType.STRING_ARGUMENT
+      ? this.rawContent.substr(1).substring(0, this.rawContent.length - 2)
+      : this.rawContent;
   }
 
   public get hasFinished() {

@@ -12,7 +12,7 @@ export class DuplicateCommandImplementationException extends BootstrappingExcept
       "CommandContainer",
       DUPLICATE_COMMAND_NAME(
         conflict,
-        duplicate.prefix.getFirst(),
+        duplicate.prefix,
         existing.host,
         duplicate.host
       )

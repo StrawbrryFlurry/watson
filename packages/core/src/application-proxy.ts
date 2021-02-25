@@ -1,4 +1,4 @@
-import { IClientEvent } from '@watsonjs/common';
+import { WatsonEvent } from '@watsonjs/common';
 import { Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
@@ -10,7 +10,7 @@ export interface IApplicationProxyOptions {
 }
 
 export class ApplicationProxy {
-  private eventProxies = new Map<IClientEvent, EventProxy<any>>();
+  private eventProxies = new Map<WatsonEvent, EventProxy<any>>();
 
   constructor() {}
 
@@ -26,7 +26,7 @@ export class ApplicationProxy {
     }
   }
 
-  public bindProxy(event: IClientEvent, proxy: EventProxy<any>) {
+  public bindProxy(event: WatsonEvent, proxy: EventProxy<any>) {
     if (this.eventProxies.has(event)) {
       this.bindToExistingProxy(event, proxy);
     } else {
@@ -40,7 +40,7 @@ export class ApplicationProxy {
     }
   }
 
-  private bindToExistingProxy(event: IClientEvent, proxy: EventProxy<any>) {
+  private bindToExistingProxy(event: WatsonEvent, proxy: EventProxy<any>) {
     const handlerFns = proxy.getHandlerFns();
     const proxyRef = this.eventProxies.get(event);
 

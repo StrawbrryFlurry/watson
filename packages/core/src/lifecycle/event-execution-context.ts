@@ -1,13 +1,9 @@
-import { ContextDataTypes, ContextEventTypes, ExecutionContext, Type, ValuesOf } from '@watsonjs/common';
-import { Base as DjsBaseClass, Client, ClientEvents } from 'discord.js';
+import { ContextDataTypes, ContextEventTypes, ExecutionContext, Type } from '@watsonjs/common';
+import { Base as DjsBaseClass, Client } from 'discord.js';
 
 import { DiscordJSAdapter } from '../adapters';
 import { AbstractEventRoute } from '../routes';
 import { WatsonContainer } from '../watson-container';
-
-type ParsedEventData<K extends keyof ClientEvents = any> = {
-  [P in ValuesOf<ClientEvents[K]>]: InstanceType<ClientEvents[K][P]>;
-};
 
 export class EventExecutionContext<
   CtxData extends ContextDataTypes = ContextDataTypes,
@@ -20,7 +16,7 @@ export class EventExecutionContext<
   private readonly eventRoute: AbstractEventRoute<any>;
   private readonly eventData: EventData;
   private readonly contextType: CtxEventType;
-  private parsedEventData: ParsedEventData;
+  private parsedEventData: unknown;
   public readonly adapter: DiscordJSAdapter;
 
   constructor(
@@ -39,17 +35,17 @@ export class EventExecutionContext<
 
     this.parseEventData();
   }
+  swichToPipe<T = any>(): T {
+    throw new Error("Method not implemented.");
+  }
 
-  public getEvent<T extends keyof ClientEvents>(): ClientEvents[T] {
-    return (this.eventData as any) as ClientEvents[T];
+  public getEvent(): any {
+    return this.eventData as any;
   }
 
   public getEventObj<T extends Type>(): { [key: string]: InstanceType<T> };
   public getEventObj<T extends Type>(name: string): InstanceType<T>;
-  public getEventObj<
-    K extends keyof ClientEvents,
-    N extends keyof ParsedEventData<K>
-  >(name?: N) {
+  public getEventObj(name?: any) {
     if (name) {
       return this.parsedEventData[name];
     }

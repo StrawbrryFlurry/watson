@@ -1,6 +1,6 @@
-import { isNil, RuntimeException } from '@watsonjs/common';
+import { isNil, RuntimeException, WatsonEvent } from '@watsonjs/common';
 import { sub } from 'cli-color/beep';
-import { ActivityOptions, Client, ClientEvents, ClientOptions } from 'discord.js';
+import { ActivityOptions, Client, ClientOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { BootstrappingException } from '../exceptions';
@@ -111,9 +111,7 @@ export class DiscordJSAdapter {
     this.setUserActivity();
   }
 
-  public registerEventProxy<E extends keyof ClientEvents>(
-    eventProxy: EventProxy<E>
-  ) {
+  public registerEventProxy<E extends WatsonEvent>(eventProxy: EventProxy<E>) {
     const observable = eventProxy.isWSEvent
       ? this.createWSListener(eventProxy.eventType)
       : this.createListener(eventProxy.eventType);
@@ -135,11 +133,9 @@ export class DiscordJSAdapter {
    * @param name name of the event
    * @return event observable
    */
-  public createListener<E extends keyof ClientEvents>(
-    event: E
-  ): Observable<ClientEvents[E]> {
+  public createListener<E extends WatsonEvent>(event: E): Observable<unknown> {
     return new Observable((subscriber) => {
-      this.client.on(event, (...args) => {
+      this.client.on(event as any, (...args) => {
         subscriber.next(args);
       });
     });
@@ -161,10 +157,10 @@ export class DiscordJSAdapter {
   }
 
   private registerStateListener() {
-    this.createListener("ready").subscribe(() => {
-      this.ready.next(true);
-      this.setUserActivity();
-    });
+    // this.createListener("ready").subscribe(() => {
+    //   this.ready.next(true);
+    //   this.setUserActivity();
+    // });
   }
 
   private registerDefaultListeners() {

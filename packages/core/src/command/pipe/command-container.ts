@@ -1,36 +1,12 @@
+import { CommandPrefix, isNil } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { CommandTokenFactory } from '../../helpers';
 import { CommandRoute } from '../../routes';
-import { DuplicateCommandImplementationException } from '../exceptions';
 
 export class CommandContainer extends Map<string, CommandRoute> {
-  /**
-   * Set of all prefixes the bot has
-   */
-  private _prefixes: Set<string>;
-  /**
-   * Set of all base command names the
-   * container has.
-   */
-  private _names: Set<string>;
-
-  /**
-   * A set of commands tokens without any prefix
-   * which will require additional message content checking
-   */
-  public commandsWithoutPrefix = new Set<string>();
-
   constructor(private commandTokenFactory = new CommandTokenFactory()) {
     super();
-  }
-
-  public hasPrefix(prefix: string) {
-    return this._prefixes.has(prefix);
-  }
-
-  public hasCommand(command: string) {
-    return this._names.has(command);
   }
 
   public apply(route: CommandRoute) {
@@ -40,72 +16,57 @@ export class CommandContainer extends Map<string, CommandRoute> {
       return;
     }
 
-    const { prefix, name, alias } = route;
-
-    if (!this.hasPrefix(prefix) && prefix !== undefined) {
-      this._prefixes.add(prefix);
-    }
-
-    [name, ...alias].forEach((name) => {
-      if (!this.hasCommand(name)) {
-        return this._names.add(name);
-      }
-
-      const existing = this.commands.find((e) => e.hasName(name));
-
-      if (existing.prefix === prefix) {
-        throw new DuplicateCommandImplementationException(
-          existing,
-          route,
-          name
-        );
-      }
-    });
-
-    if (prefix === undefined) {
-      this.commandsWithoutPrefix.add(token);
-    }
-
     this.set(token, route);
   }
 
-  public remove(route: CommandRoute) {
-    const token = this.commandTokenFactory.create(route);
-    const { name, alias } = route.config;
-
-    if (this.has(token)) {
-      this.delete(token);
-    }
-
-    [name, ...alias].forEach((e) => {
-      if (this._names.has(e)) {
-        this._names.delete(e);
-      }
-    });
+  public getCommandByName(name: string, prefix?: string) {
+    return isNil(prefix)
+      ? this.commands.find((route) => route.hasName(name))
+      : this.commands.find(
+          (route) => route.hasName(name) && route.prefix === prefix
+        );
   }
 
-  public get prefixes() {
-    return iterate(this._prefixes).toArray();
+  public getPrefixesAsArray() {
+    return iterate(this)
+      .toArray()
+      .map(([_, route]) => route.commandPrefix)
+      .reduce((prefixes: CommandPrefix[], commandPrefix) => {
+        const { prefix } = commandPrefix;
+
+        if (isNil(prefix)) {
+          return [...prefixes, commandPrefix];
+        }
+
+        const hasPrefix = prefixes.some((p) => p.prefix === prefix);
+
+        if (hasPrefix) {
+          return prefixes;
+        }
+
+        return [...prefixes, commandPrefix];
+      }, []);
+  }
+
+  public getCommandsMap() {
+    const commands = new Map<string, string>();
+
+    for (const [id, route] of this) {
+      const { name, alias } = route;
+
+      commands.set(name, id);
+
+      for (const aliasName of alias) {
+        commands.set(aliasName, id);
+      }
+    }
+
+    return commands;
   }
 
   public get commands() {
     return iterate(this)
       .toArray()
-      .map(([token, command]) => command);
-  }
-
-  public getCommandByName(name: string, prefix?: string) {
-    return typeof prefix === "undefined"
-      ? this.commands.find((config) => config.hasName(name))
-      : this.commands.find(
-          (config) => config.hasName(name) && config.prefix.includes(prefix)
-        );
-  }
-
-  /**
-   * True if the container only holds commands with a prefix
-   */
-  public get hasOnlyPrefixes() {
-    return this.commandsWithoutPrefix.size === 0;
+      .map(([id, route]) => route);
   }
 }

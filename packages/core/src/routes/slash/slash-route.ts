@@ -1,12 +1,12 @@
-import { PartialApplicationCommand, TReceiver } from '@watsonjs/common';
+import { PartialApplicationCommand, TReceiver, WatsonEvent } from '@watsonjs/common';
 
 import { InstanceWrapper } from '../../injector';
 import { IAsynchronousResolvable } from '../../interfaces';
 import { WatsonContainer } from '../../watson-container';
-import { AbstractEventRoute } from '../event-route';
+import { AbstractRoute } from '../abstract-route';
 import { SlashConfiguration } from './slash-config';
 
-export class SlashRoute extends AbstractEventRoute<any> {
+export class SlashRoute extends AbstractRoute<WatsonEvent.INTERACTION_CREATE> {
   public handler: Function;
   public host: InstanceWrapper<TReceiver>;
   public config: SlashConfiguration;
@@ -17,7 +17,7 @@ export class SlashRoute extends AbstractEventRoute<any> {
     handler: Function,
     container: WatsonContainer
   ) {
-    super("slash", container);
+    super("slash", WatsonEvent.INTERACTION_CREATE, container);
 
     this.host = receiver;
     this.handler = handler;

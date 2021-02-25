@@ -1,7 +1,7 @@
 import { CommandContextData } from '@watsonjs/common';
 import { Channel, Message, PermissionString, Role } from 'discord.js';
 
-import { CommandConfiguration } from './command-config';
+import { CommandConfiguration } from './command-configuration-host';
 
 interface IMessageParts {
   command: string;

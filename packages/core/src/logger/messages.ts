@@ -28,7 +28,7 @@ export const MAP_COMMAND = (route: CommandRoute) =>
   )}`;
 
 export const MAP_EVENT = (route: EventRoute<any>) =>
-  `Mapped event ${yellow(route.eventType)} in ${blue(route.host.name)}`;
+  `Mapped event ${yellow(route.event)} in ${blue(route.host.name)}`;
 
 export const MAP_SLASH_COMMAND = (route: SlashRoute) =>
   `Mapped slash command ${cyan(route.name)} in ${blue(route.host.name)}`;

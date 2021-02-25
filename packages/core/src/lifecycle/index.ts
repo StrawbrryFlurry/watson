@@ -1,4 +1,3 @@
-export * from "./async-context-resolver";
 export * from "./common-exception-handler";
 export * from "./event-execution-context";
 export * from "./event-proxy";

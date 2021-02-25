@@ -23,11 +23,10 @@ import {
   User,
 } from 'discord.js';
 
-import { AsyncContextResolver, EventExecutionContext } from '../lifecycle';
+import { resolveAsyncValue } from '../helpers/resolve-async-value';
+import { EventExecutionContext } from '../lifecycle';
 
 export class RouteParamsFactory {
-  private asyncResolver = new AsyncContextResolver();
-
   public async createFromContext(
     paramTypes: IParamDecoratorMetadata[],
     ctx: EventExecutionContext
@@ -95,7 +94,7 @@ export class RouteParamsFactory {
     }
 
     const factoryResult = factory(ctx);
-    return this.asyncResolver.resolveAsyncValue(factoryResult);
+    return resolveAsyncValue(factoryResult);
   }
 
   private fromInquirable(

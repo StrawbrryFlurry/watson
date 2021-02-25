@@ -1,4 +1,4 @@
-import { EventExceptionHandler, RuntimeException, Type } from '@watsonjs/common';
+import { CommandPrefix, EventExceptionHandler, RuntimeException, Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
@@ -38,7 +38,7 @@ export class WatsonApplication {
 
   /**
    * Starts the Watson application.
-   * @returns The client adapter instance.
+   * Returns the client adapter instance.
    */
   public async start() {
     if (this.isDisposed) {
@@ -89,7 +89,7 @@ export class WatsonApplication {
    * Sets a global prefix for all commands.
    * It it will only be applied if none is specified for either a receiver or a command.
    */
-  public addGlobalPrefix(prefix: string) {
+  public addGlobalPrefix(prefix: CommandPrefix) {
     this.config.globalCommandPrefix = prefix;
   }
 

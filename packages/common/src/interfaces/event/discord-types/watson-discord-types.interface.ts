@@ -1,0 +1,13 @@
+export type WatsonMessage<T = any> = T;
+export type WatsonGuild<T = any> = T;
+export type WatsonChannel<T = any> = T;
+export type WatsonDmChannel<T = any> = T;
+export type WatsonGuildChannel<T = any> = T;
+export type WatsonGuildMember<T = any> = T;
+export type WatsonGuildEmoji<T = any> = T;
+export type WatsonGuildInvite<T = any> = T;
+export type WatsonMessageReaction<T = any> = T;
+export type WatsonRole<T = any> = T;
+export type WatsonPresence<T = any> = T;
+export type WatsonRateLimitData<T = any> = T;
+export type WatsonVoiceState<T = any> = T;

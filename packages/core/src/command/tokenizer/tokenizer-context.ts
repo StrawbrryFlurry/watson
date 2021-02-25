@@ -1,5 +1,6 @@
+import { CommandTokenType } from '@watsonjs/common';
+
 import { TokenizingException } from '../exceptions';
-import { CommandTokenType } from './command-token';
 import { CommandTokenList } from './command-token-list';
 
 export enum TokenizerContextType {

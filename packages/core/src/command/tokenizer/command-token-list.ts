@@ -1,9 +1,10 @@
+import { CommandTokenType } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { CommandToken, CommandTokenType } from './command-token';
+import { CommandTokenHost } from './command-token';
 
 export class CommandTokenList {
-  private readonly _tokens = new Set<CommandToken>();
+  private readonly _tokens = new Set<CommandTokenHost>();
 
   public getTokensOfType(type: CommandTokenType) {
     return this.tokens.filter((e) => e.type === type);
@@ -14,7 +15,7 @@ export class CommandTokenList {
   }
 
   public addToken(lineIdx: number) {
-    const token = new CommandToken();
+    const token = new CommandTokenHost();
     token.startIndex = lineIdx;
     const tokenidx = this._tokens.size;
     token.tokenIndex = tokenidx;
@@ -29,7 +30,7 @@ export class CommandTokenList {
    * Returns the lastest token or a new one of the token
    * list is empty or the current one is completed
    */
-  public getCurrentToken(lineIdx: number): CommandToken {
+  public getCurrentToken(lineIdx: number): CommandTokenHost {
     if (this._tokens.size === 0) {
       this.addToken(lineIdx);
       return this.getCurrentToken(lineIdx);
@@ -48,5 +49,9 @@ export class CommandTokenList {
 
   private get lastIndex() {
     return this._tokens.size - 1;
+  }
+
+  public get length() {
+    return this._tokens.size;
   }
 }

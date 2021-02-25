@@ -54,7 +54,7 @@ export class ErrorHost {
       });
     }
 
-    const [msgEvent] = ctx.getEvent<"message">();
+    const [msgEvent] = ctx.getEvent();
     const { channel } = msgEvent;
     await channel.send(message);
   }

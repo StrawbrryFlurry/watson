@@ -1,5 +1,5 @@
-import { RuntimeException } from '@watsonjs/common';
-import { ActivityOptions, ClientEvents } from 'discord.js';
+import { RuntimeException, WatsonEvent } from '@watsonjs/common';
+import { ActivityOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { EventProxy } from '../lifecycle';
@@ -40,9 +40,9 @@ export abstract class AbstractDiscordAdapter<
    * @param name name of the event
    * @return event observable
    */
-  public abstract createListener<E extends keyof ClientEvents>(
+  public abstract createListener<E extends WatsonEvent>(
     event: E
-  ): Observable<ClientEvents[E]>;
+  ): Observable<unknown>;
 
   /**
    * Subscribe to a Websocket event on the DiscordJS client. The observable emits each time the event occurs.
@@ -53,9 +53,7 @@ export abstract class AbstractDiscordAdapter<
     event: E
   ): Observable<any>;
 
-  public registerEventProxy<E extends keyof ClientEvents>(
-    eventProxy: EventProxy<E>
-  ) {
+  public registerEventProxy<E extends WatsonEvent>(eventProxy: EventProxy<E>) {
     const observable = eventProxy.isWSEvent
       ? this.createWSListener(eventProxy.eventType)
       : this.createListener(eventProxy.eventType);
@@ -116,7 +114,7 @@ export abstract class AbstractDiscordAdapter<
   }
 
   private registerStateListener() {
-    this.createListener("ready").subscribe(() => {
+    this.createListener(WatsonEvent.CLIENT_READY).subscribe(() => {
       this.ready.next(true);
       this.setUserActivity();
     });

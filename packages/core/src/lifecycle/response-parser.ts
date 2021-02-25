@@ -2,14 +2,11 @@ import { isNil, isString } from '@watsonjs/common';
 import { MessageEmbed } from 'discord.js';
 
 import { NotParsableException } from '../exceptions/not-parsable.exception';
-import { AsyncContextResolver } from './async-context-resolver';
 import { EventExecutionContext } from './event-execution-context';
 
 export type ICommandResponse<T = any> = undefined | T[] | T;
 
 export class ResponseParser {
-  private asyncResolver = new AsyncContextResolver();
-
   public async parse(
     ctx: EventExecutionContext,
     commandData: ICommandResponse

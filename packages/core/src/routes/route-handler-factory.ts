@@ -18,20 +18,22 @@ import {
   SlashContextData,
   TReceiver,
   UnauthorizedException,
+  WatsonEvent,
 } from '@watsonjs/common';
-import { Base, ClientEvents } from 'discord.js';
+import { Base } from 'discord.js';
 
 import { DiscordJSAdapter } from '../adapters';
 import { ModuleInitException } from '../exceptions';
 import { rethrowWithContext } from '../helpers';
+import { resolveAsyncValue } from '../helpers/resolve-async-value';
 import { InstanceWrapper, Module } from '../injector';
-import { AsyncContextResolver, EventExecutionContext, ResponseController } from '../lifecycle';
+import { EventExecutionContext, ResponseController } from '../lifecycle';
 import { BAD_CHANGEALE_IMPLEMENTATION, CHANGEABLE_NOT_FOUND } from '../logger';
 import { RouteParamsFactory } from '../routes';
 import { WatsonContainer } from '../watson-container';
+import { AbstractEventRoute } from './abstract-route';
 import { CommandRoute } from './command';
 import { EventRoute } from './event';
-import { AbstractEventRoute } from './event-route';
 import { SlashRoute } from './slash';
 
 export type IHandlerFunction = (
@@ -39,10 +41,16 @@ export type IHandlerFunction = (
   eventData: unknown[]
 ) => Promise<void>;
 
+export type IHandlerFactory = (
+  route: AbstractEventRoute<any>,
+  handle: Function,
+  receiver: InstanceWrapper<TReceiver>,
+  module: Module
+) => Promise<IHandlerFunction>;
+
 export class RouteHandlerFactory {
   private paramsFactory = new RouteParamsFactory();
   private responseController = new ResponseController();
-  private asyncResolver = new AsyncContextResolver();
 
   constructor(private container: WatsonContainer) {}
 
@@ -104,7 +112,7 @@ export class RouteHandlerFactory {
     });
   }
 
-  public async createEventHandler<T extends keyof ClientEvents>(
+  public async createEventHandler<T extends WatsonEvent>(
     route: EventRoute<T>,
     handle: Function,
     receiver: InstanceWrapper<TReceiver>,
@@ -194,10 +202,7 @@ export class RouteHandlerFactory {
     return async (ctx: any) => {
       for (const guard of guards) {
         const res = guard.canActivate(ctx);
-        const activationRes = await this.asyncResolver.resolveAsyncValue<
-          boolean,
-          boolean
-        >(res);
+        const activationRes = await resolveAsyncValue<boolean, boolean>(res);
 
         if (activationRes === false) {
           throw new UnauthorizedException();
@@ -265,10 +270,7 @@ export class RouteHandlerFactory {
     return async (ctx: EventExecutionContext) => {
       for (const filter of filters) {
         const res = filter.filter(ctx as any);
-        const filterResult = await this.asyncResolver.resolveAsyncValue<
-          boolean,
-          boolean
-        >(res);
+        const filterResult = await resolveAsyncValue<boolean, boolean>(res);
 
         if (filterResult) {
           continue;
@@ -347,7 +349,7 @@ export class RouteHandlerFactory {
       const pipeResults = [];
       for (const pipe of pipes) {
         const res = pipe.transform(ctx);
-        const transformedCtx = await this.asyncResolver.resolveAsyncValue(res);
+        const transformedCtx = await resolveAsyncValue(res);
 
         pipeResults.push(transformedCtx);
       }
@@ -424,7 +426,7 @@ export class RouteHandlerFactory {
     route: AbstractEventRoute<any>;
   }) {
     return async (adapter: DiscordJSAdapter, event: Base[]) => {
-      const matches = route.matchEvent(event);
+      const matches = /* route.matchEvent(event) */ "" as any;
 
       if (!matches) {
         return null;
@@ -439,7 +441,7 @@ export class RouteHandlerFactory {
       );
 
       try {
-        const data = await route.createContextData(event);
+        const data = "" as any; // = await route.createContextData(event);
         ctx.applyTransformation(data);
 
         const compliesFilter = applyFilterFn && (await applyFilterFn(ctx));
@@ -459,9 +461,7 @@ export class RouteHandlerFactory {
 
         const params = await paramsFactory(ctx);
         const resolvable = handle.apply(receiver.instance, params);
-        const result = (await this.asyncResolver.resolveAsyncValue(
-          resolvable
-        )) as RouteResult;
+        const result = (await resolveAsyncValue(resolvable)) as RouteResult;
         await this.responseController.apply(ctx, result);
       } catch (err) {
         if (err instanceof EventException) {

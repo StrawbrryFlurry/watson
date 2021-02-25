@@ -4,4 +4,5 @@ export * from "./event.exception";
 export * from "./exception-handler";
 export * from "./runtime-exception";
 export * from "./unauthorized.exception";
+export * from "./unknown-command.exception";
 export * from "./watson-exception";

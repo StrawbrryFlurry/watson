@@ -3,14 +3,12 @@ import {
   EVENT_METADATA,
   EventExceptionHandler,
   EXCEPTION_HANDLER_METADATA,
-  IClientEvent,
-  ICommandOptions,
   isFunction,
   PartialApplicationCommand,
-  RECEIVER_METADATA,
   SLASH_COMMAND_METADATA,
   TReceiver,
   Type,
+  WatsonEvent,
 } from '@watsonjs/common';
 import iterate from 'iterare';
 
@@ -18,9 +16,10 @@ import { InstanceWrapper, MetadataResolver, Module } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
 import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND, MAP_EVENT, MAP_SLASH_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
+import { AbstractEventRoute } from './abstract-route';
 import { CommandRoute } from './command';
 import { EventRoute } from './event';
-import { IHandlerFunction, RouteHandlerFactory } from './route-handler-factory';
+import { IHandlerFactory, IHandlerFunction, RouteHandlerFactory } from './route-handler-factory';
 import { SlashRoute } from './slash';
 
 export class RouteExplorer {
@@ -33,7 +32,7 @@ export class RouteExplorer {
   private commandRoutes = new Set<CommandRoute>();
   private slashRoutes = new Set<SlashRoute>();
 
-  private eventProxies = new Map<IClientEvent, EventProxy<any>>();
+  private eventProxies = new Map<WatsonEvent, EventProxy<any>>();
   private routeHanlderFactory: RouteHandlerFactory;
 
   constructor(container: WatsonContainer) {
@@ -53,111 +52,64 @@ export class RouteExplorer {
 
       this.logger.logMessage(EXPLORE_RECEIVER(receiver.wrapper));
 
-      await this.reflectEventRoutes(wrapper);
-      await this.reflectCommandRoutes(wrapper);
-      await this.reflectSlashRoutes(wrapper);
+      const {
+        createCommandHandler,
+        createEventHandler,
+        createSlashHandler,
+      } = this.routeHanlderFactory;
+
+      await this.reflectRoute(
+        wrapper,
+        EVENT_METADATA,
+        EventRoute,
+        createEventHandler,
+        this.eventRoutes,
+        (metadata: WatsonEvent) => metadata,
+        MAP_EVENT
+      );
+
+      await this.reflectRoute(
+        wrapper,
+        COMMAND_METADATA,
+        CommandRoute,
+        createCommandHandler,
+        this.commandRoutes,
+        () => WatsonEvent.MESSAGE_CREATE,
+        MAP_COMMAND
+      );
+
+      await this.reflectRoute(
+        wrapper,
+        SLASH_COMMAND_METADATA,
+        SlashRoute,
+        createSlashHandler,
+        this.slashRoutes,
+        () => WatsonEvent.INTERACTION_CREATE,
+        MAP_SLASH_COMMAND,
+        true
+      );
     }
 
     this.logger.logMessage(COMPLETED());
   }
 
-  private async reflectEventRoutes(receiver: InstanceWrapper<TReceiver>) {
-    const { metatype } = receiver;
-    const receiverMethods = this.reflectReceiverMehtods(metatype);
-
-    for (const method of receiverMethods) {
-      const { descriptor } = method;
-      const metadata = this.resolver.getMetadata<IClientEvent>(
-        EVENT_METADATA,
-        descriptor
-      );
-
-      if (!metadata) {
-        continue;
-      }
-
-      const routeRef = new EventRoute(
-        metadata,
-        receiver,
-        descriptor,
-        this.constainer
-      );
-
-      const handler = await this.routeHanlderFactory.createEventHandler(
-        routeRef,
-        descriptor,
-        receiver,
-        receiver.host
-      );
-
-      this.eventRoutes.add(routeRef);
-      this.logger.logMessage(MAP_EVENT(routeRef));
-
-      const exceptionHandler = this.createExceptionHandler(
-        receiver.metatype,
-        method.descriptor,
-        receiver.host
-      );
-
-      this.bindHandler(metadata, handler, exceptionHandler);
-    }
-  }
-
-  private async reflectCommandRoutes(receiver: InstanceWrapper<TReceiver>) {
-    const { metatype } = receiver;
-    const receiverMethods = this.reflectReceiverMehtods(metatype);
-    const receiverOptions = this.resolver.getMetadata(
-      RECEIVER_METADATA,
-      metatype
-    );
-
-    for (const method of receiverMethods) {
-      const metadata = this.resolver.getMetadata<ICommandOptions>(
-        COMMAND_METADATA,
-        method.descriptor
-      );
-
-      if (!metadata) {
-        continue;
-      }
-
-      const routeRef = new CommandRoute(
-        metadata,
-        receiverOptions,
-        receiver,
-        method,
-        this.constainer
-      );
-
-      const handler = await this.routeHanlderFactory.createCommandHandler(
-        routeRef,
-        method.descriptor,
-        receiver,
-        receiver.host
-      );
-
-      this.commandRoutes.add(routeRef);
-      this.constainer.addCommand(routeRef);
-      this.logger.logMessage(MAP_COMMAND(routeRef));
-
-      const exceptionHandler = this.createExceptionHandler(
-        receiver.metatype,
-        method.descriptor,
-        receiver.host
-      );
-
-      this.bindHandler("message", handler, exceptionHandler);
-    }
-  }
-
-  private async reflectSlashRoutes(receiver: InstanceWrapper<TReceiver>) {
+  private async reflectRoute(
+    receiver: InstanceWrapper<TReceiver>,
+    metadataKey: string,
+    routeType: Type,
+    handlerFactory: IHandlerFactory,
+    collectionRef: Set<AbstractEventRoute<any>>,
+    eventFunction: (metadata: unknown) => WatsonEvent,
+    logMessage: Function,
+    isWsEvent?: boolean
+  ) {
     const { metatype } = receiver;
     const receiverMethods = this.reflectReceiverMehtods(metatype);
 
     for (const method of receiverMethods) {
       const { descriptor } = method;
       const metadata = this.resolver.getMetadata<PartialApplicationCommand>(
-        SLASH_COMMAND_METADATA,
+        metadataKey,
         descriptor
       );
 
@@ -165,22 +117,22 @@ export class RouteExplorer {
         continue;
       }
 
-      const routeRef = new SlashRoute(
+      const routeRef = new routeType(
         metadata,
         receiver,
         descriptor,
         this.constainer
       );
 
-      const handler = await this.routeHanlderFactory.createSlashHandler(
+      const handler = await handlerFactory(
         routeRef,
         method.descriptor,
         receiver,
         receiver.host
       );
 
-      this.slashRoutes.add(routeRef);
-      this.logger.logMessage(MAP_SLASH_COMMAND(routeRef));
+      collectionRef.add(routeRef);
+      this.logger.logMessage(logMessage(routeRef));
 
       const exceptionHandler = this.createExceptionHandler(
         receiver.metatype,
@@ -189,12 +141,14 @@ export class RouteExplorer {
       );
 
       this.bindHandler(
-        "INTERACTION_CREATE" as any,
+        eventFunction(metadata),
         handler,
         exceptionHandler,
-        true
+        isWsEvent
       );
     }
+
+    this.logger.logMessage(COMPLETED());
   }
 
   private reflectReceiverMehtods(receiver: Type) {
@@ -232,12 +186,12 @@ export class RouteExplorer {
     return iterate(this.eventProxies).toArray();
   }
 
-  public getEventProxy(event: IClientEvent) {
+  public getEventProxy(event: WatsonEvent) {
     return this.eventProxies.get(event);
   }
 
   private bindHandler(
-    event: IClientEvent,
+    event: WatsonEvent,
     handler: IHandlerFunction,
     exceptionHandler: ExceptionHandler,
     isWsEvent?: boolean

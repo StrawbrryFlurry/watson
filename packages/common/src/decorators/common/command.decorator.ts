@@ -1,8 +1,8 @@
-import { PermissionResolvable } from 'discord.js';
+import { Message, PermissionResolvable } from 'discord.js';
 
-import { CommandPrefix } from '../../command/common/command-prefix';
 import { COMMAND_METADATA } from '../../constants';
 import { CommandArgumentType } from '../../enums';
+import { CommandPrefix } from '../../interfaces';
 import { isNil, isObject, isString } from '../../utils/shared.utils';
 
 export interface ICommandParam {
@@ -51,6 +51,11 @@ export interface ICommandParam {
    * for this argument.
    */
   choices?: string[];
+  /**
+   * A custom parser used with the`CommandArgumentType.CUSTOM`
+   * type
+   */
+  parser?(message: Message): any;
 }
 
 export interface ICommandCooldown {
@@ -137,10 +142,24 @@ export interface ICommandOptions {
    * Sets the prefix for the command.
    * If no prefix was set the receiver prefix is used.
    * If no prefix was set in the receiver the global prefix will be used.
+   * @example
+   * !ban @username
+   * Where `!` is the prefix
    */
   prefix?: string | CommandPrefix;
   /**
+   * Sets the named prefix for the command.
+   * If no prefix was set the receiver prefix is used.
+   * If no prefix was set in the receiver the global prefix will be used.
+   *
+   * @example
+   * pls ban @username
+   * Where `pls` is the named prefix
+   */
+  namedPrefix?: string;
+  /**
    * Requires the format of the command message to exactly match the command name
+   * @example
    * ```
    * `@command('help')`
    * // By default `!Help` will still work. If the option is set, it will require the command to be all lowercase.

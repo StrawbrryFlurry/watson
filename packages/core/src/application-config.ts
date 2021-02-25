@@ -1,11 +1,11 @@
-import { EventExceptionHandler, isNil } from '@watsonjs/common';
+import { CommandPrefix, EventExceptionHandler, isNil } from '@watsonjs/common';
 import { ClientOptions, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
 import { IWatsonApplicationOptions } from './interfaces';
 
 export class ApplicationConfig {
-  public globalCommandPrefix: string;
+  public globalCommandPrefix: CommandPrefix;
   public clientOptions: ClientOptions;
   public authToken: string;
   public acknowledgementReaction: string | Snowflake;

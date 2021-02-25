@@ -1,13 +1,13 @@
-import { CommandPrefix } from '@watsonjs/common/command/common/command-prefix';
 import * as hash from 'object-hash';
 
 import { CommandRoute } from '../routes';
+import { CommandPrefixHost } from '../routes/command/command-prefix-host';
 import { genearateRandomString } from './random-string.helper';
 
 interface ITokenData {
   id: string;
   names: string[];
-  prefix: CommandPrefix;
+  prefix: CommandPrefixHost;
 }
 
 export class CommandTokenFactory {
@@ -18,7 +18,7 @@ export class CommandTokenFactory {
     const { prefix, name, alias } = command;
     const token: ITokenData = {
       id: id,
-      prefix: prefix,
+      prefix: prefix as any,
       names: [name, ...alias],
     };
 

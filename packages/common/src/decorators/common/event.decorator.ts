@@ -1,5 +1,5 @@
 import { EVENT_METADATA } from '../../constants';
-import { IClientEvent } from '../../interfaces';
+import { WatsonEvent } from '../../enums/watson-event.enum';
 import { isUndefined } from '../../utils';
 
 /**
@@ -10,14 +10,14 @@ import { isUndefined } from '../../utils';
  * If no event type is specified the method will be called with all `raw` event values.
  */
 export function Event(): MethodDecorator;
-export function Event(type: IClientEvent): MethodDecorator;
-export function Event(type?: IClientEvent): MethodDecorator {
+export function Event(type: WatsonEvent): MethodDecorator;
+export function Event(type?: WatsonEvent): MethodDecorator {
   return (
     target: Object,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) => {
-    const eventType = isUndefined(type) ? "raw" : type;
+    const eventType = isUndefined(type) ? WatsonEvent.RAW : type;
     Reflect.defineMetadata(EVENT_METADATA, eventType, descriptor.value);
   };
 }

@@ -10,6 +10,7 @@ import {
   isFunction,
   MODULE_METADATA,
   PIPE_METADATA,
+  PREFIX_METADATA,
   Type,
 } from '@watsonjs/common';
 
@@ -123,6 +124,7 @@ export class MetadataResolver {
       token,
       EXCEPTION_HANDLER_METADATA
     );
+    this.reflectComponentInjectables(metatype, token, PREFIX_METADATA);
   }
 
   private reflectComponentInjectables(

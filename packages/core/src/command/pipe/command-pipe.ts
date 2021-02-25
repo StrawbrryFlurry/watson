@@ -1,22 +1,56 @@
-import { Message } from 'discord.js';
+import { CommandArguments, CommandPipeline, CommandRoute } from '@watsonjs/common';
+import { Guild, Message, PermissionString, TextChannel, User } from 'discord.js';
 
-import { CommandRoute } from '../../routes';
-import { CommandArgumentHost } from './command-argument-host';
+import { CommandRouteHost } from '../../routes';
+import { CommandParser } from '../parser';
+import { CommandArgumentsHost } from './command-argument-host';
 
-export class CommandPipeline {
-  public argumentHost: CommandArgumentHost;
-  public route: CommandRoute;
+export class CommandPipelineHost implements CommandPipeline {
+  public argumentHost: CommandArgumentsHost;
+  public route: CommandRouteHost;
   public message: Message;
+  public command: string;
+  public prefix: string;
+  public isFromGuild: boolean;
+  public userPermissions: Set<PermissionString>;
 
-  constructor(route: CommandRoute) {
+  private parser: CommandParser;
+
+  constructor(route: CommandRouteHost) {
     this.route = route;
-    this.argumentHost = new CommandArgumentHost(route);
+    this.argumentHost = new CommandArgumentsHost(route);
+  }
+
+  getUser(): User {
+    return this.message.author;
+  }
+  getCommand(): CommandRoute {
+    throw new Error("Method not implemented.");
   }
 
   public invokeFromMessage(message: Message) {
-    this.argumentHost.parseMessage(message);
+    this.message = message;
 
-    /* Parse first token + prefix */
-    /* Check with the command container */
+    this.argumentHost.parseMessage(message);
+  }
+
+  getArguments(): CommandArguments {
+    return this.argumentHost;
+  }
+
+  getMessage(): Message {
+    throw new Error("Method not implemented.");
+  }
+
+  getChannel(): TextChannel {
+    throw new Error("Method not implemented.");
+  }
+
+  getGuild(): Guild {
+    throw new Error("Method not implemented.");
+  }
+
+  getContent(): string {
+    throw new Error("Method not implemented.");
   }
 }

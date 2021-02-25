@@ -1,12 +1,11 @@
-import { IClientEvent } from "@watsonjs/common";
-import { ClientEvents } from "discord.js";
-import iterate from "iterare";
+import { WatsonEvent } from '@watsonjs/common';
+import iterate from 'iterare';
 
-import { DiscordJSAdapter } from "../adapters";
-import { ExceptionHandler } from "../lifecycle";
-import { IHandlerFunction } from "../routes";
+import { DiscordJSAdapter } from '../adapters';
+import { ExceptionHandler } from '../lifecycle';
+import { IHandlerFunction } from '../routes';
 
-export class EventProxy<Event extends IClientEvent> {
+export class EventProxy<Event extends WatsonEvent> {
   public readonly eventType: Event;
   public readonly isWSEvent: boolean;
   public readonly handlerFunctions = new Map<
@@ -21,7 +20,7 @@ export class EventProxy<Event extends IClientEvent> {
 
   public async proxy(
     adapter: DiscordJSAdapter,
-    args: ClientEvents[Event]
+    args: unknown[]
   ): Promise<void> {
     Promise.all(
       this.getHandlerFns().map(async ([eventHandler, excpetionHandler]) => {

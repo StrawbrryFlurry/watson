@@ -1,5 +1,5 @@
+import { WatsonEvent } from '@watsonjs/common';
 import { AbstractDiscordAdapter } from '@watsonjs/core';
-import { ClientEvents } from 'discord.js';
 import { Observable } from 'rxjs';
 
 export class DiscordJsAdapter extends AbstractDiscordAdapter {
@@ -25,9 +25,7 @@ export class DiscordJsAdapter extends AbstractDiscordAdapter {
     throw new Error("Method not implemented.");
   }
 
-  public createListener<E extends keyof ClientEvents>(
-    event: E
-  ): Observable<ClientEvents[E]> {
+  public createListener<E extends WatsonEvent>(event: E): Observable<E> {
     throw new Error("Method not implemented.");
   }
 
