@@ -6,7 +6,7 @@ import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
 import { APP_STARTING, APP_STRATED, Logger } from './logger';
-import { RouteExplorer } from './routes';
+import { RouteExplorer } from './router';
 import { WatsonContainer } from './watson-container';
 
 /**

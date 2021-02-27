@@ -1,4 +1,5 @@
 import { BadArgumentException, CommandArgumentType, CommandTokenType, isNil } from '@watsonjs/common';
+import { Message } from 'discord.js';
 
 import { CommandArgumentWrapper } from '../command-argument-wrapper';
 import { CommandArgumentsHost } from '../pipe';
@@ -23,56 +24,47 @@ export class CommandParser {
     this.argumentHost = argumentHost;
   }
 
+  public async parseHungryArgument(argumentRef: CommandArgumentWrapper) {
+    const { param, content } = argumentRef;
+    const parsedArgs = [];
+
+    for (const token of content as string[]) {
+      const parsed = await this.parseArgumentToType(
+        argumentRef,
+        token,
+        this.message
+      );
+      parsedArgs.push(parsed);
+    }
+
+    return argumentRef.resolveValue(parsedArgs);
+  }
+
   public async parseArgument(argumentRef: CommandArgumentWrapper) {
-    const { content, type, param } = argumentRef;
-    const { type: paramType, default: d } = param;
-    const { message } = this.argumentHost;
+    const { content, param } = argumentRef;
 
-    let value: any;
+    /**
+     * As hungry params will be handled with @method this.parseHungryArgument the
+     * content will always be of type string.
+     */
+    let parsed = await this.parseArgumentToType(
+      argumentRef,
+      content as string,
+      this.message
+    );
 
-    switch (paramType) {
-      case CommandArgumentType.CHANNEL:
-        value = this.discordParser.parseChannel(message, content, param);
-        break;
-      case CommandArgumentType.USER:
-        value = this.discordParser.parseUser(message, content, param);
-        break;
-      case CommandArgumentType.ROLE:
-        value = this.discordParser.parseRole(message, content, param);
-        break;
-      case CommandArgumentType.CUSTOM:
-        value = await this.customParser.parseCustom(message, content, param);
-        break;
-      case CommandArgumentType.DATE:
-        value = this.dateParser.parseDate(content, param);
-        break;
-      case CommandArgumentType.NUMBER:
-        value = this.primitiveParser.parseNumber(content, param);
-        break;
-      case CommandArgumentType.STRING:
-        value = this.primitiveParser.parseString(type, content, param);
-        break;
-      case CommandArgumentType.TEXT:
-        value = this.primitiveParser.parseText(content);
-        break;
-      case CommandArgumentType.SWITCH:
-        value = this.primitiveParser.parseBoolean(content);
-        break;
-    }
-
-    if (isNil(value) && !isNil(d)) {
-      value = d;
-    }
-
-    if (isNil(value)) {
-      throw new BadArgumentException(param);
-    }
-
-    return argumentRef.resolveValue(value);
+    return argumentRef.resolveValue(parsed);
   }
 
   public async parseParameter(
     argumentRef: CommandArgumentWrapper,
+    /**
+     * The next token in the parsed token list
+     * @example
+     * `!ban -username @username`
+     * Where `@username` would be the next token when
+     * the `-username` parameter is parsed
+     */
     peek: CommandTokenHost
   ) {
     const { type } = argumentRef;
@@ -97,5 +89,59 @@ export class CommandParser {
    */
   public normalizeParam(param: string) {
     return param.replace(TokenizerKnownCharacters.NAMED_PARAM_SINGLE, "");
+  }
+
+  private async parseArgumentToType<T = any>(
+    argumentRef: CommandArgumentWrapper,
+    content: string,
+    message: Message
+  ): Promise<T> {
+    const { param } = argumentRef;
+    const { type, default: d, optional } = param;
+    let parsed: any;
+
+    switch (type) {
+      case CommandArgumentType.CHANNEL:
+        parsed = this.discordParser.parseChannel(message, content, param);
+        break;
+      case CommandArgumentType.USER:
+        parsed = this.discordParser.parseUser(message, content, param);
+        break;
+      case CommandArgumentType.ROLE:
+        parsed = this.discordParser.parseRole(message, content, param);
+        break;
+      case CommandArgumentType.CUSTOM:
+        parsed = await this.customParser.parseCustom(message, content, param);
+        break;
+      case CommandArgumentType.DATE:
+        parsed = this.dateParser.parseDate(content, param);
+        break;
+      case CommandArgumentType.NUMBER:
+        parsed = this.primitiveParser.parseNumber(content, param);
+        break;
+      case CommandArgumentType.STRING:
+        parsed = this.primitiveParser.parseString(content);
+        break;
+      case CommandArgumentType.TEXT:
+        parsed = this.primitiveParser.parseText(content);
+        break;
+      case CommandArgumentType.SWITCH:
+        parsed = this.primitiveParser.parseBoolean(content);
+        break;
+    }
+
+    if (isNil(parsed) && !isNil(d)) {
+      parsed = d;
+    }
+
+    if (isNil(parsed) && !optional) {
+      throw new BadArgumentException(param);
+    }
+
+    return parsed;
+  }
+
+  private get message() {
+    return this.argumentHost.message;
   }
 }

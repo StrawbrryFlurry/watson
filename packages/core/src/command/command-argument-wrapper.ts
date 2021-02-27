@@ -1,5 +1,7 @@
-import { CommandArgument, CommandArgumentType, ICommandParam } from '@watsonjs/common';
+import { ArgumentPromtFunction, CommandArgument, CommandArgumentType, ICommandParam, isNil } from '@watsonjs/common';
 import { Message } from 'discord.js';
+
+import { CommandArgumentsHost } from './pipe';
 
 export class CommandArgumentWrapper<T = any> implements CommandArgument {
   public readonly name: string;
@@ -10,13 +12,16 @@ export class CommandArgumentWrapper<T = any> implements CommandArgument {
   public readonly hungry: boolean;
   public readonly label: string;
   public readonly optional: boolean;
-  public readonly promt: string;
+  public readonly promt: string | ArgumentPromtFunction;
   public readonly parser?: (message: Message) => any;
   public readonly param: ICommandParam;
   public readonly namedParamContent: string;
   public readonly isNamed: boolean;
+  public readonly message: Message;
 
-  public content: string;
+  public host: CommandArgumentsHost;
+
+  public content: string | string[];
   public isResolved: boolean;
   public value: T;
 
@@ -29,8 +34,14 @@ export class CommandArgumentWrapper<T = any> implements CommandArgument {
     this.isResolved = true;
   }
 
-  private init(withData: Partial<CommandArgument>) {
-    const isResolved = withData.isResolved || false;
-    Object.assign(this, { ...withData, isResolved });
+  private init({
+    isNamed = false,
+    isResolved = false,
+    ...withData
+  }: Partial<CommandArgument>) {
+    const { host } = withData;
+    const message = isNil(host) ? withData.message : host.message;
+
+    Object.assign(this, { ...withData, isResolved, message });
   }
 }

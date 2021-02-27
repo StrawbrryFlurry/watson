@@ -3,7 +3,7 @@ import iterate from 'iterare';
 
 import { DiscordJSAdapter } from '../adapters';
 import { ExceptionHandler } from '../lifecycle';
-import { IHandlerFunction } from '../routes';
+import { IHandlerFunction } from '../router';
 
 export class EventProxy<Event extends WatsonEvent> {
   public readonly eventType: Event;

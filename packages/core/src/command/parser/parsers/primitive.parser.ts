@@ -1,6 +1,6 @@
 import { BadArgumentException, ICommandParam } from '@watsonjs/common';
 
-import { CommandTokenType, TokenizerKnownCharacters } from '../../tokenizer';
+import { TokenizerKnownCharacters } from '../../tokenizer';
 
 export class PrimitiveMessageTypeParser {
   public parseNumber(content: string, param: ICommandParam) {
@@ -13,23 +13,15 @@ export class PrimitiveMessageTypeParser {
     return number;
   }
 
-  public parseString(
-    type: CommandTokenType,
-    content: string,
-    param: ICommandParam
-  ) {
-    if (!(type === CommandTokenType.STRING_ARGUMENT)) {
-      throw new BadArgumentException(param);
-    }
-
+  public parseString(content: string) {
     if (content.startsWith(TokenizerKnownCharacters.BEGIN_STRING_DOUBLE)) {
       content = content.replace(
-        TokenizerKnownCharacters.BEGIN_STRING_DOUBLE,
+        new RegExp(TokenizerKnownCharacters.BEGIN_STRING_DOUBLE, "g"),
         ""
       );
     } else {
       content = content.replace(
-        TokenizerKnownCharacters.BEGIN_STRING_SINGLE,
+        new RegExp(TokenizerKnownCharacters.BEGIN_STRING_SINGLE, "g"),
         ""
       );
     }

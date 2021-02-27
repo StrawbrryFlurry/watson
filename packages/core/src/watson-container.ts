@@ -6,7 +6,7 @@ import { CommandContainer } from './command';
 import { UnknownModuleException } from './exceptions';
 import { CommandTokenFactory, ModuleTokenFactory } from './helpers';
 import { GlobalInstanceHost, Module } from './injector';
-import { CommandRoute } from './routes';
+import { CommandRoute } from './router';
 
 /**
  * Contains application state such as modules and provides an interface to get update / retrieve them

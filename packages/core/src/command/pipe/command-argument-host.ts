@@ -1,16 +1,18 @@
 import {
   BadArgumentException,
-  CommandArgument,
   CommandArguments,
   CommandArgumentType,
   CommandPrefix,
   CommandTokenType,
   ICommandParam,
   isNil,
+  MaxPromtCountExceededException,
+  MessageSendable,
+  MissingArgumentException,
 } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { CommandRouteHost } from '../../routes';
+import { CommandRouteHost } from '../../router';
 import { CommandArgumentWrapper } from '../command-argument-wrapper';
 import { CommandParser } from '../parser';
 import { CommandTokenHost, CommandTokenizer } from '../tokenizer';
@@ -18,7 +20,7 @@ import { CommandTokenHost, CommandTokenizer } from '../tokenizer';
 export class CommandArgumentsHost implements CommandArguments {
   public message: Message;
   public arguments: CommandArgumentWrapper[] = [];
-  public pendingArguments: CommandArgument[] = [];
+
   public params: ICommandParam[] = [];
   public route: CommandRouteHost;
   public tokens: CommandTokenHost[] = [];
@@ -46,25 +48,35 @@ export class CommandArgumentsHost implements CommandArguments {
   public async parseMessage(message: Message) {
     this.message = message;
     const tokens = this.tokenize(message);
+    const { promt } = this.route.configuration;
 
     while (!(this.isResolved && this.aborted)) {
       const token = tokens[this.tokenIndex];
       const { type, content } = token;
 
-      if (type === CommandTokenType.ARGUMENT) {
+      if (
+        type === CommandTokenType.ARGUMENT ||
+        type === CommandTokenType.STRING_ARGUMENT
+      ) {
         const param = this.calculateAnonymousParam();
+
+        if (param.hungry === true) {
+          this.handleHungryArgument(param, content);
+          continue;
+        }
+
         const argumentRef = new CommandArgumentWrapper({
           ...param,
+          host: this,
           content: content,
-          isNamed: false,
-          isResolved: false,
         });
 
         this.arguments.push(argumentRef);
-        this.parser.parseArgument(argumentRef);
+        await this.parser.parseArgument(argumentRef);
+        continue;
       }
 
-      if (token.type === CommandTokenType.PARAMETER) {
+      if (type === CommandTokenType.PARAMETER) {
         const paramName = this.parser.normalizeParam(content);
         const param = this.getParamByName(paramName);
 
@@ -73,14 +85,14 @@ export class CommandArgumentsHost implements CommandArguments {
         }
 
         if (param.hungry === true) {
-          const tokens = this.getTokenContentUntilNextParam();
-          this.parser;
+          this.handleHungryArgument(param, content, true);
+          continue;
         }
 
         const argumentRef = new CommandArgumentWrapper({
           ...param,
+          host: this,
           namedParamContent: content,
-          isResolved: false,
           isNamed: true,
         });
 
@@ -90,6 +102,26 @@ export class CommandArgumentsHost implements CommandArguments {
           argumentRef,
           tokens[this.nextTokenIndex]
         );
+        continue;
+      }
+
+      if (isNil(token)) {
+        const missingPrams = this.getMissingParams(false);
+        const missingOptionals = missingPrams.filter(
+          (e) => e.optional === true
+        );
+
+        this.handleOptionalParams(missingOptionals);
+
+        if (this.isResolved) {
+          return;
+        }
+
+        if (!promt) {
+          throw new MissingArgumentException(missingPrams);
+        }
+
+        await this.collect(missingPrams);
       }
     }
   }
@@ -120,7 +152,44 @@ export class CommandArgumentsHost implements CommandArguments {
    * or max promt count is reached the
    * execution will be aborted.
    */
-  private collect(message: Message) {}
+  private async collect(unresolved: ICommandParam[]) {
+    const { maxPromts } = this.configuration;
+
+    for (const param of unresolved) {
+      const { promt } = param;
+      let resolved = false;
+      let promts = 0;
+      let message: MessageSendable;
+
+      if (typeof promt === "function") {
+        message = await promt(this.message);
+      } else {
+        message = promt;
+      }
+
+      while (!resolved && promts < maxPromts) {
+        const response = await this.collectArgumentFromUser(message);
+
+        const argumentRef = new CommandArgumentWrapper({
+          ...param,
+          content: response.content,
+          message: response,
+          host: this,
+        });
+
+        try {
+          await this.parser.parseArgument(argumentRef);
+          resolved = true;
+        } catch {
+          console.log("parsing failed");
+        }
+      }
+
+      if (!resolved) {
+        throw new MaxPromtCountExceededException(param.name);
+      }
+    }
+  }
 
   /**
    * If named params were provided before an
@@ -190,9 +259,13 @@ export class CommandArgumentsHost implements CommandArguments {
    * Returns the params that were not yet
    * resolved
    */
-  private getMissingParams() {
+  private getMissingParams(incudeOptionals = true) {
     return this.params.filter((e) => {
       const argumentRef = this.getArgumentByParam(e.name);
+
+      if (incudeOptionals && e.optional) {
+        return false;
+      }
 
       if (isNil(argumentRef)) {
         return true;
@@ -206,13 +279,34 @@ export class CommandArgumentsHost implements CommandArguments {
     });
   }
 
+  private handleHungryArgument(
+    param: ICommandParam,
+    content: string,
+    isNamed = false
+  ) {
+    const tokens = this.getTokenContentUntilNextParam(isNamed);
+    const argumentRef = new CommandArgumentWrapper({
+      ...param,
+      isResolved: false,
+      isNamed: isNamed,
+      content: tokens,
+      namedParamContent: content,
+    });
+
+    this.parser.parseHungryArgument(argumentRef);
+  }
+
   /**
    * Returns all tokens until the next parameter
    * Is used when a parameter is *hungry*
+   *
+   * @param fromNamed True if this function was called
+   * while parsing a named parameter in which case the
+   * current token will be skipped.
    */
-  private getTokenContentUntilNextParam() {
+  private getTokenContentUntilNextParam(fromNamed: boolean) {
     const tokens: CommandTokenHost[] = [];
-    this.tokenIndex = this.nextTokenIndex;
+    this.tokenIndex = fromNamed ? this.nextTokenIndex : this.tokenIndex;
     let token = this.currentToken;
 
     while (token.type !== CommandTokenType.PARAMETER && !isNil(token)) {
@@ -234,5 +328,48 @@ export class CommandArgumentsHost implements CommandArguments {
 
   private get currentToken() {
     return this.tokens[this.tokenIndex];
+  }
+
+  private get configuration() {
+    return this.route.configuration;
+  }
+
+  /**
+   * Sends the promt to the channel that the command originated
+   * from.
+   * @returns The Message received from the user or `undefined`
+   * if the timeout exceeds
+   */
+  private async collectArgumentFromUser(promt: MessageSendable) {
+    const { channel } = this.message;
+    const { promtTimeout } = this.configuration;
+
+    const messageFilter = (message: Message) =>
+      message.author.id === this.message.author.id;
+
+    await channel.send(promt);
+    const response = await channel.awaitMessages(messageFilter, {
+      max: 1,
+      time: promtTimeout * 1000,
+    });
+
+    return response.first();
+  }
+
+  private handleOptionalParams(params: ICommandParam[]) {
+    for (const param of params) {
+      const { optional, default: d } = param;
+
+      if (optional && !isNil(d)) {
+        const argumentRef = new CommandArgumentWrapper({
+          ...param,
+          host: this,
+          content: d,
+          isResolved: true,
+        });
+
+        this.arguments.push(argumentRef);
+      }
+    }
   }
 }

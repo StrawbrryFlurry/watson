@@ -2,7 +2,7 @@ import { TReceiver, Type } from '@watsonjs/common';
 import { blue, cyan, yellow } from 'cli-color';
 
 import { InstanceWrapper, Module } from '../injector';
-import { CommandRoute, EventRoute, SlashRoute } from '../routes';
+import { CommandRoute, EventRoute, SlashRoute } from '../router';
 
 // WATSON FACTORY
 export const CREATE_APP_CONTEXT = () => `Creating application context...`;

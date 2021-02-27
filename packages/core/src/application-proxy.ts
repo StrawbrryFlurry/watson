@@ -3,7 +3,7 @@ import { Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
 import { EventProxy } from './lifecycle/event-proxy';
-import { RouteExplorer } from './routes';
+import { RouteExplorer } from './router';
 
 export interface IApplicationProxyOptions {
   acknowledgementEmote?: Snowflake | string;

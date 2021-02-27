@@ -1,6 +1,6 @@
 import { BootstrappingException } from '../../exceptions';
 import { DUPLICATE_COMMAND_NAME } from '../../logger';
-import { CommandRoute } from '../../routes';
+import { CommandRoute } from '../../router';
 
 export class DuplicateCommandImplementationException extends BootstrappingException {
   constructor(

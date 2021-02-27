@@ -2,7 +2,7 @@ import { BadArgumentException, CommandContextData, EventException, UnauthorizedE
 import { ClientUser, MessageEmbed } from 'discord.js';
 
 import { EventExecutionContext } from '../lifecycle';
-import { CommandRoute } from '../routes';
+import { CommandRoute } from '../router';
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
 import { CUSTOM_ERROR } from './custom.error';
 import { UNAUTHORIZED_ERROR } from './unauthorized.error';

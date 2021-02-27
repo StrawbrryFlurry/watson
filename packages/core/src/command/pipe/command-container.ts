@@ -2,14 +2,14 @@ import { CommandPrefix, isNil } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { CommandTokenFactory } from '../../helpers';
-import { CommandRoute } from '../../routes';
+import { CommandRouteHost } from '../../router';
 
-export class CommandContainer extends Map<string, CommandRoute> {
+export class CommandContainer extends Map<string, CommandRouteHost> {
   constructor(private commandTokenFactory = new CommandTokenFactory()) {
     super();
   }
 
-  public apply(route: CommandRoute) {
+  public apply(route: CommandRouteHost) {
     const token = this.commandTokenFactory.create(route);
 
     if (this.has(token)) {

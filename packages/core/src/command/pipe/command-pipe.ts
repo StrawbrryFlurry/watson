@@ -1,8 +1,8 @@
-import { CommandArguments, CommandPipeline, CommandRoute } from '@watsonjs/common';
-import { Guild, Message, PermissionString, TextChannel, User } from 'discord.js';
+import { CommandPipeline } from '@watsonjs/common';
+import { Channel, Guild, GuildMember, Message, User } from 'discord.js';
 
-import { CommandRouteHost } from '../../routes';
-import { CommandParser } from '../parser';
+import { CommandRouteHost } from '../../router';
+import { CommandPrefixHost } from '../../router/command/command-prefix-host';
 import { CommandArgumentsHost } from './command-argument-host';
 
 export class CommandPipelineHost implements CommandPipeline {
@@ -10,47 +10,61 @@ export class CommandPipelineHost implements CommandPipeline {
   public route: CommandRouteHost;
   public message: Message;
   public command: string;
-  public prefix: string;
+  public prefix: CommandPrefixHost;
   public isFromGuild: boolean;
-  public userPermissions: Set<PermissionString>;
+  public guildMember: GuildMember;
 
-  private parser: CommandParser;
-
-  constructor(route: CommandRouteHost) {
+  constructor(
+    command: string,
+    prefix: CommandPrefixHost,
+    route: CommandRouteHost
+  ) {
     this.route = route;
+    this.command = command;
+    this.prefix = prefix;
     this.argumentHost = new CommandArgumentsHost(route);
+  }
+
+  public async invokeFromMessage(message: Message) {
+    this.message = message;
+    await this.assingSelf();
+    await this.argumentHost.parseMessage(message);
+  }
+
+  private async assingSelf() {
+    const { guild } = this.message;
+    this.isFromGuild = !!guild;
+
+    if (this.isFromGuild) {
+      this.guildMember = await guild.members.fetch(this.message);
+    }
+  }
+
+  getMessage(): Message {
+    return this.message;
+  }
+
+  getChannel(): Channel {
+    return this.message.channel;
+  }
+
+  getGuild(): Guild {
+    return this.message.guild;
+  }
+
+  getContent(): string {
+    return this.message.content;
   }
 
   getUser(): User {
     return this.message.author;
   }
-  getCommand(): CommandRoute {
-    throw new Error("Method not implemented.");
-  }
 
-  public invokeFromMessage(message: Message) {
-    this.message = message;
-
-    this.argumentHost.parseMessage(message);
-  }
-
-  getArguments(): CommandArguments {
+  getArguments(): CommandArgumentsHost {
     return this.argumentHost;
   }
 
-  getMessage(): Message {
-    throw new Error("Method not implemented.");
-  }
-
-  getChannel(): TextChannel {
-    throw new Error("Method not implemented.");
-  }
-
-  getGuild(): Guild {
-    throw new Error("Method not implemented.");
-  }
-
-  getContent(): string {
-    throw new Error("Method not implemented.");
+  getCommand(): CommandRouteHost {
+    return this.route;
   }
 }

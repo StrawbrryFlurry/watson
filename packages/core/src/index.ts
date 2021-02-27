@@ -9,7 +9,7 @@ export * from "./injector";
 export * from "./interfaces";
 export * from "./lifecycle";
 export * from "./logger";
-export * from "./routes";
+export * from "./router";
 export * from "./sharding";
 export * from "./application-config";
 export * from "./application-proxy";

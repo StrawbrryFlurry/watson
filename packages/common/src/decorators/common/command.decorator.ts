@@ -2,8 +2,12 @@ import { Message, PermissionResolvable } from 'discord.js';
 
 import { COMMAND_METADATA } from '../../constants';
 import { CommandArgumentType } from '../../enums';
-import { CommandPrefix } from '../../interfaces';
+import { CommandPrefix, MessageSendable } from '../../interfaces';
 import { isNil, isObject, isString } from '../../utils/shared.utils';
+
+export type ArgumentPromtFunction = (
+  message: Message
+) => MessageSendable | Promise<MessageSendable>;
 
 export interface ICommandParam {
   /**
@@ -45,7 +49,7 @@ export interface ICommandParam {
    * The promt that will be used to ask for this parameter
    * if it was not specified
    */
-  promt?: string;
+  promt?: string | ArgumentPromtFunction;
   /**
    * An array of options the user can choose from
    * for this argument.

@@ -2,21 +2,39 @@ import { CommandPrefix, UnknownCommandException } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
 import { resolveAsyncValue } from '../../helpers/resolve-async-value';
-import { CommandRouteHost } from '../../routes';
+import { CommandRouteHost } from '../../router';
 import { CommandContainer } from '../pipe';
+
+export interface CommandMatchResult {
+  command: string;
+  prefix: CommandPrefix;
+  route: CommandRouteHost;
+}
 
 export class CommandMatcher {
   private container: CommandContainer;
   private prefixes: CommandPrefix[];
   private commands: Map<string, string>;
 
+  /**
+   * TODO:
+   * Evaluate if message caching is worth the memory cost
+   *
+   * @key The guild id + the message content
+   * @value The coresponding command
+   */
+  // private messageCache = new Map<string, CommandRouteHost>();
+
+  /**
+   *
+   */
   constructor(container: CommandContainer) {
     this.container = container;
     this.prefixes = this.container.getPrefixesAsArray();
     this.commands = this.container.getCommandsMap();
   }
 
-  public async matches(message: Message): Promise<CommandRouteHost> {
+  public async match(message: Message): Promise<CommandMatchResult> {
     const { content } = message;
     const commandPrefix = await this.checkForPrefix(message);
 
@@ -25,13 +43,19 @@ export class CommandMatcher {
     }
 
     const { isNamedPrefix, prefix } = commandPrefix;
-    let contentWithoutPrefix = content.substr(prefix.length);
+    let command = content.substr(prefix.length);
 
     if (isNamedPrefix) {
-      contentWithoutPrefix = contentWithoutPrefix.trim();
+      command = command.trim();
     }
 
-    return this.getCommand(contentWithoutPrefix);
+    const routeRef = this.getCommand(command);
+
+    return {
+      route: routeRef,
+      prefix: commandPrefix,
+      command: command,
+    };
   }
 
   private async checkForPrefix(message: Message) {
