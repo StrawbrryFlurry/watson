@@ -1,19 +1,14 @@
+import { Message } from 'discord.js';
+
 import { ICommandParam } from '../../decorators';
-import { CommandArgumentType } from '../../enums';
+import { CommandArguments } from './command-arguments.interface';
 
 export interface CommandArgument<T = any> extends ICommandParam {
-  name: string;
-  label?: string;
-  type?: CommandArgumentType;
-  optional?: boolean;
-  hungry?: boolean;
-  default?: any;
-  dateFormat?: string;
-  promt?: string;
-  choices?: string[];
   isResolved: boolean;
   isNamed: boolean;
   namedParamContent: string;
-  content: string;
+  content: string | string[];
+  message: Message;
+  host: CommandArguments;
   value: T;
 }

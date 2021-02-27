@@ -38,5 +38,5 @@ export interface CommandRoute extends BaseRoute {
    * Checks if this route supports a given
    * command name
    */
-  hasName(): boolean;
+  hasName(name: string): boolean;
 }

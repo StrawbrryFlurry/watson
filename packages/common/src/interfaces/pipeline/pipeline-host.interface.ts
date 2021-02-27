@@ -1,4 +1,4 @@
-import { BaseRoute } from '../routing';
+import { BaseRoute } from '../router';
 import { CommandPipeline } from './command-pipeline.interface';
 import { EventPipeline } from './event-pipeline.interface';
 import { SlashPipeline } from './slash-pipeline.interface';

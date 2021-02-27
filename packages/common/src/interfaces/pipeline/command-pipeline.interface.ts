@@ -1,7 +1,7 @@
-import { Guild, Message, PermissionString, TextChannel, User } from 'discord.js';
+import { Channel, Guild, GuildMember, Message, User } from 'discord.js';
 
-import { CommandArguments } from '../command';
-import { CommandRoute } from '../routing';
+import { CommandArguments, CommandPrefix } from '../command';
+import { CommandRoute } from '../router';
 
 export interface CommandPipeline {
   /**
@@ -11,15 +11,16 @@ export interface CommandPipeline {
   /**
    * The prefix used by the user
    */
-  prefix: string;
+  prefix: CommandPrefix;
   /**
    * Whether the message is from a guild or not
    */
   isFromGuild: boolean;
   /**
-   * Set of permissions of the author
+   * The resolved guild member object if
+   * the message originated form a guild
    */
-  userPermissions: Set<PermissionString>;
+  guildMember: GuildMember;
   /**
    * Returns the `CommandArgumentsHost` which
    * holds arguments collected for this context
@@ -36,7 +37,7 @@ export interface CommandPipeline {
   /**
    * Returns the text channel in which this command was used
    */
-  getChannel(): TextChannel;
+  getChannel(): Channel;
   /**
    * Returns the guild in which the message was sent
    * @returns `null` if the message was sent in a dm
