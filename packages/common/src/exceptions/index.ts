@@ -2,6 +2,8 @@ export * from "./bad-argument.exception";
 export * from "./custom-component.exception";
 export * from "./event.exception";
 export * from "./exception-handler";
+export * from "./max-promt-count-exceeded.exception";
+export * from "./missing-arguments.exception";
 export * from "./runtime-exception";
 export * from "./unauthorized.exception";
 export * from "./unknown-command.exception";
