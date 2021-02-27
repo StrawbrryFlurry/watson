@@ -3,7 +3,7 @@ import { BaseRoute, ContextType, TReceiver, Type, WatsonEvent } from '@watsonjs/
 import { InstanceWrapper } from '../injector';
 import { WatsonContainer } from '../watson-container';
 
-export abstract class AbstractRoute<Event extends WatsonEvent>
+export abstract class AbstractRoute<Event extends WatsonEvent = any>
   implements BaseRoute {
   /**
    * The type of the execution context Execution contexts be either "slash", event or "command"

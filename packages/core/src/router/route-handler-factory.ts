@@ -1,9 +1,5 @@
 import {
   CanActivate,
-  CommandContextData,
-  ContextDataTypes,
-  ContextEventTypes,
-  EventContextData,
   EventException,
   Filter,
   FILTER_METADATA,
@@ -15,35 +11,36 @@ import {
   PARAM_METADATA,
   PIPE_METADATA,
   PipeTransform,
-  SlashContextData,
   TReceiver,
   UnauthorizedException,
   WatsonEvent,
 } from '@watsonjs/common';
 import { Base } from 'discord.js';
 
+import { RouteParamsFactory } from '.';
 import { DiscordJSAdapter } from '../adapters';
 import { ModuleInitException } from '../exceptions';
 import { rethrowWithContext } from '../helpers';
 import { resolveAsyncValue } from '../helpers/resolve-async-value';
 import { InstanceWrapper, Module } from '../injector';
-import { EventExecutionContext, ResponseController } from '../lifecycle';
+import { ResponseController } from '../lifecycle';
 import { BAD_CHANGEALE_IMPLEMENTATION, CHANGEABLE_NOT_FOUND } from '../logger';
-import { RouteParamsFactory } from '../routes';
 import { WatsonContainer } from '../watson-container';
-import { AbstractEventRoute } from './abstract-route';
-import { CommandRoute } from './command';
-import { EventRoute } from './event';
-import { SlashRoute } from './slash';
+import { AbstractRoute } from './abstract-route';
 
+/**
+ * The handler function will be called by
+ * the event proxy to invoke the watson lifecycle
+ * when a registered event is fired.
+ */
 export type IHandlerFunction = (
   adapter: DiscordJSAdapter,
-  eventData: unknown[]
+  eventData: Base[]
 ) => Promise<void>;
 
 export type IHandlerFactory = (
-  route: AbstractEventRoute<any>,
-  handle: Function,
+  route: AbstractRoute,
+  handler: Function,
   receiver: InstanceWrapper<TReceiver>,
   module: Module
 ) => Promise<IHandlerFunction>;
@@ -53,6 +50,8 @@ export class RouteHandlerFactory {
   private responseController = new ResponseController();
 
   constructor(private container: WatsonContainer) {}
+
+  public async createHandler() {}
 
   public async createCommandHandler(
     route: CommandRoute,
@@ -376,10 +375,10 @@ export class RouteHandlerFactory {
     const receiverMetadata: (T | Function)[] =
       Reflect.getMetadata(metadataKey, metatype) || [];
 
-    const allGuards = [...receiverMetadata, ...handlerMetadata];
-    const filteredGuards = [...new Set(allGuards)];
+    const allMetadata = [...receiverMetadata, ...handlerMetadata];
+    const metadata = [...new Set(allMetadata)];
 
-    return filteredGuards;
+    return metadata;
   }
 
   private getMetadata(
