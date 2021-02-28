@@ -2,15 +2,12 @@ import { isNil, isString } from '@watsonjs/common';
 import { MessageEmbed } from 'discord.js';
 
 import { NotParsableException } from '../exceptions/not-parsable.exception';
-import { EventExecutionContext } from './event-execution-context';
+import { ExecutionContextHost } from './execution-context-host';
 
 export type ICommandResponse<T = any> = undefined | T[] | T;
 
 export class ResponseParser {
-  public async parse(
-    ctx: EventExecutionContext,
-    commandData: ICommandResponse
-  ) {
+  public async parse(ctx: ExecutionContextHost, commandData: ICommandResponse) {
     if (isNil(commandData)) {
       return;
     }

@@ -4,12 +4,13 @@ import {
   DiscordAdapter,
   EventPipeline,
   ExecutionContext,
+  PipelineBase,
   SlashPipeline,
   Type,
 } from '@watsonjs/common';
 import { Base as DjsBaseClass, Client } from 'discord.js';
 
-import { DiscordJSAdapter } from '../adapters';
+import { AbstractDiscordAdapter } from '../adapters';
 import { CommandPipelineHost } from '../command';
 import { AbstractRoute } from '../router';
 
@@ -17,14 +18,13 @@ export class ExecutionContextHost<
   PipelineHost extends
     | CommandPipelineHost
     | EventPipeline
-    | SlashPipeline = any,
+    | SlashPipeline = PipelineBase,
   EventData extends DjsBaseClass[] = any
 > implements ExecutionContext {
   public handler: Function;
   public next: Function;
   public route: AbstractRoute;
-  public adapter: DiscordJSAdapter;
-  public contextType: string;
+  public adapter: AbstractDiscordAdapter;
   public eventData: EventData;
 
   private pipeline: PipelineHost;
@@ -32,15 +32,15 @@ export class ExecutionContextHost<
   constructor(
     pipeline: PipelineHost,
     eventData: EventData,
-    contextType: ContextType,
     route: AbstractRoute,
-    adapter: DiscordJSAdapter
+    adapter: AbstractDiscordAdapter,
+    next?: Function
   ) {
     this.pipeline = pipeline;
     this.adapter = adapter;
     this.eventData = eventData;
-    this.contextType = contextType;
     this.route = route;
+    this.next = next;
   }
 
   public setNext(nextFn: Function) {
@@ -57,10 +57,6 @@ export class ExecutionContextHost<
 
   public getHandler(): Function {
     return this.handler;
-  }
-
-  public getEvent<T = unknown[]>(): T {
-    return this.eventData as any;
   }
 
   public getClient(): Client {
@@ -84,10 +80,27 @@ export class ExecutionContextHost<
   }
 
   public getType<T extends string = ContextType>(): T {
-    return this.contextType as T;
+    return this.pipeline.contextType as T;
+  }
+
+  public getEvent<T, R = T extends Array<any> ? T : [T]>(): R {
+    return (this.eventData as any) as R;
   }
 
   public getRoute(): BaseRoute {
     return this.route;
+  }
+
+  /**
+   * Removes all properties from the context
+   * so that it cannot be used any further
+   *
+   * @warn
+   * This method should only be called by the
+   * `ResponseController` and only after the
+   * event life cycle has finished!
+   */
+  public _destroy() {
+    Object.keys(this).forEach((k) => delete this[k]);
   }
 }

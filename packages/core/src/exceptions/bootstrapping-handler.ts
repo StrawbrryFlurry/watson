@@ -17,9 +17,9 @@ export class BootstrappingHandler {
       } catch (err: unknown) {
         if (err instanceof BootstrappingException) {
           const context = err.getContext();
+          const logger = new Logger(context);
           const message = err.getMessage();
           const stack = err.getStack();
-          const logger = new Logger(context);
 
           logger.logMessage(BOOTSTRAPPING_ERROR_MESSAGE());
           logger.logMessage(red(message));
@@ -34,6 +34,8 @@ export class BootstrappingHandler {
 
           reject(err);
         } else {
+          const logger = new Logger("WatsonApplication");
+          logger.logMessage(BOOTSTRAPPING_ERROR_MESSAGE());
           reject(err);
         }
       }

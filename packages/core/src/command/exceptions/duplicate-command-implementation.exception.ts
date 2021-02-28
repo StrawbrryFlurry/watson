@@ -1,11 +1,11 @@
 import { BootstrappingException } from '../../exceptions';
 import { DUPLICATE_COMMAND_NAME } from '../../logger';
-import { CommandRoute } from '../../router';
+import { CommandRouteHost } from '../../router';
 
 export class DuplicateCommandImplementationException extends BootstrappingException {
   constructor(
-    existing: CommandRoute,
-    duplicate: CommandRoute,
+    existing: CommandRouteHost,
+    duplicate: CommandRouteHost,
     conflict: string
   ) {
     super(

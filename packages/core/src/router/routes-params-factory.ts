@@ -1,13 +1,11 @@
 import {
   AskFunction,
   CollectFunction,
-  CommandContextData,
   ExecutionContext,
   IInquirableMetadata,
   InquirableType,
   IParamDecoratorMetadata,
   isFunction,
-  isNil,
   isString,
   ParamFactoryFunction,
   ReactFunction,
@@ -20,18 +18,20 @@ import {
   Message,
   MessageEmbed,
   MessageReaction,
+  TextChannel,
   User,
 } from 'discord.js';
 
+import { CommandPipelineHost } from '../command';
 import { resolveAsyncValue } from '../helpers/resolve-async-value';
-import { EventExecutionContext } from '../lifecycle';
+import { ExecutionContextHost } from '../lifecycle';
 
 export class RouteParamsFactory {
   public async createFromContext(
     paramTypes: IParamDecoratorMetadata[],
-    ctx: EventExecutionContext
+    ctx: ExecutionContextHost
   ) {
-    const data = ctx.getContextData();
+    const commandPipe = ctx.switchToCommand();
 
     const params: unknown[] = [];
     for (const type of paramTypes) {
@@ -41,7 +41,7 @@ export class RouteParamsFactory {
           params[idx] = ctx.getEvent();
           break;
         case RouteParamType.CHANNEL:
-          params[idx] = (data as CommandContextData).channel;
+          params[idx] = commandPipe.getChannel();
           break;
         case RouteParamType.CLIENT:
           params[idx] = ctx.getClient();
@@ -50,30 +50,33 @@ export class RouteParamsFactory {
           params[idx] = ctx;
           break;
         case RouteParamType.GUILD:
-          params[idx] = (data as CommandContextData)?.guild;
+          params[idx] = commandPipe.getGuild();
           break;
         case RouteParamType.MESSAGE:
-          params[idx] = data as CommandContextData;
+          params[idx] = commandPipe.getMessage();
           break;
         case RouteParamType.PARAM:
           const param = type.options;
-          if (isNil((data as CommandContextData).params)) {
+          const argumentsHost = commandPipe.getArguments();
+
+          if (argumentsHost.arguments.length === 0) {
             params[idx] = undefined;
             break;
           }
+
           params[idx] = isString(param)
-            ? (data as CommandContextData).params[param]
-            : (data as CommandContextData).params;
+            ? argumentsHost.getParamByName(param)
+            : argumentsHost.arguments;
           break;
         case RouteParamType.USER:
-          params[idx] = (data as CommandContextData).user;
+          params[idx] = commandPipe.getUser();
           break;
         case RouteParamType.FACTORY:
           params[idx] = await this.fromParamFactory(ctx as any, type.factory);
           break;
         case RouteParamType.INQUIRABLE:
           params[idx] = this.fromInquirable(
-            ctx as EventExecutionContext<CommandContextData>,
+            commandPipe,
             (type.options as IInquirableMetadata).type
           );
           break;
@@ -97,26 +100,20 @@ export class RouteParamsFactory {
     return resolveAsyncValue(factoryResult);
   }
 
-  private fromInquirable(
-    ctx: EventExecutionContext<CommandContextData>,
-    type: InquirableType
-  ) {
+  private fromInquirable(pipe: CommandPipelineHost, type: InquirableType) {
     switch (type) {
       case InquirableType.ASK:
-        return this.createAskInquirable(ctx);
+        return this.createAskInquirable(pipe);
       case InquirableType.REACT:
-        return this.createReactInquirable(ctx);
+        return this.createReactInquirable(pipe);
       case InquirableType.COLLECT:
-        return this.createCollectionInquirable(ctx);
+        return this.createCollectionInquirable(pipe);
     }
   }
 
-  private createAskInquirable(
-    ctx: EventExecutionContext<CommandContextData>
-  ): AskFunction {
-    const { channel } = ctx.getContextData();
-    const askFilter = (message: Message) =>
-      message.author.id === ctx.getContextData<CommandContextData>().user.id;
+  private createAskInquirable(pipe: CommandPipelineHost): AskFunction {
+    const channel = pipe.getChannel() as TextChannel;
+    const askFilter = (message: Message) => message.author.id === pipe.user.id;
 
     return async (
       message: string | MessageEmbed,
@@ -139,10 +136,8 @@ export class RouteParamsFactory {
     };
   }
 
-  private createReactInquirable(
-    ctx: EventExecutionContext<CommandContextData>
-  ): ReactFunction {
-    const { channel } = ctx.getContextData();
+  private createReactInquirable(pipe: CommandPipelineHost): ReactFunction {
+    const channel = pipe.getChannel() as TextChannel;
 
     return async (
       message: string | MessageEmbed,
@@ -154,8 +149,7 @@ export class RouteParamsFactory {
       const { time = 10000 } = options;
       const reactionFilter = customReactionFilter
         ? customReactionFilter
-        : (reaction: MessageReaction, user: User) =>
-            user.id === ctx.getContextData<CommandContextData>().user.id;
+        : (reaction: MessageReaction, user: User) => user.id === pipe.user.id;
 
       const result = await messageRef.awaitReactions(reactionFilter, {
         ...options,
@@ -171,9 +165,9 @@ export class RouteParamsFactory {
   }
 
   private createCollectionInquirable(
-    ctx: EventExecutionContext<CommandContextData>
+    pipe: CommandPipelineHost
   ): CollectFunction {
-    const { channel } = ctx.getContextData();
+    const { channel } = pipe;
 
     return async (
       message: string | MessageEmbed,

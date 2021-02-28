@@ -1,13 +1,8 @@
-import {
-  BadArgumentException,
-  CommandContextData,
-  EventException,
-  EventExceptionHandler,
-  UnauthorizedException,
-} from '@watsonjs/common';
+import { BadArgumentException, EventException, EventExceptionHandler, UnauthorizedException } from '@watsonjs/common';
 
+import { CommandPipelineHost } from '../command';
 import { ErrorHost } from '../errors';
-import { EventExecutionContext } from './event-execution-context';
+import { ExecutionContextHost } from './execution-context-host';
 
 export class CommonExceptionHandler extends EventExceptionHandler {
   private errorHost = new ErrorHost();
@@ -19,7 +14,7 @@ export class CommonExceptionHandler extends EventExceptionHandler {
   catch(err: EventException) {
     this.errorHost.handleCommonException(
       err,
-      (err.context as any) as EventExecutionContext<CommandContextData>
+      err.context as ExecutionContextHost<CommandPipelineHost>
     );
   }
 }

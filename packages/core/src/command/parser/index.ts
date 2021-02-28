@@ -1,3 +1,2 @@
-export * from "./types";
+export * from "./parsers";
 export * from "./command-parser";
-export * from "./watson-command";

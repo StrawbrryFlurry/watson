@@ -2,7 +2,7 @@ import { TReceiver, Type } from '@watsonjs/common';
 import { blue, cyan, yellow } from 'cli-color';
 
 import { InstanceWrapper, Module } from '../injector';
-import { CommandRoute, EventRoute, SlashRoute } from '../router';
+import { CommandRouteHost, EventRouteHost, SlashRoute } from '../router';
 
 // WATSON FACTORY
 export const CREATE_APP_CONTEXT = () => `Creating application context...`;
@@ -22,12 +22,12 @@ export const EXPLORE_START = () => `Exploring application event handlers`;
 export const EXPLORE_RECEIVER = (receiver: InstanceWrapper) =>
   `From ${blue(receiver.name)} in ${yellow(receiver.host.name)}`;
 
-export const MAP_COMMAND = (route: CommandRoute) =>
+export const MAP_COMMAND = (route: CommandRouteHost) =>
   `Mapped command ${cyan(route.prefix)}${cyan(route.name)} in ${blue(
     route.host.name
   )}`;
 
-export const MAP_EVENT = (route: EventRoute<any>) =>
+export const MAP_EVENT = (route: EventRouteHost<any>) =>
   `Mapped event ${yellow(route.event)} in ${blue(route.host.name)}`;
 
 export const MAP_SLASH_COMMAND = (route: SlashRoute) =>
@@ -57,10 +57,10 @@ export const CREATE_INSTANCE = (instance: InstanceWrapper) =>
 // GLOBAL
 export const COMPLETED = () => `Completed`;
 
-type Changeable = "guard" | "pipe" | "filter";
+export type Interceptor<T extends string = "guard" | "pipe" | "filter"> = T;
 
-export const CHANGEABLE_NOT_FOUND = (
-  type: Changeable,
+export const INTERCEPTOR_NOT_FOUND = (
+  type: Interceptor,
   name: string,
   method: Function,
   receiver: InstanceWrapper<TReceiver>,
@@ -68,8 +68,8 @@ export const CHANGEABLE_NOT_FOUND = (
 ) =>
   `The ${type} ${name} used to decorate the handler ${method.name} in receiver ${receiver.name} was not found in the module ${module.name}`;
 
-export const BAD_CHANGEALE_IMPLEMENTATION = (
-  type: Changeable,
+export const BAD_INTERCEPTOR_IMPLEMENTATION = (
+  type: Interceptor,
   name: string,
   method: Function,
   receiver: InstanceWrapper<TReceiver>,

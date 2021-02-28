@@ -1,13 +1,14 @@
-import { CommandContextData, isNil } from '@watsonjs/common';
+import { isNil } from '@watsonjs/common';
+import { TextChannel } from 'discord.js';
 
-import { EventExecutionContext } from './event-execution-context';
+import { ExecutionContextHost } from './execution-context-host';
 import { ResponseParser } from './response-parser';
 
 export class ResponseController {
   private parser = new ResponseParser();
 
   public async apply<CtxResult = any>(
-    ctx: EventExecutionContext,
+    ctx: ExecutionContextHost,
     result: CtxResult
   ) {
     const parsed = await this.parser.parse(ctx, result);
@@ -16,10 +17,14 @@ export class ResponseController {
       return;
     }
 
-    const { channel } = ctx.getContextData<CommandContextData>();
+    const pipelineHost = ctx.switchToCommand();
+    const channel = pipelineHost.getChannel() as TextChannel;
     await channel.send(parsed);
 
-    // The context should not be usable after the command or event has been executed.
+    /**
+     * This should mark the context for gc
+     */
+    ctx._destroy();
     ctx = undefined;
   }
 }
