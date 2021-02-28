@@ -1,378 +1,196 @@
 import {
-  CanActivate,
+  CommandPrefix,
   EventException,
-  Filter,
   FILTER_METADATA,
   GUARD_METADATA,
   IParamDecoratorMetadata,
-  isEmpty,
-  isFunction,
-  isNil,
   PARAM_METADATA,
   PIPE_METADATA,
-  PipeTransform,
+  TFiltersMetadata,
+  TGuardsMetadata,
+  TPipesMetadata,
   TReceiver,
-  UnauthorizedException,
-  WatsonEvent,
 } from '@watsonjs/common';
-import { Base } from 'discord.js';
+import { Base, Message } from 'discord.js';
 
 import { RouteParamsFactory } from '.';
-import { DiscordJSAdapter } from '../adapters';
-import { ModuleInitException } from '../exceptions';
+import { AbstractDiscordAdapter } from '../adapters';
+import { CommandPipelineHost } from '../command';
+import { CommandMatcher } from '../command/matcher';
 import { rethrowWithContext } from '../helpers';
 import { resolveAsyncValue } from '../helpers/resolve-async-value';
-import { InstanceWrapper, Module } from '../injector';
-import { ResponseController } from '../lifecycle';
-import { BAD_CHANGEALE_IMPLEMENTATION, CHANGEABLE_NOT_FOUND } from '../logger';
+import { InstanceWrapper } from '../injector';
+import { ExecutionContextHost, ResponseController } from '../lifecycle';
 import { WatsonContainer } from '../watson-container';
-import { AbstractRoute } from './abstract-route';
+import { CommandRouteHost } from './command';
+import { FiltersConsumer, GuardsConsumer, PipesConsumer } from './interceptors';
 
 /**
  * The handler function will be called by
  * the event proxy to invoke the watson lifecycle
  * when a registered event is fired.
  */
-export type IHandlerFunction = (
-  adapter: DiscordJSAdapter,
-  eventData: Base[]
-) => Promise<void>;
+export type TLifecycleFunction = (eventData: Base[]) => Promise<void>;
 
-export type IHandlerFactory = (
-  route: AbstractRoute,
+export interface IRouteMetadata {
+  pipes: TPipesMetadata[];
+  guards: TGuardsMetadata[];
+  filters: TFiltersMetadata[];
+  /**
+   * Returns an array of data to call
+   * the handler with.
+   */
+  paramsFactory: (ctx: ExecutionContextHost) => Promise<unknown[]>;
+}
+
+export type THandlerFactory = (
+  route: CommandRouteHost,
   handler: Function,
   receiver: InstanceWrapper<TReceiver>,
-  module: Module
-) => Promise<IHandlerFunction>;
+  moduleKey: string
+) => Promise<TLifecycleFunction>;
 
 export class RouteHandlerFactory {
   private paramsFactory = new RouteParamsFactory();
   private responseController = new ResponseController();
+  private matcher = new CommandMatcher(this.container.getCommands());
 
-  constructor(private container: WatsonContainer) {}
+  private pipesConsumer = new PipesConsumer(this.container);
+  private guardsConsumer = new GuardsConsumer(this.container);
+  private filtersConsumer = new FiltersConsumer(this.container);
 
-  public async createHandler() {}
+  private adapterRef: AbstractDiscordAdapter;
 
-  public async createCommandHandler(
-    route: CommandRoute,
-    handle: Function,
-    receiver: InstanceWrapper<TReceiver>,
-    module: Module
-  ): Promise<IHandlerFunction> {
-    const { filters, guards, paramsFactory, pipes } = this.getMetadata(
-      route,
-      handle,
-      receiver,
-      module
-    );
-
-    const applyPipesFn = this.createPipesFn(pipes);
-    const applyFilterFn = this.createFiltersFn(filters);
-    const applyGuardsFn = this.createGuardsFn(guards);
-
-    return this.createHandlerFn({
-      type: "command",
-      handle: handle,
-      paramsFactory: paramsFactory,
-      receiver: receiver,
-      route: route,
-      applyFilterFn,
-      applyGuardsFn,
-      applyPipesFn,
-    });
+  constructor(private container: WatsonContainer) {
+    this.adapterRef = this.container.getClientAdapter();
   }
 
-  public async createSlashHandler(
-    route: SlashRoute,
-    handle: Function,
-    receiver: InstanceWrapper<TReceiver>,
-    module: Module
-  ): Promise<IHandlerFunction> {
-    const { filters, guards, paramsFactory, pipes } = this.getMetadata(
-      route,
-      handle,
-      receiver,
-      module
-    );
-
-    const applyPipesFn = this.createPipesFn(pipes);
-    const applyFilterFn = this.createFiltersFn(filters);
-    const applyGuardsFn = this.createGuardsFn(guards);
-
-    return this.createHandlerFn({
-      type: "slash",
-      handle: handle,
-      paramsFactory: paramsFactory,
-      receiver: receiver,
-      route: route,
-      applyFilterFn,
-      applyGuardsFn,
-      applyPipesFn,
-    });
-  }
-
-  public async createEventHandler<T extends WatsonEvent>(
-    route: EventRoute<T>,
-    handle: Function,
-    receiver: InstanceWrapper<TReceiver>,
-    module: Module
-  ): Promise<IHandlerFunction> {
-    const { filters, paramsFactory, pipes } = this.getMetadata(
-      route,
-      handle,
-      receiver,
-      module
-    );
-
-    const applyPipesFn = this.createPipesFn(pipes);
-    const applyFilterFn = this.createFiltersFn(filters);
-
-    return this.createHandlerFn({
-      type: "event",
-      handle: handle,
-      paramsFactory: paramsFactory,
-      receiver: receiver,
-      route: route,
-      applyFilterFn,
-      applyPipesFn,
-    });
-  }
-
-  private reflectGuards(
+  public async createCommandHandler<RouteResult = any>(
+    route: CommandRouteHost,
     handler: Function,
-    receiver: InstanceWrapper<TReceiver>
-  ) {
-    const { host: module } = receiver;
-
-    const guards = this.reflectKey<CanActivate>(
-      GUARD_METADATA,
+    receiver: InstanceWrapper<TReceiver>,
+    moduleKey: string
+  ): Promise<TLifecycleFunction> {
+    const { filters, guards, pipes, paramsFactory } = this.getMetadata(
       handler,
       receiver
     );
 
-    let resolvedGuards: CanActivate[] = [];
+    const applyGuards = this.guardsConsumer.create({
+      route: route,
+      receiver: receiver,
+      metadata: guards,
+      moduleKey: moduleKey,
+    });
 
-    const checkActivate = (guard: CanActivate) => {
-      if (typeof guard.canActivate === "undefined") {
-        throw new ModuleInitException(
-          BAD_CHANGEALE_IMPLEMENTATION(
-            "guard",
-            (guard as any).name,
-            handler,
-            receiver,
-            module
-          )
-        );
-      }
-    };
+    const applyPipes = this.pipesConsumer.create({
+      route: route,
+      receiver: receiver,
+      metadata: pipes,
+      moduleKey: moduleKey,
+    });
 
-    for (const guard of guards) {
-      if (isFunction(guard)) {
-        const wrapper = module.injectables.get(guard);
+    const applyFilters = this.filtersConsumer.create({
+      route: route,
+      receiver: receiver,
+      metadata: filters,
+      moduleKey: moduleKey,
+    });
 
-        if (typeof wrapper === "undefined") {
-          throw new ModuleInitException(
-            CHANGEABLE_NOT_FOUND(
-              "guard",
-              (guard as Function).name,
-              handler,
-              receiver,
-              module
-            )
-          );
+    const lifeCycle: TLifecycleFunction = async (event: [Message]) => {
+      const [message] = event;
+      let routeRef: CommandRouteHost;
+      let commandName: string, prefixRef: CommandPrefix;
+
+      /**
+       * Matches the message against all mapped
+       * command routes.
+       * If none could be matched the message will
+       * be ignored.
+       *
+       * If the demand is there to have `command not found`
+       * messages this could be updated to specifically
+       * catch the `UnknownCommandException`.
+       *
+       * TODO:
+       * Move match to the event proxy and let it call the lifecycle
+       * method with the data only if the route is matched
+       */
+      try {
+        const { route, command, prefix } = await this.matcher.match(message);
+
+        if (!route) {
+          return;
         }
 
-        checkActivate(wrapper.instance as CanActivate);
-        resolvedGuards.push(wrapper.instance as CanActivate);
-      } else {
-        checkActivate(guard as CanActivate);
-        resolvedGuards.push(guard as CanActivate);
-      }
-    }
-
-    return resolvedGuards;
-  }
-
-  private createGuardsFn(guards: CanActivate[]) {
-    if (isEmpty(guards)) {
-      return null;
-    }
-
-    return async (ctx: any) => {
-      for (const guard of guards) {
-        const res = guard.canActivate(ctx);
-        const activationRes = await resolveAsyncValue<boolean, boolean>(res);
-
-        if (activationRes === false) {
-          throw new UnauthorizedException();
-        }
-      }
-    };
-  }
-
-  private reflectFilters(
-    handler: Function,
-    receiver: InstanceWrapper<TReceiver>
-  ) {
-    const { host: module } = receiver;
-
-    const filters = this.reflectKey<Filter>(FILTER_METADATA, handler, receiver);
-
-    let resolvedFilters: Filter[] = [];
-
-    const checkFilter = (filter: Filter) => {
-      if (typeof filter.filter === "undefined") {
-        throw new ModuleInitException(
-          BAD_CHANGEALE_IMPLEMENTATION(
-            "filter",
-            (filter as any).name,
-            handler,
-            receiver,
-            module
-          )
-        );
-      }
-    };
-
-    for (const filter of filters) {
-      if (isFunction(filter)) {
-        const wrapper = module.injectables.get(filter);
-
-        if (typeof wrapper === "undefined") {
-          throw new ModuleInitException(
-            CHANGEABLE_NOT_FOUND(
-              "filter",
-              (filter as Function).name,
-              handler,
-              receiver,
-              module
-            )
-          );
-        }
-
-        checkFilter(wrapper.instance as Filter);
-        resolvedFilters.push(wrapper.instance as Filter);
-      } else {
-        checkFilter(filter as Filter);
-        resolvedFilters.push(filter as Filter);
-      }
-    }
-
-    return resolvedFilters;
-  }
-
-  private createFiltersFn(filters: Filter[]) {
-    if (isEmpty(filters)) {
-      return null;
-    }
-
-    return async (ctx: EventExecutionContext) => {
-      for (const filter of filters) {
-        const res = filter.filter(ctx as any);
-        const filterResult = await resolveAsyncValue<boolean, boolean>(res);
-
-        if (filterResult) {
-          continue;
-        } else {
-          return false;
-        }
+        routeRef = route;
+        commandName = command;
+        prefixRef = prefix;
+      } catch {
+        return;
       }
 
-      return true;
-    };
-  }
-
-  private reflectPipes(
-    handler: Function,
-    receiver: InstanceWrapper<TReceiver>
-  ) {
-    const { host: module } = receiver;
-
-    const pipes = this.reflectKey<PipeTransform>(
-      PIPE_METADATA,
-      handler,
-      receiver
-    );
-
-    let resolvedPipes: PipeTransform[] = [];
-
-    const checkTransform = (pipe: PipeTransform) => {
-      if (typeof pipe.transform === "undefined") {
-        throw new ModuleInitException(
-          BAD_CHANGEALE_IMPLEMENTATION(
-            "pipe",
-            (pipe as any).name,
-            handler,
-            receiver,
-            module
-          )
-        );
-      }
-    };
-
-    for (const pipe of pipes) {
-      if (isFunction(pipe)) {
-        const wrapper = module.injectables.get(pipe);
-
-        if (typeof wrapper === "undefined") {
-          throw new ModuleInitException(
-            CHANGEABLE_NOT_FOUND(
-              "pipe",
-              (pipe as Function).name,
-              handler,
-              receiver,
-              module
-            )
-          );
-        }
-
-        checkTransform(wrapper.instance as PipeTransform);
-        resolvedPipes.push(wrapper.instance as PipeTransform);
-      } else {
-        checkTransform(pipe as PipeTransform);
-        resolvedPipes.push(pipe as PipeTransform);
-      }
-    }
-
-    return resolvedPipes;
-  }
-
-  private createPipesFn(pipes: PipeTransform[]) {
-    if (isEmpty(pipes)) {
-      return null;
-    }
-
-    return async (
-      ctx: CommandContextData | SlashContextData | EventContextData
-    ) => {
-      const pipeResults = [];
-      for (const pipe of pipes) {
-        const res = pipe.transform(ctx);
-        const transformedCtx = await resolveAsyncValue(res);
-
-        pipeResults.push(transformedCtx);
-      }
-
-      const transformation = pipeResults.reduce(
-        (changes, change) => ({ ...changes, ...change }),
-        {}
+      const pipeline = new CommandPipelineHost(
+        commandName,
+        prefixRef,
+        routeRef
       );
 
-      return transformation;
+      /**
+       * Initialize the pipeline and parse
+       * the message content
+       */
+      await pipeline.invokeFromMessage(message);
+
+      const context = new ExecutionContextHost(
+        pipeline,
+        event,
+        routeRef,
+        this.adapterRef
+      );
+
+      try {
+        const didPass = await applyFilters(pipeline);
+
+        if (didPass !== true) {
+          return;
+        }
+
+        await applyGuards(pipeline);
+        await applyPipes(pipeline);
+
+        const params = await paramsFactory(context);
+        const resolvable = handler.apply(receiver.instance, params);
+        const result = (await resolveAsyncValue(resolvable)) as RouteResult;
+
+        await this.responseController.apply(context, result);
+      } catch (err) {
+        if (err instanceof EventException) {
+          rethrowWithContext(err, context);
+        } else {
+          throw err;
+        }
+      }
     };
+
+    return lifeCycle;
   }
 
+  /**
+   * Reflects the metadata key for both
+   * the receiver type and the handler function
+   */
   private reflectKey<T>(
     metadataKey: string,
     handler: Function,
     receiver: InstanceWrapper<TReceiver>
-  ) {
+  ): T[] {
     const { metatype } = receiver;
 
-    const handlerMetadata: (T | Function)[] =
+    const handlerMetadata: T[] =
       Reflect.getMetadata(metadataKey, handler) || [];
 
-    const receiverMetadata: (T | Function)[] =
+    const receiverMetadata: T[] =
       Reflect.getMetadata(metadataKey, metatype) || [];
 
     const allMetadata = [...receiverMetadata, ...handlerMetadata];
@@ -382,18 +200,27 @@ export class RouteHandlerFactory {
   }
 
   private getMetadata(
-    route: AbstractEventRoute<any>,
-    handle: Function,
-    receiver: InstanceWrapper<TReceiver>,
-    module: Module
-  ) {
-    const guards = this.reflectGuards(handle, receiver);
-    const filters = this.reflectFilters(handle, receiver);
-    const pipes = this.reflectPipes(handle, receiver);
+    handler: Function,
+    receiver: InstanceWrapper<TReceiver>
+  ): IRouteMetadata {
+    const guards = this.reflectKey<TGuardsMetadata>(
+      GUARD_METADATA,
+      handler,
+      receiver
+    );
+    const filters = this.reflectKey<TFiltersMetadata>(
+      FILTER_METADATA,
+      handler,
+      receiver
+    );
+    const pipes = this.reflectKey<TPipesMetadata>(
+      PIPE_METADATA,
+      handler,
+      receiver
+    );
 
-    const params = this.reflectParams(receiver, handle);
-
-    const paramsFactory = (ctx: EventExecutionContext) => {
+    const params = this.reflectParams(receiver, handler);
+    const paramsFactory = (ctx: ExecutionContextHost) => {
       return this.paramsFactory.createFromContext(params, ctx);
     };
 
@@ -402,73 +229,6 @@ export class RouteHandlerFactory {
       filters,
       pipes,
       paramsFactory,
-    };
-  }
-
-  private createHandlerFn<RouteResult = any>({
-    applyFilterFn,
-    applyGuardsFn,
-    applyPipesFn,
-    paramsFactory,
-    handle,
-    receiver,
-    type,
-    route,
-  }: {
-    applyPipesFn?: (ctx: ContextDataTypes) => Promise<any>;
-    applyGuardsFn?: (ctx: EventExecutionContext) => Promise<void>;
-    applyFilterFn?: (ctx: EventExecutionContext) => Promise<boolean>;
-    paramsFactory: (ctx: EventExecutionContext) => Promise<unknown[]>;
-    receiver: InstanceWrapper<TReceiver>;
-    handle: Function;
-    type: ContextEventTypes;
-    route: AbstractEventRoute<any>;
-  }) {
-    return async (adapter: DiscordJSAdapter, event: Base[]) => {
-      const matches = /* route.matchEvent(event) */ "" as any;
-
-      if (!matches) {
-        return null;
-      }
-
-      const ctx = new EventExecutionContext(
-        type,
-        event,
-        route,
-        adapter,
-        this.container
-      );
-
-      try {
-        const data = "" as any; // = await route.createContextData(event);
-        ctx.applyTransformation(data);
-
-        const compliesFilter = applyFilterFn && (await applyFilterFn(ctx));
-
-        if (!isNil(applyFilterFn) && !compliesFilter) {
-          return null;
-        }
-
-        applyGuardsFn && (await applyGuardsFn(ctx));
-
-        const transfromedParams = applyPipesFn && (await applyPipesFn(ctx));
-
-        if (!isNil(transfromedParams)) {
-          data.params = transfromedParams;
-          ctx.applyTransformation(data);
-        }
-
-        const params = await paramsFactory(ctx);
-        const resolvable = handle.apply(receiver.instance, params);
-        const result = (await resolveAsyncValue(resolvable)) as RouteResult;
-        await this.responseController.apply(ctx, result);
-      } catch (err) {
-        if (err instanceof EventException) {
-          rethrowWithContext(err, ctx as any);
-        } else {
-          throw err;
-        }
-      }
     };
   }
 

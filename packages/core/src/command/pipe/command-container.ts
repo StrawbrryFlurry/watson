@@ -27,7 +27,7 @@ export class CommandContainer extends Map<string, CommandRouteHost> {
         );
   }
 
-  public getPrefixesAsArray() {
+  public getPrefixesAsArray(): CommandPrefix[] {
     return iterate(this)
       .toArray()
       .map(([_, route]) => route.commandPrefix)
@@ -35,7 +35,7 @@ export class CommandContainer extends Map<string, CommandRouteHost> {
         const { prefix } = commandPrefix;
 
         if (isNil(prefix)) {
-          return [...prefixes, commandPrefix];
+          return prefixes;
         }
 
         const hasPrefix = prefixes.some((p) => p.prefix === prefix);

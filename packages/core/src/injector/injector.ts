@@ -188,6 +188,20 @@ export class Injector {
     await this.createInstance(receiver, module);
   }
 
+  public createFromModuleContext<T>(module: Module) {
+    return async (metatype: Type, inject?: unknown[]) => {
+      const wrapper = new InstanceWrapper<T>({
+        name: metatype.name,
+        host: module,
+        metatype: metatype,
+        inject: inject,
+      });
+
+      await this.createInstance(wrapper, module);
+      return wrapper.instance;
+    };
+  }
+
   private resolveDependencies(wrapper: InstanceWrapper): (Type | string)[] {
     if (!isNil(wrapper.inject)) {
       return wrapper.inject;

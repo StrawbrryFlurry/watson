@@ -35,6 +35,12 @@ export interface IMethodValue {
   descriptor: Function;
 }
 
+/**
+ * TODO:
+ * - Update this class to be more widely applicable
+ * - Abstract the module logic to a new class
+ * - Rename to `Reflector` or smth.
+ */
 export class MetadataResolver {
   private container: WatsonContainer;
   private logger = new Logger("ModuleLoader");

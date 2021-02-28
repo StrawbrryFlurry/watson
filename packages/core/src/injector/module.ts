@@ -54,7 +54,7 @@ export class Module {
 
   private instance: InstanceType<Type>;
 
-  private readonly injector: Injector;
+  private readonly _injector: Injector;
 
   constructor(metatype: Type, container: WatsonContainer) {
     this._id = v4();
@@ -63,7 +63,7 @@ export class Module {
     this.name = this.metatype.name;
 
     const resolver = new MetadataResolver(container);
-    this.injector = new Injector(resolver);
+    this._injector = new Injector(resolver);
 
     this.registerDefaultProviders();
   }
@@ -170,21 +170,11 @@ export class Module {
   }
 
   public async createInstanceOfType<T extends Type>(
-    metatype: T
+    metatype: T,
+    inject?: unknown[]
   ): Promise<InstanceType<T>> {
-    const wrapper = new InstanceWrapper({
-      host: this,
-      metatype: metatype,
-      name: metatype.name,
-    });
-
-    await this.injector.createInstance(wrapper, this);
-
-    if (wrapper.isResolved) {
-      return wrapper.instance;
-    }
-
-    return undefined;
+    const callback = this.injector.createFromModuleContext<T>(this);
+    return callback(metatype, inject) as InstanceType<T>;
   }
 
   public async getInstance<T extends Type>(): Promise<T> {
@@ -343,5 +333,9 @@ export class Module {
 
   get exports(): Set<string | Symbol> {
     return this._exports;
+  }
+
+  get injector(): Injector {
+    return this.injector;
   }
 }

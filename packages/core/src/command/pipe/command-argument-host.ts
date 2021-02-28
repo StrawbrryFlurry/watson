@@ -52,6 +52,26 @@ export class CommandArgumentsHost implements CommandArguments {
 
     while (!(this.isResolved && this.aborted)) {
       const token = tokens[this.tokenIndex];
+
+      if (isNil(token)) {
+        const missingPrams = this.getMissingParams(false);
+        const missingOptionals = missingPrams.filter(
+          (e) => e.optional === true
+        );
+
+        this.handleOptionalParams(missingOptionals);
+
+        if (this.isResolved) {
+          return;
+        }
+
+        if (!promt) {
+          throw new MissingArgumentException(missingPrams);
+        }
+
+        await this.collect(missingPrams);
+      }
+
       const { type, content } = token;
 
       if (
@@ -103,25 +123,6 @@ export class CommandArgumentsHost implements CommandArguments {
           tokens[this.nextTokenIndex]
         );
         continue;
-      }
-
-      if (isNil(token)) {
-        const missingPrams = this.getMissingParams(false);
-        const missingOptionals = missingPrams.filter(
-          (e) => e.optional === true
-        );
-
-        this.handleOptionalParams(missingOptionals);
-
-        if (this.isResolved) {
-          return;
-        }
-
-        if (!promt) {
-          throw new MissingArgumentException(missingPrams);
-        }
-
-        await this.collect(missingPrams);
       }
     }
   }

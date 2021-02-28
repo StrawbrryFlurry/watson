@@ -15,6 +15,15 @@ export class CommandMatcher {
   private container: CommandContainer;
   private prefixes: CommandPrefix[];
   private commands: Map<string, string>;
+  /**
+   * Because this class will be insanciated
+   * before all routes were mapped by
+   * the routes explorer some prefixes or
+   * commands might have not been mapped.
+   * Therefore we need to initialize
+   * the matcher when it's first used.
+   */
+  private initialized: boolean = false;
 
   /**
    * TODO:
@@ -30,11 +39,15 @@ export class CommandMatcher {
    */
   constructor(container: CommandContainer) {
     this.container = container;
-    this.prefixes = this.container.getPrefixesAsArray();
-    this.commands = this.container.getCommandsMap();
   }
 
   public async match(message: Message): Promise<CommandMatchResult> {
+    if (this.initialized === false) {
+      this.prefixes = this.container.getPrefixesAsArray();
+      this.commands = this.container.getCommandsMap();
+      this.initialized = true;
+    }
+
     const { content } = message;
     const commandPrefix = await this.checkForPrefix(message);
 
@@ -77,8 +90,11 @@ export class CommandMatcher {
   private getCommand(content: string) {
     const [command] = content.split(" ");
 
+    console.log(this.commands);
+
     if (this.commands.has(command)) {
-      return this.container.get(command);
+      const id = this.commands.get(command);
+      return this.container.get(id);
     }
 
     throw new UnknownCommandException(content);

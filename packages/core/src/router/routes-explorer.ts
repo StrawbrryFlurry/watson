@@ -1,11 +1,10 @@
 import {
+  BaseRoute,
   COMMAND_METADATA,
-  EVENT_METADATA,
   EventExceptionHandler,
   EXCEPTION_HANDLER_METADATA,
   isFunction,
-  PartialApplicationCommand,
-  SLASH_COMMAND_METADATA,
+  RECEIVER_METADATA,
   TReceiver,
   Type,
   WatsonEvent,
@@ -14,36 +13,35 @@ import iterate from 'iterare';
 
 import { InstanceWrapper, MetadataResolver, Module } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
-import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND, MAP_EVENT, MAP_SLASH_COMMAND } from '../logger';
+import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
-import { AbstractEventRoute } from './abstract-route';
-import { CommandRoute } from './command';
-import { EventRoute } from './event';
-import { IHandlerFactory, IHandlerFunction, RouteHandlerFactory } from './route-handler-factory';
+import { CommandRouteHost } from './command';
+import { EventRouteHost } from './event';
+import { RouteHandlerFactory, THandlerFactory, TLifecycleFunction } from './route-handler-factory';
 import { SlashRoute } from './slash';
 
 export class RouteExplorer {
-  private constainer: WatsonContainer;
+  private container: WatsonContainer;
   private resolver: MetadataResolver;
 
   private logger = new Logger("RouteExplorer");
 
-  private eventRoutes = new Set<EventRoute<any>>();
-  private commandRoutes = new Set<CommandRoute>();
+  private eventRoutes = new Set<EventRouteHost<any>>();
+  private commandRoutes = new Set<CommandRouteHost>();
   private slashRoutes = new Set<SlashRoute>();
 
   private eventProxies = new Map<WatsonEvent, EventProxy<any>>();
   private routeHanlderFactory: RouteHandlerFactory;
 
   constructor(container: WatsonContainer) {
-    this.constainer = container;
+    this.container = container;
     this.resolver = new MetadataResolver(container);
     this.routeHanlderFactory = new RouteHandlerFactory(container);
   }
 
   public async explore() {
     this.logger.logMessage(EXPLORE_START());
-    const receivers = this.constainer.globalInstanceHost.getAllInstancesOfType(
+    const receivers = this.container.globalInstanceHost.getAllInstancesOfType(
       "receiver"
     );
 
@@ -54,51 +52,51 @@ export class RouteExplorer {
 
       const {
         createCommandHandler,
-        createEventHandler,
-        createSlashHandler,
+        //  createEventHandler,
+        //  createSlashHandler,
       } = this.routeHanlderFactory;
 
-      await this.reflectRoute(
-        wrapper,
-        EVENT_METADATA,
-        EventRoute,
-        createEventHandler,
-        this.eventRoutes,
-        (metadata: WatsonEvent) => metadata,
-        MAP_EVENT
-      );
+      // await this.reflectRoute(
+      //   wrapper,
+      //   EVENT_METADATA,
+      //   EventRoute,
+      //   createEventHandler,
+      //   this.eventRoutes,
+      //   (metadata: WatsonEvent) => metadata,
+      //   MAP_EVENT
+      // );
 
       await this.reflectRoute(
         wrapper,
         COMMAND_METADATA,
-        CommandRoute,
+        CommandRouteHost,
         createCommandHandler,
         this.commandRoutes,
         () => WatsonEvent.MESSAGE_CREATE,
         MAP_COMMAND
       );
 
-      await this.reflectRoute(
-        wrapper,
-        SLASH_COMMAND_METADATA,
-        SlashRoute,
-        createSlashHandler,
-        this.slashRoutes,
-        () => WatsonEvent.INTERACTION_CREATE,
-        MAP_SLASH_COMMAND,
-        true
-      );
+      //  await this.reflectRoute(
+      //    wrapper,
+      //    SLASH_COMMAND_METADATA,
+      //    SlashRoute,
+      //    createSlashHandler,
+      //    this.slashRoutes,
+      //    () => WatsonEvent.INTERACTION_CREATE,
+      //    MAP_SLASH_COMMAND,
+      //    true
+      //  );
     }
 
     this.logger.logMessage(COMPLETED());
   }
 
-  private async reflectRoute(
+  private async reflectRoute<T extends string>(
     receiver: InstanceWrapper<TReceiver>,
     metadataKey: string,
     routeType: Type,
-    handlerFactory: IHandlerFactory,
-    collectionRef: Set<AbstractEventRoute<any>>,
+    handlerFactory: THandlerFactory,
+    collectionRef: Set<BaseRoute>,
     eventFunction: (metadata: unknown) => WatsonEvent,
     logMessage: Function,
     isWsEvent?: boolean
@@ -108,9 +106,10 @@ export class RouteExplorer {
 
     for (const method of receiverMethods) {
       const { descriptor } = method;
-      const metadata = this.resolver.getMetadata<PartialApplicationCommand>(
-        metadataKey,
-        descriptor
+      const metadata = this.resolver.getMetadata<T>(metadataKey, descriptor);
+      const receiverMetadata = this.resolver.getMetadata<T>(
+        RECEIVER_METADATA,
+        receiver.metatype
       );
 
       if (!metadata) {
@@ -119,16 +118,24 @@ export class RouteExplorer {
 
       const routeRef = new routeType(
         metadata,
+        receiverMetadata,
         receiver,
         descriptor,
-        this.constainer
+        this.container
       );
 
-      const handler = await handlerFactory(
+      if (metadataKey === COMMAND_METADATA) {
+        this.container.addCommand(routeRef);
+      }
+
+      const moduleId = this.container.generateTokenFromModule(receiver.host);
+
+      const handler = await handlerFactory.call(
+        this.routeHanlderFactory,
         routeRef,
         method.descriptor,
         receiver,
-        receiver.host
+        moduleId
       );
 
       collectionRef.add(routeRef);
@@ -192,7 +199,7 @@ export class RouteExplorer {
 
   private bindHandler(
     event: WatsonEvent,
-    handler: IHandlerFunction,
+    handler: TLifecycleFunction,
     exceptionHandler: ExceptionHandler,
     isWsEvent?: boolean
   ) {
@@ -210,7 +217,7 @@ export class RouteExplorer {
     module: Module
   ) {
     const defaultHandlers = [new CommonExceptionHandler()];
-    const customGlobalHandlers = this.constainer.getGlobalExceptionHandlers();
+    const customGlobalHandlers = this.container.getGlobalExceptionHandlers();
     const customReceiverHandlers = this.reflectExceptionHandlers(
       EXCEPTION_HANDLER_METADATA,
       receiver,
