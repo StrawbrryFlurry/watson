@@ -1,1 +1,3 @@
-export interface EventPipeline {}
+import { PipelineBase } from './pipeline-base.interface';
+
+export interface EventPipeline extends PipelineBase {}

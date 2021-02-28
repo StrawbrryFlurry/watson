@@ -11,13 +11,11 @@ export interface PipelineHost {
    * this executions context.
    */
   switchToCommand(): CommandPipeline;
-
   /**
    * Returns the SlashPipelineHost class for
    * this executions context.
    */
   switchToSlash(): SlashPipeline;
-
   /**
    * Returns the EventPipelineHost class for
    * this executions context.

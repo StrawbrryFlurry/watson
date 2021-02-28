@@ -1,4 +1,4 @@
-import { CommandPrefix, EventExceptionHandler, RuntimeException, Type } from '@watsonjs/common';
+import { CommandPrefix, EventExceptionHandler, isString, RuntimeException, Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
 import { DiscordJSAdapter } from './adapters';
@@ -7,6 +7,7 @@ import { ApplicationProxy } from './application-proxy';
 import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
 import { APP_STARTING, APP_STRATED, Logger } from './logger';
 import { RouteExplorer } from './router';
+import { CommandPrefixHost } from './router/command/command-prefix-host';
 import { WatsonContainer } from './watson-container';
 
 /**
@@ -89,8 +90,12 @@ export class WatsonApplication {
    * Sets a global prefix for all commands.
    * It it will only be applied if none is specified for either a receiver or a command.
    */
-  public addGlobalPrefix(prefix: CommandPrefix) {
-    this.config.globalCommandPrefix = prefix;
+  public addGlobalPrefix(prefix: CommandPrefix | string) {
+    const prefixHost = isString(prefix)
+      ? new CommandPrefixHost(prefix)
+      : prefix;
+
+    this.config.globalCommandPrefix = prefixHost;
   }
 
   /**

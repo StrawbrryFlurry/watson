@@ -6,7 +6,7 @@ import { CommandContainer } from './command';
 import { UnknownModuleException } from './exceptions';
 import { CommandTokenFactory, ModuleTokenFactory } from './helpers';
 import { GlobalInstanceHost, Module } from './injector';
-import { CommandRoute } from './router';
+import { CommandRouteHost } from './router';
 
 /**
  * Contains application state such as modules and provides an interface to get update / retrieve them
@@ -61,11 +61,11 @@ export class WatsonContainer {
     return token;
   }
 
-  public addCommand(command: CommandRoute) {
+  public addCommand(command: CommandRouteHost) {
     this.commands.apply(command);
   }
 
-  public hasCommand(command: CommandRoute) {
+  public hasCommand(command: CommandRouteHost) {
     const token = this.commandTokenFactory.create(command);
     return this.commands.get(token);
   }
@@ -231,6 +231,11 @@ export class WatsonContainer {
     );
 
     return instance;
+  }
+
+  public generateTokenFromModule(module: Module) {
+    const { metatype } = module;
+    return this.moduleTokenFactory.generateModuleToken(metatype);
   }
 
   public getGlobalExceptionHandlers() {

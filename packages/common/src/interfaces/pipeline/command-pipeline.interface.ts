@@ -1,9 +1,12 @@
-import { Channel, Guild, GuildMember, Message, User } from 'discord.js';
+import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User } from 'discord.js';
 
 import { CommandArguments, CommandPrefix } from '../command';
 import { CommandRoute } from '../router';
+import { PipelineBase } from './pipeline-base.interface';
 
-export interface CommandPipeline {
+export type TextBasedChannel = TextChannel | DMChannel | NewsChannel;
+
+export interface CommandPipeline extends PipelineBase {
   /**
    * The command name used by the user
    */
@@ -22,6 +25,14 @@ export interface CommandPipeline {
    */
   guildMember: GuildMember;
   /**
+   * The user from whom the message was sent
+   */
+  user: User;
+  /**
+   * The channel from which the message was sent
+   */
+  channel: TextBasedChannel;
+  /**
    * Returns the `CommandArgumentsHost` which
    * holds arguments collected for this context
    */
@@ -37,7 +48,7 @@ export interface CommandPipeline {
   /**
    * Returns the text channel in which this command was used
    */
-  getChannel(): Channel;
+  getChannel(): TextBasedChannel;
   /**
    * Returns the guild in which the message was sent
    * @returns `null` if the message was sent in a dm

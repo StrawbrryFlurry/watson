@@ -1,8 +1,7 @@
-import { CommandPipeline } from '@watsonjs/common';
-import { Channel, Guild, GuildMember, Message, User } from 'discord.js';
+import { CommandPipeline, CommandPrefix, ContextType, TextBasedChannel } from '@watsonjs/common';
+import { Guild, GuildMember, Message, User } from 'discord.js';
 
 import { CommandRouteHost } from '../../router';
-import { CommandPrefixHost } from '../../router/command/command-prefix-host';
 import { CommandArgumentsHost } from './command-argument-host';
 
 export class CommandPipelineHost implements CommandPipeline {
@@ -10,15 +9,14 @@ export class CommandPipelineHost implements CommandPipeline {
   public route: CommandRouteHost;
   public message: Message;
   public command: string;
-  public prefix: CommandPrefixHost;
+  public prefix: CommandPrefix;
   public isFromGuild: boolean;
   public guildMember: GuildMember;
+  public user: User;
+  public channel: TextBasedChannel;
+  public readonly contextType: ContextType = "command";
 
-  constructor(
-    command: string,
-    prefix: CommandPrefixHost,
-    route: CommandRouteHost
-  ) {
+  constructor(command: string, prefix: CommandPrefix, route: CommandRouteHost) {
     this.route = route;
     this.command = command;
     this.prefix = prefix;
@@ -32,8 +30,10 @@ export class CommandPipelineHost implements CommandPipeline {
   }
 
   private async assingSelf() {
-    const { guild } = this.message;
+    const { guild, author, channel } = this.message;
     this.isFromGuild = !!guild;
+    this.user = author;
+    this.channel = channel;
 
     if (this.isFromGuild) {
       this.guildMember = await guild.members.fetch(this.message);
@@ -44,7 +44,7 @@ export class CommandPipelineHost implements CommandPipeline {
     return this.message;
   }
 
-  getChannel(): Channel {
+  getChannel(): TextBasedChannel {
     return this.message.channel;
   }
 
@@ -66,5 +66,9 @@ export class CommandPipelineHost implements CommandPipeline {
 
   getCommand(): CommandRouteHost {
     return this.route;
+  }
+
+  getEvent<T extends unknown[] = unknown[]>(): T {
+    return [this.message] as T;
   }
 }

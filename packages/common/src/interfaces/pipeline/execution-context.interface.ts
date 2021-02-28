@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { Base, Client } from 'discord.js';
 
 import { DiscordAdapter } from '../adapters';
 import { Type } from '../type.interface';
@@ -23,7 +23,7 @@ export interface ExecutionContext extends PipelineHost {
   /**
    * Returns the raw event data as an array
    */
-  getEvent<T = unknown[]>(): T;
+  getEvent<T, R = T extends Array<Base> ? T : [T]>(): R;
   /**
    * Returns the client that has emitted the event.
    */
