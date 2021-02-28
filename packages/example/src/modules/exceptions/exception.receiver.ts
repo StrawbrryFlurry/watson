@@ -16,7 +16,7 @@ import { CustomExceptionHandler } from './custom.handler';
 @UseExceptionHandler(CustomExceptionHandler)
 export class ExceptionsReceiver {
   @Command({
-    command: "throw",
+    name: "throw",
     params: [{ name: "type", type: CommandArgumentType.STRING }],
   })
   handleThrow(@InjectParam("type") type: string) {

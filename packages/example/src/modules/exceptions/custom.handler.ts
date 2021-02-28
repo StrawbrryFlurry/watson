@@ -11,7 +11,7 @@ export class CustomExceptionHandler extends EventExceptionHandler {
 
   async catch(err: CustomException) {
     const { data, context } = err;
-    const { message } = context.getEventObj() as { message: Message };
+    const [message] = context.getEvent<Message>();
 
     await message.channel.send(data);
   }

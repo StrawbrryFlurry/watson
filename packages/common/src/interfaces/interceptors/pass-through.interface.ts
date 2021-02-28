@@ -1,15 +1,15 @@
-import { Observable } from "rxjs";
+import { Observable } from 'rxjs';
 
-import { ExecutionContext } from "../../interfaces";
+import { ExecutionContext } from '..';
 
 /**
  * Filters work in a similar way to guards. Their difference being that they will not throw an error if the command shouldn't be run.
- * If a filter returns false the handler for this event will simply not be called.
- * @param ctx The current execution context
+ * Additionally they're also supported on EventRoutes.
+ * @param context The current execution context
  * @returns {boolean} Whether the user should be allowed to run the command or not.
  */
-export interface Filter {
-  filter(
+export interface PassThrough {
+  pass(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean>;
 }

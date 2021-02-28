@@ -1,9 +1,10 @@
-import { ExecutionContext, Filter, Injectable } from '@watsonjs/common';
+import { ExecutionContext, Injectable, PassThrough } from '@watsonjs/common';
+import { Message } from 'discord.js';
 
 @Injectable()
-export class GuildMessageFilter implements Filter {
-  filter(ctx: ExecutionContext) {
-    const [message] = ctx.getEvent<"message">();
+export class GuildMessageFilter implements PassThrough {
+  pass(ctx: ExecutionContext) {
+    const [message] = ctx.getEvent<Message>();
     const channel = message.channel;
 
     if (channel.type !== "dm") {

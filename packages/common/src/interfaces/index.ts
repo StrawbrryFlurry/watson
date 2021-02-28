@@ -1,5 +1,5 @@
 export * from "./adapters";
-export * from "./changeable";
+export * from "./interceptors";
 export * from "./command";
 export * from "./common";
 export * from "./discord";

@@ -1,11 +1,11 @@
 import { BadArgumentException, ExecutionContext, getId, Injectable, isNil, PipeTransform } from '@watsonjs/common';
-import { CommandRoute } from '@watsonjs/core';
+import { Message } from 'discord.js';
 
 @Injectable()
 export class MentionPipe implements PipeTransform {
   transform(ctx: ExecutionContext) {
-    const [message] = ctx.getEvent<"message">();
-    const route = ctx.getRoute<CommandRoute>();
+    const [message] = ctx.getEvent<Message>();
+    const route = ctx.switchToCommand().getCommand();
 
     const { content, guild } = message;
     const { prefix, name } = route;

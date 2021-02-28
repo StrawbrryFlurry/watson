@@ -1,9 +1,11 @@
-import { FILTER_METADATA } from "../../constants";
-import { Filter } from "../../interfaces";
-import { applyStackableMetadata } from "../apply-stackable-metadata";
+import { FILTER_METADATA } from '../../constants';
+import { PassThrough, Type } from '../../interfaces';
+import { applyStackableMetadata } from '../apply-stackable-metadata';
+
+export type TFiltersMetadata = PassThrough | Type;
 
 export function UseFilters(
-  ...filters: (Filter | Function)[]
+  ...filters: TFiltersMetadata[]
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,

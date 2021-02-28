@@ -1,6 +1,4 @@
-import { Command, Event, InjectEvent, Receiver } from '@watsonjs/common';
-import { TokenizerContext } from '@watsonjs/core';
-import { Message } from 'discord.js';
+import { Command, Receiver } from '@watsonjs/common';
 
 import { AppService } from './app.service';
 
@@ -11,13 +9,5 @@ export class AppReceiver {
   @Command("ping")
   ping() {
     return this.appService.ping();
-  }
-
-  @Event("message")
-  handle(@InjectEvent() [e]: [Message]) {
-    const { content } = e;
-    const tokenizer = new TokenizerContext(content);
-    const s = tokenizer.tokenize();
-    console.log(s.tokens);
   }
 }

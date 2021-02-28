@@ -1,9 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@watsonjs/common';
+import { Message } from 'discord.js';
 
 @Injectable()
 export class CanKickGuard implements CanActivate {
   async canActivate(ctx: ExecutionContext) {
-    const [message] = ctx.getEvent<"message">();
+    const [message] = ctx.getEvent<Message>();
     const { author, guild } = message;
 
     const member = guild.members.cache.get(author.id);

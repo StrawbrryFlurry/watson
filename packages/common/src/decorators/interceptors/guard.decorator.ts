@@ -1,9 +1,11 @@
-import { GUARD_METADATA } from "../../constants";
-import { CanActivate } from "../../interfaces";
-import { applyStackableMetadata } from "../apply-stackable-metadata";
+import { GUARD_METADATA } from '../../constants';
+import { CanActivate, Type } from '../../interfaces';
+import { applyStackableMetadata } from '../apply-stackable-metadata';
+
+export type TGuardsMetadata = CanActivate | Type;
 
 export function UseGuards(
-  ...guards: (CanActivate | Function)[]
+  ...guards: TGuardsMetadata[]
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,

@@ -1,11 +1,11 @@
-import { Injectable } from "../decorators";
-import { ExecutionContext, Filter } from "../interfaces";
+import { Injectable } from '../decorators';
+import { ExecutionContext, PassThrough } from '../interfaces';
 
 /**
  * Default filter for specifing guilds whose events should call the handler method.
  */
 @Injectable()
-export class GuildFilter implements Filter {
+export class GuildFilter implements PassThrough {
   public readonly allowedGuilds: string[];
 
   constructor(allowedGuild: string);
@@ -18,7 +18,7 @@ export class GuildFilter implements Filter {
     this.allowedGuilds = guilds;
   }
 
-  filter(ctx: ExecutionContext) {
+  pass(ctx: ExecutionContext) {
     return true;
   }
 }

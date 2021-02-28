@@ -1,8 +1,14 @@
-import { PIPE_METADATA } from "../../constants";
-import { PipeTransform } from "../../interfaces";
-import { applyStackableMetadata } from "../apply-stackable-metadata";
+import { PIPE_METADATA } from '../../constants';
+import { PipeTransform, Type } from '../../interfaces';
+import { applyStackableMetadata } from '../apply-stackable-metadata';
+
+export type TPipesMetadata = (PipeTransform | Type)[];
 
 /**
+ * TODO:
+ * Update to fit the current pipe implementation
+ *
+ * @deprecated
  * Use pipes to parse command arguments without relying on Watsons command parser.
  * When you apply multiple parsers they are getting called in the same order as they are in the array.
  * If you return object keys with the same name from multiple parsers the last one returned will be used.

@@ -1,6 +1,6 @@
-import { Observable } from "rxjs";
+import { Observable } from 'rxjs';
 
-import { ExecutionContext } from "../../interfaces";
+import { ExecutionContext } from '..';
 
 /**
  * Guards will check incomming commands for user permissions or other data you might
