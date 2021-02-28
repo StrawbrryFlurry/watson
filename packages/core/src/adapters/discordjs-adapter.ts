@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { BootstrappingException } from '../exceptions';
 import { EventProxy } from '../lifecycle';
+import { AbstractDiscordAdapter } from './abstract-discord-adapter';
 import { SlashCommandAdapter } from './slash-adapter';
 
 export type IWSEvent<T extends {}> = [data: T, shardID: number];
@@ -14,7 +15,7 @@ export const DISCORDJS_ADAPTER_SUGGESTIONS = [
   "Set the token to the WatsonApplication instance using the setToken method.",
 ];
 
-export class DiscordJSAdapter {
+export class DiscordJSAdapter implements AbstractDiscordAdapter {
   private token: string;
   private client: Client;
   private clientOptions: ClientOptions;
@@ -55,14 +56,14 @@ export class DiscordJSAdapter {
   }
 
   private async initializeSlashCommands() {
-    const clientID = this.client.user.id;
-
-    this.slashCommandAdapter = new SlashCommandAdapter({
-      applicationId: clientID,
-      authToken: this.token,
-    });
-
-    const commands = await this.slashCommandAdapter.getApplicationCommands();
+    //const clientID = this.client.user.id;
+    //
+    //this.slashCommandAdapter = new SlashCommandAdapter({
+    //  applicationId: clientID,
+    //  authToken: this.token,
+    //});
+    //
+    //const commands = await this.slashCommandAdapter.getApplicationCommands();
   }
 
   private async createClientInstance() {
@@ -117,7 +118,7 @@ export class DiscordJSAdapter {
       : this.createListener(eventProxy.eventType);
 
     const subscriber = observable.subscribe((observer) =>
-      eventProxy.proxy(this, observer)
+      eventProxy.proxy(observer)
     );
 
     this.eventSubscriptions.set(eventProxy, {
@@ -135,7 +136,7 @@ export class DiscordJSAdapter {
    */
   public createListener<E extends WatsonEvent>(event: E): Observable<unknown> {
     return new Observable((subscriber) => {
-      this.client.on(event as any, (...args) => {
+      this.client.on("message" /*TODO: revert event*/ as any, (...args) => {
         subscriber.next(args);
       });
     });
@@ -177,5 +178,12 @@ export class DiscordJSAdapter {
     } else {
       this.client.user.setActivity();
     }
+  }
+
+  protected login(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  protected destroy(): Promise<void> {
+    throw new Error("Method not implemented.");
   }
 }
