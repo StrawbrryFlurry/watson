@@ -4,6 +4,11 @@ import { Guild, GuildMember, Message, User } from 'discord.js';
 import { CommandRouteHost } from '../../router';
 import { CommandArgumentsHost } from './command-argument-host';
 
+export interface IParsedCommandData {
+  command: string;
+  prefix: CommandPrefix;
+}
+
 export class CommandPipelineHost implements CommandPipeline {
   public argumentHost: CommandArgumentsHost;
   public route: CommandRouteHost;

@@ -28,7 +28,17 @@ export class ApplicationProxy {
 
   public bindProxy(event: WatsonEvent, proxy: EventProxy<any>) {
     if (this.eventProxies.has(event)) {
-      this.bindToExistingProxy(event, proxy);
+      const proxyRef = this.eventProxies.get(event);
+
+      /**
+       * Makes sure that command / slash proxies get
+       * their own event proxy
+       */
+      if (proxy.eventType === proxyRef.eventType) {
+        this.bindToExistingProxy(event, proxy);
+      } else {
+        this.eventProxies.set(event, proxy);
+      }
     } else {
       this.eventProxies.set(event, proxy);
     }
@@ -44,8 +54,8 @@ export class ApplicationProxy {
     const handlerFns = proxy.getHandlerFns();
     const proxyRef = this.eventProxies.get(event);
 
-    for (const [eventHandler, exceptionHandler] of handlerFns) {
-      proxyRef.bind(eventHandler, exceptionHandler);
+    for (const [routeRef, [eventHandler, exceptionHandler]] of handlerFns) {
+      proxyRef.bind(routeRef, eventHandler, exceptionHandler);
     }
   }
 }

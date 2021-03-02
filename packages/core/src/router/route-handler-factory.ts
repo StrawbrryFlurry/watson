@@ -1,5 +1,5 @@
 import {
-  CommandPrefix,
+  BaseRoute,
   EventException,
   FILTER_METADATA,
   GUARD_METADATA,
@@ -15,8 +15,7 @@ import { Base, Message } from 'discord.js';
 
 import { RouteParamsFactory } from '.';
 import { AbstractDiscordAdapter } from '../adapters';
-import { CommandPipelineHost } from '../command';
-import { CommandMatcher } from '../command/matcher';
+import { CommandPipelineHost, IParsedCommandData } from '../command';
 import { rethrowWithContext } from '../helpers';
 import { resolveAsyncValue } from '../helpers/resolve-async-value';
 import { InstanceWrapper } from '../injector';
@@ -30,7 +29,11 @@ import { FiltersConsumer, GuardsConsumer, PipesConsumer } from './interceptors';
  * the event proxy to invoke the watson lifecycle
  * when a registered event is fired.
  */
-export type TLifecycleFunction = (eventData: Base[]) => Promise<void>;
+export type TLifecycleFunction = (
+  routeRef: BaseRoute,
+  eventData: Base[],
+  ...args: unknown[]
+) => Promise<void>;
 
 export interface IRouteMetadata {
   pipes: TPipesMetadata[];
@@ -53,8 +56,6 @@ export type THandlerFactory = (
 export class RouteHandlerFactory {
   private paramsFactory = new RouteParamsFactory();
   private responseController = new ResponseController();
-  private matcher = new CommandMatcher(this.container.getCommands());
-
   private pipesConsumer = new PipesConsumer(this.container);
   private guardsConsumer = new GuardsConsumer(this.container);
   private filtersConsumer = new FiltersConsumer(this.container);
@@ -97,44 +98,14 @@ export class RouteHandlerFactory {
       moduleKey: moduleKey,
     });
 
-    const lifeCycle: TLifecycleFunction = async (event: [Message]) => {
+    const lifeCycle: TLifecycleFunction = async (
+      route: CommandRouteHost,
+      event: [Message],
+      parsed: IParsedCommandData
+    ) => {
+      const { prefix, command } = parsed;
       const [message] = event;
-      let routeRef: CommandRouteHost;
-      let commandName: string, prefixRef: CommandPrefix;
-
-      /**
-       * Matches the message against all mapped
-       * command routes.
-       * If none could be matched the message will
-       * be ignored.
-       *
-       * If the demand is there to have `command not found`
-       * messages this could be updated to specifically
-       * catch the `UnknownCommandException`.
-       *
-       * TODO:
-       * Move match to the event proxy and let it call the lifecycle
-       * method with the data only if the route is matched
-       */
-      try {
-        const { route, command, prefix } = await this.matcher.match(message);
-
-        if (!route) {
-          return;
-        }
-
-        routeRef = route;
-        commandName = command;
-        prefixRef = prefix;
-      } catch {
-        return;
-      }
-
-      const pipeline = new CommandPipelineHost(
-        commandName,
-        prefixRef,
-        routeRef
-      );
+      const pipeline = new CommandPipelineHost(command, prefix, route);
 
       /**
        * Initialize the pipeline and parse
@@ -145,7 +116,7 @@ export class RouteHandlerFactory {
       const context = new ExecutionContextHost(
         pipeline,
         event,
-        routeRef,
+        route,
         this.adapterRef
       );
 

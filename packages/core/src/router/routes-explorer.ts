@@ -13,6 +13,7 @@ import iterate from 'iterare';
 
 import { InstanceWrapper, MetadataResolver, Module } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
+import { CommandProxy } from '../lifecycle/command-proxy';
 import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { CommandRouteHost } from './command';
@@ -70,6 +71,8 @@ export class RouteExplorer {
         wrapper,
         COMMAND_METADATA,
         CommandRouteHost,
+        CommandProxy,
+        [this.container.getCommands()],
         createCommandHandler,
         this.commandRoutes,
         () => WatsonEvent.MESSAGE_CREATE,
@@ -95,6 +98,8 @@ export class RouteExplorer {
     receiver: InstanceWrapper<TReceiver>,
     metadataKey: string,
     routeType: Type,
+    eventProxyType: Type<EventProxy>,
+    proxyArgs: unknown[],
     handlerFactory: THandlerFactory,
     collectionRef: Set<BaseRoute>,
     eventFunction: (metadata: unknown) => WatsonEvent,
@@ -149,9 +154,11 @@ export class RouteExplorer {
 
       this.bindHandler(
         eventFunction(metadata),
+        routeRef,
+        eventProxyType,
         handler,
         exceptionHandler,
-        isWsEvent
+        proxyArgs
       );
     }
 
@@ -199,16 +206,18 @@ export class RouteExplorer {
 
   private bindHandler(
     event: WatsonEvent,
+    route: BaseRoute,
+    proxyType: Type,
     handler: TLifecycleFunction,
     exceptionHandler: ExceptionHandler,
-    isWsEvent?: boolean
+    proxyArgs: unknown[]
   ) {
     if (!this.eventProxies.has(event)) {
-      this.eventProxies.set(event, new EventProxy(event, isWsEvent));
+      this.eventProxies.set(event, new proxyType(...proxyArgs));
     }
 
     const proxyRef = this.eventProxies.get(event);
-    proxyRef.bind(handler, exceptionHandler);
+    proxyRef.bind(route, handler, exceptionHandler);
   }
 
   private createExceptionHandler(
