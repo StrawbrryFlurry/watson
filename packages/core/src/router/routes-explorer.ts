@@ -31,7 +31,7 @@ export class RouteExplorer {
   private commandRoutes = new Set<CommandRouteHost>();
   private slashRoutes = new Set<SlashRoute>();
 
-  private eventProxies = new Map<WatsonEvent, EventProxy<any>>();
+  private eventProxies = new Map<WatsonEvent, EventProxy>();
   private routeHanlderFactory: RouteHandlerFactory;
 
   constructor(container: WatsonContainer) {

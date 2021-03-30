@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 export class AppReceiver {
   constructor(private readonly appService: AppService) {}
 
-  @Command("ping")
+  @Command("ping", { namedPrefix: "pls" })
   ping() {
     return this.appService.ping();
   }

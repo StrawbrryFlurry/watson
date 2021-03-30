@@ -60,12 +60,14 @@ export class CommandConfigurationHost implements CommandConfiguration {
   private setPrefix() {
     const { prefix, namedPrefix } = this.commandOptions;
 
-    if (prefix) {
-      return this.applyPrefix(this.commandOptions.prefix);
+    if (prefix && namedPrefix) {
+      this.applyPrefix(prefix);
+    } else if (prefix) {
+      return this.applyPrefix(prefix);
     }
 
     if (namedPrefix) {
-      return this.applyPrefix(this.commandOptions.namedPrefix, true);
+      return this.applyPrefix(namedPrefix, true);
     }
 
     const {
@@ -78,7 +80,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
     }
 
     if (receiverNamedPrefix) {
-      return this.applyPrefix(receiverNamedPrefix);
+      return this.applyPrefix(receiverNamedPrefix, true);
     }
 
     const { globalCommandPrefix } = this.config;

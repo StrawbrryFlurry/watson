@@ -90,8 +90,6 @@ export class CommandMatcher {
   private getCommand(content: string) {
     const [command] = content.split(" ");
 
-    console.log(this.commands);
-
     if (this.commands.has(command)) {
       const id = this.commands.get(command);
       return this.container.get(id);

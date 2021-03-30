@@ -207,6 +207,7 @@ export function Command(
 
     if (!isNil(commandOptions)) {
       options["command"] = command as string;
+      options = commandOptions;
     } else if (isString(command)) {
       options["command"] = command;
     } else if (isObject(command)) {
