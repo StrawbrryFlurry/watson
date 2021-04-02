@@ -41,6 +41,16 @@ export function InjectChannel(): ParameterDecorator {
 }
 
 /**
+ * Injects the voice channel the user who has used the command is in
+ * to the argument in the command handler method.
+ *
+ * Is `null` if the user is not in a voice channel.
+ */
+export function InjectVoiceChannel(): ParameterDecorator {
+  return createParamDecorator(RouteParamType.VOICE_CHANNEL);
+}
+
+/**
  * Injects the original message object to the argument in the command handler method.
  */
 export function InjectMessage(): ParameterDecorator {

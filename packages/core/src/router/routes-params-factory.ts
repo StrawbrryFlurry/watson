@@ -5,6 +5,7 @@ import {
   IInquirableMetadata,
   InquirableType,
   IParamDecoratorMetadata,
+  isEmpty,
   isFunction,
   isString,
   ParamFactoryFunction,
@@ -43,6 +44,9 @@ export class RouteParamsFactory {
         case RouteParamType.CHANNEL:
           params[idx] = commandPipe.getChannel();
           break;
+        case RouteParamType.VOICE_CHANNEL:
+          params[idx] = commandPipe.getVoiceChannel();
+          break;
         case RouteParamType.CLIENT:
           params[idx] = ctx.getClient();
           break;
@@ -59,14 +63,12 @@ export class RouteParamsFactory {
           const param = type.options;
           const argumentsHost = commandPipe.getArguments();
 
-          if (argumentsHost.arguments.length === 0) {
+          if (isEmpty(argumentsHost.arguments)) {
             params[idx] = undefined;
             break;
           }
-
-          params[idx] = isString(param)
-            ? argumentsHost.getParamByName(param)
-            : argumentsHost.arguments;
+          const argumentMap = argumentsHost.getArgumentMap();
+          params[idx] = isString(param) ? argumentMap[param] : argumentMap;
           break;
         case RouteParamType.USER:
           params[idx] = commandPipe.getUser();

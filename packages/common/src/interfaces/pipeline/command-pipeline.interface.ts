@@ -1,8 +1,17 @@
-import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User } from 'discord.js';
+import {
+  DMChannel,
+  Guild,
+  GuildMember,
+  Message,
+  NewsChannel,
+  TextChannel,
+  User,
+  VoiceChannel,
+} from "discord.js";
 
-import { CommandArguments, CommandPrefix } from '../command';
-import { CommandRoute } from '../router';
-import { PipelineBase } from './pipeline-base.interface';
+import { CommandArguments, CommandPrefix } from "../command";
+import { CommandRoute } from "../router";
+import { PipelineBase } from "./pipeline-base.interface";
 
 export type TextBasedChannel = TextChannel | DMChannel | NewsChannel;
 
@@ -50,8 +59,13 @@ export interface CommandPipeline extends PipelineBase {
    */
   getChannel(): TextBasedChannel;
   /**
+   * Returns the voice cannel the user is currently in
+   * Returns `null` if the user is not in a voice channel
+   */
+  getVoiceChannel(): VoiceChannel | null;
+  /**
    * Returns the guild in which the message was sent
-   * @returns `null` if the message was sent in a dm
+   * Returns `null` if the message was sent in a dm
    */
   getGuild(): Guild | null;
   /**

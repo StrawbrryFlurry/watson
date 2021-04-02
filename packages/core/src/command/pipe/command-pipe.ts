@@ -1,8 +1,13 @@
-import { CommandPipeline, CommandPrefix, ContextType, TextBasedChannel } from '@watsonjs/common';
-import { Guild, GuildMember, Message, User } from 'discord.js';
+import {
+  CommandPipeline,
+  CommandPrefix,
+  ContextType,
+  TextBasedChannel,
+} from "@watsonjs/common";
+import { Guild, GuildMember, Message, User, VoiceChannel } from "discord.js";
 
-import { CommandRouteHost } from '../../router';
-import { CommandArgumentsHost } from './command-argument-host';
+import { CommandRouteHost } from "../../router";
+import { CommandArgumentsHost } from "./command-argument-host";
 
 export interface IParsedCommandData {
   command: string;
@@ -53,7 +58,11 @@ export class CommandPipelineHost implements CommandPipeline {
     return this.message.channel;
   }
 
-  getGuild(): Guild {
+  getVoiceChannel(): VoiceChannel | null {
+    return this.guildMember.voice.channel;
+  }
+
+  getGuild(): Guild | null {
     return this.message.guild;
   }
 
