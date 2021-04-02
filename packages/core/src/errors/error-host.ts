@@ -1,4 +1,4 @@
-import { BadArgumentException, EventException, UnauthorizedException } from '@watsonjs/common';
+import { BadArgumentException, EventException, MissingArgumentException, UnauthorizedException } from '@watsonjs/common';
 import { ClientUser, MessageEmbed } from 'discord.js';
 
 import { CommandPipelineHost } from '../command';
@@ -6,6 +6,7 @@ import { ExecutionContextHost } from '../lifecycle';
 import { CommandRouteHost } from '../router';
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
 import { CUSTOM_ERROR } from './custom.error';
+import { MISSING_ARGUMENT_ERROR } from './missing-argument.error';
 import { UNAUTHORIZED_ERROR } from './unauthorized.error';
 
 export interface IErrorOptions {
@@ -31,7 +32,7 @@ export class ErrorHost {
   ) {
     let message: MessageEmbed | string;
     const { user } = ctx.getClient();
-    const { route } = ctx.switchToCommand();
+    const { route, channel } = ctx.switchToCommand();
 
     if (exception.isMessageEmbed) {
       message = exception.data;
@@ -46,7 +47,7 @@ export class ErrorHost {
       message = BAD_ARGUMENT_ERROR({
         clientUser: user,
         color: this.messageColor,
-        param: exception.param,
+        argument: exception.argument,
         route: route,
       });
     } else if (exception instanceof UnauthorizedException) {
@@ -55,10 +56,15 @@ export class ErrorHost {
         color: this.messageColor,
         route: route,
       });
+    } else if (exception instanceof MissingArgumentException) {
+      message = MISSING_ARGUMENT_ERROR({
+        clientUser: user,
+        color: this.messageColor,
+        parameters: exception.params,
+        route: route,
+      });
     }
 
-    const [msgEvent] = ctx.getEvent();
-    const { channel } = msgEvent;
     await channel.send(message);
   }
 }
