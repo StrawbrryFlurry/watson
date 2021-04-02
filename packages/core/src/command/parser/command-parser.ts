@@ -1,15 +1,20 @@
-import { BadArgumentException, CommandArgumentType, CommandTokenType, isNil } from '@watsonjs/common';
-import { Message } from 'discord.js';
+import {
+  BadArgumentException,
+  CommandArgumentType,
+  CommandTokenType,
+  isNil,
+} from "@watsonjs/common";
+import { Message } from "discord.js";
 
-import { CommandArgumentWrapper } from '../command-argument-wrapper';
-import { CommandArgumentsHost } from '../pipe';
-import { CommandTokenHost, TokenizerKnownCharacters } from '../tokenizer';
+import { CommandArgumentWrapper } from "../command-argument-wrapper";
+import { CommandArgumentsHost } from "../pipe";
+import { CommandTokenHost, TokenizerKnownCharacters } from "../tokenizer";
 import {
   CustomMessageTypeParser,
   DateMessageTypeParser,
   DiscordMessageTypeParser,
   PrimitiveMessageTypeParser,
-} from './parsers';
+} from "./parsers";
 
 export class CommandParser {
   private argumentHost: CommandArgumentsHost;
@@ -25,7 +30,7 @@ export class CommandParser {
   }
 
   public async parseHungryArgument(argumentRef: CommandArgumentWrapper) {
-    const { param, content } = argumentRef;
+    const { content } = argumentRef;
     const parsedArgs = [];
 
     for (const token of content as string[]) {
@@ -41,7 +46,7 @@ export class CommandParser {
   }
 
   public async parseArgument(argumentRef: CommandArgumentWrapper) {
-    const { content, param } = argumentRef;
+    const { content } = argumentRef;
 
     /**
      * As hungry params will be handled with @method this.parseHungryArgument the
@@ -74,7 +79,7 @@ export class CommandParser {
     }
 
     if (isNil(peek)) {
-      throw new BadArgumentException(argumentRef.param);
+      throw new BadArgumentException(argumentRef);
     }
 
     argumentRef.content = peek.content;
@@ -96,28 +101,31 @@ export class CommandParser {
     content: string,
     message: Message
   ): Promise<T> {
-    const { param } = argumentRef;
-    const { type, default: d, optional } = param;
+    const { default: d, optional, type } = argumentRef;
     let parsed: any;
 
     switch (type) {
       case CommandArgumentType.CHANNEL:
-        parsed = this.discordParser.parseChannel(message, content, param);
+        parsed = this.discordParser.parseChannel(message, content, argumentRef);
         break;
       case CommandArgumentType.USER:
-        parsed = this.discordParser.parseUser(message, content, param);
+        parsed = this.discordParser.parseUser(message, content, argumentRef);
         break;
       case CommandArgumentType.ROLE:
-        parsed = this.discordParser.parseRole(message, content, param);
+        parsed = this.discordParser.parseRole(message, content, argumentRef);
         break;
       case CommandArgumentType.CUSTOM:
-        parsed = await this.customParser.parseCustom(message, content, param);
+        parsed = await this.customParser.parseCustom(
+          message,
+          content,
+          argumentRef
+        );
         break;
       case CommandArgumentType.DATE:
-        parsed = this.dateParser.parseDate(content, param);
+        parsed = this.dateParser.parseDate(content, argumentRef);
         break;
       case CommandArgumentType.NUMBER:
-        parsed = this.primitiveParser.parseNumber(content, param);
+        parsed = this.primitiveParser.parseNumber(content, argumentRef);
         break;
       case CommandArgumentType.STRING:
         parsed = this.primitiveParser.parseString(content);
@@ -135,7 +143,7 @@ export class CommandParser {
     }
 
     if (isNil(parsed) && !optional) {
-      throw new BadArgumentException(param);
+      throw new BadArgumentException(argumentRef);
     }
 
     return parsed;

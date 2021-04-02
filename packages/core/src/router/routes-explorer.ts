@@ -90,7 +90,6 @@ export class RouteExplorer {
       //    true
       //  );
     }
-
     this.logger.logMessage(COMPLETED());
   }
 
@@ -161,8 +160,6 @@ export class RouteExplorer {
         proxyArgs
       );
     }
-
-    this.logger.logMessage(COMPLETED());
   }
 
   private reflectReceiverMehtods(receiver: Type) {

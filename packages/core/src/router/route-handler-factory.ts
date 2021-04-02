@@ -10,19 +10,19 @@ import {
   TGuardsMetadata,
   TPipesMetadata,
   TReceiver,
-} from '@watsonjs/common';
-import { Base, Message } from 'discord.js';
+} from "@watsonjs/common";
+import { Base, Message } from "discord.js";
 
-import { RouteParamsFactory } from '.';
-import { AbstractDiscordAdapter } from '../adapters';
-import { CommandPipelineHost, IParsedCommandData } from '../command';
-import { rethrowWithContext } from '../helpers';
-import { resolveAsyncValue } from '../helpers/resolve-async-value';
-import { InstanceWrapper } from '../injector';
-import { ExecutionContextHost, ResponseController } from '../lifecycle';
-import { WatsonContainer } from '../watson-container';
-import { CommandRouteHost } from './command';
-import { FiltersConsumer, GuardsConsumer, PipesConsumer } from './interceptors';
+import { RouteParamsFactory } from ".";
+import { AbstractDiscordAdapter } from "../adapters";
+import { CommandPipelineHost, IParsedCommandData } from "../command";
+import { rethrowWithContext } from "../helpers";
+import { resolveAsyncValue } from "../helpers/resolve-async-value";
+import { InstanceWrapper } from "../injector";
+import { ExecutionContextHost, ResponseController } from "../lifecycle";
+import { WatsonContainer } from "../watson-container";
+import { CommandRouteHost } from "./command";
+import { FiltersConsumer, GuardsConsumer, PipesConsumer } from "./interceptors";
 
 /**
  * The handler function will be called by
@@ -106,13 +106,6 @@ export class RouteHandlerFactory {
       const { prefix, command } = parsed;
       const [message] = event;
       const pipeline = new CommandPipelineHost(command, prefix, route);
-
-      /**
-       * Initialize the pipeline and parse
-       * the message content
-       */
-      await pipeline.invokeFromMessage(message);
-
       const context = new ExecutionContextHost(
         pipeline,
         event,
@@ -121,6 +114,12 @@ export class RouteHandlerFactory {
       );
 
       try {
+        /**
+         * Initialize the pipeline and parse
+         * the message content
+         */
+        await pipeline.invokeFromMessage(message);
+
         const didPass = await applyFilters(pipeline);
 
         if (didPass !== true) {

@@ -5,6 +5,7 @@ import {
   CommandPrefix,
   CommandTokenType,
   ICommandParam,
+  isEmpty,
   isNil,
   MaxPromtCountExceededException,
   MessageSendable,
@@ -45,17 +46,24 @@ export class CommandArgumentsHost implements CommandArguments {
     this.params = params;
   }
 
+  public getArgumentMap<T extends object = any>(): T {
+    return this.arguments.reduce(
+      (map, argument) => ({ ...map, [argument.name]: argument.value }),
+      {}
+    ) as T;
+  }
+
   public async parseMessage(message: Message) {
     this.message = message;
     const tokens = this.tokenize(message);
     const { promt } = this.route.configuration;
 
     while (!(this.isResolved && this.aborted)) {
-      const token = tokens[this.tokenIndex];
+      const token = this.currentToken;
 
       if (isNil(token)) {
-        const missingPrams = this.getMissingParams(false);
-        const missingOptionals = missingPrams.filter(
+        const missingParams = this.getMissingParams(false);
+        const missingOptionals = missingParams.filter(
           (e) => e.optional === true
         );
 
@@ -66,10 +74,10 @@ export class CommandArgumentsHost implements CommandArguments {
         }
 
         if (!promt) {
-          throw new MissingArgumentException(missingPrams);
+          throw new MissingArgumentException(missingParams);
         }
 
-        await this.collect(missingPrams);
+        await this.collect(missingParams);
       }
 
       const { type, content } = token;
@@ -81,7 +89,8 @@ export class CommandArgumentsHost implements CommandArguments {
         const param = this.calculateAnonymousParam();
 
         if (param.hungry === true) {
-          this.handleHungryArgument(param, content);
+          await this.handleHungryArgument(param, content);
+          this.incrementTokenIndex();
           continue;
         }
 
@@ -93,6 +102,7 @@ export class CommandArgumentsHost implements CommandArguments {
 
         this.arguments.push(argumentRef);
         await this.parser.parseArgument(argumentRef);
+        this.incrementTokenIndex();
         continue;
       }
 
@@ -105,7 +115,8 @@ export class CommandArgumentsHost implements CommandArguments {
         }
 
         if (param.hungry === true) {
-          this.handleHungryArgument(param, content, true);
+          await this.handleHungryArgument(param, content, true);
+          this.incrementTokenIndex();
           continue;
         }
 
@@ -122,6 +133,7 @@ export class CommandArgumentsHost implements CommandArguments {
           argumentRef,
           tokens[this.nextTokenIndex]
         );
+        this.incrementTokenIndex();
         continue;
       }
     }
@@ -206,16 +218,22 @@ export class CommandArgumentsHost implements CommandArguments {
    */
   private calculateAnonymousParam() {
     const namedParams = this.arguments.filter((p) => p.isNamed === true);
+    const processedNamedParams =
+      namedParams.length === 0 ? 0 : namedParams.length - 1;
+
     const switchCount = namedParams.filter(
       (p) => p.type === CommandArgumentType.SWITCH
     ).length;
 
-    const expectedIndex =
-      (namedParams.length - 1 - switchCount) * 2 + switchCount;
+    /**
+     * Named params take two tokens to be processed
+     * !remove channel -Channel #Channel
+     */
+    const expectedIndex = processedNamedParams * 2 - switchCount;
     const paramAtExpectedIndex = this.params[expectedIndex];
     const existing = this.getArgumentByParam(paramAtExpectedIndex.name);
 
-    if (!isNil(existing)) {
+    if (!isEmpty(existing)) {
       let index = expectedIndex + 1;
 
       while (true) {
@@ -223,7 +241,7 @@ export class CommandArgumentsHost implements CommandArguments {
 
         if (isNil(nextParam)) {
           throw new BadArgumentException(
-            "Argument at index ${tokenIndex} was not found"
+            `Argument at index ${this.tokenIndex} was not found`
           );
         }
 
@@ -280,7 +298,7 @@ export class CommandArgumentsHost implements CommandArguments {
     });
   }
 
-  private handleHungryArgument(
+  private async handleHungryArgument(
     param: ICommandParam,
     content: string,
     isNamed = false
@@ -293,8 +311,8 @@ export class CommandArgumentsHost implements CommandArguments {
       content: tokens,
       namedParamContent: content,
     });
-
-    this.parser.parseHungryArgument(argumentRef);
+    this.arguments.push(argumentRef);
+    await this.parser.parseHungryArgument(argumentRef);
   }
 
   /**
@@ -310,9 +328,9 @@ export class CommandArgumentsHost implements CommandArguments {
     this.tokenIndex = fromNamed ? this.nextTokenIndex : this.tokenIndex;
     let token = this.currentToken;
 
-    while (token.type !== CommandTokenType.PARAMETER && !isNil(token)) {
+    while (!isNil(token) && token.type !== CommandTokenType.PARAMETER) {
       tokens.push(token);
-      this.tokenIndex = this.nextTokenIndex;
+      this.incrementTokenIndex();
       token = this.currentToken;
     }
 
@@ -372,5 +390,9 @@ export class CommandArgumentsHost implements CommandArguments {
         this.arguments.push(argumentRef);
       }
     }
+  }
+
+  private incrementTokenIndex() {
+    this.tokenIndex++;
   }
 }
