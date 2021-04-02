@@ -1,7 +1,12 @@
-import { ArgumentPromtFunction, CommandArgument, CommandArgumentType, ICommandParam, isNil } from '@watsonjs/common';
-import { Message } from 'discord.js';
+import {
+  ArgumentPromtFunction,
+  CommandArgument,
+  CommandArgumentType,
+  isNil,
+} from "@watsonjs/common";
+import { Message } from "discord.js";
 
-import { CommandArgumentsHost } from './pipe';
+import { CommandArgumentsHost } from "./pipe";
 
 export class CommandArgumentWrapper<T = any> implements CommandArgument {
   public readonly name: string;
@@ -14,7 +19,6 @@ export class CommandArgumentWrapper<T = any> implements CommandArgument {
   public readonly optional: boolean;
   public readonly promt: string | ArgumentPromtFunction;
   public readonly parser?: (message: Message) => any;
-  public readonly param: ICommandParam;
   public readonly namedParamContent: string;
   public readonly isNamed: boolean;
   public readonly message: Message;

@@ -1,4 +1,10 @@
-import { BadArgumentException, EventException, EventExceptionHandler, UnauthorizedException } from '@watsonjs/common';
+import {
+  BadArgumentException,
+  EventException,
+  EventExceptionHandler,
+  MissingArgumentException,
+  UnauthorizedException,
+} from '@watsonjs/common';
 
 import { CommandPipelineHost } from '../command';
 import { ErrorHost } from '../errors';
@@ -8,7 +14,11 @@ export class CommonExceptionHandler extends EventExceptionHandler {
   private errorHost = new ErrorHost();
 
   constructor() {
-    super([BadArgumentException, UnauthorizedException]);
+    super([
+      BadArgumentException,
+      UnauthorizedException,
+      MissingArgumentException,
+    ]);
   }
 
   catch(err: EventException) {

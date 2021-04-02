@@ -1,8 +1,9 @@
-import { EventException } from '.';
-import { ICommandParam } from '../decorators';
+import { ICommandParam } from "decorators";
+
+import { EventException } from ".";
 
 export class MissingArgumentException extends EventException {
-  constructor(params: ICommandParam | ICommandParam[]) {
+  constructor(public readonly params: ICommandParam | ICommandParam[]) {
     super();
   }
 }
