@@ -7,6 +7,7 @@ import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
 import { MetadataResolver } from './injector';
 import { InstanceLoader } from './injector/instance-loader';
 import { IWatsonApplicationOptions } from './interfaces';
+import { LifecycleHost } from './lifecycle/hooks';
 import { CREATE_APP_CONTEXT, Logger } from './logger';
 import { WatsonApplication } from './watson-application';
 import { WatsonContainer } from './watson-container';
@@ -31,10 +32,12 @@ export class WatsonFactory {
   private static async initialize(module: Type, container: WatsonContainer) {
     const resolver = new MetadataResolver(container);
     const instanceLoader = new InstanceLoader(container);
+    const lifecycleHost = new LifecycleHost(container);
 
     await BootstrappingHandler.run(async () => {
       await resolver.resolveRootModule(module);
       await instanceLoader.createInstances();
+      await lifecycleHost.callOnModuleInitHook();
     });
   }
 

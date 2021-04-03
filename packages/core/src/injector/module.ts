@@ -4,6 +4,7 @@ import {
   FactoryProvider,
   isConstructor,
   isFunction,
+  isNil,
   isString,
   TInjectable,
   TReceiver,
@@ -22,7 +23,6 @@ import { InstanceWrapper } from './instance-wrapper';
 /**
  * Wrapper for a class decorated with the @\Module decorator.
  * Resolves providers and imports for other dependants
- *
  */
 export class Module {
   private readonly _id: string;
@@ -52,7 +52,10 @@ export class Module {
   private readonly container: WatsonContainer;
   private readonly _metatype: Type;
 
-  private instance: InstanceType<Type>;
+  /**
+   * The InstanceWrapper for this module instance
+   */
+  private instanceWrapper: InstanceWrapper<Type>;
 
   private readonly _injector: Injector;
 
@@ -177,9 +180,9 @@ export class Module {
     return callback(metatype, inject) as InstanceType<T>;
   }
 
-  public async getInstance<T extends Type>(): Promise<T> {
-    if (typeof this.instance !== "undefined") {
-      return this.instance;
+  public async getModuleInstance(): Promise<InstanceWrapper> {
+    if (!isNil(this.instanceWrapper)) {
+      return this.instanceWrapper;
     }
 
     const moduleWrapper = new InstanceWrapper({
@@ -190,10 +193,8 @@ export class Module {
 
     await this.injector.createInstance(moduleWrapper, this);
 
-    const { instance } = moduleWrapper;
-    this.instance = instance;
-
-    return instance;
+    this.instanceWrapper = moduleWrapper;
+    return moduleWrapper;
   }
 
   private addCustomProvider(provider: CustomProvider) {
@@ -336,6 +337,6 @@ export class Module {
   }
 
   get injector(): Injector {
-    return this.injector;
+    return this._injector;
   }
 }

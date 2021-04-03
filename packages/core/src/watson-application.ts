@@ -4,7 +4,9 @@ import { ActivityOptions, Client, Snowflake } from 'discord.js';
 import { DiscordJSAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
+import { SHUTDOWN_SIGNALS } from './constants';
 import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
+import { LifecycleHost } from './lifecycle/hooks';
 import { APP_STARTING, APP_STRATED, Logger } from './logger';
 import { RouteExplorer } from './router';
 import { CommandPrefixHost } from './router/command/command-prefix-host';
@@ -20,6 +22,7 @@ export class WatsonApplication {
   private routeExplorer: RouteExplorer;
   private applicationProxy: ApplicationProxy;
   private clientAdapter: DiscordJSAdapter;
+  private lifecycleHost: LifecycleHost;
 
   private isStarted: boolean = false;
   private isInitialized: boolean = false;
@@ -34,6 +37,7 @@ export class WatsonApplication {
     this.container = container;
     this.routeExplorer = new RouteExplorer(this.container);
     this.applicationProxy = new ApplicationProxy();
+    this.lifecycleHost = new LifecycleHost(container);
     this.clientAdapter = client;
   }
 
@@ -47,7 +51,7 @@ export class WatsonApplication {
         "Cannot start an application instance that is disposed"
       );
     }
-
+    this.registerShutdownHook();
     this.logger.logMessage(APP_STARTING());
 
     !this.isInitialized && (await this.init());
@@ -68,6 +72,7 @@ export class WatsonApplication {
 
   private async init() {
     await BootstrappingHandler.run(async () => {
+      await this.lifecycleHost.callOnApplicationBootstrapHook();
       await this.routeExplorer.explore();
       await this.clientAdapter.initialize();
       this.applicationProxy.initFromRouteExplorer(this.routeExplorer);
@@ -136,5 +141,21 @@ export class WatsonApplication {
   public setAuthToken(token: string) {
     this.clientAdapter.setAuthToken(token);
     this.config.authToken = token;
+  }
+
+  private registerShutdownHook() {
+    const teardown = async () => {
+      await this.lifecycleHost.callOnApplicationShutdownHook();
+
+      if (this.isInitialized) {
+        await this.stop();
+      }
+
+      process.exit(0);
+    };
+
+    for (const signal of SHUTDOWN_SIGNALS) {
+      process.on(signal, teardown);
+    }
   }
 }
