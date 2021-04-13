@@ -13,7 +13,7 @@ import iterate from 'iterare';
 
 import { InstanceWrapper, MetadataResolver, Module } from '../injector';
 import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
-import { CommandProxy } from '../lifecycle/command-proxy';
+import { CommandProxy } from '../lifecycle/proxies/command-proxy';
 import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
 import { CommandRouteHost } from './command';

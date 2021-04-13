@@ -23,9 +23,9 @@ export const EXPLORE_RECEIVER = (receiver: InstanceWrapper) =>
   `From ${blue(receiver.name)} in ${yellow(receiver.host.name)}`;
 
 export const MAP_COMMAND = (route: CommandRouteHost) =>
-  `Mapped command ${cyan(route.prefix)}${cyan(route.name)} in ${blue(
-    route.host.name
-  )}`;
+  `Mapped command ${cyan(route.prefix)}${route.hasNamedPrefix ? " " : ""}${cyan(
+    route.name
+  )} in ${blue(route.host.name)}`;
 
 export const MAP_EVENT = (route: EventRouteHost<any>) =>
   `Mapped event ${yellow(route.event)} in ${blue(route.host.name)}`;

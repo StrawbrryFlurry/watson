@@ -4,9 +4,9 @@ import iterate from 'iterare';
 import { ApplicationConfig } from './application-config';
 import { CommandContainer } from './command';
 import { UnknownModuleException } from './exceptions';
-import { CommandTokenFactory, ModuleTokenFactory } from './helpers';
 import { GlobalInstanceHost, Module } from './injector';
 import { CommandRouteHost } from './router';
+import { CommandTokenFactory, ModuleTokenFactory } from './util';
 
 /**
  * Contains application state such as modules and provides an interface to get update / retrieve them
@@ -38,7 +38,7 @@ export class WatsonContainer {
 
   public addModule(
     metatype: Type | DynamicModule,
-    forwardRef: Type[] | DynamicModule[] | Type
+    forwardRef: (Type | DynamicModule)[] | Type
   ) {
     const token = this.moduleTokenFactory.generateModuleToken(metatype);
     let module: Module;
@@ -54,7 +54,7 @@ export class WatsonContainer {
       this.globalModules.add(module);
     }
 
-    if (this.isRootModule(forwardRef)) {
+    if (this.isRootModule(forwardRef as Type)) {
       this.setRootModule(token);
     }
 
@@ -209,7 +209,7 @@ export class WatsonContainer {
     this.rootModule = moduleRef;
   }
 
-  public hasModule(metatype: Type) {
+  public hasModule(metatype: Type | DynamicModule) {
     return !!this.moduleTokenFactory.getTokenByModuleType(metatype);
   }
 

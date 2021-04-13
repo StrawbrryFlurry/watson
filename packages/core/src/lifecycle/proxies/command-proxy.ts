@@ -1,10 +1,10 @@
 import { isNil, WatsonEvent } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { CommandContainer, CommandMatcher, IParsedCommandData } from '../command';
-import { CommandRouteHost, TLifecycleFunction } from '../router';
+import { CommandContainer, CommandMatcher, IParsedCommandData } from '../../command';
+import { CommandRouteHost, TLifecycleFunction } from '../../router';
+import { ExceptionHandler } from '../exception-handler';
 import { EventProxy } from './event-proxy';
-import { ExceptionHandler } from './exception-handler';
 
 export class CommandProxy extends EventProxy<
   WatsonEvent.MESSAGE_CREATE,

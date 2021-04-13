@@ -1,8 +1,8 @@
-import { MessageEmbed } from "discord.js";
-import { CommandArgument } from "interfaces";
+import { MessageEmbed } from 'discord.js';
 
-import { isString } from "../utils";
-import { EventException } from "./event.exception";
+import { CommandArgument } from '../interfaces';
+import { isString } from '../utils';
+import { EventException } from './event.exception';
 
 /**
  * Sends a default message to the channel with information about the correct usage of the command.

@@ -2,7 +2,7 @@ import { HttpClient, mergeDefaults } from '@watsonjs/common';
 import { map } from 'rxjs/operators';
 
 import { DISCORD_GATEWAY_URL, DISCORD_GATEWAY_VERSION, DISCORD_URL } from '../constants';
-import { containerInstanceHelper } from '../helpers';
+import { containerInstanceHelper } from '../util';
 import { WatsonContainer } from '../watson-container';
 import { ClusterManager } from './cluster';
 import { IBotIdentificationResponse, IFetchableShardValue } from './interfaces';

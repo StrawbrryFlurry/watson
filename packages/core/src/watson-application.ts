@@ -1,7 +1,7 @@
 import { CommandPrefix, EventExceptionHandler, isString, RuntimeException, Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
-import { DiscordJSAdapter } from './adapters';
+import { AbstractDiscordAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';
@@ -21,24 +21,20 @@ export class WatsonApplication {
   private config: ApplicationConfig;
   private routeExplorer: RouteExplorer;
   private applicationProxy: ApplicationProxy;
-  private clientAdapter: DiscordJSAdapter;
+  private clientAdapter: AbstractDiscordAdapter;
   private lifecycleHost: LifecycleHost;
 
   private isStarted: boolean = false;
   private isInitialized: boolean = false;
   private isDisposed = false;
 
-  constructor(
-    config: ApplicationConfig,
-    container: WatsonContainer,
-    client: DiscordJSAdapter
-  ) {
+  constructor(config: ApplicationConfig, container: WatsonContainer) {
     this.config = config;
     this.container = container;
     this.routeExplorer = new RouteExplorer(this.container);
     this.applicationProxy = new ApplicationProxy();
     this.lifecycleHost = new LifecycleHost(container);
-    this.clientAdapter = client;
+    this.clientAdapter = config.clientAdapter;
   }
 
   /**
@@ -139,8 +135,7 @@ export class WatsonApplication {
    * @param token The bot token string.
    */
   public setAuthToken(token: string) {
-    this.clientAdapter.setAuthToken(token);
-    this.config.authToken = token;
+    this.config.setAuthToken(token);
   }
 
   private registerShutdownHook() {

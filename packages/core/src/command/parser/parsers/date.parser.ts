@@ -1,9 +1,11 @@
-import { BadArgumentException, ICommandParam } from '@watsonjs/common';
+import { BadArgumentException } from '@watsonjs/common';
 import dayjs = require('dayjs');
 
+import { CommandArgumentWrapper } from '../../command-argument-wrapper';
+
 export class DateMessageTypeParser {
-  parseDate(content: string, param: ICommandParam) {
-    const { dateFormat } = param;
+  parseDate(content: string, argument: CommandArgumentWrapper) {
+    const { dateFormat } = argument;
 
     const date = dayjs(content, {
       format: dateFormat,
@@ -13,6 +15,6 @@ export class DateMessageTypeParser {
       return date;
     }
 
-    throw new BadArgumentException(param);
+    throw new BadArgumentException(argument);
   }
 }

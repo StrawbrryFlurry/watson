@@ -1,8 +1,8 @@
-import { ICommandParam } from "@watsonjs/common";
+import { ICommandParam } from '@watsonjs/common';
 
-import { commandExampleUtil, ReadableArgumentTypeHelper } from "../helpers";
-import { createBaseError } from "./create-error";
-import { IErrorOptions } from "./error-host";
+import { commandExampleUtil, ReadableArgumentTypeHelper } from '../util';
+import { createBaseError } from './create-error';
+import { IErrorOptions } from './error-host';
 
 export interface IMissingArgumentErrorOptions extends IErrorOptions {
   parameters: ICommandParam | ICommandParam[];

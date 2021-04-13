@@ -1,7 +1,7 @@
-import { EmbedFieldData } from "discord.js";
-import { CommandRouteHost } from "router";
+import { EmbedFieldData } from 'discord.js';
 
-import { ReadableArgumentTypeHelper } from "./readable-argument-type.helper";
+import { CommandRouteHost } from '../router';
+import { ReadableArgumentTypeHelper } from './readable-argument-type.helper';
 
 /**
  * Generates an example of a command by using the

@@ -1,112 +1,137 @@
-export abstract class AbstractDiscordAdapter<
-  TClient = any,
-  TOptions = any,
-  TMessage = any
-> {
-  // protected token: string;
-  // protected client: TClient;
-  // protected clientOptions: TOptions;
-  // protected activity: ActivityOptions;
-  //
-  // protected eventSubscriptions = new Map<
-  //   EventProxy<any>,
-  //   { sub: Subscription; obsv: Observable<any> }
-  // >();
-  //
-  // public ready = new BehaviorSubject<boolean>(false);
-  //
-  // protected slashCommandAdapter: SlashCommandAdapter;
-  // public abstract initialize(): Promise<void>;
-  //  public abstract initializeSlashCommands(): Promise<void>;
-  // protected abstract setUserActivity(): void;
-  // protected abstract login(): Promise<void>;
-  // protected abstract destroy(): Promise<void>;
-  //
+import { DiscordAdapter, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
+import { ActivityOptions } from 'discord.js';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+
+import { ApplicationConfig } from '../application-config';
+import { EventProxy } from '../lifecycle';
+import { SlashCommandAdapter } from './slash-adapter';
+
+export abstract class AbstractDiscordAdapter<TClient = any, TOptions = any>
+  implements DiscordAdapter<TClient> {
+  protected activity: ActivityOptions;
+
+  protected configuration: ApplicationConfig;
+
+  protected eventSubscriptions = new Map<
+    EventProxy,
+    { subscription: Subscription; observable: Observable<any> }
+  >();
+
+  public ready = new BehaviorSubject<boolean>(false);
+  protected slashCommandAdapter: SlashCommandAdapter;
+
+  constructor(configuration: ApplicationConfig) {
+    this.configuration = configuration;
+  }
+
+  public abstract initialize(): Promise<void>;
+  protected abstract initializeSlashCommands(): Promise<void>;
+
+  protected abstract parseEvent(event: WatsonEvent): string;
+
+  protected abstract setUserActivity(): Promise<void>;
+  protected abstract login(): Promise<void>;
+  protected abstract destroy(): void;
+
   /**
-   * Subscribe to a DiscordJS event. The observable emits each time the event occurs.
+   * Creates a listener for the client instance.
    * @param name name of the event
    * @return event observable
    */
-  // public abstract createListener<E extends WatsonEvent>(
-  //   event: E
-  // ): Observable<unknown>;
+  public abstract registerListener<T, E extends WatsonEvent>(
+    event: E
+  ): Observable<T | [T]>;
+
   /**
-   * Subscribe to a Websocket event on the DiscordJS client. The observable emits each time the event occurs.
+   * Creates a listener on the websocket of the client.
    * @param name name of the event
    * @return event observable
    */
-  // public abstract createWSListener<T extends {}, E extends string>(
-  //   event: E
-  // ): Observable<any>;
-  // public registerEventProxy<E extends WatsonEvent>(eventProxy: EventProxy<E>) {
-  //   const observable = eventProxy.isWSEvent
-  //     ? this.createWSListener(eventProxy.eventType)
-  //     : this.createListener(eventProxy.eventType);
-  //
-  //   const subscriber = observable.subscribe((observer) =>
-  //     eventProxy.proxy(this as any, observer)
-  //   );
-  //
-  //   this.eventSubscriptions.set(eventProxy, {
-  //     obsv: observable,
-  //     sub: subscriber,
-  //   });
-  //
-  //   return subscriber;
-  // }
-  //
-  // public async start() {
-  //   await this.initialize();
-  //   this.registerDefaultListeners();
-  //   await this.login();
-  //   await this.initializeSlashCommands();
-  // }
-  //
-  // public async stop() {
-  //   for (const [proxy, { sub }] of this.eventSubscriptions.entries()) {
-  //     sub.unsubscribe();
-  //   }
-  //
-  //   await this.destroy();
-  //   this.ready.next(false);
-  // }
-  //
+  public abstract registerWsListener<T extends {}, E extends WatsonEvent>(
+    event: E
+  ): Observable<IWSEvent<T>>;
+
+  public registerEventProxy<E extends WatsonEvent>(eventProxy: EventProxy<E>) {
+    const observable = eventProxy.isWSEvent
+      ? this.registerWsListener(eventProxy.eventType)
+      : this.registerListener(eventProxy.eventType);
+
+    const subscriber = observable.subscribe((value) => eventProxy.proxy(value));
+
+    this.eventSubscriptions.set(eventProxy, {
+      observable: observable,
+      subscription: subscriber,
+    });
+
+    return subscriber;
+  }
+
+  public get client(): TClient {
+    return this.configuration.clientInstance;
+  }
+
+  public set client(instance: TClient) {
+    this.configuration.setClientInstance(instance);
+  }
+
+  public async start() {
+    await this.initialize();
+    this.registerDefaultListeners();
+    await this.login();
+    await this.initializeSlashCommands();
+  }
+
+  public async stop() {
+    for (const [proxy, { subscription }] of this.eventSubscriptions.entries()) {
+      subscription.unsubscribe();
+    }
+
+    await this.destroy();
+    this.ready.next(false);
+  }
+
   public getClient() {
-    // @ts-ignore
     return this.client;
   }
-  //
-  // public setClient(client: TClient) {
-  //   if (this.ready.value === true) {
-  //     throw new RuntimeException("The client cannot be set while it's running");
-  //   }
-  //
-  //   this.client = client;
-  // }
-  //
-  // public setAuthToken(token: string) {
-  //   this.token = token;
-  // }
-  //
-  // public setActivity(options: ActivityOptions) {
-  //   this.activity = options;
-  //   this.setUserActivity();
-  // }
-  //
-  // public async removeActivity() {
-  //   this.activity = undefined;
-  //
-  //   this.setUserActivity();
-  // }
-  //
-  // private registerStateListener() {
-  //   this.createListener(WatsonEvent.CLIENT_READY).subscribe(() => {
-  //     this.ready.next(true);
-  //     this.setUserActivity();
-  //   });
-  // }
-  //
-  // private registerDefaultListeners() {
-  //   this.registerStateListener();
-  // }
+
+  public setClient(client: TClient) {
+    if (this.ready.value === true) {
+      throw new RuntimeException("The client cannot be set while it's running");
+    }
+
+    this.client = client;
+  }
+
+  public getActivity(): ActivityOptions {
+    return this.activity;
+  }
+
+  public get token() {
+    return this.configuration.authToken;
+  }
+
+  protected get clientOptions(): TOptions {
+    return this.configuration.clientOptions as TOptions;
+  }
+
+  public setActivity(options: ActivityOptions) {
+    this.activity = options;
+    return this.setUserActivity();
+  }
+
+  public async removeActivity() {
+    this.activity = undefined;
+    return this.setUserActivity();
+  }
+
+  private registerStateListener() {
+    this.registerListener(WatsonEvent.CLIENT_READY).subscribe(() => {
+      this.ready.next(true);
+      this.setUserActivity();
+    });
+  }
+
+  private registerDefaultListeners() {
+    this.registerStateListener();
+  }
 }

@@ -64,7 +64,7 @@ export class ExecutionContextHost<
   }
 
   public getAdapter(): DiscordAdapter {
-    return this.adapter;
+    return this.adapter as DiscordAdapter;
   }
 
   public switchToCommand(): CommandPipelineHost {

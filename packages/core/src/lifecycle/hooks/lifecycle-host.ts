@@ -8,9 +8,10 @@ import {
   TProvider,
   TReceiver,
 } from '@watsonjs/common';
-import { InstanceWrapper, Module } from 'injector';
 import iterate from 'iterare';
-import { WatsonContainer } from 'watson-container';
+
+import { InstanceWrapper, Module } from '../../injector';
+import { WatsonContainer } from '../../watson-container';
 
 type ComponentWithLifecycleFunction = { [key: string]: Function };
 

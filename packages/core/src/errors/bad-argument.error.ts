@@ -1,11 +1,11 @@
-import { CommandArgumentWrapper } from "command/command-argument-wrapper";
+import { CommandArgument } from '@watsonjs/common';
 
-import { commandExampleUtil, ReadableArgumentTypeHelper } from "../helpers";
-import { createBaseError } from "./create-error";
-import { IErrorOptions } from "./error-host";
+import { commandExampleUtil, ReadableArgumentTypeHelper } from '../util';
+import { createBaseError } from './create-error';
+import { IErrorOptions } from './error-host';
 
 export interface IBadArgumentErrorOptions extends IErrorOptions {
-  argument: CommandArgumentWrapper;
+  argument: CommandArgument;
 }
 
 export const BAD_ARGUMENT_ERROR = (options: IBadArgumentErrorOptions) => {

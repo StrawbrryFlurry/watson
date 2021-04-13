@@ -1,3 +1,4 @@
+export * from "./testing";
 export * from "./bad-argument.exception";
 export * from "./custom-component.exception";
 export * from "./event.exception";

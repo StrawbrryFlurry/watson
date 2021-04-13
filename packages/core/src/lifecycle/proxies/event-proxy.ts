@@ -1,13 +1,13 @@
 import { BaseRoute, WatsonEvent } from '@watsonjs/common';
-import { Base } from 'discord.js';
 import iterate from 'iterare';
 
-import { ExceptionHandler } from '../lifecycle';
-import { TLifecycleFunction } from '../router';
+import { ExceptionHandler } from '..';
+import { TLifecycleFunction } from '../../router';
 
 export abstract class EventProxy<
   Event extends WatsonEvent = WatsonEvent,
-  Route extends BaseRoute = BaseRoute
+  Route extends BaseRoute = BaseRoute,
+  ProxyType = any
 > {
   public readonly eventType: Event;
   public readonly isWSEvent: boolean;
@@ -21,19 +21,8 @@ export abstract class EventProxy<
     this.isWSEvent = isWSEvent;
   }
 
-  public abstract proxy(args: Base[]): Promise<void>;
+  public abstract proxy(args: ProxyType): Promise<void>;
 
-  /**
-   * Promise.all(
-      this.getHandlerFns().map(async ([eventHandler, excpetionHandler]) => {
-        try {
-          await eventHandler(routeRef, event);
-        } catch (err) {
-          excpetionHandler.handle(err);
-        }
-      })
-    );
-  */
   public abstract bind(
     route: BaseRoute,
     eventHandler: TLifecycleFunction,

@@ -24,8 +24,8 @@ import {
 } from 'discord.js';
 
 import { CommandPipelineHost } from '../command';
-import { resolveAsyncValue } from '../helpers/resolve-async-value';
 import { ExecutionContextHost } from '../lifecycle';
+import { resolveAsyncValue } from '../util/resolve-async-value';
 
 export class RouteParamsFactory {
   public async createFromContext(

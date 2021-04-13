@@ -1,8 +1,8 @@
 import { CommandPrefix, isNil } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { CommandTokenFactory } from '../../helpers';
 import { CommandRouteHost } from '../../router';
+import { CommandTokenFactory } from '../../util';
 
 export class CommandContainer extends Map<string, CommandRouteHost> {
   constructor(private commandTokenFactory = new CommandTokenFactory()) {

@@ -1,7 +1,6 @@
-import { isNil, Type } from '@watsonjs/common';
-import { Client } from 'discord.js';
+import { Type } from '@watsonjs/common';
 
-import { DiscordJSAdapter } from './adapters';
+import { DiscordJsAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
 import { MetadataResolver } from './injector';
@@ -20,13 +19,15 @@ export class WatsonFactory {
     options?: IWatsonApplicationOptions
   ) {
     this.logger.logMessage(CREATE_APP_CONTEXT());
-    const client = this.createClientInstance(options);
-    const appOptions = new ApplicationConfig(options, client);
-    const container = new WatsonContainer(appOptions);
+    const appConfig = new ApplicationConfig();
+    const client = new DiscordJsAdapter(appConfig);
+    appConfig.setClientAdapter(client);
+    appConfig.assingOptions(options);
+    const container = new WatsonContainer(appConfig);
 
     await this.initialize(module, container);
 
-    return new WatsonApplication(appOptions, container, client);
+    return new WatsonApplication(appConfig, container);
   }
 
   private static async initialize(module: Type, container: WatsonContainer) {
@@ -39,15 +40,5 @@ export class WatsonFactory {
       await instanceLoader.createInstances();
       await lifecycleHost.callOnModuleInitHook();
     });
-  }
-
-  private static createClientInstance(options: IWatsonApplicationOptions) {
-    if (isNil(options)) {
-      return new DiscordJSAdapter();
-    }
-
-    return options?.client instanceof Client
-      ? new DiscordJSAdapter(options.client)
-      : new DiscordJSAdapter(options.discordAuthToken, options.clientOptions);
   }
 }

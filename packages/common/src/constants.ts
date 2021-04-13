@@ -27,7 +27,28 @@ export const INQUIRABLE_METADATA = "inquirable:meta";
 
 export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
 
+/**
+ * The parmeter types that the decoratee descriptor value
+ * takes.
+ *```ts
+ * class Foo {
+ *  constructor(private appService: AppService) {  }
+ * }
+ *
+ * // [ AppService ]
+ *```
+ */
 export const DESIGN_PARAMETERS = "design:paramtypes";
+/**
+ * The return type of the decoratee descriptor
+ * is `void` e.g `undefined` if not explicitly
+ * defined.
+ */
+export const RETURN_TYPE = "design:returntype";
+/**
+ * The type of the decoratee
+ */
+export const DESIGN_TYPE = "design:type";
 
 export const USER_MENTION_REGEXP = /^<@.*>$/;
 export const CHANNEL_MENTION_REGEXP = /^<#.*>$/;

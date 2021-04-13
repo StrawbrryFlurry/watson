@@ -67,6 +67,10 @@ export class CommandRouteHost
     return this.configuration.alias || [];
   }
 
+  public get hasNamedPrefix(): boolean {
+    return this.configuration.prefix.isNamedPrefix;
+  }
+
   public hasName(name: string) {
     return this.alias.includes(name) || this.name === name;
   }

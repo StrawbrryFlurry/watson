@@ -3,7 +3,7 @@ import { Snowflake } from 'discord.js';
 import { map } from 'rxjs/operators';
 
 import { DISCORD_API_URL, DISCORD_GATEWAY_VERSION, DISCORD_TOKEN_PREFIX, DISCORD_URL } from '../constants';
-import { containerInstanceHelper } from '../helpers';
+import { containerInstanceHelper } from '../util';
 import { WatsonContainer } from '../watson-container';
 
 export class SlashCommandAdapter {

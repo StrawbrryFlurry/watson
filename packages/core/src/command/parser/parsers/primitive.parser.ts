@@ -1,13 +1,14 @@
-import { BadArgumentException, ICommandParam } from '@watsonjs/common';
+import { BadArgumentException } from '@watsonjs/common';
 
+import { CommandArgumentWrapper } from '../../command-argument-wrapper';
 import { TokenizerKnownCharacters } from '../../tokenizer';
 
 export class PrimitiveMessageTypeParser {
-  public parseNumber(content: string, param: ICommandParam) {
+  public parseNumber(content: string, argument: CommandArgumentWrapper) {
     const number = Number(content);
 
     if (number === NaN) {
-      throw new BadArgumentException(param);
+      throw new BadArgumentException(argument);
     }
 
     return number;

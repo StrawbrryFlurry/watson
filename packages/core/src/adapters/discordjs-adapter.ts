@@ -1,61 +1,39 @@
-import { isNil, RuntimeException, WatsonEvent } from '@watsonjs/common';
-import { sub } from 'cli-color/beep';
-import { ActivityOptions, Client, ClientOptions } from 'discord.js';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { isNil, IWSEvent, WatsonEvent } from '@watsonjs/common';
+import { Channel, Client, ClientEvents, ClientOptions, Guild } from 'discord.js';
+import { fromEvent, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { ApplicationConfig } from '../application-config';
 import { BootstrappingException } from '../exceptions';
-import { EventProxy } from '../lifecycle';
 import { AbstractDiscordAdapter } from './abstract-discord-adapter';
-import { SlashCommandAdapter } from './slash-adapter';
+import { parseToDiscordJsEvent } from './event-parser';
 
-export type IWSEvent<T extends {}> = [data: T, shardID: number];
-
-export const DISCORDJS_ADAPTER_SUGGESTIONS = [
+export const CLIENT_ADAPTER_SUGGESTIONS = [
   "Add the token as an option to the WatsonFactory",
   "Set the token to the WatsonApplication instance using the setToken method.",
 ];
 
-export class DiscordJSAdapter implements AbstractDiscordAdapter {
-  private token: string;
-  private client: Client;
-  private clientOptions: ClientOptions;
-  private activity: ActivityOptions;
-  private eventSubscriptions = new Map<
-    EventProxy<any>,
-    { sub: Subscription; obsv: Observable<any> }
-  >();
-  private slashCommandAdapter: SlashCommandAdapter;
-  public ready = new BehaviorSubject<boolean>(false);
-
-  /**
-   * Constructs a DiscordJS adapter
-   * @param token Discord API token
-   */
-  constructor();
-  constructor(client: Client);
-  constructor(token: string, options: ClientOptions);
-  constructor(token?: string | Client, options?: ClientOptions) {
-    if (token instanceof Client) {
-      this.client = token;
-    } else {
-      this.token = token;
-      this.clientOptions = options;
-    }
+export class DiscordJsAdapter extends AbstractDiscordAdapter<
+  Client,
+  ClientOptions
+> {
+  constructor(configuration: ApplicationConfig<Client>) {
+    super(configuration);
   }
 
   public async initialize() {
     if (isNil(this.token)) {
       throw new BootstrappingException(
-        "DiscordJsAdapter",
+        "ClientAdapter",
         "No auth token was provided",
-        DISCORDJS_ADAPTER_SUGGESTIONS
+        CLIENT_ADAPTER_SUGGESTIONS
       );
     }
 
     await this.createClientInstance();
   }
 
-  private async initializeSlashCommands() {
+  protected async initializeSlashCommands() {
     //const clientID = this.client.user.id;
     //
     //this.slashCommandAdapter = new SlashCommandAdapter({
@@ -70,120 +48,51 @@ export class DiscordJSAdapter implements AbstractDiscordAdapter {
     this.client = this.client || new Client(this.clientOptions || {});
   }
 
-  public async start() {
-    this.initialize();
-    this.registerDefaultListeners();
-    await this.client.login(this.token);
-    await this.initializeSlashCommands();
+  public fetchChannel(id: string): Promise<Channel> {
+    return this.client.channels.fetch(id);
   }
 
-  public async stop() {
-    for (const [proxy, { sub }] of this.eventSubscriptions.entries()) {
-      sub.unsubscribe();
-    }
-    this.client.destroy();
-    this.ready.next(false);
+  public fetchGuild(id: string): Promise<Guild> {
+    return this.client.guilds.fetch(id);
   }
 
-  public getClient() {
-    return this.client;
-  }
-
-  public setClient(client: Client) {
-    if (this.ready.value === true) {
-      throw new RuntimeException("The client cannot be set while it's running");
-    }
-
-    this.client = client;
-  }
-
-  public setAuthToken(token: string) {
-    this.token = token;
-  }
-
-  public setActivity(options: ActivityOptions) {
-    this.activity = options;
-    this.setUserActivity();
-  }
-
-  public async removeActivity() {
-    this.activity = undefined;
-
-    this.setUserActivity();
-  }
-
-  public registerEventProxy<E extends WatsonEvent>(eventProxy: EventProxy<E>) {
-    const observable = eventProxy.isWSEvent
-      ? this.createWSListener(eventProxy.eventType)
-      : this.createListener(eventProxy.eventType);
-
-    const subscriber = observable.subscribe((observer) =>
-      eventProxy.proxy(observer)
-    );
-
-    this.eventSubscriptions.set(eventProxy, {
-      obsv: observable,
-      sub: subscriber,
-    });
-
-    return subscriber;
-  }
-
-  /**
-   * Subscribe to a DiscordJS event. The observable emits each time the event occurs.
-   * @param name name of the event
-   * @return event observable
-   */
-  public createListener<E extends WatsonEvent>(event: E): Observable<unknown> {
-    return new Observable((subscriber) => {
-      this.client.on("message" /*TODO: revert event*/ as any, (...args) => {
-        subscriber.next(args);
-      });
-    });
-  }
-
-  /**
-   * Subscribe to a Websocket event on the DiscordJS client. The observable emits each time the event occurs.
-   * @param name name of the event
-   * @return event observable
-   */
-  public createWSListener<T extends {}, E extends string>(
+  public registerListener<T, E extends WatsonEvent>(
     event: E
-  ): Observable<any> {
-    return new Observable<IWSEvent<T>>((subscriber) => {
-      this.client.ws.on(event as any, (...args) => {
-        subscriber.next(args);
-      });
-    });
+  ): Observable<T | [T]> {
+    const eventName = this.parseEvent(event);
+    return fromEvent<T>(this.client, eventName).pipe(
+      map((value) => (Array.isArray(value) ? value : [value]))
+    );
   }
 
-  private registerStateListener() {
-    // this.createListener("ready").subscribe(() => {
-    //   this.ready.next(true);
-    //   this.setUserActivity();
-    // });
+  public registerWsListener<T extends {}, E extends WatsonEvent>(
+    event: E
+  ): Observable<IWSEvent<T>> {
+    const eventName = this.parseEvent(event);
+    return fromEvent<IWSEvent<T>>(this.client.ws, eventName);
   }
 
-  private registerDefaultListeners() {
-    this.registerStateListener();
+  protected parseEvent(event: WatsonEvent): keyof ClientEvents | "raw" {
+    return parseToDiscordJsEvent(event);
   }
 
-  private setUserActivity() {
+  protected async setUserActivity(): Promise<void> {
     if (this.ready.value !== true) {
       return;
     }
 
     if (typeof this.activity !== "undefined") {
-      this.client.user.setActivity(this.activity);
+      await this.client.user.setActivity(this.activity);
     } else {
-      this.client.user.setActivity();
+      await this.client.user.setActivity();
     }
   }
 
-  protected login(): Promise<void> {
-    throw new Error("Method not implemented.");
+  protected async login(): Promise<void> {
+    await this.client.login(this.token);
   }
-  protected destroy(): Promise<void> {
-    throw new Error("Method not implemented.");
+
+  protected destroy(): void {
+    this.client.destroy();
   }
 }

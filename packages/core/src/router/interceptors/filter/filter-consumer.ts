@@ -2,8 +2,8 @@ import { PassThrough, PipelineBase, TFiltersMetadata } from '@watsonjs/common';
 import { Base } from 'discord.js';
 
 import { AbstractDiscordAdapter } from '../../../adapters';
-import { resolveAsyncValue } from '../../../helpers/resolve-async-value';
 import { ExecutionContextHost } from '../../../lifecycle';
+import { resolveAsyncValue } from '../../../util/resolve-async-value';
 import { WatsonContainer } from '../../../watson-container';
 import { IContextCreatorArguments } from '../context-creator-arguments.interface';
 import { InterceptorsConsumer } from '../interceptors-consumer';

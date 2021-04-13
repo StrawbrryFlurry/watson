@@ -20,7 +20,9 @@ export class ModuleTokenFactory {
     return moduleToken;
   }
 
-  public getTokenByModuleType(metatype: Type) {
+  public getTokenByModuleType(metatype: Type | DynamicModule) {
+    metatype = this.getMetatype(metatype);
+
     if (this.moduleTokenCache.has(metatype)) {
       return this.moduleTokenCache.get(metatype);
     }

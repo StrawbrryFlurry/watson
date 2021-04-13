@@ -4,7 +4,7 @@ export * from "./adapters";
 export * from "./command";
 export * from "./errors";
 export * from "./exceptions";
-export * from "./helpers";
+export * from "./util";
 export * from "./injector";
 export * from "./interfaces";
 export * from "./lifecycle";

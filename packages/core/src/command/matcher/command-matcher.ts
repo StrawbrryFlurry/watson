@@ -1,8 +1,8 @@
 import { CommandPrefix, UnknownCommandException } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { resolveAsyncValue } from '../../helpers/resolve-async-value';
 import { CommandRouteHost } from '../../router';
+import { resolveAsyncValue } from '../../util/resolve-async-value';
 import { CommandContainer } from '../pipe';
 
 export interface CommandMatchResult {

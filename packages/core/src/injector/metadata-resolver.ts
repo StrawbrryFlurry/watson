@@ -62,6 +62,12 @@ export class MetadataResolver {
     this.container.bindGlobalModules();
   }
 
+  public async createTestingModule(moduelRef: DynamicModule) {
+    await this.scanForModuleImports(moduelRef);
+    await this.resolveModuleProperties();
+    this.container.bindGlobalModules();
+  }
+
   private async resolveModuleProperties() {
     const modules = this.container.getModules();
 
@@ -75,7 +81,7 @@ export class MetadataResolver {
 
       this.reflectProviders(token, providers);
       this.reflectReceivers(token, receivers);
-      this.reflectImports(token, imports);
+      this.reflectImports(token, imports as Type[]);
       this.reflectExports(token, exports);
     }
   }
@@ -84,7 +90,7 @@ export class MetadataResolver {
     [
       ...imports,
       ...this.container.getDynamicModuleMetadataByToken(token, "imports"),
-    ].forEach((_import) => this.container.addImport(token, _import));
+    ].forEach((_import) => this.container.addImport(token, _import as Type));
   }
 
   private reflectExports(token: string, exports: (Type | CustomProvider)[]) {
@@ -163,7 +169,10 @@ export class MetadataResolver {
     });
   }
 
-  private async scanForModuleImports(metatype: Type, context: Type[] = []) {
+  private async scanForModuleImports(
+    metatype: Type | DynamicModule,
+    context: (Type | DynamicModule)[] = []
+  ) {
     this.container.addModule(metatype, context);
 
     context.push(metatype);
@@ -175,8 +184,16 @@ export class MetadataResolver {
     this.logger.logMessage(ADD_MODULE(type));
 
     for (let module of imports) {
+      if (module instanceof Promise) {
+        module = await module;
+      }
+
       if (typeof module === "undefined") {
-        throw new CircularDependencyException("Injector", metatype, context);
+        throw new CircularDependencyException(
+          "Injector",
+          type,
+          context as Type[]
+        );
       }
 
       if (this.container.hasModule(module)) {
@@ -195,34 +212,34 @@ export class MetadataResolver {
     return Reflect.getMetadata(DESIGN_PARAMETERS, target, propertyKey);
   }
 
-  public reflectModuleMetadata(target: Type) {
-    if (this.isDynamicModule(target as any)) {
-      return this.reflectDynamicModule(target as any);
+  public reflectModuleMetadata(target: Type | DynamicModule) {
+    if (this.isDynamicModule(target as DynamicModule)) {
+      return this.reflectDynamicModule(target as DynamicModule & Type);
     }
 
-    const imports = this.getArrayMetadata(
+    const imports = this.getArrayMetadata<Type[]>(
       MODULE_METADATA.IMPORTS,
-      target
-    ) as Type[];
-    const providers = this.getArrayMetadata(
+      target as Type
+    );
+    const providers = this.getArrayMetadata<Type[]>(
       MODULE_METADATA.PROVIDERS,
-      target
-    ) as Type[];
-    const receivers = this.getArrayMetadata(
+      target as Type
+    );
+    const receivers = this.getArrayMetadata<Type[]>(
       MODULE_METADATA.RECEIVER,
-      target
-    ) as Type[];
-    const exports = this.getArrayMetadata(
+      target as Type
+    );
+    const exports = this.getArrayMetadata<Type[]>(
       MODULE_METADATA.EXPORTS,
-      target
-    ) as Type[];
+      target as Type
+    );
 
     return {
       imports,
       providers,
       receivers,
       exports,
-      metatype: target,
+      metatype: target as Type,
     };
   }
 
@@ -242,7 +259,13 @@ export class MetadataResolver {
     const providers = moduleData.providers || [];
     const receivers = moduleData.receivers || [];
 
-    return { metatype, imports, exports, providers, receivers };
+    return {
+      metatype,
+      imports,
+      exports,
+      providers,
+      receivers,
+    };
   }
 
   /**
@@ -341,7 +364,7 @@ export class MetadataResolver {
     }));
   }
 
-  private isDynamicModule(module: DynamicModule) {
+  private isDynamicModule(module: DynamicModule): module is DynamicModule {
     return module && "module" in module;
   }
 
