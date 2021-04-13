@@ -8,6 +8,7 @@ import { source } from '../config';
 const packages = {
   common: createProject("packages/common/tsconfig.json"),
   core: createProject("packages/core/tsconfig.json"),
+  testing: createProject("packages/testing/tsconfig.json"),
 };
 
 const modules = Object.keys(packages);

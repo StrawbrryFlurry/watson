@@ -1,5 +1,10 @@
-import { CollectFunction, Command, InjectCollect, Receiver } from '@watsonjs/common';
-import { MessageReaction } from 'discord.js';
+import {
+  CollectFunction,
+  Command,
+  InjectCollect,
+  Receiver,
+} from "@watsonjs/common";
+import { MessageReaction } from "discord.js";
 
 const REACTION_FILTER = (reaction: MessageReaction) =>
   reaction.emoji.name === "🎉";
@@ -22,7 +27,5 @@ export class CollectionInquirableReceiver {
       (users, user) => [...users, user],
       []
     );
-
-    console.log(participants);
   }
 }

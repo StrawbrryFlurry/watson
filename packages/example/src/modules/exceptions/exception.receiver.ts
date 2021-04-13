@@ -2,12 +2,12 @@ import {
   BadArgumentException,
   Command,
   CommandArgumentType,
-  ICommandParam,
   InjectParam,
   Receiver,
   UnauthorizedException,
   UseExceptionHandler,
 } from '@watsonjs/common';
+import { CommandArgumentWrapper } from '@watsonjs/core/command/command-argument-wrapper';
 
 import { CustomException } from './custom.exception';
 import { CustomExceptionHandler } from './custom.handler';
@@ -28,7 +28,7 @@ export class ExceptionsReceiver {
       throw new BadArgumentException({
         name: "param",
         type: CommandArgumentType.CHANNEL,
-      } as ICommandParam);
+      } as CommandArgumentWrapper);
     }
   }
 }

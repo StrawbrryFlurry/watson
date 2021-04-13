@@ -20,6 +20,7 @@
   "dependencies": {
     "@watsonjs/common": "0.0.1",
     "@watsonjs/core": "0.0.1",
+    "@watsonjs/testing": "0.0.1",
     "axios": "^0.21.0",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
@@ -34,7 +35,10 @@
   },
   "devDependencies": {
     "@types/node": "^14.14.11",
+    "@types/jest": "^26.0.22",
     "@types/reflect-metadata": "^0.1.0",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.4",
     "lerna": "^3.22.1",
     "nodemon": "^2.0.6",
     "typescript": "^4.1.2"
