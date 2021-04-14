@@ -9,7 +9,7 @@ import { CommandRouteHost } from './router';
 import { CommandTokenFactory, ModuleTokenFactory } from './util';
 
 /**
- * Contains application state such as modules and provides an interface to get update / retrieve them
+ * Injection Container for the application
  */
 export class WatsonContainer {
   private readonly modules = new Map<string, Module>();
