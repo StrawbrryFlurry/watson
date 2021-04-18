@@ -1,17 +1,8 @@
-import {
-  DMChannel,
-  Guild,
-  GuildMember,
-  Message,
-  NewsChannel,
-  TextChannel,
-  User,
-  VoiceChannel,
-} from "discord.js";
+import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User, VoiceChannel } from 'discord.js';
 
-import { CommandArguments, CommandPrefix } from "../command";
-import { CommandRoute } from "../router";
-import { PipelineBase } from "./pipeline-base.interface";
+import { CommandArgumentsHost, CommandPrefix } from '../command';
+import { CommandRoute } from '../router';
+import { PipelineBase } from './pipeline-base.interface';
 
 export type TextBasedChannel = TextChannel | DMChannel | NewsChannel;
 
@@ -45,7 +36,7 @@ export interface CommandPipeline extends PipelineBase {
    * Returns the `CommandArgumentsHost` which
    * holds arguments collected for this context
    */
-  getArguments(): CommandArguments;
+  getArguments(): CommandArgumentsHost;
   /**
    * Returns the message which used the command
    */

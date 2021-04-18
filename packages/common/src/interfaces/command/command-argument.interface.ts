@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
 import { ICommandParam } from '../../decorators';
-import { CommandArguments } from './command-arguments.interface';
+import { CommandArgumentsHost } from './command-arguments.interface';
 
 export interface CommandArgument<T = any> extends ICommandParam {
   isResolved: boolean;
@@ -9,6 +9,6 @@ export interface CommandArgument<T = any> extends ICommandParam {
   namedParamContent: string;
   content: string | string[];
   message: Message;
-  host: CommandArguments;
+  host: CommandArgumentsHost;
   value: T;
 }

@@ -25,6 +25,7 @@
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "cli-color": "^2.0.0",
+    "date-fns": "^2.21.0",
     "dayjs": "^1.9.7",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
@@ -36,6 +37,7 @@
     "uuid": "^8.3.1"
   },
   "devDependencies": {
+    "@types/date-fns": "^2.6.0",
     "@types/axios": "^0.14.0",
     "@types/cli-color": "^2.0.0",
     "@types/dotenv": "^8.2.0",

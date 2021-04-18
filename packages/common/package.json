@@ -21,7 +21,8 @@
     "reflect-metadata": "^0.1.12"
   },
   "peerDependencies": {
-    "rxjs": "^6.6.3"
+    "rxjs": "^6.6.3",
+    "date-fns": "^2.21.0"
   },
   "homepage": "https://watsonjs.io",
   "publishConfig": {

@@ -1,6 +1,7 @@
 import {
   BaseRoute,
   COMMAND_METADATA,
+  DESIGN_PARAMETERS,
   EventExceptionHandler,
   EXCEPTION_HANDLER_METADATA,
   isFunction,
@@ -23,7 +24,7 @@ import { SlashRoute } from './slash';
 
 export class RouteExplorer {
   private container: WatsonContainer;
-  private resolver: MetadataResolver;
+  private scanner: MetadataResolver;
 
   private logger = new Logger("RouteExplorer");
 
@@ -36,7 +37,7 @@ export class RouteExplorer {
 
   constructor(container: WatsonContainer) {
     this.container = container;
-    this.resolver = new MetadataResolver(container);
+    this.scanner = new MetadataResolver(container);
     this.routeHanlderFactory = new RouteHandlerFactory(container);
   }
 
@@ -93,6 +94,15 @@ export class RouteExplorer {
     this.logger.logMessage(COMPLETED());
   }
 
+  private async reflectCommands(receiver: InstanceWrapper<TReceiver>) {
+    const { metatype } = receiver;
+    const receiverMethods = this.reflectReceiverMehtods(metatype);
+    for (const method of receiverMethods) {
+      const { descriptor, name } = method;
+      this.scanner.getMetadata<unknown[]>(DESIGN_PARAMETERS, metatype, name);
+    }
+  }
+
   private async reflectRoute<T extends string>(
     receiver: InstanceWrapper<TReceiver>,
     metadataKey: string,
@@ -110,8 +120,8 @@ export class RouteExplorer {
 
     for (const method of receiverMethods) {
       const { descriptor } = method;
-      const metadata = this.resolver.getMetadata<T>(metadataKey, descriptor);
-      const receiverMetadata = this.resolver.getMetadata<T>(
+      const metadata = this.scanner.getMetadata<T>(metadataKey, descriptor);
+      const receiverMetadata = this.scanner.getMetadata<T>(
         RECEIVER_METADATA,
         receiver.metatype
       );
@@ -163,7 +173,7 @@ export class RouteExplorer {
   }
 
   private reflectReceiverMehtods(receiver: Type) {
-    return this.resolver.reflectMethodsFromMetatype(receiver);
+    return this.scanner.reflectMethodsFromMetatype(receiver);
   }
 
   private reflectExceptionHandlers(
@@ -171,7 +181,7 @@ export class RouteExplorer {
     reflectee: Type | Function,
     module: Module
   ) {
-    const handlerMetadata = this.resolver.getArrayMetadata<
+    const handlerMetadata = this.scanner.getArrayMetadata<
       EventExceptionHandler[]
     >(metadataKey, reflectee);
 

@@ -1,66 +1,8 @@
-import { Message, PermissionResolvable } from 'discord.js';
+import { PermissionResolvable } from 'discord.js';
 
 import { COMMAND_METADATA } from '../../constants';
-import { CommandArgumentType } from '../../enums';
-import { CommandPrefix, MessageSendable } from '../../interfaces';
+import { CommandPrefix } from '../../interfaces';
 import { isNil, isObject, isString } from '../../utils/shared.utils';
-
-export type ArgumentPromtFunction = (
-  message: Message
-) => MessageSendable | Promise<MessageSendable>;
-
-export interface ICommandParam {
-  /**
-   * Internal name the parameter should be reffered as.
-   * It can then also be used to get the pram data using the @\param() decorator
-   */
-  name: string;
-  /**
-   * Lable that describes the parameter
-   */
-  label?: string;
-  /**
-   * Internal type the parameter should be parsed as
-   * @default CommandArgumentType.TEXT
-   */
-  type?: CommandArgumentType;
-  /**
-   * Makes the parameter optional.
-   * Optional parameters cannot be followed by mandatory ones.
-   * If default is set this option will automatically be set
-   * @default false
-   */
-  optional?: boolean;
-  /**
-   * Uses the rest of the message content
-   * This option can only be used for the last parameter
-   * @default false
-   */
-  hungry?: boolean;
-  /**
-   * The default value if none was provided
-   */
-  default?: any;
-  /**
-   * If the type a date this parameter is required to parse the date.
-   */
-  dateFormat?: string;
-  /**
-   * The promt that will be used to ask for this parameter
-   * if it was not specified
-   */
-  promt?: string | ArgumentPromtFunction;
-  /**
-   * An array of options the user can choose from
-   * for this argument.
-   */
-  choices?: string[];
-  /**
-   * A custom parser used with the`CommandArgumentType.CUSTOM`
-   * type
-   */
-  parser?(message: Message): any;
-}
 
 export interface ICommandCooldown {
   /**
@@ -121,28 +63,6 @@ export interface ICommandOptions {
    */
   cooldown?: ICommandCooldown;
   /**
-   * Promt for arguments if one was not provided
-   * @default false
-   */
-  promt?: boolean;
-  /**
-   * The maximum number of argument promts per agument
-   * @default 1
-   */
-  maxPromts?: number;
-  /**
-   * Seconds to wait for a user to provide the
-   * argument promted for
-   * @default 10
-   */
-  promtTimeout?: number;
-  /**
-   * Parameters of the command
-   * @see ICommandParam
-   * @default none
-   */
-  params?: ICommandParam[];
-  /**
    * Sets the prefix for the command.
    * If no prefix was set the receiver prefix is used.
    * If no prefix was set in the receiver the global prefix will be used.
@@ -181,11 +101,33 @@ export interface ICommandOptions {
 }
 
 /**
- * Marks a method in an receiver as a command
+ * Marks a method in an receiver as a usable bot command
  * @param command The name of the command
- * @param commandOptions Options the command is configured with
+ * @param commandOptions Options to configure the command
  *
- * @default command The default command name is the descriptor name of the method
+ * The default command name is the descriptor name of the method
+ * To define parameters for the command you can specify parameters for the
+ * decorated method which Watson will add to the command configuration. The type
+ * can either be a custom parsed class that implements the CommandArgumentType interface
+ * or a builtin type.
+ *
+ * The parsed argument will automaticuall be injected to the parameter
+ * that has registered it.
+ * ```ts
+ *  import { User } from 'discord.js';
+ *
+ * `@Command("ping")`
+ *  public ping(user: User) {  }
+ * ```
+ * You might want to have a more fine grade control over your
+ * parameters. For that you can use the `@Param` decorator.
+ *
+ * ```ts
+ *  import { User } from 'discord.js';
+ *
+ * `@Command("ping")`
+ *  public ping(`@Param`({ label: "The target user who is being pinged" }) user: UserArgument) {  }
+ * ```
  */
 export function Command(): MethodDecorator;
 export function Command(command: string): MethodDecorator;

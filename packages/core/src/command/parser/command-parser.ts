@@ -1,20 +1,23 @@
 import {
   BadArgumentException,
+  ChannelArgument,
   CommandArgumentType,
   CommandTokenType,
   isNil,
-} from "@watsonjs/common";
-import { Message } from "discord.js";
+  RoleArgument,
+  UserArgument,
+} from '@watsonjs/common';
+import { Message } from 'discord.js';
 
-import { CommandArgumentWrapper } from "../command-argument-wrapper";
-import { CommandArgumentsHost } from "../pipe";
-import { CommandTokenHost, TokenizerKnownCharacters } from "../tokenizer";
+import { CommandArgumentWrapper } from '../command-argument-wrapper';
+import { CommandArgumentsHost } from '../pipe';
+import { CommandTokenHost, TokenizerKnownCharacters } from '../tokenizer';
 import {
   CustomMessageTypeParser,
   DateMessageTypeParser,
   DiscordMessageTypeParser,
   PrimitiveMessageTypeParser,
-} from "./parsers";
+} from './parsers';
 
 export class CommandParser {
   private argumentHost: CommandArgumentsHost;
@@ -103,18 +106,18 @@ export class CommandParser {
   ): Promise<T> {
     const { default: d, optional, type } = argumentRef;
     let parsed: any;
-
-    switch (type) {
-      case CommandArgumentType.CHANNEL:
+    // TODO:
+    switch (type as any) {
+      case ChannelArgument:
         parsed = this.discordParser.parseChannel(message, content, argumentRef);
         break;
-      case CommandArgumentType.USER:
+      case UserArgument:
         parsed = this.discordParser.parseUser(message, content, argumentRef);
         break;
-      case CommandArgumentType.ROLE:
+      case RoleArgument:
         parsed = this.discordParser.parseRole(message, content, argumentRef);
         break;
-      case CommandArgumentType.CUSTOM:
+      case Object:
         parsed = await this.customParser.parseCustom(
           message,
           content,

@@ -7,6 +7,7 @@ import {
   OnModuleInit,
   Receiver,
 } from '@watsonjs/common';
+import { User } from 'discord.js';
 
 import { AppService } from './app.service';
 
@@ -29,33 +30,20 @@ export class AppReceiver implements OnModuleInit, OnApplicationShutdown {
   }
 
   @Command("ping", {
-    namedPrefix: "pls",
-    params: [{ name: "Name", type: CommandArgumentType.CHANNEL, hungry: true }],
+    params: [{ name: "user", type: CommandArgumentType.USER }],
   })
-  ping(@InjectParam() param: any) {
-    console.log(param);
-    return this.appService.ping();
-  }
+  ping(@InjectParam("user") user: User) {}
+
+  @Command("ping")
+  ping(
+    @Param({
+      /*  */
+    })
+    user: UserArgument
+  ) {}
 
   @Command("s", {
     prefix: new p(),
   })
   stuff() {}
-
-  @Command()
-  s(param: Object) {}
-
-  @Command()
-  b(param: p) {}
-
-  @Command()
-  asd(param: string) {}
-
-  @Command()
-  aasd(param: any) {}
-
-  @Command()
-  test(param: AppService, something: string): string {
-    return "";
-  }
 }

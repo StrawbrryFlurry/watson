@@ -4,7 +4,7 @@ import { CommandArgument } from './command-argument.interface';
 import { CommandPrefix } from './command-prefix.interface';
 import { CommandToken } from './tokenization';
 
-export interface CommandArguments {
+export interface CommandArgumentsHost {
   /**
    * The base command name
    */

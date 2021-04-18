@@ -1,1 +1,1 @@
-export * from "./param.decorator";
+export * from "./inject-param.decorator";
