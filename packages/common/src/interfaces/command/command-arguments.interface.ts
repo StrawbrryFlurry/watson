@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
 import { CommandArgument } from './command-argument.interface';
-import { CommandPrefix } from './command-prefix.interface';
+import { ICommandPrefix } from './command-prefix.interface';
 import { CommandToken } from './tokenization';
 
 export interface CommandArgumentsHost {
@@ -12,7 +12,7 @@ export interface CommandArgumentsHost {
   /**
    * The command prefix used
    */
-  prefix: CommandPrefix;
+  prefix: ICommandPrefix;
   /**
    * The arguments that were parsed from
    * the message content as well as the ones promted

@@ -1,6 +1,6 @@
 import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User, VoiceChannel } from 'discord.js';
 
-import { CommandArgumentsHost, CommandPrefix } from '../command';
+import { CommandArgumentsHost, ICommandPrefix } from '../command';
 import { CommandRoute } from '../router';
 import { PipelineBase } from './pipeline-base.interface';
 
@@ -14,7 +14,7 @@ export interface CommandPipeline extends PipelineBase {
   /**
    * The prefix used by the user
    */
-  prefix: CommandPrefix;
+  prefix: ICommandPrefix;
   /**
    * Whether the message is from a guild or not
    */

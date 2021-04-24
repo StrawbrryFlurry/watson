@@ -1,4 +1,4 @@
-import { TReceiver, Type } from '@watsonjs/common';
+import { TComponent, TReceiver, Type } from '@watsonjs/common';
 import { blue, cyan, yellow } from 'cli-color';
 
 import { InstanceWrapper, Module } from '../injector';
@@ -67,7 +67,11 @@ export const INTERCEPTOR_NOT_FOUND = (
   module: Module
 ) =>
   `The ${type} ${name} used to decorate the handler ${method.name} in receiver ${receiver.name} was not found in the module ${module.name}`;
-
+export const INVALID_COMPONENT_DEF_MESSAGE = (
+  type: TComponent,
+  name: string,
+  message: string
+) => `Failed to parse ${type}, ${name}.\n${message}`;
 export const BAD_INTERCEPTOR_IMPLEMENTATION = (
   type: Interceptor,
   name: string,

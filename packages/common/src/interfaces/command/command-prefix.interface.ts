@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
  * your command is dynamic among different
  * guilds.
  */
-export interface CommandPrefix {
+export interface ICommandPrefix {
   /**
    * The prefix string
    */

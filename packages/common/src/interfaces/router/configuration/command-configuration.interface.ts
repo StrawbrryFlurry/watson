@@ -1,14 +1,14 @@
 import { PermissionResolvable } from 'discord.js';
 
-import { ICommandCooldown, ICommandOptions, ICommandParam } from '../../../decorators';
-import { CommandPrefix } from '../../command';
+import { ICommandCooldown, ICommandOptions, ICommandParameterMetadata } from '../../../decorators';
+import { ICommandPrefix } from '../../command';
 
 export interface CommandConfiguration extends ICommandOptions {
-  prefix: CommandPrefix;
+  prefix: ICommandPrefix;
   name: string;
   alias: string[];
   caseSensitive: boolean;
-  params?: ICommandParam[];
+  params?: ICommandParameterMetadata[];
   description: string;
   tags: string[];
   guild: boolean;

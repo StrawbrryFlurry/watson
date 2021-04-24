@@ -1,5 +1,5 @@
 import { RECEIVER_METADATA } from '../../constants';
-import { CommandPrefix } from '../../interfaces';
+import { ICommandPrefix } from '../../interfaces';
 import { isNil, isObject, isString } from '../../utils/shared.utils';
 
 export interface IReceiverOptions {
@@ -10,7 +10,7 @@ export interface IReceiverOptions {
    * !ban @username
    * Where `!` is the prefix
    */
-  prefix?: string | CommandPrefix;
+  prefix?: string | ICommandPrefix;
   /**
    * The named prefix for underlying commands if none is specified.
    *

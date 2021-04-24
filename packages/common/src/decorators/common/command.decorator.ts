@@ -1,7 +1,7 @@
 import { PermissionResolvable } from 'discord.js';
 
 import { COMMAND_METADATA } from '../../constants';
-import { CommandPrefix } from '../../interfaces';
+import { ICommandPrefix } from '../../interfaces';
 import { isNil, isObject, isString } from '../../utils/shared.utils';
 
 export interface ICommandCooldown {
@@ -70,7 +70,7 @@ export interface ICommandOptions {
    * !ban @username
    * Where `!` is the prefix
    */
-  prefix?: string | CommandPrefix;
+  prefix?: string | ICommandPrefix;
   /**
    * Sets the named prefix for the command.
    * If no prefix was set the receiver prefix is used.

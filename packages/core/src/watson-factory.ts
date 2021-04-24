@@ -2,7 +2,7 @@ import { Type } from '@watsonjs/common';
 
 import { DiscordJsAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
-import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
+import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
 import { MetadataResolver } from './injector';
 import { InstanceLoader } from './injector/instance-loader';
 import { IWatsonApplicationOptions } from './interfaces';

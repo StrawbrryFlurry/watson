@@ -1,6 +1,6 @@
 import { red } from 'cli-color';
 
-import { BOOTSTRAPPING_ERROR_MESSAGE, EXCEPTION_STACK, Logger, SUGGESTION } from '../logger';
+import { BOOTSTRAPPING_ERROR_MESSAGE, EXCEPTION_STACK, Logger, SUGGESTION } from '../../logger';
 import { BootstrappingException } from './bootstrapping.exception';
 
 export type ZoneFunction<T extends (...args: unknown[]) => unknown> = T;

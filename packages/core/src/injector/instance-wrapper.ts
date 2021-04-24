@@ -11,14 +11,31 @@ export interface IInstanceWrapperArgs<T = any> {
   inject?: unknown[];
 }
 
+export type TInstanceFactory<T, D extends any[]> = (...deps: D) => T;
+
+// TODO:
+// Use custom DI tokens + factory and deps
+// ~ Rewrite ctor?
+
 /**
  * Wraps around Provicer, Receiver and Module instaces
  * Provides init options and dependencies
  */
-export class InstanceWrapper<T = any> {
+export class InstanceWrapper<T = any, D extends any[] = unknown[]> {
   public readonly name: string;
   public readonly metatype: Type;
   public readonly host: Module;
+  /**
+   * The factory function resolves
+   * the type to its value using
+   * using dependencies if necessary
+   */
+  public readonly factory: TInstanceFactory<T, D>;
+  /**
+   * Dependencies of the factory
+   */
+  public readonly deps?: D;
+
   public isResolved: boolean;
   public instance: T;
   public inject?: Type[];

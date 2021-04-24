@@ -1,5 +1,5 @@
-import { ICommandParam } from '../../decorators';
-import { CommandPrefix } from '../command';
+import { ICommandParameterMetadata } from '../../decorators';
+import { ICommandPrefix } from '../command';
 import { BaseRoute } from './base-route.interface';
 import { CommandConfiguration } from './configuration';
 
@@ -15,7 +15,7 @@ export interface CommandRoute extends BaseRoute {
   /**
    * The parameters registered for this command
    */
-  params: ICommandParam[];
+  params: ICommandParameterMetadata[];
   /**
    * The prefix used for this command
    */
@@ -24,7 +24,7 @@ export interface CommandRoute extends BaseRoute {
    * The prefix declaration for this command
    * that implements the `CommandPrefix` interface
    */
-  commandPrefix: CommandPrefix;
+  commandPrefix: ICommandPrefix;
   /**
    * Alias for this command
    */

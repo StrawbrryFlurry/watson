@@ -43,7 +43,7 @@ export class CommandRouteHost
     this.host = receiver;
   }
 
-  getConfiguration(): CommandConfiguration {
+  public getConfiguration(): CommandConfiguration {
     return this.configuration;
   }
 

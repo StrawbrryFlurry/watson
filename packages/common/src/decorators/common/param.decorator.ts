@@ -1,7 +1,7 @@
 import { PARAM_METADATA } from '../../constants';
 import { mergeDefaults } from '../../utils';
 
-export interface ICommandParam<T = any> {
+export interface ICommandParameterMetadata<T = any> {
   /**
    * Internal name the parameter should be reffered as.
    * It can then also be used to get the pram data using the @\param() decorator
@@ -35,11 +35,6 @@ export interface ICommandParam<T = any> {
   choices?: T[];
 }
 
-export interface ICommandParameterMetadata {
-  parameterIndex: number;
-  options: ICommandParam;
-}
-
 /**
  * Injects the parameters of a command to the argument in the command handler method.
  * @param options Options to configure the parameter.
@@ -60,19 +55,16 @@ export interface ICommandParameterMetadata {
  * `RoleArgument`
  */
 export function Param(): ParameterDecorator;
-export function Param(options?: ICommandParam): ParameterDecorator;
-export function Param(options: ICommandParam = {}): ParameterDecorator {
+export function Param(options?: ICommandParameterMetadata): ParameterDecorator;
+export function Param(
+  options: ICommandParameterMetadata = {}
+): ParameterDecorator {
   return (target: object, propertyKey: string, parameterIndex: number) => {
-    const optionsWithDefaults = mergeDefaults(options, {
+    const metadata = mergeDefaults(options, {
       name: propertyKey,
       hungry: false,
       optional: false,
     });
-
-    const metadata: ICommandParameterMetadata = {
-      options: optionsWithDefaults,
-      parameterIndex,
-    };
 
     const existingMetadata =
       Reflect.getMetadata(PARAM_METADATA, target, propertyKey) || [];

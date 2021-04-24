@@ -5,7 +5,7 @@ import { AbstractDiscordAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';
-import { BootstrappingHandler } from './exceptions/bootstrapping-handler';
+import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
 import { LifecycleHost } from './lifecycle/hooks';
 import { APP_STARTING, APP_STRATED, Logger } from './logger';
 import { RouteExplorer } from './router';

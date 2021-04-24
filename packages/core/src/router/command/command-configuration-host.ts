@@ -142,9 +142,6 @@ export class CommandConfigurationHost implements CommandConfiguration {
       dm,
       guild,
       hidden,
-      maxPromts,
-      promt,
-      promtTimeout,
       tags,
     } = this.commandOptions;
 
@@ -164,10 +161,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
 
     this.description = description || "";
     this.dm = dm || false;
-    this.promt = promt || false;
     this.tags = tags || [];
-    this.promtTimeout = promtTimeout || 10;
-    this.maxPromts = maxPromts || 1;
 
     this.guild = isNil(guild) ? true : guild;
     this.hidden = isNil(hidden) ? true : hidden;

@@ -1,17 +1,18 @@
 import { PREFIX_METADATA } from '../../constants';
-import { CommandPrefix } from '../../interfaces';
+import { ICommandPrefix } from '../../interfaces';
+import { isNil } from '../../utils';
 
 /**
  * Assings a custom prefix class to the decorated command.
  */
-export function UsePrefix(prefix: CommandPrefix): MethodDecorator {
+export function UsePrefix(prefix: ICommandPrefix): MethodDecorator {
   return (
     target: Object,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) => {
     // Is method decorator
-    if (typeof descriptor !== "undefined") {
+    if (!isNil(descriptor)) {
       return Reflect.defineMetadata(PREFIX_METADATA, prefix, descriptor.value);
     }
 
