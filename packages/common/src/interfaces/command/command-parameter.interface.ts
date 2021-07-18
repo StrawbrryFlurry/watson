@@ -1,11 +1,11 @@
 export interface CommandParameter<T = any> {
   /**
-   * Internal name the parameter should be reffered as.
+   * Internal name the parameter should be referred as.
    * It can then also be used to get the pram data using the @\param() decorator
    */
   name: string;
   /**
-   * Lable that describes the parameter
+   * Label that describes the parameter
    */
   label?: string;
   /**
@@ -40,7 +40,7 @@ export interface CommandParameter<T = any> {
    * to.
    *
    * ```ts
-   * `@Commad("ping")`
+   * `@Command("ping")`
    * handlePing(@Param() param1: UserArgument) { ... }
    * // param1 => 0
    * ```

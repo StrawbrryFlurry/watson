@@ -2,9 +2,11 @@ import {
   CommandArgumentType,
   CommandParameter,
   ICommandParameterMetadata,
+  isEmpty,
   isInternalParameterType,
   isObject,
   mergeDefaults,
+  NON_DECLARATIVE_PARAM_METADATA,
   PARAM_METADATA,
   TReceiver,
   Type,
@@ -25,6 +27,10 @@ export class CommandRouteFactory {
 
     const methods = this.reflector.reflectMethodsOfType(metatype);
 
+    if (isEmpty(methods)) {
+      return;
+    }
+
     for (const method of methods) {
       const { propertyKey } = method;
       const commandDef = new CommandDefinition();
@@ -33,12 +39,22 @@ export class CommandRouteFactory {
         propertyKey
       );
 
+      // TODO:: Create route
+      if (isEmpty(parameters)) {
+        continue;
+      }
+
       for (
         let parameterIndex = 0;
         parameterIndex < parameters.length;
         parameterIndex++
       ) {
         const parameter = parameters[parameterIndex];
+        this.reflector.reflectMetadata<boolean | null>(
+          NON_DECLARATIVE_PARAM_METADATA,
+          metatype,
+          propertyKey
+        );
 
         if (!this.isParamDeclarative(parameter)) {
           continue;
