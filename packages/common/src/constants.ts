@@ -7,7 +7,7 @@ export const MODULE_METADATA = {
 
 export const MODULE_GLOBAL_METADATA = "module:global";
 
-export const RECEIVER_METADATA = "reciver:meta";
+export const RECEIVER_METADATA = "receiver:meta";
 export const EVENT_METADATA = "event:meta";
 export const COMMAND_METADATA = "command:meta";
 export const SLASH_COMMAND_METADATA = "slashcommands:meta";
@@ -20,6 +20,8 @@ export const GUARD_METADATA = "guard:meta";
 export const FILTER_METADATA = "filter:meta";
 export const EXCEPTION_HANDLER_METADATA = "exception.handler:meta";
 export const PREFIX_METADATA = "prefix:meta";
+
+export const NON_DECLARATIVE_PARAM_METADATA = "param:non.declarative:meta";
 
 export const RECEIVER_ERROR_HANDLER_METADATA = "receiver:error:meta";
 export const COMMAND_ERROR_HANDLER_METADATA = "command:error:meta";

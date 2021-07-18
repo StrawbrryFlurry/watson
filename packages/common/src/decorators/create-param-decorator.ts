@@ -1,4 +1,4 @@
-import { PARAM_METADATA } from '../constants';
+import { NON_DECLARATIVE_PARAM_METADATA, PARAM_METADATA } from '../constants';
 import { RouteParamType } from '../enums';
 import { ExecutionContext } from '../interfaces';
 
@@ -9,6 +9,10 @@ export interface IParamDecoratorMetadata<O = any> {
   paramIndex: number;
   options?: O;
   factory?: ParamFactoryFunction;
+}
+
+export interface IParamNonDeclarativeMetadata {
+  parameterIndex: number;
 }
 
 export function createParamDecorator<O = any>(
@@ -32,6 +36,19 @@ export function createParamDecorator<O = any>(
     Reflect.defineMetadata(
       PARAM_METADATA,
       args,
+      target.constructor,
+      propertyKey
+    );
+
+    const existingHelperMetadata: IParamNonDeclarativeMetadata[] =
+      Reflect.getMetadata(PARAM_METADATA, target.constructor, propertyKey) ||
+      [];
+
+    const helperMetadata = [...existingHelperMetadata, parameterIndex];
+
+    Reflect.defineMetadata(
+      NON_DECLARATIVE_PARAM_METADATA,
+      helperMetadata,
       target.constructor,
       propertyKey
     );
