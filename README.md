@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://watsonjs.io/static/logo.png" width="500" />
+  <img src="https://watsonjs.io/assets/logo/logo.png" width="500" />
 </p>
 <p align="center">
   A scalable <a href="https://nodejs.org">Node.js</a> framework for building <a href="https://discord.com">Discord</a> applications
