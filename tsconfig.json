@@ -1,22 +1,30 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": false,
-    "noImplicitAny": false,
-    "noUnusedLocals": false,
-    "removeComments": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "lib": ["es2017", "dom"],
+    "suppressImplicitAnyIndexErrors": true,
+    "strictPropertyInitialization": false,
+    "importHelpers": true,
+    "removeComments": false,
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es6",
+    "target": "es2017",
     "sourceMap": true,
-    "allowJs": true,
-    "lib": ["es6","es2017", "DOM"],
+    "allowJs": false,
+    "strict": true,
+    "strictNullChecks": false,
+    "types": ["node"],
+    "moduleResolution": "node",
     "baseUrl": ".",
-    "outDir": "dist",
-    "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "paths": {
+      "@watsonjs/common": ["packages/common/src"],
+      "@watsonjs/core": ["packages/core/src"]
+    }
   },
-  "include": ["packages/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["../node_modules", "./**/*.spec.ts"]
 }
