@@ -380,7 +380,7 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
         case "8":
         case "9": {
           if (c === "." && sb.has(".")) {
-            continue;
+            return this.scanGenericToken(sb);
           }
 
           sb.append(c);
@@ -429,17 +429,17 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
           }
 
           const isCodeBlock = this.isCodeBlockPattern();
-          
-          if(backTicks.length > 3) {
+
+          if (backTicks.length > 3) {
             backTicks.push(c);
           }
 
-          if(isCodeBlock) {
+          if (isCodeBlock) {
             backTicks.push(c);
           }
 
           text.append(c);
-          
+
           if (backTicks.length === 6) {
             this.forceNewToken = true;
             continue;
@@ -471,19 +471,17 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
       }
     }
 
-    if(backTicks.length < 6) {
-      this.resync();
-      return this.scanGenericToken(this.getChar());
+    if (backTicks.length < 6) {
+      return this.scanGenericToken(text);
     }
 
     return this.newCodeBlockToken(text, sb, language);
   }
 
-  // TODO: 
-  // Prevent recursion / endless loop
-  // If string / code block is not valid
-  protected scanGenericToken(char: char) {
-    const sb = new StringBuilder(char);
+  protected scanGenericToken(sb: StringBuilder): GenericToken;
+  protected scanGenericToken(char: char): GenericToken;
+  protected scanGenericToken(input: char | StringBuilder): GenericToken {
+    const sb = new StringBuilder(input);
 
     while (!this.forceNewToken && !this.atEom()) {
       const c = this.getChar();

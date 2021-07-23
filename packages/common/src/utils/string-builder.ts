@@ -29,8 +29,12 @@ export class StringBuilder {
   /**
    * A default value for the StringBuilder
    */
-   constructor(value?: string) {
-    if(!isString(value)) {
+   constructor(value?: string | StringBuilder) {
+    if(value instanceof StringBuilder) {
+      this._chars = value.chars;
+    }
+    
+    if(isString(value)) {
       this.append(value);
     }
   }
