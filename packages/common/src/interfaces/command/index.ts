@@ -1,4 +1,4 @@
-export * from "./tokenization";
+export * from "./parsing";
 export * from "./command-argument-type.interface";
 export * from "./command-argument.interface";
 export * from "./command-arguments.interface";
