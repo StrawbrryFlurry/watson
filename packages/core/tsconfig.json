@@ -1,19 +1,7 @@
 {
-  "extends": "./../../tsconfig.base.json",
+  "extends": "./../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "@command": ["command/index"],
-      "@errors": ["errors/index"],
-      "@exceptions": ["exceptions/index"],
-      "@injector": ["injector/index"],
-      "@lifecycle": ["lifecycle/index"],
-      "@logger": ["logger/index"],
-      "@router": ["router/index"],
-      "@sharding": ["sharding/index"],
-      "@util": ["util/index"],
-      "@core": ["index"]
-    }
+    "sourceRoot": "src"
   },
   "include": ["*.ts", "**/*.ts"]
 }
