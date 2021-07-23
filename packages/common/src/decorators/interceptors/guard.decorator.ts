@@ -9,7 +9,7 @@ export function UseGuards(
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,
-    propertykey?: string,
+    propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
     // Is method decorator

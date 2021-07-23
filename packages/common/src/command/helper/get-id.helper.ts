@@ -24,7 +24,7 @@ export function getId(type: IGetIdTypes, id: string) {
       return undefined;
     }
 
-    const [parsed] = id.match(/(\d+)/);
+    const [parsed] = id.match(/(\d+)/)!;
     return parsed;
   } catch {
     return undefined;

@@ -59,7 +59,7 @@ export function Param(options?: ICommandParameterMetadata): ParameterDecorator;
 export function Param(
   options: ICommandParameterMetadata = {}
 ): ParameterDecorator {
-  return (target: object, propertyKey: string, parameterIndex: number) => {
+  return (target: object, propertyKey: string | symbol, parameterIndex: number) => {
     const metadata = mergeDefaults(options, {
       name: propertyKey,
       hungry: false,

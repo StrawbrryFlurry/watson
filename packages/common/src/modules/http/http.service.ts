@@ -16,7 +16,7 @@ export class HttpClient {
   private requestInterceptors: HttpRequestInterceptor[] = [];
   private responseInterceptors: HttpResponseInterceptor[] = [];
 
-  constructor(@Inject("HTTP_CONFIG") config: AxiosRequestConfig) {
+  constructor(@Inject("HTTP_CONFIG") config: AxiosRequestConfig | undefined) {
     this.httpClientInstance = Axios.create(config);
   }
 

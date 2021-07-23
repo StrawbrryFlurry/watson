@@ -9,7 +9,7 @@ import { RuntimeException } from './runtime-exception';
 export abstract class EventException extends RuntimeException {
   protected _context: ExecutionContext;
   public readonly isMessageEmbed: boolean;
-  public readonly data: string | MessageEmbed;
+  public readonly data: string | MessageEmbed | undefined;
 
   constructor(message?: string);
   constructor(message?: MessageEmbed);

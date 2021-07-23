@@ -1,5 +1,5 @@
-import { SLASH_COMMAND_METADATA } from "../../constants";
-import { PartialApplicationCommand } from "../../interfaces";
+import { SLASH_COMMAND_METADATA } from '../../constants';
+import { PartialApplicationCommand } from '../../interfaces';
 
 export interface ISlashCommandConfig extends PartialApplicationCommand {}
 
@@ -16,7 +16,7 @@ export function SlashCommand(
 ): MethodDecorator {
   return (
     target: Object,
-    propertyKey: string,
+    propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
     Reflect.defineMetadata(

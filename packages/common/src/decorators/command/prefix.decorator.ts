@@ -8,7 +8,7 @@ import { isNil } from '../../utils';
 export function UsePrefix(prefix: ICommandPrefix): MethodDecorator {
   return (
     target: Object,
-    propertyKey: string,
+    propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
     // Is method decorator

@@ -1,7 +1,7 @@
-import { isEmpty, isNil } from "../utils";
+import { isEmpty, isNil } from '../utils';
 
 export abstract class WatsonException extends Error {
-  public readonly suggestions: string[];
+  public readonly suggestions: string[] | undefined;
 
   constructor(message: string, suggestions?: string[]) {
     super(message);

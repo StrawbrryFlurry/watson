@@ -11,7 +11,7 @@ export interface IPaginatorOptions extends IReactiveOptions {
   delete?: boolean;
 }
 
-export class WatsonPaginator extends WatsonComponent<IPaginatorOptions> {
+export class WatsonPaginator extends WatsonComponent<Required<IPaginatorOptions>> {
   public _index: number;
   public paginatorContent: (string | MessageEmbed)[];
 
@@ -22,21 +22,21 @@ export class WatsonPaginator extends WatsonComponent<IPaginatorOptions> {
       );
     }
 
-    options = {
+    const paginatorOptions = {
       timeReactive: 60000,
       delete: false,
       deleteEmote: "🗑",
       leftEmote: "⬅",
       rightEmote: "➡",
       ...options,
-    };
+    } 
 
     const filterFn = (reaction: MessageReaction) =>
-      reaction.emoji.name === options.deleteEmote ||
-      reaction.emoji.name === options.leftEmote ||
-      reaction.emoji.name === options.rightEmote;
+      reaction.emoji.name === paginatorOptions.deleteEmote ||
+      reaction.emoji.name === paginatorOptions.leftEmote ||
+      reaction.emoji.name === paginatorOptions.rightEmote;
 
-    super(content[0], { ...options, reactionsFilter: filterFn });
+    super(content[0], { ...paginatorOptions, reactionsFilter: filterFn });
 
     this._index = 0;
     this.paginatorContent = content;

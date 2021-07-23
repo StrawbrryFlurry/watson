@@ -6,7 +6,7 @@ import { Injectable } from '../../decorators';
 export class ConfigService {
   protected config: { [key: string]: any };
 
-  constructor(cfg: DotenvConfigOptions, withConfig: {}[]) {
+  constructor(cfg: DotenvConfigOptions | undefined, withConfig: {}[]) {
     let dotEnvConfig = {};
 
     try {
@@ -39,6 +39,6 @@ export class ConfigService {
    */
   get<T = any>(path: string): T {
     const segments = path.split(".");
-    return segments.reduce((val, segment) => (val = val[segment]), this.config);
+    return segments.reduce((val, segment) => (val = val[segment]), this.config) as T;
   }
 }

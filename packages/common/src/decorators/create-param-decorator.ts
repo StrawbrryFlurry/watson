@@ -19,7 +19,7 @@ export function createParamDecorator<O = any>(
   parm: RouteParamType,
   options?: O
 ): ParameterDecorator {
-  return (target: Object, propertyKey: string, parameterIndex: number) => {
+  return (target: Object, propertyKey: string | symbol, parameterIndex: number) => {
     const existing: IParamDecoratorMetadata[] =
       Reflect.getMetadata(PARAM_METADATA, target.constructor, propertyKey) ||
       [];

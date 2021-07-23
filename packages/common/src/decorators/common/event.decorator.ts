@@ -14,7 +14,7 @@ export function Event(type: WatsonEvent): MethodDecorator;
 export function Event(type?: WatsonEvent): MethodDecorator {
   return (
     target: Object,
-    propertyKey: string,
+    propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
     const eventType = isUndefined(type) ? WatsonEvent.RAW : type;
