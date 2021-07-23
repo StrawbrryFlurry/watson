@@ -47,7 +47,7 @@ export class ApplicationConfig<DiscordClient = any> {
     this.globalExceptionHandlers.add(handler);
   }
 
-  public assingOptions(options: Partial<IWatsonApplicationOptions>) {
+  public assingOptions(options: Partial<IWatsonApplicationOptions> | undefined) {
     Object.assign(this, options);
   }
 

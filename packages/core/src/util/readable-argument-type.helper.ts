@@ -1,6 +1,6 @@
-import { CommandArgumentType } from '@watsonjs/common';
+import { CommandArgument } from '@watsonjs/common';
 
-export const ReadableArgumentTypeHelper = (type: CommandArgumentType) => {
+export const ReadableArgumentTypeHelper = (type: CommandArgument) => {
   let readableName: string;
 
   switch (type) {

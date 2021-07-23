@@ -1,4 +1,4 @@
-import { BaseRoute, WatsonEvent } from '@watsonjs/common';
+import { IBaseRoute, WatsonEvent } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { ExceptionHandler } from '..';
@@ -6,7 +6,7 @@ import { TLifecycleFunction } from '../../router';
 
 export abstract class EventProxy<
   Event extends WatsonEvent = WatsonEvent,
-  Route extends BaseRoute = BaseRoute,
+  Route extends IBaseRoute = IBaseRoute,
   ProxyType = any
 > {
   public readonly eventType: Event;
@@ -24,7 +24,7 @@ export abstract class EventProxy<
   public abstract proxy(args: ProxyType): Promise<void>;
 
   public abstract bind(
-    route: BaseRoute,
+    route: IBaseRoute,
     eventHandler: TLifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void;

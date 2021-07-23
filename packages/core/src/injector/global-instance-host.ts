@@ -1,4 +1,4 @@
-import { Type } from '@watsonjs/common';
+import { isNil, Type } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { IInstanceType } from '../interfaces';
@@ -41,21 +41,22 @@ export class GlobalInstanceHost {
     );
   }
 
-  getInstance(name: string, type?: IInstanceType) {
+  getInstance(name: string, type?: IInstanceType): IInstanceData | null {
     if (typeof type === "undefined") {
       if (this.instanceMap.has(name)) {
         return this.instanceMap.get(name)[-1];
       }
 
-      return undefined;
+      return null;
     }
 
-    if (!this.instanceMap.has(name)) {
-      return undefined;
+    
+    if (isNil(this.instanceMap.get(name))) {
+      return null;
     }
 
     const instanceData = this.instanceMap.get(name);
-    return instanceData.find((instanceType) => instanceType.type === type);
+    return instanceData.find((instanceType) => instanceType.type === type) ?? null;
   }
 
   applyInstances() {

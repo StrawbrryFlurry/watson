@@ -2,7 +2,7 @@ import { WatsonEvent } from '../../enums';
 import { ContextType } from '../pipeline';
 import { Type } from '../type.interface';
 
-export interface BaseRoute {
+export interface IBaseRoute {
   /**
    * The type of the execution context
    * Execution contexts be either `"slash"`, `event` or `"command"`

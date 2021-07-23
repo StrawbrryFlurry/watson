@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 
 import { CommandArgument } from './command-argument.interface';
 import { ICommandPrefix } from './command-prefix.interface';
-import { CommandToken } from './tokenization';
+import { ICommandToken } from './tokenization';
 
 export interface CommandArgumentsHost {
   /**
@@ -22,7 +22,7 @@ export interface CommandArgumentsHost {
   /**
    * The parsed tokens from the message content
    */
-  tokens: CommandToken[];
+  tokens: ICommandToken[];
   /**
    * Are all arguments for the arguments
    * for this host resolved.
@@ -34,7 +34,7 @@ export interface CommandArgumentsHost {
    */
   message: Message;
   /**
-   * Get the argument coresponding to the name of the parameter
+   * Get the argument corresponding to the name of the parameter
    */
   getArgumentByParam(param: string): CommandArgument;
 }

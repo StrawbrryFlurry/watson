@@ -1,15 +1,16 @@
-import { CommandPrefix, isNil } from '@watsonjs/common';
+import { ICommandPrefix, isNil } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { CommandRouteHost } from '../../router';
+import { CommandRoute } from '../../router';
+import { CommandPrefixHost } from '../../router/command/command-prefix-host';
 import { CommandTokenFactory } from '../../util';
 
-export class CommandContainer extends Map<string, CommandRouteHost> {
+export class CommandContainer extends Map<string, CommandRoute> {
   constructor(private commandTokenFactory = new CommandTokenFactory()) {
     super();
   }
 
-  public apply(route: CommandRouteHost) {
+  public apply(route: CommandRoute) {
     const token = this.commandTokenFactory.create(route);
 
     if (this.has(token)) {
@@ -27,28 +28,20 @@ export class CommandContainer extends Map<string, CommandRouteHost> {
         );
   }
 
-  public getPrefixesAsArray(): CommandPrefix[] {
-    return iterate(this)
-      .toArray()
-      .map(([_, route]) => route.commandPrefix)
-      .reduce((prefixes: CommandPrefix[], commandPrefix) => {
-        const { prefix } = commandPrefix;
-
-        if (isNil(prefix)) {
-          return prefixes;
-        }
-
-        const hasPrefix = prefixes.some((p) => p.prefix === prefix);
-
-        if (hasPrefix) {
-          return prefixes;
-        }
-
-        return [...prefixes, commandPrefix];
-      }, []);
+  public getPrefixesAsArray(): ICommandPrefix[] {
+    return iterate(this.getPrefixes()).toArray()
   }
 
-  public getCommandsMap() {
+  public getPrefixes(): Set<CommandPrefixHost> {
+    return iterate(this)
+      .map(([_, route]) => route.commandPrefix)
+      .reduce((prefixes, prefix) => {
+        prefixes.add(prefix);
+        return prefixes;
+      }, new Set());
+  }
+
+  public getCommandsMap(): Map<string, string> {
     const commands = new Map<string, string>();
 
     for (const [id, route] of this) {

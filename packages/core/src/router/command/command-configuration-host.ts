@@ -1,10 +1,10 @@
 import {
   CommandArgumentType,
   CommandConfiguration,
-  CommandPrefix,
   ICommandCooldown,
   ICommandOptions,
-  ICommandParam,
+  ICommandParameterMetadata,
+  ICommandPrefix,
   IReceiverOptions,
   isEmpty,
   isNil,
@@ -16,14 +16,14 @@ import { ApplicationConfig } from '../../application-config';
 import { CommandConfigurationException } from '../../exceptions';
 import { IMethodValue } from '../../injector';
 import { CommandPrefixHost } from './command-prefix-host';
-import { CommandRouteHost } from './command-route-host';
+import { CommandRoute } from './command-route-host';
 
 export class CommandConfigurationHost implements CommandConfiguration {
-  public prefix: CommandPrefix;
+  public prefix: ICommandPrefix;
   public name: string;
   public alias: string[];
   public caseSensitive: boolean;
-  public params: ICommandParam[] = [];
+  public params: ICommandParameterMetadata[] = [];
   public description: string;
   public tags: string[];
   public guild: boolean;
@@ -37,7 +37,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
   public hidden: boolean;
 
   constructor(
-    public host: CommandRouteHost,
+    public host: CommandRoute,
     private commandOptions: ICommandOptions,
     private receiverOptions: IReceiverOptions,
     private config: ApplicationConfig,
@@ -92,7 +92,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
     this.prefix = undefined;
   }
 
-  private applyPrefix(prefix: string | CommandPrefix, named?: boolean) {
+  private applyPrefix(prefix: string | ICommandPrefix, named?: boolean) {
     if (isString(prefix)) {
       this.prefix = new CommandPrefixHost(prefix, named);
     } else {

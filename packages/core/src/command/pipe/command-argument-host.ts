@@ -13,18 +13,18 @@ import {
 } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { CommandRouteHost } from '../../router';
+import { CommandRoute } from '../../router';
 import { CommandArgumentWrapper } from '../command-argument-wrapper';
 import { CommandParser } from '../parser';
-import { CommandTokenHost, CommandTokenizer } from '../tokenizer';
+import { CommandToken, CommandTokenizer } from '../tokenizer';
 
 export class CommandArgumentsHost implements CommandArguments {
   public message: Message;
   public arguments: CommandArgumentWrapper[] = [];
 
   public params: ICommandParam[] = [];
-  public route: CommandRouteHost;
-  public tokens: CommandTokenHost[] = [];
+  public route: CommandRoute;
+  public tokens: CommandToken[] = [];
 
   public base: string;
   public prefix: CommandPrefix;
@@ -36,7 +36,7 @@ export class CommandArgumentsHost implements CommandArguments {
   private tokenizer: CommandTokenizer;
   private parser: CommandParser;
 
-  constructor(route: CommandRouteHost) {
+  constructor(route: CommandRoute) {
     this.tokenizer = new CommandTokenizer();
     this.parser = new CommandParser(this);
     this.route = route;
@@ -324,7 +324,7 @@ export class CommandArgumentsHost implements CommandArguments {
    * current token will be skipped.
    */
   private getTokenContentUntilNextParam(fromNamed: boolean) {
-    const tokens: CommandTokenHost[] = [];
+    const tokens: CommandToken[] = [];
     this.tokenIndex = fromNamed ? this.nextTokenIndex : this.tokenIndex;
     let token = this.currentToken;
 

@@ -3,7 +3,7 @@ import { ClientUser, MessageEmbed } from 'discord.js';
 
 import { CommandPipelineHost } from '../command';
 import { ExecutionContextHost } from '../lifecycle';
-import { CommandRouteHost } from '../router';
+import { CommandRoute } from '../router';
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
 import { CUSTOM_ERROR } from './custom.error';
 import { MISSING_ARGUMENT_ERROR } from './missing-argument.error';
@@ -11,7 +11,7 @@ import { UNAUTHORIZED_ERROR } from './unauthorized.error';
 
 export interface IErrorOptions {
   color: string;
-  route: CommandRouteHost;
+  route: CommandRoute;
   clientUser: ClientUser;
 }
 

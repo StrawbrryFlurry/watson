@@ -1,4 +1,4 @@
-import { BaseRoute } from '../router';
+import { IBaseRoute } from '../router';
 import { CommandPipeline } from './command-pipeline.interface';
 import { EventPipeline } from './event-pipeline.interface';
 import { SlashPipeline } from './slash-pipeline.interface';
@@ -30,5 +30,5 @@ export interface PipelineHost {
    * which was mapped to the event
    * handler
    */
-  getRoute(): BaseRoute;
+  getRoute(): IBaseRoute;
 }

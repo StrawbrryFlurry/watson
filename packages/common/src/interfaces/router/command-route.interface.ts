@@ -1,13 +1,13 @@
 import { ICommandParameterMetadata } from '../../decorators';
 import { ICommandPrefix } from '../command';
-import { BaseRoute } from './base-route.interface';
+import { IBaseRoute } from './base-route.interface';
 import { CommandConfiguration } from './configuration';
 
 /**
  * Represents a command *route* which is mapped
  * to the event handler
  */
-export interface CommandRoute extends BaseRoute {
+export interface ICommandRoute extends IBaseRoute {
   /**
    * The name of the command
    */

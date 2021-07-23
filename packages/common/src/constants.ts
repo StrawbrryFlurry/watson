@@ -86,6 +86,6 @@ export const DESIGN_RETURN_TYPE = "design:returntype";
  */
 export const DESIGN_TYPE = "design:type";
 
-export const USER_MENTION_REGEXP = /^<@.*>$/;
-export const CHANNEL_MENTION_REGEXP = /^<#.*>$/;
-export const ROLE_MENTION_REGEXP = /^<@&.*>$/;
+export const USER_MENTION_REGEXP = /^<@\d+>$/;
+export const CHANNEL_MENTION_REGEXP = /^<#\d+>$/;
+export const ROLE_MENTION_REGEXP = /^<@&\d+>$/;

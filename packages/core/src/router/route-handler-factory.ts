@@ -1,8 +1,8 @@
 import {
-  BaseRoute,
   EventException,
   FILTER_METADATA,
   GUARD_METADATA,
+  IBaseRoute,
   IParamDecoratorMetadata,
   PARAM_METADATA,
   PIPE_METADATA,
@@ -21,7 +21,7 @@ import { ExecutionContextHost, ResponseController } from '../lifecycle';
 import { rethrowWithContext } from '../util';
 import { resolveAsyncValue } from '../util/resolve-async-value';
 import { WatsonContainer } from '../watson-container';
-import { CommandRouteHost } from './command';
+import { CommandRoute } from './command';
 import { FiltersConsumer, GuardsConsumer, PipesConsumer } from './interceptors';
 
 /**
@@ -30,7 +30,7 @@ import { FiltersConsumer, GuardsConsumer, PipesConsumer } from './interceptors';
  * when a registered event is fired.
  */
 export type TLifecycleFunction = (
-  routeRef: BaseRoute,
+  routeRef: IBaseRoute,
   eventData: Base[],
   ...args: unknown[]
 ) => Promise<void>;
@@ -47,7 +47,7 @@ export interface IRouteMetadata {
 }
 
 export type THandlerFactory = (
-  route: CommandRouteHost,
+  route: CommandRoute,
   handler: Function,
   receiver: InstanceWrapper<TReceiver>,
   moduleKey: string
@@ -67,7 +67,7 @@ export class RouteHandlerFactory {
   }
 
   public async createCommandHandler<RouteResult = any>(
-    route: CommandRouteHost,
+    route: CommandRoute,
     handler: Function,
     receiver: InstanceWrapper<TReceiver>,
     moduleKey: string
@@ -99,7 +99,7 @@ export class RouteHandlerFactory {
     });
 
     const lifeCycle: TLifecycleFunction = async (
-      route: CommandRouteHost,
+      route: CommandRoute,
       event: [Message],
       parsed: IParsedCommandData
     ) => {

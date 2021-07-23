@@ -11,7 +11,7 @@ import { Message } from 'discord.js';
 
 import { CommandArgumentWrapper } from '../command-argument-wrapper';
 import { CommandArgumentsHost } from '../pipe';
-import { CommandTokenHost, TokenizerKnownCharacters } from '../tokenizer';
+import { CommandToken, TokenizerKnownCharacters } from '../tokenizer';
 import {
   CustomMessageTypeParser,
   DateMessageTypeParser,
@@ -73,7 +73,7 @@ export class CommandParser {
      * Where `@username` would be the next token when
      * the `-username` parameter is parsed
      */
-    peek: CommandTokenHost
+    peek: CommandToken
   ) {
     const { type } = argumentRef;
 

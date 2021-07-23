@@ -1,7 +1,7 @@
 import {
   CommandConfiguration,
-  CommandRoute,
   ICommandOptions,
+  ICommandRoute,
   IParamDecoratorMetadata,
   IReceiverOptions,
   TReceiver,
@@ -12,12 +12,13 @@ import { IMethodValue, InstanceWrapper } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
 import { AbstractRoute } from '../abstract-route';
 import { CommandConfigurationHost } from './command-configuration-host';
+import { CommandPrefixHost } from './command-prefix-host';
 
 export interface IParamDecorator extends IParamDecoratorMetadata {}
 
-export class CommandRouteHost
+export class CommandRoute
   extends AbstractRoute<WatsonEvent.MESSAGE_CREATE>
-  implements CommandRoute {
+  implements ICommandRoute {
   public readonly configuration: CommandConfigurationHost;
   public readonly handler: Function;
   public readonly host: InstanceWrapper<TReceiver>;
@@ -55,7 +56,7 @@ export class CommandRouteHost
     return this.configuration.params || [];
   }
 
-  public get commandPrefix() {
+  public get commandPrefix(): CommandPrefixHost {
     return this.configuration.prefix;
   }
 

@@ -1,9 +1,9 @@
 import {
-  BaseRoute,
   COMMAND_METADATA,
   DESIGN_PARAMETERS,
   EventExceptionHandler,
   EXCEPTION_HANDLER_METADATA,
+  IBaseRoute,
   isFunction,
   RECEIVER_METADATA,
   TReceiver,
@@ -17,7 +17,7 @@ import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecyc
 import { CommandProxy } from '../lifecycle/proxies/command-proxy';
 import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND } from '../logger';
 import { WatsonContainer } from '../watson-container';
-import { CommandRouteHost } from './command';
+import { CommandRoute } from './command';
 import { EventRouteHost } from './event';
 import { RouteHandlerFactory, THandlerFactory, TLifecycleFunction } from './route-handler-factory';
 import { SlashRoute } from './slash';
@@ -29,7 +29,7 @@ export class RouteExplorer {
   private logger = new Logger("RouteExplorer");
 
   private eventRoutes = new Set<EventRouteHost<any>>();
-  private commandRoutes = new Set<CommandRouteHost>();
+  private commandRoutes = new Set<CommandRoute>();
   private slashRoutes = new Set<SlashRoute>();
 
   private eventProxies = new Map<WatsonEvent, EventProxy>();
@@ -71,7 +71,7 @@ export class RouteExplorer {
       await this.reflectRoute(
         wrapper,
         COMMAND_METADATA,
-        CommandRouteHost,
+        CommandRoute,
         CommandProxy,
         [this.container.getCommands()],
         createCommandHandler,
@@ -110,7 +110,7 @@ export class RouteExplorer {
     eventProxyType: Type<EventProxy>,
     proxyArgs: unknown[],
     handlerFactory: THandlerFactory,
-    collectionRef: Set<BaseRoute>,
+    collectionRef: Set<IBaseRoute>,
     eventFunction: (metadata: unknown) => WatsonEvent,
     logMessage: Function,
     isWsEvent?: boolean
@@ -213,7 +213,7 @@ export class RouteExplorer {
 
   private bindHandler(
     event: WatsonEvent,
-    route: BaseRoute,
+    route: IBaseRoute,
     proxyType: Type,
     handler: TLifecycleFunction,
     exceptionHandler: ExceptionHandler,

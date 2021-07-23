@@ -1,4 +1,4 @@
-import { CommandPrefix, EventExceptionHandler, isString, RuntimeException, Type } from '@watsonjs/common';
+import { EventExceptionHandler, ICommandPrefix, isString, RuntimeException, Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
 import { AbstractDiscordAdapter } from './adapters';
@@ -91,7 +91,7 @@ export class WatsonApplication {
    * Sets a global prefix for all commands.
    * It it will only be applied if none is specified for either a receiver or a command.
    */
-  public addGlobalPrefix(prefix: CommandPrefix | string) {
+  public addGlobalPrefix(prefix: ICommandPrefix | string) {
     const prefixHost = isString(prefix)
       ? new CommandPrefixHost(prefix)
       : prefix;

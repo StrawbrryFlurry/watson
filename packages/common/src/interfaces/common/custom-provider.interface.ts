@@ -1,7 +1,7 @@
 import { Type } from '../type.interface';
 
 export type IProviderFactory<T = any> = (
-  ...injectArgs: unknown[]
+  ...injectArgs: any[]
 ) => T | Promise<T>;
 
 /**

@@ -16,7 +16,7 @@ export class WatsonFactory {
 
   public static async create(
     module: Type,
-    options?: IWatsonApplicationOptions
+    options?: IWatsonApplicationOptions | undefined
   ) {
     this.logger.logMessage(CREATE_APP_CONTEXT());
     const appConfig = new ApplicationConfig();

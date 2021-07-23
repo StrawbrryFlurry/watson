@@ -1,6 +1,6 @@
 import { EmbedFieldData } from 'discord.js';
 
-import { CommandRouteHost } from '../router';
+import { CommandRoute } from '../router';
 import { ReadableArgumentTypeHelper } from './readable-argument-type.helper';
 
 /**
@@ -8,7 +8,7 @@ import { ReadableArgumentTypeHelper } from './readable-argument-type.helper';
  * data provided by the route definition
  */
 export const commandExampleUtil = (
-  routeRef: CommandRouteHost
+  routeRef: CommandRoute
 ): EmbedFieldData[] => {
   const { name, configuration } = routeRef;
   const { params, prefix } = configuration;

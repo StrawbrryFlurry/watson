@@ -1,7 +1,7 @@
 import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User, VoiceChannel } from 'discord.js';
 
 import { CommandArgumentsHost, ICommandPrefix } from '../command';
-import { CommandRoute } from '../router';
+import { ICommandRoute } from '../router';
 import { PipelineBase } from './pipeline-base.interface';
 
 export type TextBasedChannel = TextChannel | DMChannel | NewsChannel;
@@ -67,5 +67,5 @@ export interface CommandPipeline extends PipelineBase {
    * Returns the command route in which this command
    * was registered in
    */
-  getCommand(): CommandRoute;
+  getCommand(): ICommandRoute;
 }

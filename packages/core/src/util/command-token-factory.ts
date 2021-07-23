@@ -1,6 +1,6 @@
 import * as hash from 'object-hash';
 
-import { CommandRouteHost } from '../router';
+import { CommandRoute } from '../router';
 import { CommandPrefixHost } from '../router/command/command-prefix-host';
 import { genearateRandomString } from './random-string.helper';
 
@@ -11,9 +11,9 @@ interface ITokenData {
 }
 
 export class CommandTokenFactory {
-  private commandIdCache = new WeakMap<CommandRouteHost, string>();
+  private commandIdCache = new WeakMap<CommandRoute, string>();
 
-  public create(command: CommandRouteHost) {
+  public create(command: CommandRoute) {
     const id = this.getCommandId(command);
     const { prefix, name, alias } = command;
     const token: ITokenData = {
@@ -25,7 +25,7 @@ export class CommandTokenFactory {
     return hash(token) as string;
   }
 
-  public getCommandId(command: CommandRouteHost) {
+  public getCommandId(command: CommandRoute) {
     if (this.commandIdCache.has(command)) {
       return this.commandIdCache.get(command);
     }

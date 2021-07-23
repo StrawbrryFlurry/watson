@@ -5,7 +5,7 @@ import { ApplicationConfig } from './application-config';
 import { CommandContainer } from './command';
 import { UnknownModuleException } from './exceptions';
 import { GlobalInstanceHost, Module } from './injector';
-import { CommandRouteHost } from './router';
+import { CommandRoute } from './router';
 import { CommandTokenFactory, ModuleTokenFactory } from './util';
 
 /**
@@ -61,11 +61,11 @@ export class WatsonContainer {
     return token;
   }
 
-  public addCommand(command: CommandRouteHost) {
+  public addCommand(command: CommandRoute) {
     this.commands.apply(command);
   }
 
-  public hasCommand(command: CommandRouteHost) {
+  public hasCommand(command: CommandRoute) {
     const token = this.commandTokenFactory.create(command);
     return this.commands.get(token);
   }

@@ -1,8 +1,8 @@
-import { CommandToken, CommandTokenType } from '@watsonjs/common';
+import { CommandTokenKind, ICommandToken } from '@watsonjs/common';
 
-export class CommandTokenHost implements CommandToken {
+export class CommandToken implements ICommandToken {
   public rawContent: string;
-  public type: CommandTokenType;
+  public type: CommandTokenKind;
   public startIndex: number;
   public endIndex: number;
   public tokenIndex: number;

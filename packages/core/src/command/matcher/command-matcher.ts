@@ -1,19 +1,19 @@
-import { CommandPrefix, UnknownCommandException } from '@watsonjs/common';
+import { ICommandPrefix, UnknownCommandException } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { CommandRouteHost } from '../../router';
+import { CommandRoute } from '../../router';
 import { resolveAsyncValue } from '../../util/resolve-async-value';
 import { CommandContainer } from '../pipe';
 
 export interface CommandMatchResult {
   command: string;
-  prefix: CommandPrefix;
-  route: CommandRouteHost;
+  prefix: ICommandPrefix;
+  route: CommandRoute;
 }
 
 export class CommandMatcher {
   private container: CommandContainer;
-  private prefixes: CommandPrefix[];
+  private prefixes: ICommandPrefix[];
   private commands: Map<string, string>;
   /**
    * Because this class will be insanciated
@@ -30,7 +30,7 @@ export class CommandMatcher {
    * Evaluate if message caching is worth the memory cost
    *
    * @key The guild id + the message content
-   * @value The coresponding command
+   * @value The corresponding command
    */
   // private messageCache = new Map<string, CommandRouteHost>();
 

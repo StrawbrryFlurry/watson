@@ -2,13 +2,13 @@ import { isNil, WatsonEvent } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
 import { CommandContainer, CommandMatcher, IParsedCommandData } from '../../command';
-import { CommandRouteHost, TLifecycleFunction } from '../../router';
+import { CommandRoute, TLifecycleFunction } from '../../router';
 import { ExceptionHandler } from '../exception-handler';
 import { EventProxy } from './event-proxy';
 
 export class CommandProxy extends EventProxy<
   WatsonEvent.MESSAGE_CREATE,
-  CommandRouteHost
+  CommandRoute
 > {
   private readonly matcher: CommandMatcher;
 
@@ -22,7 +22,7 @@ export class CommandProxy extends EventProxy<
     event: ProxyData
   ) {
     const [message] = event;
-    let routeRef: CommandRouteHost;
+    let routeRef: CommandRoute;
     let parsed: IParsedCommandData;
 
     /**
@@ -61,7 +61,7 @@ export class CommandProxy extends EventProxy<
   }
 
   public bind(
-    route: CommandRouteHost,
+    route: CommandRoute,
     eventHandler: TLifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void {

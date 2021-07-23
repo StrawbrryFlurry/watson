@@ -1,13 +1,8 @@
-import {
-  CommandPipeline,
-  CommandPrefix,
-  ContextType,
-  TextBasedChannel,
-} from "@watsonjs/common";
-import { Guild, GuildMember, Message, User, VoiceChannel } from "discord.js";
+import { CommandPipeline, CommandPrefix, ContextType, TextBasedChannel } from '@watsonjs/common';
+import { Guild, GuildMember, Message, User, VoiceChannel } from 'discord.js';
 
-import { CommandRouteHost } from "../../router";
-import { CommandArgumentsHost } from "./command-argument-host";
+import { CommandRoute } from '../../router';
+import { CommandArgumentsHost } from './command-argument-host';
 
 export interface IParsedCommandData {
   command: string;
@@ -16,7 +11,7 @@ export interface IParsedCommandData {
 
 export class CommandPipelineHost implements CommandPipeline {
   public argumentHost: CommandArgumentsHost;
-  public route: CommandRouteHost;
+  public route: CommandRoute;
   public message: Message;
   public command: string;
   public prefix: CommandPrefix;
@@ -26,7 +21,7 @@ export class CommandPipelineHost implements CommandPipeline {
   public channel: TextBasedChannel;
   public readonly contextType: ContextType = "command";
 
-  constructor(command: string, prefix: CommandPrefix, route: CommandRouteHost) {
+  constructor(command: string, prefix: CommandPrefix, route: CommandRoute) {
     this.route = route;
     this.command = command;
     this.prefix = prefix;
@@ -78,7 +73,7 @@ export class CommandPipelineHost implements CommandPipeline {
     return this.argumentHost;
   }
 
-  getCommand(): CommandRouteHost {
+  getCommand(): CommandRoute {
     return this.route;
   }
 

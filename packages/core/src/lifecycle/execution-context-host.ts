@@ -1,9 +1,9 @@
 import {
-  BaseRoute,
   ContextType,
   DiscordAdapter,
   EventPipeline,
   ExecutionContext,
+  IBaseRoute,
   PipelineBase,
   SlashPipeline,
   Type,
@@ -87,7 +87,7 @@ export class ExecutionContextHost<
     return (this.eventData as any) as R;
   }
 
-  public getRoute(): BaseRoute {
+  public getRoute(): IBaseRoute {
     return this.route;
   }
 

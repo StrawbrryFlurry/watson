@@ -3,8 +3,8 @@ import { Observable } from 'rxjs';
 import { ExecutionContext } from '..';
 
 /**
- * Guards will check incomming commands for user permissions or other data you might
- * want to check before enabeling them to run a command. If the guard returns false, the framework
+ * Guards will check incoming commands for user permissions or other data you might
+ * want to check before enabling them to run a command. If the guard returns false, the framework
  * will throw a `UnauthorizedException`. If don't want this to happen simply throw your own exception instead of returning `false`
  *
  * @param ctx The current execution context
