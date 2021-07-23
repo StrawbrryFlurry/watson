@@ -23,10 +23,27 @@ export enum CommandTokenKind {
    * regular expression.
    */
   RoleMention,
-  /** A single or double quoted string literal  */
-  String,
+  /**
+   * Double quoted string literal - `"`
+   * Expandable strings could reference variables
+   * in future releases
+   */
+  StringExpandable,
+  /** Single quoted string literal - `'` */
+  StringLiteral,
+  /** A string string literal quoted with a single back tick - '`' */
+  StringTemplate,
   /** Any numeric literal */
   Number,
+  /**
+   * A code block starts with three back-ticks and is ended accordingly
+   * ```
+   * \`\`\`ts
+   *  const a = "Beep Boop";
+   * \`\`\`
+   * ```
+   */
+  CodeBlock,
   /** Text prefixed with a Dash or DoubleDash is treated as a parameter */
   Parameter,
   /**
@@ -79,10 +96,21 @@ export interface IRoleMentionToken extends ICommandTokenWithValue<string> {
   getRole(client: Client): Promise<Role>;
 }
 
-/** @see {@link CommandTokenKind#String} */
-export interface IStringToken extends ICommandTokenWithValue<string> {}
+/** @see {@link CommandTokenKind#CodeBlock} */
+export interface ICodeBlockToken extends ICommandTokenWithValue<string> {
+  language: string;
+}
+
+/** @see {@link CommandTokenKind#StringExpandable} */
+export interface IStringExpandableToken
+  extends ICommandTokenWithValue<string> {}
+/** @see {@link CommandTokenKind#StringLiteral} */
+export interface IStringLiteralToken extends ICommandTokenWithValue<string> {}
+/** @see {@link CommandTokenKind#StringTemplate} */
+export interface IStringTemplateToken extends ICommandTokenWithValue<string> {}
 /** @see {@link CommandTokenKind#Number} */
 export interface INumberToken extends ICommandTokenWithValue<number> {}
+
 /** @see {@link CommandTokenKind#Generic} */
 export interface IGenericToken extends IToken<CommandTokenKind> {}
 

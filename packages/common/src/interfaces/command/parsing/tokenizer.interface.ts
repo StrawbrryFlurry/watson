@@ -1,3 +1,4 @@
+import { char } from './char.interface';
 import { IParser } from './parser.interface';
 import { IToken } from './token.interface';
 
@@ -50,7 +51,7 @@ export interface ITokenizer<T> {
    *  ^ (1) idx + 1
    * ```
    */
-  getChar(): string | null;
+  getChar(): char | null;
   /**
    * Returns the next character
    * in the input string without
@@ -61,7 +62,7 @@ export interface ITokenizer<T> {
    *  ^ (1) idx + 0
    * ```
    */
-  peekChar(): string | null;
+  peekChar(): char | null;
   /**
    * Skips the next character
    * by moving the cursor by one
@@ -81,7 +82,7 @@ export interface ITokenizer<T> {
    * ^ (0) idx - 1
    * ```
    */
-  ungetChar(): string;
+  ungetChar(): char;
   /**
    * Returns the next token in the input.
    */

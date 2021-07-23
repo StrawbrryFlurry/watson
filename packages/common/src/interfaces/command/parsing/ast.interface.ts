@@ -1,4 +1,4 @@
-export enum AstType {
+export enum CommandAstType {
   /** The root node of a command AST */
   WatsonCommand,
   /** Prefix used for the command */
@@ -24,20 +24,20 @@ export interface IAstElement<T = any> {
 }
 
 export interface IAstPrefix extends IAstElement<string> {
-  type: AstType.Prefix;
+  type: CommandAstType.Prefix;
 }
 
 export interface IAstCommand extends IAstElement<string> {
-  type: AstType.Command;
+  type: CommandAstType.Command;
   /** Sub commands for this command */
   subCommand?: IAstCommand[];
 }
 
 export interface IAstArgument<T = any> extends IAstElement<T> {
-  type: AstType.Argument;
+  type: CommandAstType.Argument;
   /** The parameter this argument belongs to */
   parameter: {
-    type: AstType.Parameter;
+    type: CommandAstType.Parameter;
     /** The name specified for the parameter in the command route */
     name: string;
   };
@@ -117,7 +117,7 @@ export interface IAstArgument<T = any> extends IAstElement<T> {
  * ```
  */
 export interface ICommandAst<Arguments = any> {
-  type: AstType.WatsonCommand;
+  type: CommandAstType.WatsonCommand;
   /** Prefix used for the command */
   prefix: IAstPrefix;
   /** The main command and all subsequent sub commands used */

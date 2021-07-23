@@ -1,13 +1,16 @@
 import {
   CommandTokenKind,
   IChannelMentionToken,
+  ICodeBlockToken,
   IDashDashToken,
   IDashToken,
   IEndOfMessageToken,
   IGenericToken,
   INewLineToken,
   INumberToken,
-  IStringToken,
+  IStringExpandableToken,
+  IStringLiteralToken,
+  IStringTemplateToken,
   IToken,
   ITokenPosition,
   IUserMentionToken,
@@ -16,16 +19,25 @@ import {
 import { Channel, Client, User } from 'discord.js';
 
 export enum TokenKindIdentifier {
+  /** String identifier */
   SingleQuote = "'",
+  /** String identifier */
   DoubleQuote = '"',
+  /** String identifier */
+  BackTick = '`',
+  /* Parameter identifier */
   Dash = "-",
-  /* New lines */
+  /* New line */
   LineFeed = "\n",
+  /* New line */
   CharacterReturn = "\r",
+  /* New line */
   FormattedPageBreak = "\f",
-  /* White spaces */
+  /** White space */
   WhiteSpace = " ",
+  /** White space */
   HorizontalTab = "\t",
+  /** White space */
   VerticalTab = "\v",
 }
 
@@ -41,20 +53,22 @@ export class Token<T = any> implements IToken<T> {
   }
 }
 
+export class TokenPosition implements ITokenPosition {
+  public tokenStart: number 
+  public tokenEnd:number
+  public text: string;
+
+  constructor(text: string, tokenStart: number, tokenEnd: number) {
+    this.tokenStart = tokenStart;
+    this.tokenEnd = tokenEnd;
+    this.text = text;
+  }
+}
+
 export class DiscordToken extends Token<CommandTokenKind> {
   getId(): string {
     const [id] = this.text.match(/\d/);
     return id;
-  }
-}
-
-export class EndOfMessageToken
-  extends Token<CommandTokenKind>
-  implements IEndOfMessageToken
-{
-  constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.Eom, text, position);
-    this.text = text;
   }
 }
 
@@ -68,25 +82,6 @@ export class GenericToken
   }
 }
 
-export class NewLineToken
-  extends Token<CommandTokenKind>
-  implements INewLineToken
-{
-  constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.NewLine, text, position);
-    this.text = text;
-  }
-}
-
-export class WhiteSpaceToken
-  extends Token<CommandTokenKind>
-  implements IWhiteSpaceToken
-{
-  constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.WhiteSpace, text, position);
-    this.text = text;
-  }
-}
 
 export class NumberToken
   extends Token<CommandTokenKind>
@@ -101,33 +96,42 @@ export class NumberToken
   }
 }
 
-export class StringToken
+export class StringExpandableToken
   extends Token<CommandTokenKind>
-  implements IStringToken
+  implements IStringExpandableToken
 {
   value: string;
 
   constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.String, text, position);
-    this.text = text;
+    super(CommandTokenKind.StringExpandable, text, position);
+    this.text = `"${text}"`;
     this.value = String(text);
   }
 }
 
-export class DashToken extends Token<CommandTokenKind> implements IDashToken {
+export class StringLiteralToken
+  extends Token<CommandTokenKind>
+  implements IStringLiteralToken
+{
+  value: string;
+
   constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.Dash, text, position);
-    this.text = text;
+    super(CommandTokenKind.StringLiteral, text, position);
+    this.text = `'${text}'`;
+    this.value = String(text);
   }
 }
 
-export class DashDashToken
+export class StringTemplateToken
   extends Token<CommandTokenKind>
-  implements IDashDashToken
+  implements IStringTemplateToken
 {
+  value: string;
+
   constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.DashDash, text, position);
-    this.text = text;
+    super(CommandTokenKind.StringTemplate, text, position);
+    this.text = `\`${text}\``;;
+    this.value = String(text);
   }
 }
 
@@ -182,5 +186,71 @@ export class RoleMentionToken
   getUser(client: Client): Promise<User> {
     const id = this.getId();
     return client.users.fetch(id);
+  }
+}
+
+export class CodeBlockToken extends Token implements ICodeBlockToken {
+  public language: string;
+  public value: string;
+
+  constructor(text: string, codeblock: string, language: string, position: ITokenPosition){
+    super(CommandTokenKind.CodeBlock, text, position)
+    this.value = codeblock;
+    this.language = language;
+  }
+}
+
+/**
+ * !==========================================================================================================!
+ * The default tokenizer is not going to generate
+ * a token of this kind.
+ * 
+ * If you need to have access to these tokens in
+ * your program please implement your own tokenizer. 
+*/
+export class NewLineToken
+  extends Token<CommandTokenKind>
+  implements INewLineToken
+{
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.NewLine, text, position);
+    this.text = text;
+  }
+}
+
+export class WhiteSpaceToken
+  extends Token<CommandTokenKind>
+  implements IWhiteSpaceToken
+{
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.WhiteSpace, text, position);
+    this.text = text;
+  }
+}
+
+export class DashToken extends Token<CommandTokenKind> implements IDashToken {
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.Dash, text, position);
+    this.text = text;
+  }
+}
+
+export class DashDashToken
+  extends Token<CommandTokenKind>
+  implements IDashDashToken
+{
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.DashDash, text, position);
+    this.text = text;
+  }
+}
+
+export class EndOfMessageToken
+  extends Token<CommandTokenKind>
+  implements IEndOfMessageToken
+{
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.Eom, text, position);
+    this.text = text;
   }
 }

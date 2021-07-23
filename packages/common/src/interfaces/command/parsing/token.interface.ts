@@ -17,4 +17,8 @@ export interface ITokenPosition {
    * The exclusive end index
    */
   tokenEnd: number;
+  /**
+   * The Text this token came from.
+   */
+  text: string;
 }

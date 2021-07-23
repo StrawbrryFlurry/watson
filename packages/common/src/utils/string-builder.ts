@@ -29,8 +29,18 @@ export class StringBuilder {
   /**
    * A default value for the StringBuilder
    */
-  constructor(value: string) {
-    this._chars.push(value);
+   constructor(value?: string) {
+    if(!isString(value)) {
+      this.append(value);
+    }
+  }
+
+  /** 
+   * If the character is present in the
+   * StringBuilder
+   */
+  public has(char: string) {
+    return this._chars.indexOf(char) === -1 ? false : true;
   }
 
   /**
@@ -140,7 +150,11 @@ export class StringBuilder {
    * Same as {@link _appendAsCharArray} but
    * makes sure the value is a string
    */
-  private _saveAppendAsCharArray(value: string | number | boolean): void {
+  private _saveAppendAsCharArray(value?: string | number | boolean): void {
+    if(isNil(value)) {
+      return;
+    }
+
     let v: string = value as string;
 
     if (!isString(value)) {
