@@ -29,17 +29,17 @@ export class StringBuilder {
   /**
    * A default value for the StringBuilder
    */
-   constructor(value?: string | StringBuilder) {
-    if(value instanceof StringBuilder) {
+  constructor(value?: string | StringBuilder) {
+    if (value instanceof StringBuilder) {
       this._chars = value.chars;
     }
-    
-    if(isString(value)) {
+
+    if (isString(value)) {
       this.append(value);
     }
   }
 
-  /** 
+  /**
    * If the character is present in the
    * StringBuilder
    */
@@ -54,9 +54,10 @@ export class StringBuilder {
   public append(value: string[]): StringBuilder;
   public append(value: number): StringBuilder;
   public append(value: number[]): StringBuilder;
+  public append(value: StringBuilder): StringBuilder;
   public append(value: boolean): StringBuilder;
   public append(
-    value: string | string[] | number | number[] | boolean
+    value: string | StringBuilder | string[] | number | number[] | boolean
   ): StringBuilder {
     if (Array.isArray(value)) {
       for (let i = 0; i < value.length; i++) {
@@ -72,12 +73,9 @@ export class StringBuilder {
 
   /**
    * Inserts `value` at `index` in the StringBuilder
-  */
-  public insert(
-    value: string,
-    index: number = 0,
-  ): StringBuilder {
-    if(isNil(value)) {
+   */
+  public insert(value: string, index: number = 0): StringBuilder {
+    if (isNil(value)) {
       return;
     }
     const v = value.split("");
@@ -154,15 +152,21 @@ export class StringBuilder {
    * Same as {@link _appendAsCharArray} but
    * makes sure the value is a string
    */
-  private _saveAppendAsCharArray(value?: string | number | boolean): void {
-    if(isNil(value)) {
+  private _saveAppendAsCharArray(
+    value?: string | number | boolean | StringBuilder
+  ): void {
+    if (isNil(value)) {
       return;
     }
 
     let v: string = value as string;
 
     if (!isString(value)) {
-      v = String(value);
+      if (value instanceof StringBuilder) {
+        v = value.toString();
+      } else {
+        v = String(value);
+      }
     }
 
     this._appendAsCharArray(v);

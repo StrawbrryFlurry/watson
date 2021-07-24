@@ -40,7 +40,7 @@ export interface ITokenizer<T> {
    * Returns a token list from the input
    * string.
    */
-  tokenize(input: string): IToken<T>[];
+  tokenize(input: string, prefixLength: number, parser?: IParser<T>): IToken<T>[];
   /**
    * Returns the next character
    * in the input string and moves
@@ -72,7 +72,7 @@ export interface ITokenizer<T> {
    *  ^ (1) idx + 1
    * ```
    */
-  skipChar(): void;
+  skipChar(skipBy?: number): void;
   /**
    * Returns the current character
    * and moves the cursor back by one position

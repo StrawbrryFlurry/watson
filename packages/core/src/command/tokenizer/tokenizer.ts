@@ -1,10 +1,13 @@
-import { char, CommandTokenKind, IParser, isNil, ITokenizer, ITokenPosition, StringBuilder } from '@watsonjs/common';
+import { char, CommandTokenKind, IParser, isNil, IToken, ITokenizer, ITokenPosition, StringBuilder } from '@watsonjs/common';
 
 import {
   ChannelMentionToken,
   CodeBlockToken,
   GenericToken,
+  IdentifierToken,
   NumberToken,
+  ParameterToken,
+  PrefixToken,
   RoleMentionToken,
   StringExpandableToken,
   StringLiteralToken,
@@ -15,6 +18,11 @@ import {
   UserMentionToken,
 } from './token';
 
+/**
+ * TODO:
+ * Local StringBuilder queue to avoid
+ * creating new instances for every token - less gc
+ */
 export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   private _input: string;
   private _index: number = 0;
@@ -26,6 +34,17 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
    * token and move on to the next one
    */
   private _forceSkipToken = false;
+  /**
+   * An array of tokens that were pre parsed
+   * already while determining a token.
+   *
+   * While getting a next token this
+   * array is checked and the most recent
+   * value is popped of if there is one.
+   */
+  private _tokenCache: IToken[] = [];
+
+  private _stringBuilders: StringBuilder[] = [];
 
   constructor(parser: IParser<CommandTokenKind>) {
     this._parser = parser;
@@ -71,6 +90,7 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
 
   public tokenize(
     input: string,
+    prefixLength: number,
     parser?: IParser<CommandTokenKind>
   ): Token<CommandTokenKind>[] {
     /* Reset internal state */
@@ -84,6 +104,8 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     if (isNil(input)) {
       return [];
     }
+
+    this.newPrefixToken(this.scanPrefixToken(prefixLength));
 
     while (!this.atEom()) {
       this.nextToken();
@@ -114,8 +136,8 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     return this._input[this._index + 1];
   }
 
-  public skipChar(): void {
-    this._index += 1;
+  public skipChar(skipBy: number = 1): void {
+    this._index += skipBy;
   }
 
   public ungetChar(): char {
@@ -156,6 +178,27 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     return this.isWhiteSpace(char) || this.isNewLine(char);
   }
 
+  protected initStringBuilders() {
+    this._stringBuilders = [
+      new StringBuilder(),
+      new StringBuilder(),
+      new StringBuilder(),
+    ];
+  }
+
+  protected getStringBuilder(value: string | StringBuilder) {
+    return (
+      this._stringBuilders.pop().append(value as string) ||
+      new StringBuilder(value)
+    );
+  }
+
+  protected releaseStringBuilder(sb: StringBuilder): string {
+    const string = sb.toString();
+    sb.clear();
+    return string;
+  }
+
   protected isWhiteSpace(char: char): boolean {
     return (
       char === TokenKindIdentifier.WhiteSpace ||
@@ -185,6 +228,100 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   }
 
   /**
+   * Do the next characters represent a
+   * discord token?
+   *
+   * The first leading '<' was already consumed.
+   */
+  protected isDiscordToken(): boolean {
+    const idx = this.index;
+    const sb = new StringBuilder("<");
+    let kind: CommandTokenKind;
+
+    while (!this.atEom()) {
+      const c = this.getChar();
+      switch (c) {
+        case "0":
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9": {
+          /**
+           * No check for @ or # needed here
+           * as it's already checked in a later
+           * step if the rest of the token is valid
+           */
+          sb.append(c);
+          continue;
+        }
+        case TokenKindIdentifier.NumberSign:
+        case TokenKindIdentifier.AtSign: {
+          if (sb.has(c) || sb.length > 0) {
+            this.resync(idx);
+            return false;
+          }
+          kind =
+            c === TokenKindIdentifier.AtSign
+              ? CommandTokenKind.UserMention
+              : CommandTokenKind.ChannelMention;
+          sb.append(c);
+          continue;
+        }
+        case TokenKindIdentifier.AmpersandSign: {
+          if (
+            sb.has(c) ||
+            sb.length > 1 ||
+            !sb.has(TokenKindIdentifier.AtSign)
+          ) {
+            this.resync(idx);
+            return false;
+          }
+          kind = CommandTokenKind.RoleMention;
+          sb.append(c);
+          continue;
+        }
+        case TokenKindIdentifier.GreaterThan: {
+          if (
+            sb.has(TokenKindIdentifier.AtSign) ||
+            sb.has(TokenKindIdentifier.NumberSign)
+          ) {
+            this.resync(idx);
+            return false;
+          }
+          let token: Token;
+          sb.append(c);
+
+          switch (kind) {
+            case CommandTokenKind.UserMention:
+              token = this.newUserMentionToken(sb);
+              break;
+            case CommandTokenKind.RoleMention:
+              token = this.newRoleMentionToken(sb);
+              break;
+            case CommandTokenKind.ChannelMention:
+              token = this.newChannelMentionToken(sb);
+              break;
+          }
+
+          this.cacheToken(token);
+          return true;
+        }
+        default: {
+          this.resync(idx);
+          return false;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Are the next two characters a backtick
    */
   protected isCodeBlockPattern(): boolean {
@@ -202,23 +339,24 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     return false;
   }
 
+  protected reportError(error: string, position: ITokenPosition) {
+    // TODO: Implement optional error handling
+  }
+
   // Newable helpers
 
-  public saveToken<T extends Token<CommandTokenKind>>(token: T): T {
-    switch (token.kind) {
-      case CommandTokenKind.WhiteSpace:
-      case CommandTokenKind.NewLine:
-        break;
-      /** We don't need these tokens */
-      case CommandTokenKind.UserMention:
-      case CommandTokenKind.RoleMention:
-      case CommandTokenKind.ChannelMention: {
-        this.push(token);
-        break;
-      }
-    }
-
+  protected cacheToken<T extends Token<CommandTokenKind>>(token: T): T {
+    this._tokenCache.unshift(token);
     return token;
+  }
+
+  public saveToken<T extends Token<CommandTokenKind>>(token: T): T {
+    this._tokens.push(token);
+    return token;
+  }
+
+  protected newPrefixToken(sb: string) {
+    return this.saveToken(new PrefixToken(sb, this.currentPosition()));
   }
 
   protected newNumberToken(sb: StringBuilder) {
@@ -227,61 +365,81 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     );
   }
 
-  protected newDashToken() {}
-
-  protected newDashDashToken() {}
-
-  protected newGenericToken(sb: StringBuilder) {
+  protected newGenericToken(sb: StringBuilder): GenericToken {
     return this.saveToken(
       new GenericToken(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newStringExpandableToken(sb: StringBuilder) {
+  protected newStringExpandableToken(sb: StringBuilder): StringExpandableToken {
     return this.saveToken(
       new StringExpandableToken(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newStringLiteralToken(sb: StringBuilder) {
+  protected newStringLiteralToken(sb: StringBuilder): StringLiteralToken {
     return this.saveToken(
       new StringLiteralToken(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newStringTemplateToken(sb: StringBuilder) {
+  protected newStringTemplateToken(sb: StringBuilder): StringTemplateToken {
     return this.saveToken(
       new StringTemplateToken(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newUserMentionToken(sb: StringBuilder) {
+  protected newUserMentionToken(sb: StringBuilder): UserMentionToken {
     return this.saveToken(
       new UserMentionToken(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newRoleMentionToken(sb: StringBuilder) {
+  protected newRoleMentionToken(sb: StringBuilder): RoleMentionToken {
     return this.saveToken(
       new RoleMentionToken(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newChannelMentionToken(sb: StringBuilder) {
+  protected newChannelMentionToken(sb: StringBuilder): ChannelMentionToken {
     return this.saveToken(
       new ChannelMentionToken(sb.toString(), this.currentPosition())
     );
   }
 
+  protected newIdentifierToken(
+    value: StringBuilder,
+    text: StringBuilder
+  ): IdentifierToken {
+    return new IdentifierToken(
+      value.toString(),
+      text.toString(),
+      this.currentPosition()
+    );
+  }
+
+  protected newParameterToken(
+    value: StringBuilder,
+    text: StringBuilder,
+    doubleDashed: boolean = false
+  ): IdentifierToken {
+    return new ParameterToken(
+      value.toString(),
+      text.toString(),
+      doubleDashed,
+      this.currentPosition()
+    );
+  }
+
   protected newCodeBlockToken(
     text: StringBuilder,
-    sb: StringBuilder,
+    value: StringBuilder,
     language: StringBuilder
   ) {
     return this.saveToken(
       new CodeBlockToken(
         text.toString(),
-        sb.toString(),
+        value.toString(),
         language.toString(),
         this.currentPosition()
       )
@@ -290,11 +448,73 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
 
   // Scanners
 
+  protected scanPrefixToken(length: number): string {
+    const prefix = this._input.substr(0, length);
+    this.skipChar(length);
+    return prefix;
+  }
+
   protected scanDash() {
     const isDashDash = this.peekChar() === TokenKindIdentifier.Dash;
     if (isDashDash) {
       this.skipChar();
     }
+  }
+
+  /**
+   * @param identifier The character that marked this token
+   * as an identifier
+   */
+  protected scanIdentifier(identifier: char) {
+    const value = new StringBuilder();
+
+    if (identifier === TokenKindIdentifier.Dash) {
+      const next = this.peekChar();
+
+      if (identifier) {
+      }
+    }
+
+    while (!this.forceNewToken && !this.atEom()) {
+      const c = this.getChar();
+
+      switch (c) {
+        case TokenKindIdentifier.WhiteSpace:
+        case TokenKindIdentifier.CharacterReturn:
+        case TokenKindIdentifier.FormattedPageBreak:
+        case TokenKindIdentifier.LineFeed:
+        case TokenKindIdentifier.VerticalTab:
+        case TokenKindIdentifier.HorizontalTab: {
+          const text = new StringBuilder(value);
+          text.insert(identifier);
+        }
+      }
+    }
+  }
+
+  protected scanDiscordIdentifier(char: char) {
+    let type: CommandTokenKind;
+    let scanning = true;
+
+    while (scanning && !this.atEom()) {
+      const c = this.getChar();
+      switch (c) {
+        // Is channel mention
+        case TokenKindIdentifier.NumberSign: {
+        }
+        // Is user or channel mention
+        case TokenKindIdentifier.AtSign: {
+          if (!isNil(type)) {
+            this.resync();
+            return this.scanGenericToken(char);
+          }
+        }
+      }
+    }
+
+    return this.saveToken(
+      new Token(CommandTokenKind.ChannelMention, "", this.currentPosition())
+    );
   }
 
   /**
@@ -313,6 +533,64 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   ): boolean {
     while (!this.forceNewToken && !this.atEom()) {
       const c = this.getChar();
+
+      switch (c) {
+        // Is valid identifier
+        case "a":
+        case "b":
+        case "c":
+        case "d":
+        case "e":
+        case "f":
+        case "g":
+        case "h":
+        case "i":
+        case "j":
+        case "k":
+        case "l":
+        case "m":
+        case "n":
+        case "o":
+        case "p":
+        case "q":
+        case "r":
+        case "s":
+        case "t":
+        case "u":
+        case "v":
+        case "w":
+        case "x":
+        case "y":
+        case "z":
+        case "A":
+        case "B":
+        case "C":
+        case "D":
+        case "E":
+        case "F":
+        case "G":
+        case "H":
+        case "I":
+        case "J":
+        case "K":
+        case "L":
+        case "M":
+        case "N":
+        case "O":
+        case "P":
+        case "Q":
+        case "R":
+        case "S":
+        case "T":
+        case "U":
+        case "V":
+        case "W":
+        case "X":
+        case "Y":
+        case "Z":
+        case "_": {
+        }
+      }
 
       if (c === identifier) {
         return true;
@@ -362,8 +640,12 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     return this.newStringExpandableToken(sb);
   }
 
-  protected scanNumber(char: char) {
+  protected scanNumber(char: char, isNegative?: boolean) {
     const sb = new StringBuilder(char);
+
+    if (isNegative) {
+      sb.insert("-");
+    }
 
     while (!this.forceNewToken && !this.atEom()) {
       const c = this.getChar();
@@ -485,29 +767,24 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
 
     while (!this.forceNewToken && !this.atEom()) {
       const c = this.getChar();
-      const idx = this._index;
 
-      if (this.isStringIdentifier(c)) {
-        const isValidString = this.scanStringIdentifier(
-          c,
-          new StringBuilder(),
-          idx
-        );
-
-        if (!isValidString) {
-          sb.append(c);
-          continue;
+      switch (c) {
+        case TokenKindIdentifier.WhiteSpace:
+        case TokenKindIdentifier.CharacterReturn:
+        case TokenKindIdentifier.FormattedPageBreak:
+        case TokenKindIdentifier.LineFeed:
+        case TokenKindIdentifier.VerticalTab:
+        case TokenKindIdentifier.HorizontalTab: {
+          return this.newGenericToken(sb);
         }
-
-        // Reset to before this token
-        // and scan for a new token
-        this.resync(idx - 1);
-        return this.newGenericToken(sb);
-      }
-
-      if (this.isNumber(c)) {
-        this.resync(idx - 1);
-        return this.newGenericToken(sb);
+        case TokenKindIdentifier.LessThan: {
+          const isDiscordToken = this.isDiscordToken();
+          this.ungetChar();
+          return this.newGenericToken(sb);
+        }
+        default: {
+          sb.append(c);
+        }
       }
     }
 
@@ -515,10 +792,21 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   }
 
   public nextToken(): Token<CommandTokenKind> {
+    if (this._tokenCache.length > 0) {
+      const token = this._tokenCache[0];
+      this.resync(token.position.tokenEnd + 1);
+      return this._tokenCache[0];
+    }
+
     this._tokenStart = this._index;
     const c = this.getChar();
 
     switch (c) {
+      /**
+       *  In the future it might make sense to save these
+       * tokens to more accurately rebuild generic tokens
+       * to a string
+       */
       /** We ignore all whitespace / blank tokens */
       case TokenKindIdentifier.WhiteSpace:
       case TokenKindIdentifier.VerticalTab:
@@ -552,7 +840,27 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
 
         return this.scanStringTemplate();
       }
+      case TokenKindIdentifier.LessThan: {
+        return this.scanDiscordIdentifier(c);
+      }
       case TokenKindIdentifier.Dash: {
+        const next = this.peekChar();
+
+        // Is probably part of some text
+        // The parser will try to piece the
+        // Actual text back together
+        if (this.isWhiteSpace(next)) {
+          return this.newGenericToken(new StringBuilder(c));
+        }
+
+        if (this.isNumber(next)) {
+          const next = this.getChar();
+          return this.scanNumber(next);
+        }
+
+        if (next === TokenKindIdentifier.Dash) {
+          this.scanDash();
+        }
       }
       default:
         return this.scanGenericToken(c);

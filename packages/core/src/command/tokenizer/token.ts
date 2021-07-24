@@ -6,8 +6,11 @@ import {
   IDashToken,
   IEndOfMessageToken,
   IGenericToken,
+  IIdentifierToken,
   INewLineToken,
   INumberToken,
+  IParameterToken,
+  IPrefixToken,
   IStringExpandableToken,
   IStringLiteralToken,
   IStringTemplateToken,
@@ -24,14 +27,26 @@ export enum TokenKindIdentifier {
   /** String identifier */
   DoubleQuote = '"',
   /** String identifier */
-  BackTick = '`',
-  /* Parameter identifier */
+  BackTick = "`",
+  /** Parameter identifier */
   Dash = "-",
-  /* New line */
+  /** Discord identifier */
+  LessThan = "<",
+  /** Discord identifier */
+  GreaterThan = ">",
+  /** Discord identifier */
+  DollarSign = "$",
+  /** Discord identifier */
+  NumberSign = "#",
+  /** Discord identifier */
+  AmpersandSign = "&",
+  /** At Sign */
+  AtSign = "@",
+  /** New line */
   LineFeed = "\n",
-  /* New line */
+  /** New line */
   CharacterReturn = "\r",
-  /* New line */
+  /** New line */
   FormattedPageBreak = "\f",
   /** White space */
   WhiteSpace = " ",
@@ -54,8 +69,8 @@ export class Token<T = any> implements IToken<T> {
 }
 
 export class TokenPosition implements ITokenPosition {
-  public tokenStart: number 
-  public tokenEnd:number
+  public tokenStart: number;
+  public tokenEnd: number;
   public text: string;
 
   constructor(text: string, tokenStart: number, tokenEnd: number) {
@@ -82,6 +97,47 @@ export class GenericToken
   }
 }
 
+export class IdentifierToken
+  extends Token<CommandTokenKind>
+  implements IIdentifierToken
+{
+  public value: string;
+
+  constructor(value: string, text: string, position: ITokenPosition) {
+    super(CommandTokenKind.Identifier, text, position);
+    this.text = text;
+    this.value = value;
+  }
+}
+
+export class ParameterToken
+  extends Token<CommandTokenKind>
+  implements IParameterToken
+{
+  public value: string;
+  public doubleDashed: boolean;
+
+  constructor(
+    value: string,
+    text: string,
+    doubleDashed: boolean,
+    position: ITokenPosition
+  ) {
+    super(CommandTokenKind.Generic, text, position);
+    this.text = text;
+    this.value = value;
+    this.doubleDashed = doubleDashed;
+  }
+}
+
+export class PrefixToken
+  extends Token<CommandTokenKind>
+  implements IPrefixToken
+{
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.Prefix, text, position);
+  }
+}
 
 export class NumberToken
   extends Token<CommandTokenKind>
@@ -130,7 +186,7 @@ export class StringTemplateToken
 
   constructor(text: string, position: ITokenPosition) {
     super(CommandTokenKind.StringTemplate, text, position);
-    this.text = `\`${text}\``;;
+    this.text = `\`${text}\``;
     this.value = String(text);
   }
 }
@@ -193,8 +249,13 @@ export class CodeBlockToken extends Token implements ICodeBlockToken {
   public language: string;
   public value: string;
 
-  constructor(text: string, codeblock: string, language: string, position: ITokenPosition){
-    super(CommandTokenKind.CodeBlock, text, position)
+  constructor(
+    text: string,
+    codeblock: string,
+    language: string,
+    position: ITokenPosition
+  ) {
+    super(CommandTokenKind.CodeBlock, text, position);
     this.value = codeblock;
     this.language = language;
   }
@@ -204,10 +265,10 @@ export class CodeBlockToken extends Token implements ICodeBlockToken {
  * !==========================================================================================================!
  * The default tokenizer is not going to generate
  * a token of this kind.
- * 
+ *
  * If you need to have access to these tokens in
- * your program please implement your own tokenizer. 
-*/
+ * your program please implement your own tokenizer.
+ */
 export class NewLineToken
   extends Token<CommandTokenKind>
   implements INewLineToken
