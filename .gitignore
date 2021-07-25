@@ -16,6 +16,7 @@ packages/**/*.js
 
 # build folder
 dist
+tmp
 
 # build file
 *.tsbuildinfo
