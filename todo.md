@@ -93,6 +93,10 @@ class SomeReceiver {
 }
 ```
 
+## Prefixes should be injectables / providers
+
+Custom command prefixes need to be injectables constructed by the framework in oder to access other framework providers.
+
 # Scope - Beta@Next
 
 ## Decouple the framework from DiscordJs
