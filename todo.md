@@ -20,7 +20,7 @@ Scoped - Instantiated for every scope if present, otherwise the module is used a
 
 ## Migrate parameter injectables to services
 
-Migrate services like the `ComponentFactory` or `inquirables` as well as to transient providers that can be injected to a receiver / service instead of the method.
+Migrate services like the `ComponentFactory` or `inquirables` as well as to transient providers that öcan be injected to a receiver / service instead of the method.
 
 ## Re-implement the Command decorator
 
@@ -40,6 +40,12 @@ class SomeReceiver {
   }
 }
 ```
+
+## Rate limiting
+
+## Interceptors
+
+See https://docs.nestjs.com/interceptors#interceptors
 
 ## Improve DI token management
 
@@ -106,3 +112,11 @@ Support Discord slash commands.
 ## Support sharding
 
 Support sharding - Maybe across multiple servers?
+
+## Web Dashboard
+
+Integrated web API & boilerplate to manage the bot instance and configuration.
+
+## Database / TypeORM module
+
+## Support for external modules
