@@ -4,6 +4,7 @@ import {
   GUARD_METADATA,
   IBaseRoute,
   IParamDecoratorMetadata,
+  isNil,
   PARAM_METADATA,
   PIPE_METADATA,
   TFiltersMetadata,
@@ -11,7 +12,8 @@ import {
   TPipesMetadata,
   TReceiver,
 } from '@watsonjs/common';
-import { Base, Message } from 'discord.js';
+import dayjs = require('dayjs');
+import { Base, Guild, Message, User } from 'discord.js';
 
 import { RouteParamsFactory } from '.';
 import { AbstractDiscordAdapter } from '../adapters';
@@ -61,6 +63,20 @@ export class RouteHandlerFactory {
   private filtersConsumer = new FiltersConsumer(this.container);
 
   private adapterRef: AbstractDiscordAdapter;
+
+  /**
+   * {
+   *  [Route]: {
+   *    [GuildId]: {
+   *      [UserId]: Date
+   *    }
+   *  }
+   * }
+   */
+  private commandRateLimit = new Map<
+    CommandRoute,
+    Map<string, Map<string, Date>>
+  >();
 
   constructor(private container: WatsonContainer) {
     this.adapterRef = this.container.getClientAdapter();
@@ -129,6 +145,10 @@ export class RouteHandlerFactory {
         await applyGuards(pipeline);
         await applyPipes(pipeline);
 
+        // Throws rate limit exception if
+        // the check doesn't pass
+        this.checkRateLimit(pipeline);
+
         const params = await paramsFactory(context);
         const resolvable = handler.apply(receiver.instance, params);
         const result = (await resolveAsyncValue(resolvable)) as RouteResult;
@@ -144,6 +164,59 @@ export class RouteHandlerFactory {
     };
 
     return lifeCycle;
+  }
+
+  private checkRateLimit(pipeline: CommandPipelineHost) {
+    const { user, route } = pipeline;
+    const { configuration } = route;
+    const guild = pipeline.getGuild();
+
+    if (!configuration.cooldown) {
+      return true;
+    }
+
+    const { timeout } = configuration.cooldown;
+    const existingRateLimit = this.getRateLimit(route, user, guild);
+
+    if (isNil(existingRateLimit)) {
+      return true;
+    }
+
+    const secondsPassed = dayjs(existingRateLimit).diff(new Date(), "seconds");
+
+    if (secondsPassed < timeout) {
+      throw new RateLimitException();
+    }
+
+    this.addRateLimit(route, user, guild);
+    return true;
+  }
+
+  private addRateLimit(route: CommandRoute, user: User, guild: Guild): void {
+    const guildMap = this.commandRateLimit.get(route);
+    const userId = user.id;
+    const guildId = guild.id;
+
+    if (isNil(guildMap)) {
+      this.commandRateLimit.set(route, new Map());
+      return this.addRateLimit(route, user, guild);
+    }
+
+    const userMap = guildMap.get(guildId);
+
+    if (isNil(userMap)) {
+      guildMap.set(guildId, new Map());
+      return this.addRateLimit(route, user, guild);
+    }
+
+    userMap.set(userId, new Date());
+  }
+
+  private getRateLimit(route: CommandRoute, user: User, guild: Guild) {
+    const userId = user.id;
+    const guildId = guild.id;
+
+    return this.commandRateLimit.get(route)?.get(guildId)?.get(userId);
   }
 
   /**
