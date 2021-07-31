@@ -7,11 +7,11 @@ import {
   OnModuleInit,
   TProvider,
   TReceiver,
-} from '@watsonjs/common';
-import iterate from 'iterare';
+} from "@watsonjs/common";
+import iterate from "iterare";
 
-import { InstanceWrapper, Module } from '../../injector';
-import { WatsonContainer } from '../../watson-container';
+import { InstanceWrapper, Module } from "../../injector";
+import { WatsonContainer } from "../../watson-container";
 
 type ComponentWithLifecycleFunction = { [key: string]: Function };
 

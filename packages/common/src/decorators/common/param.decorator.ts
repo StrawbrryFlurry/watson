@@ -1,5 +1,5 @@
-import { PARAM_METADATA } from '../../constants';
-import { mergeDefaults } from '../../utils';
+import { PARAM_METADATA } from "../../constants";
+import { mergeDefaults } from "../../utils";
 
 export interface ICommandParameterMetadata<T = any> {
   /**
@@ -8,7 +8,7 @@ export interface ICommandParameterMetadata<T = any> {
    */
   name?: string;
   /**
-   * Lable that describes the parameter
+   * Label that describes the parameter
    */
   label?: string;
   /**
@@ -59,7 +59,11 @@ export function Param(options?: ICommandParameterMetadata): ParameterDecorator;
 export function Param(
   options: ICommandParameterMetadata = {}
 ): ParameterDecorator {
-  return (target: object, propertyKey: string | symbol, parameterIndex: number) => {
+  return (
+    target: object,
+    propertyKey: string | symbol,
+    parameterIndex: number
+  ) => {
     const metadata = mergeDefaults(options, {
       name: propertyKey,
       hungry: false,

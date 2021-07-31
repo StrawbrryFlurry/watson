@@ -20,7 +20,7 @@ Scoped - Instantiated for every scope if present, otherwise the module is used a
 
 ## Migrate parameter injectables to services
 
-Migrate services like the `ComponentFactory` or `inquirables` as well as to transient providers that öcan be injected to a receiver / service instead of the method.
+Migrate services like the `ComponentFactory` or `inquirables` as well as to transient providers that can be injected to a receiver / service instead of the method.
 
 ## Re-implement the Command decorator
 

@@ -1,21 +1,12 @@
 import {
   Command,
-  CommandArgumentType,
-  CommandPrefix,
-  InjectParam,
   OnApplicationShutdown,
   OnModuleInit,
   Receiver,
-} from '@watsonjs/common';
-import { User } from 'discord.js';
+  UserArgument,
+} from "@watsonjs/common";
 
-import { AppService } from './app.service';
-
-class p implements CommandPrefix {
-  async getPrefix() {
-    return "a";
-  }
-}
+import { AppService } from "./app.service";
 
 @Receiver()
 export class AppReceiver implements OnModuleInit, OnApplicationShutdown {
@@ -26,24 +17,9 @@ export class AppReceiver implements OnModuleInit, OnApplicationShutdown {
   }
 
   onApplicationShutdown() {
-    console.log("Down");
+    console.log("Byee!");
   }
 
-  @Command("ping", {
-    params: [{ name: "user", type: CommandArgumentType.USER }],
-  })
-  ping(@InjectParam("user") user: User) {}
-
   @Command("ping")
-  ping(
-    @Param({
-      /*  */
-    })
-    user: UserArgument
-  ) {}
-
-  @Command("s", {
-    prefix: new p(),
-  })
-  stuff() {}
+  ping(user: UserArgument) {}
 }

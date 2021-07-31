@@ -1,7 +1,7 @@
-import { ConfigService } from '@watsonjs/common';
-import { WatsonFactory } from '@watsonjs/core';
+import { ConfigService } from "@watsonjs/common";
+import { WatsonFactory } from "@watsonjs/core";
 
-import { ApplicationModule } from './app.module';
+import { ApplicationModule } from "./app.module";
 
 const bootstrap = async () => {
   const app = await WatsonFactory.create(ApplicationModule);

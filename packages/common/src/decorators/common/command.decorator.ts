@@ -1,8 +1,8 @@
-import { PermissionResolvable } from 'discord.js';
+import { PermissionResolvable } from "discord.js";
 
-import { COMMAND_METADATA } from '../../constants';
-import { ICommandPrefix } from '../../interfaces';
-import { isNil, isObject, isString } from '../../utils/shared.utils';
+import { COMMAND_METADATA } from "../../constants";
+import { ICommandPrefix } from "../../interfaces";
+import { isNil, isObject, isString } from "../../utils/shared.utils";
 
 export interface ICommandCooldown {
   /**
@@ -41,16 +41,6 @@ export interface ICommandOptions {
    * @default none
    */
   tags?: string[];
-  /**
-   * Makes the channel available in guilds.
-   * @default true
-   */
-  guild?: boolean;
-  /**
-   * Makes the channel available in dms
-   * @default false
-   */
-  dm?: boolean;
   /**
    * The permissions required by the client to run this command
    * @default none

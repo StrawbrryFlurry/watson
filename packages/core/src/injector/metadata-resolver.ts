@@ -12,10 +12,12 @@ import {
   PIPE_METADATA,
   PREFIX_METADATA,
   Type,
-} from '@watsonjs/common';
+} from "@watsonjs/common";
 
-import { CircularDependencyException } from '../exceptions';
-import { InvalidDynamicModuleException } from '../exceptions/invalid-dynamic-module.exception';
+import {
+  CircularDependencyException,
+  InvalidDynamicModuleException,
+} from "../exceptions";
 import {
   ADD_MODULE,
   BIND_GLOBAL_MODULES,
@@ -23,8 +25,8 @@ import {
   Logger,
   REFLECT_MODULE_COMPONENTS,
   REFLECT_MODULE_IMPORTS,
-} from '../logger';
-import { WatsonContainer } from '../watson-container';
+} from "../logger";
+import { WatsonContainer } from "../watson-container";
 
 export interface IMethodDescriptors {
   [methodName: string]: PropertyDescriptor;
@@ -72,12 +74,8 @@ export class MetadataResolver {
     const modules = this.container.getModules();
 
     for (const [token, { metatype }] of modules) {
-      const {
-        imports,
-        exports,
-        providers,
-        receivers,
-      } = await this.reflectModuleMetadata(metatype);
+      const { imports, exports, providers, receivers } =
+        await this.reflectModuleMetadata(metatype);
 
       this.reflectProviders(token, providers);
       this.reflectReceivers(token, receivers);
