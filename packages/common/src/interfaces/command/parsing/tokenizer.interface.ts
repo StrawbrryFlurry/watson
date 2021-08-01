@@ -35,12 +35,16 @@ export interface ITokenizer<T> {
    */
   get tokens(): IToken<T>[];
   /** Instance of the token parser */
-  get parser(): IParser<T>;
+  get parser(): IParser;
   /**
    * Returns a token list from the input
    * string.
    */
-  tokenize(input: string, prefixLength: number, parser?: IParser<T>): IToken<T>[];
+  tokenize<P>(
+    input: string,
+    prefixLength: number,
+    parser?: IParser<P>
+  ): IToken<T>[];
   /**
    * Returns the next character
    * in the input string and moves

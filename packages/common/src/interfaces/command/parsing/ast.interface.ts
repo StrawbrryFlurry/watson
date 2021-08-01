@@ -1,3 +1,5 @@
+import { ITokenPosition } from './token.interface';
+
 export enum CommandAstType {
   /** The root node of a command AST */
   WatsonCommand,
@@ -13,10 +15,7 @@ export enum CommandAstType {
 }
 
 export interface IAstElement<T = any> {
-  /** Start index of this element in the input string */
-  start: number;
-  /** End index of this element in the input string */
-  end: number;
+  position: ITokenPosition;
   /** Raw text that this element was parsed from */
   text: string;
   /** The value that this element holds */

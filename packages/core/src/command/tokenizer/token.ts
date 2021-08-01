@@ -4,6 +4,7 @@ import {
   ICodeBlockToken,
   IDashDashToken,
   IDashToken,
+  IEmoteToken,
   IEndOfMessageToken,
   IGenericToken,
   IIdentifierToken,
@@ -11,6 +12,7 @@ import {
   INumberToken,
   IParameterToken,
   IPrefixToken,
+  isNil,
   IStringExpandableToken,
   IStringLiteralToken,
   IStringTemplateToken,
@@ -19,29 +21,9 @@ import {
   IUserMentionToken,
   IWhiteSpaceToken,
 } from '@watsonjs/common';
-import { Channel, Client, User } from 'discord.js';
+import { Channel, Client, Emoji, User } from 'discord.js';
 
 export enum TokenKindIdentifier {
-  /** String identifier */
-  SingleQuote = "'",
-  /** String identifier */
-  DoubleQuote = '"',
-  /** String identifier */
-  BackTick = "`",
-  /** Parameter identifier */
-  Dash = "-",
-  /** Discord identifier */
-  LessThan = "<",
-  /** Discord identifier */
-  GreaterThan = ">",
-  /** Discord identifier */
-  DollarSign = "$",
-  /** Discord identifier */
-  NumberSign = "#",
-  /** Discord identifier */
-  AmpersandSign = "&",
-  /** At Sign */
-  AtSign = "@",
   /** New line */
   LineFeed = "\n",
   /** New line */
@@ -117,12 +99,8 @@ export class ParameterToken
   public value: string;
   public doubleDashed: boolean;
 
-  constructor(
-    value: string,
-    text: string,
-    doubleDashed: boolean,
-    position: ITokenPosition
-  ) {
+  constructor(value: string, doubleDashed: boolean, position: ITokenPosition) {
+    const text = `-${doubleDashed ? "-" : ""}${value}`;
     super(CommandTokenKind.Generic, text, position);
     this.text = text;
     this.value = value;
@@ -242,6 +220,31 @@ export class RoleMentionToken
   getUser(client: Client): Promise<User> {
     const id = this.getId();
     return client.users.fetch(id);
+  }
+}
+
+export class EmoteToken extends DiscordToken implements IEmoteToken {
+  value: string;
+
+  constructor(text: string, position: ITokenPosition) {
+    super(CommandTokenKind.Emote, text, position);
+    this.text = text;
+    this.value = this.getId();
+  }
+
+  getId(): string {
+    if (!isNil(this.value)) {
+      return this.value;
+    }
+
+    const withoutName = this.text.replace(/\<\:.*\:/, "");
+    const [id] = withoutName.match(/\d+/);
+    return id;
+  }
+
+  getEmote(client: Client): Emoji {
+    const id = this.getId();
+    return client.emojis.resolve(id);
   }
 }
 

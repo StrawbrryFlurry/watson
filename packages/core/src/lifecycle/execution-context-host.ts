@@ -20,7 +20,8 @@ export class ExecutionContextHost<
     | EventPipeline
     | SlashPipeline = PipelineBase,
   EventData extends DjsBaseClass[] = any
-> implements ExecutionContext {
+> implements ExecutionContext
+{
   public handler: Function;
   public next: Function;
   public route: AbstractRoute;
@@ -84,7 +85,7 @@ export class ExecutionContextHost<
   }
 
   public getEvent<T, R = T extends Array<any> ? T : [T]>(): R {
-    return (this.eventData as any) as R;
+    return this.eventData as any as R;
   }
 
   public getRoute(): IBaseRoute {

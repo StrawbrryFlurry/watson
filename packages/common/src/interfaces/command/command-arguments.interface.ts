@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 
 import { CommandArgument } from './command-argument.interface';
 import { ICommandPrefix } from './command-prefix.interface';
-import { ICommandToken } from './tokenization';
+import { ICommandToken } from './parsing';
 
 export interface CommandArgumentsHost {
   /**

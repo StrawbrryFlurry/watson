@@ -1,4 +1,4 @@
-import { Channel, Client, Role, User } from 'discord.js';
+import { Channel, Client, Emoji, Role, User } from 'discord.js';
 
 import { IToken } from './token.interface';
 
@@ -23,6 +23,11 @@ export enum CommandTokenKind {
    * regular expression.
    */
   RoleMention,
+  /**
+   * An emote is formatted as follows: `<:EMOTE_NAME:EMOTE_ID`
+   * <:ayy:305818615712579584>
+   */
+  Emote,
   /**
    * Double quoted string literal - `"`
    * Expandable strings could reference variables
@@ -118,6 +123,11 @@ export interface IChannelMentionToken extends ITokenWithValue<string> {
 export interface IRoleMentionToken extends ITokenWithValue<string> {
   getId(): string;
   getRole(client: Client): Promise<Role>;
+}
+/** @see {@link CommandTokenKind#Emote} */
+export interface IEmoteToken extends ITokenWithValue<string> {
+  getId(): string;
+  getEmote(client: Client): Emoji;
 }
 
 /** @see {@link CommandTokenKind#CodeBlock} */

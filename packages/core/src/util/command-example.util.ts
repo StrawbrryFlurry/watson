@@ -1,7 +1,6 @@
 import { EmbedFieldData } from 'discord.js';
 
 import { CommandRoute } from '../router';
-import { ReadableArgumentTypeHelper } from './readable-argument-type.helper';
 
 /**
  * Generates an example of a command by using the
@@ -27,11 +26,11 @@ export const commandExampleUtil = (
   ];
 
   for (const param of params) {
-    const { name, type, optional } = param;
+    const { name, optional } = param;
 
     messageEmbedFields.push({
       name: `-${name}`,
-      value: `Type: ${ReadableArgumentTypeHelper(type)} Optional?: ${optional}`,
+      value: `Type: Optional?: ${optional}`,
     });
   }
 
