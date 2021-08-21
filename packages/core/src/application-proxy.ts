@@ -5,7 +5,7 @@ import { AbstractDiscordAdapter } from './adapters';
 import { EventProxy } from './lifecycle/proxies';
 import { RouteExplorer } from './router';
 
-export interface IApplicationProxyOptions {
+export interface ApplicationProxyOptions {
   acknowledgementEmote?: Snowflake | string;
 }
 

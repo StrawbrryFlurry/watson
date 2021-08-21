@@ -1,1 +1,1 @@
-export interface IListeningOptions {}
+export interface ListeningOptions {}

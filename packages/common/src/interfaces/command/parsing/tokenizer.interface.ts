@@ -1,6 +1,7 @@
+import { Parser } from '@interfaces/command';
+
 import { char } from './char.interface';
-import { IParser } from './parser.interface';
-import { IToken } from './token.interface';
+import { Token } from './token.interface';
 
 /**
  * The tokenizer is responsible to parse
@@ -10,7 +11,7 @@ import { IToken } from './token.interface';
  * for a route as well as pre fetch information from
  * the discord client like user information in mentions.
  */
-export interface ITokenizer<T> {
+export interface Tokenizer<T> {
   /**
    * The current cursor position of the
    * tokenizer.
@@ -33,9 +34,9 @@ export interface ITokenizer<T> {
   /**
    * All tokens processed by the tokenizer
    */
-  get tokens(): IToken<T>[];
+  get tokens(): Token<T>[];
   /** Instance of the token parser */
-  get parser(): IParser;
+  get parser(): Parser;
   /**
    * Returns a token list from the input
    * string.
@@ -43,8 +44,8 @@ export interface ITokenizer<T> {
   tokenize<P>(
     input: string,
     prefixLength: number,
-    parser?: IParser<P>
-  ): IToken<T>[];
+    parser?: Parser<P>
+  ): Token<T>[];
   /**
    * Returns the next character
    * in the input string and moves
@@ -90,7 +91,7 @@ export interface ITokenizer<T> {
   /**
    * Returns the next token in the input.
    */
-  nextToken(): IToken<T>;
+  nextToken(): Token<T>;
   /**
    * Is the index at the end of the message
    */
@@ -98,7 +99,7 @@ export interface ITokenizer<T> {
   /**
    * Saves a token to the tokenizer
    */
-  saveToken<Token extends IToken<T>>(token: Token): void;
+  saveToken<T extends Token<T>>(token: Token): void;
   /** ScanTokenKind */
   /* Implement scanning method for a given token kind which handles that specific kind */
 }

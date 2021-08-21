@@ -1,14 +1,14 @@
 import { CustomProvider, DynamicModule, Type } from '../../interfaces';
 import { isUndefined } from '../../utils';
 
-export interface IModuleOptions {
+export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
   receivers?: Type[];
   providers?: (Type | CustomProvider)[];
   exports?: (Type | CustomProvider)[];
 }
 
-export function Module(moduleOptions?: IModuleOptions): ClassDecorator {
+export function Module(moduleOptions?: ModuleOptions): ClassDecorator {
   const options = isUndefined(moduleOptions)
     ? {
         imports: undefined,

@@ -1,8 +1,8 @@
 import { isNil, WatsonEvent } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { CommandContainer, CommandMatcher, IParsedCommandData } from '../../command';
-import { CommandRoute, TLifecycleFunction } from '../../router';
+import { CommandContainer, CommandMatcher, ParsedCommandData } from '../../command';
+import { CommandRoute, LifecycleFunction } from '../../router';
 import { ExceptionHandler } from '../exception-handler';
 import { EventProxy } from './event-proxy';
 
@@ -23,7 +23,7 @@ export class CommandProxy extends EventProxy<
   ) {
     const [message] = event;
     let routeRef: CommandRoute;
-    let parsed: IParsedCommandData;
+    let parsed: ParsedCommandData;
 
     /**
      * Matches the message against all mapped
@@ -62,7 +62,7 @@ export class CommandProxy extends EventProxy<
 
   public bind(
     route: CommandRoute,
-    eventHandler: TLifecycleFunction,
+    eventHandler: LifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void {
     this.handlers.set(route, [eventHandler, exceptionHandler]);

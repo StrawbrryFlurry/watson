@@ -4,7 +4,7 @@ import { IWatsonApplicationOptions } from '@watsonjs/core';
 import { TestingModuleBuilder } from './testing-module-builder';
 import { TestingModule } from './testing.module';
 
-export interface ITestEnvironmentOptions {
+export interface TestEnvironmentOptions {
   /**
    * The auth token used for the bot.
    */
@@ -26,9 +26,9 @@ export interface ITestEnvironmentOptions {
 }
 
 export class TestEnvironment {
-  private readonly environment: ITestEnvironmentOptions;
+  private readonly environment: TestEnvironmentOptions;
 
-  constructor(environment: ITestEnvironmentOptions) {
+  constructor(environment: TestEnvironmentOptions) {
     this.environment = environment;
   }
 

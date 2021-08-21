@@ -8,17 +8,18 @@ import {
   WatsonEvent,
 } from '@watsonjs/common';
 
-import { IMethodValue, InstanceWrapper } from '../../injector';
+import { InstanceWrapper, MethodValue } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
 import { AbstractRoute } from '../abstract-route';
 import { CommandConfigurationHost } from './command-configuration-host';
 import { CommandPrefixHost } from './command-prefix-host';
 
-export interface IParamDecorator extends IParamDecoratorMetadata {}
+export interface ParamDecorator extends IParamDecoratorMetadata {}
 
 export class CommandRoute
   extends AbstractRoute<WatsonEvent.MESSAGE_CREATE>
-  implements ICommandRoute {
+  implements ICommandRoute
+{
   public readonly configuration: CommandConfigurationHost;
   public readonly handler: Function;
   public readonly host: InstanceWrapper<TReceiver>;
@@ -27,7 +28,7 @@ export class CommandRoute
     commandOptions: ICommandOptions,
     receiverOptions: IReceiverOptions,
     receiver: InstanceWrapper<TReceiver>,
-    handler: IMethodValue,
+    handler: MethodValue,
     container: WatsonContainer
   ) {
     super("command", WatsonEvent.MESSAGE_CREATE, container);

@@ -9,7 +9,7 @@ import { CUSTOM_ERROR } from './custom.error';
 import { MISSING_ARGUMENT_ERROR } from './missing-argument.error';
 import { UNAUTHORIZED_ERROR } from './unauthorized.error';
 
-export interface IErrorOptions {
+export interface ErrorOptions {
   color: string;
   route: CommandRoute;
   clientUser: ClientUser;

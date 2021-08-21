@@ -1,14 +1,14 @@
-export interface IToken<T = any> {
+export interface Token<T = any> {
   text: string;
   kind: T;
-  position: ITokenPosition;
+  position: TokenPosition;
 }
 
 /**
  * The position of the token substring
  * in the input.
  */
-export interface ITokenPosition {
+export interface TokenPosition {
   /**
    * The zero based starting index
    */

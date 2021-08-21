@@ -1,7 +1,7 @@
 import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User, VoiceChannel } from 'discord.js';
 
-import { CommandArgumentsHost, ICommandPrefix } from '../command';
-import { ICommandRoute } from '../router';
+import { CommandAst, Prefix } from '../command';
+import { CommandRoute } from '../router';
 import { PipelineBase } from './pipeline-base.interface';
 
 export type TextBasedChannel = TextChannel | DMChannel | NewsChannel;
@@ -14,7 +14,7 @@ export interface CommandPipeline extends PipelineBase {
   /**
    * The prefix used by the user
    */
-  prefix: ICommandPrefix;
+  prefix: Prefix;
   /**
    * Whether the message is from a guild or not
    */
@@ -33,10 +33,9 @@ export interface CommandPipeline extends PipelineBase {
    */
   channel: TextBasedChannel;
   /**
-   * Returns the `CommandArgumentsHost` which
-   * holds arguments collected for this context
+   * The parsed AST of this command
    */
-  getArguments(): CommandArgumentsHost;
+  ast?: CommandAst;
   /**
    * Returns the message which used the command
    */
@@ -67,5 +66,5 @@ export interface CommandPipeline extends PipelineBase {
    * Returns the command route in which this command
    * was registered in
    */
-  getCommand(): ICommandRoute;
+  getCommand(): CommandRoute;
 }

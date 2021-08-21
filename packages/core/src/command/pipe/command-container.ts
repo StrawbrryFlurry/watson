@@ -1,4 +1,4 @@
-import { ICommandPrefix, isNil } from '@watsonjs/common';
+import { IPrefix, isNil } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { CommandRoute } from '../../router';
@@ -28,8 +28,8 @@ export class CommandContainer extends Map<string, CommandRoute> {
         );
   }
 
-  public getPrefixesAsArray(): ICommandPrefix[] {
-    return iterate(this.getPrefixes()).toArray()
+  public getPrefixesAsArray(): IPrefix[] {
+    return iterate(this.getPrefixes()).toArray();
   }
 
   public getPrefixes(): Set<CommandPrefixHost> {

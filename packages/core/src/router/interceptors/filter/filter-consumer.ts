@@ -5,7 +5,7 @@ import { AbstractDiscordAdapter } from '../../../adapters';
 import { ExecutionContextHost } from '../../../lifecycle';
 import { resolveAsyncValue } from '../../../util/resolve-async-value';
 import { WatsonContainer } from '../../../watson-container';
-import { IContextCreatorArguments } from '../context-creator-arguments.interface';
+import { ContextCreatorArguments } from '../context-creator-arguments.interface';
 import { InterceptorsConsumer } from '../interceptors-consumer';
 
 export class FiltersConsumer extends InterceptorsConsumer {
@@ -22,7 +22,7 @@ export class FiltersConsumer extends InterceptorsConsumer {
     receiver,
     metadata,
     moduleKey,
-  }: IContextCreatorArguments<TFiltersMetadata>) {
+  }: ContextCreatorArguments<TFiltersMetadata>) {
     const filters = metadata.map((filter) =>
       this.getInstance<TFiltersMetadata, PassThrough>(
         "filter",

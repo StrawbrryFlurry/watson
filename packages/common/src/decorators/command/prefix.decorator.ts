@@ -1,11 +1,11 @@
 import { PREFIX_METADATA } from '../../constants';
-import { ICommandPrefix } from '../../interfaces';
+import { Prefix } from '../../interfaces';
 import { isNil } from '../../utils';
 
 /**
  * Assings a custom prefix class to the decorated command.
  */
-export function UsePrefix(prefix: ICommandPrefix): MethodDecorator {
+export function UsePrefix(prefix: Prefix): MethodDecorator {
   return (
     target: Object,
     propertyKey: string | symbol,

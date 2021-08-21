@@ -5,7 +5,7 @@ import { AbstractDiscordAdapter } from '../../../adapters';
 import { ExecutionContextHost } from '../../../lifecycle';
 import { resolveAsyncValue } from '../../../util/resolve-async-value';
 import { WatsonContainer } from '../../../watson-container';
-import { IContextCreatorArguments } from '../context-creator-arguments.interface';
+import { ContextCreatorArguments } from '../context-creator-arguments.interface';
 import { InterceptorsConsumer } from '../interceptors-consumer';
 
 export class GuardsConsumer extends InterceptorsConsumer {
@@ -22,7 +22,7 @@ export class GuardsConsumer extends InterceptorsConsumer {
     receiver,
     metadata,
     moduleKey,
-  }: IContextCreatorArguments<TGuardsMetadata>) {
+  }: ContextCreatorArguments<TGuardsMetadata>) {
     const guards = metadata.map((guard) =>
       this.getInstance("guard", guard, "canActivate", moduleKey, receiver)
     );

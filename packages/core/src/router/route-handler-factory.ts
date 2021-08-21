@@ -15,7 +15,7 @@ import { Base, Message } from 'discord.js';
 
 import { RouteParamsFactory } from '.';
 import { AbstractDiscordAdapter } from '../adapters';
-import { CommandPipelineHost, IParsedCommandData } from '../command';
+import { CommandPipelineHost, ParsedCommandData } from '../command';
 import { InstanceWrapper } from '../injector';
 import { ExecutionContextHost, ResponseController } from '../lifecycle';
 import { rethrowWithContext } from '../util';
@@ -29,13 +29,13 @@ import { FiltersConsumer, GuardsConsumer, PipesConsumer } from './interceptors';
  * the event proxy to invoke the watson lifecycle
  * when a registered event is fired.
  */
-export type TLifecycleFunction = (
+export type LifecycleFunction = (
   routeRef: IBaseRoute,
   eventData: Base[],
   ...args: unknown[]
 ) => Promise<void>;
 
-export interface IRouteMetadata {
+export interface RouteMetadata {
   pipes: TPipesMetadata[];
   guards: TGuardsMetadata[];
   filters: TFiltersMetadata[];
@@ -46,12 +46,12 @@ export interface IRouteMetadata {
   paramsFactory: (ctx: ExecutionContextHost) => Promise<unknown[]>;
 }
 
-export type THandlerFactory = (
+export type HandlerFactory = (
   route: CommandRoute,
   handler: Function,
   receiver: InstanceWrapper<TReceiver>,
   moduleKey: string
-) => Promise<TLifecycleFunction>;
+) => Promise<LifecycleFunction>;
 
 export class RouteHandlerFactory {
   private paramsFactory = new RouteParamsFactory();
@@ -71,7 +71,7 @@ export class RouteHandlerFactory {
     handler: Function,
     receiver: InstanceWrapper<TReceiver>,
     moduleKey: string
-  ): Promise<TLifecycleFunction> {
+  ): Promise<LifecycleFunction> {
     const { filters, guards, pipes, paramsFactory } = this.getMetadata(
       handler,
       receiver
@@ -98,10 +98,10 @@ export class RouteHandlerFactory {
       moduleKey: moduleKey,
     });
 
-    const lifeCycle: TLifecycleFunction = async (
+    const lifeCycle: LifecycleFunction = async (
       route: CommandRoute,
       event: [Message],
-      parsed: IParsedCommandData
+      parsed: ParsedCommandData
     ) => {
       const { prefix, command } = parsed;
       const [message] = event;
@@ -172,7 +172,7 @@ export class RouteHandlerFactory {
   private getMetadata(
     handler: Function,
     receiver: InstanceWrapper<TReceiver>
-  ): IRouteMetadata {
+  ): RouteMetadata {
     const guards = this.reflectKey<TGuardsMetadata>(
       GUARD_METADATA,
       handler,

@@ -1,6 +1,3 @@
+export * from "./common";
 export * from "./parsing";
-export * from "./command-argument-type.interface";
 export * from "./command-argument.interface";
-export * from "./command-arguments.interface";
-export * from "./command-parameter.interface";
-export * from "./command-prefix.interface";

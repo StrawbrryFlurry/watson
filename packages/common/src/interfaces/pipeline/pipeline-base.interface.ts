@@ -1,7 +1,6 @@
-import { ContextType } from './pipeline-host.interface';
+import { ContextType } from '..';
 
 export interface PipelineBase {
   contextType: ContextType;
-
   getEvent<T extends unknown[] = unknown[]>(): T;
 }

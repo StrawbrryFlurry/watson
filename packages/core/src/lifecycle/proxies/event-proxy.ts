@@ -2,7 +2,7 @@ import { IBaseRoute, WatsonEvent } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { ExceptionHandler } from '..';
-import { TLifecycleFunction } from '../../router';
+import { LifecycleFunction } from '../../router';
 
 export abstract class EventProxy<
   Event extends WatsonEvent = WatsonEvent,
@@ -13,7 +13,7 @@ export abstract class EventProxy<
   public readonly isWSEvent: boolean;
   public readonly handlers = new Map<
     Route,
-    [TLifecycleFunction, ExceptionHandler]
+    [LifecycleFunction, ExceptionHandler]
   >();
 
   constructor(type: Event, isWSEvent: boolean = false) {
@@ -25,7 +25,7 @@ export abstract class EventProxy<
 
   public abstract bind(
     route: IBaseRoute,
-    eventHandler: TLifecycleFunction,
+    eventHandler: LifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void;
 

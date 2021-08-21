@@ -2,13 +2,13 @@ import { CommandArgument } from '@watsonjs/common';
 
 import { commandExampleUtil, ReadableArgumentTypeHelper } from '../util';
 import { createBaseError } from './create-error';
-import { IErrorOptions } from './error-host';
+import { ErrorOptions as ErrorOptions } from './error-host';
 
-export interface IBadArgumentErrorOptions extends IErrorOptions {
+export interface BadArgumentErrorOptions extends ErrorOptions {
   argument: CommandArgument;
 }
 
-export const BAD_ARGUMENT_ERROR = (options: IBadArgumentErrorOptions) => {
+export const BAD_ARGUMENT_ERROR = (options: BadArgumentErrorOptions) => {
   const title = "Bad argument exception";
   const { argument, route } = options;
   const description = `The argument ${

@@ -2,7 +2,7 @@ import { INJECT_DEPENDENCY_METADATA } from '../../constants';
 import { Type } from '../../interfaces';
 import { isFunction } from '../../utils';
 
-export interface IInjectValue {
+export interface InjectValue {
   propertyKey: string | symbol;
   parameterIndex: number;
   provide: string;
@@ -23,7 +23,7 @@ export function Inject(token: Type | string): ParameterDecorator {
     const existing =
       Reflect.getMetadata(INJECT_DEPENDENCY_METADATA, target.constructor) || [];
 
-    const value: IInjectValue = {
+    const value: InjectValue = {
       provide: injectionToken as string,
       propertyKey: propertyKey,
       parameterIndex: parameterIndex,

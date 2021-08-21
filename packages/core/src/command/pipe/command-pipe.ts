@@ -4,7 +4,7 @@ import { Guild, GuildMember, Message, User, VoiceChannel } from 'discord.js';
 import { CommandRoute } from '../../router';
 import { CommandArgumentsHost } from './command-argument-host';
 
-export interface IParsedCommandData {
+export interface ParsedCommandData {
   command: string;
   prefix: CommandPrefix;
 }

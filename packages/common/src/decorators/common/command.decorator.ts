@@ -1,24 +1,10 @@
-import { PermissionResolvable } from "discord.js";
+import { PermissionResolvable } from 'discord.js';
 
-import { COMMAND_METADATA } from "../../constants";
-import { ICommandPrefix } from "../../interfaces";
-import { isNil, isObject, isString } from "../../utils/shared.utils";
+import { COMMAND_METADATA } from '../../constants';
+import { Prefix } from '../../interfaces';
+import { isNil, isObject, isString } from '../../utils/shared.utils';
 
-export interface ICommandCooldown {
-  /**
-   * The timeout in seconds
-   * @default 5
-   */
-  timeout?: number;
-  /**
-   * Is the cooldown user specific for
-   * a user or anyone in a guild
-   * @default true
-   */
-  user?: boolean;
-}
-
-export interface ICommandOptions {
+export interface CommandOptions {
   /**
    * Name of the command
    * @default The descriptor name will be used.
@@ -47,12 +33,6 @@ export interface ICommandOptions {
    */
   clientPermissions?: PermissionResolvable[];
   /**
-   * Adds a cooldown for this command
-   * @see ICommandCooldown
-   * @default none
-   */
-  cooldown?: ICommandCooldown;
-  /**
    * Sets the prefix for the command.
    * If no prefix was set the receiver prefix is used.
    * If no prefix was set in the receiver the global prefix will be used.
@@ -60,17 +40,7 @@ export interface ICommandOptions {
    * !ban @username
    * Where `!` is the prefix
    */
-  prefix?: string | ICommandPrefix;
-  /**
-   * Sets the named prefix for the command.
-   * If no prefix was set the receiver prefix is used.
-   * If no prefix was set in the receiver the global prefix will be used.
-   *
-   * @example
-   * pls ban @username
-   * Where `pls` is the named prefix
-   */
-  namedPrefix?: string;
+  prefix?: string | Prefix;
   /**
    * Requires the format of the command message to exactly match the command name
    * @example
@@ -105,15 +75,17 @@ export interface ICommandOptions {
  * that has registered it.
  * ```ts
  *  import { User } from 'discord.js';
+ *  import { UserArgument } from '@watsonjs/common';
  *
  * `@Command("ping")`
- *  public ping(user: User) {  }
+ *  public ping(user: UserArgument) {  }
  * ```
  * You might want to have a more fine grade control over your
  * parameters. For that you can use the `@Param` decorator.
  *
  * ```ts
  *  import { User } from 'discord.js';
+ *  import { UserArgument } from '@watsonjs/common';
  *
  * `@Command("ping")`
  *  public ping(`@Param`({ label: "The target user who is being pinged" }) user: UserArgument) {  }
@@ -121,21 +93,21 @@ export interface ICommandOptions {
  */
 export function Command(): MethodDecorator;
 export function Command(command: string): MethodDecorator;
-export function Command(commandOptions: ICommandOptions): MethodDecorator;
+export function Command(commandOptions: CommandOptions): MethodDecorator;
 export function Command(
   command: string,
-  commandOptions: ICommandOptions
+  commandOptions: CommandOptions
 ): MethodDecorator;
 export function Command(
-  command?: string | ICommandOptions,
-  commandOptions?: ICommandOptions
+  command?: string | CommandOptions,
+  commandOptions?: CommandOptions
 ): MethodDecorator {
   return (
     target: Object,
     propertyKey: string | Symbol,
     descriptor: PropertyDescriptor
   ) => {
-    let options: ICommandOptions = {};
+    let options: CommandOptions = {};
 
     if (!isNil(commandOptions)) {
       options["command"] = command as string;

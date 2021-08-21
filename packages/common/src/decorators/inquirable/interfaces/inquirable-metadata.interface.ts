@@ -1,6 +1,7 @@
-import { InquirableType } from '../../../enums';
-import { IInquirableOptions } from './inquirable-options.interface';
+import { InquirableOptions } from '@decorators/inquirable';
 
-export interface IInquirableMetadata<T extends IInquirableOptions = any> {
+import { InquirableType } from '../../../enums';
+
+export interface InquirableMetadata<T extends InquirableOptions = any> {
   type: InquirableType;
 }

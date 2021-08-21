@@ -1,8 +1,8 @@
-import { PIPE_METADATA } from '../../constants';
-import { PipeTransform, Type } from '../../interfaces';
+import { IPipeTransform } from '@interfaces/interceptors';
+
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
-export type TPipesMetadata = (PipeTransform | Type)[];
+export type TPipesMetadata = (IPipeTransform | Type)[];
 
 /**
  * TODO:

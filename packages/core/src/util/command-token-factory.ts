@@ -4,7 +4,7 @@ import { CommandRoute } from '../router';
 import { CommandPrefixHost } from '../router/command/command-prefix-host';
 import { genearateRandomString } from './random-string.helper';
 
-interface ITokenData {
+interface TokenData {
   id: string;
   names: string[];
   prefix: CommandPrefixHost;
@@ -16,7 +16,7 @@ export class CommandTokenFactory {
   public create(command: CommandRoute) {
     const id = this.getCommandId(command);
     const { prefix, name, alias } = command;
-    const token: ITokenData = {
+    const token: TokenData = {
       id: id,
       prefix: prefix as any,
       names: [name, ...alias],

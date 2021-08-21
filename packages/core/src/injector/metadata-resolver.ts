@@ -12,12 +12,9 @@ import {
   PIPE_METADATA,
   PREFIX_METADATA,
   Type,
-} from "@watsonjs/common";
+} from '@watsonjs/common';
 
-import {
-  CircularDependencyException,
-  InvalidDynamicModuleException,
-} from "../exceptions";
+import { CircularDependencyException, InvalidDynamicModuleException } from '../exceptions';
 import {
   ADD_MODULE,
   BIND_GLOBAL_MODULES,
@@ -25,14 +22,14 @@ import {
   Logger,
   REFLECT_MODULE_COMPONENTS,
   REFLECT_MODULE_IMPORTS,
-} from "../logger";
-import { WatsonContainer } from "../watson-container";
+} from '../logger';
+import { WatsonContainer } from '../watson-container';
 
-export interface IMethodDescriptors {
+export interface MethodDescriptors {
   [methodName: string]: PropertyDescriptor;
 }
 
-export interface IMethodValue {
+export interface MethodValue {
   name: string;
   descriptor: Function;
 }
@@ -308,7 +305,7 @@ export class MetadataResolver {
     return null;
   }
 
-  public reflectMethodsFromMetatype(metatype: Type): IMethodValue[] {
+  public reflectMethodsFromMetatype(metatype: Type): MethodValue[] {
     if (typeof metatype.prototype === "undefined") {
       return;
     }
@@ -342,7 +339,7 @@ export class MetadataResolver {
    */
   private filterAndFormatPrototypeMethods(
     ctorName: string,
-    prototypeMethods: IMethodDescriptors
+    prototypeMethods: MethodDescriptors
   ) {
     const methods = Object.entries(prototypeMethods).filter(([name]) => {
       if (name === "constructor") {

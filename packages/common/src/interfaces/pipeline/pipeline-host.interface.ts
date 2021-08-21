@@ -1,10 +1,18 @@
-import { IBaseRoute } from '../router';
+import { BaseRoute } from '../router';
 import { CommandPipeline } from './command-pipeline.interface';
 import { EventPipeline } from './event-pipeline.interface';
 import { SlashPipeline } from './slash-pipeline.interface';
 
+/** The type of a pipeline context */
 export type ContextType = "command" | "event" | "slash";
 
+/**
+ * A `IPipelineHost` is a type that contains a
+ * pipeline of any kind. Usually this will be an
+ * execution context which in itself holds the
+ * context of either a command, event or interaction
+ * handler.
+ */
 export interface PipelineHost {
   /**
    * Returns the CommandPipelineHost class for
@@ -30,5 +38,5 @@ export interface PipelineHost {
    * which was mapped to the event
    * handler
    */
-  getRoute(): IBaseRoute;
+  getRoute(): BaseRoute;
 }

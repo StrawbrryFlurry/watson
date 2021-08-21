@@ -1,6 +1,6 @@
 import { Client, ClientOptions, Intents, Snowflake } from 'discord.js';
 
-export interface IWatsonApplicationOptions {
+export interface WatsonApplicationOptions {
   discordAuthToken?: string;
   clientOptions?: ClientOptions;
   botDescription?: string;

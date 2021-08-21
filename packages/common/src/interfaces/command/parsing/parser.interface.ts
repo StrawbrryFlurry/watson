@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
 
-import { IToken } from './token.interface';
+import { Token } from './token.interface';
 
-export interface IParser<T = any> {
-  parseInput(tokenList: IToken[]): T;
+export interface Parser<T = any> {
+  parseInput(tokenList: Token[]): T;
   parseMessage(message: Message, prefixLength: number): T;
 }

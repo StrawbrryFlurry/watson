@@ -1,8 +1,8 @@
 import { Channel, Client, Emoji, Role, User } from 'discord.js';
 
-import { IToken } from './token.interface';
+import { Token } from './token.interface';
 
-export type TNewLineCharacter = "\n" | "\r" | "\r\n";
+export type NewLineCharacter = "\n" | "\r" | "\r\n";
 
 export enum CommandTokenKind {
   /**
@@ -63,7 +63,7 @@ export enum CommandTokenKind {
    * A prefix can be any character / characters formatted
    * like it was specified by the prefix configuration.
    *
-   * @see {@link ICommandPrefix}
+   * @see {@link IPrefix}
    */
   Prefix,
   /** Text prefixed with a Dash or DoubleDash is treated as a parameter */
@@ -100,59 +100,59 @@ export enum CommandTokenKind {
   Eom,
 }
 
-export interface ICommandToken extends IToken<CommandTokenKind> {}
+export interface CommandToken extends Token<CommandTokenKind> {}
 
-export interface ITokenWithValue<T> extends ICommandToken {
+export interface TokenWithValue<T> extends CommandToken {
   value: T;
 }
 
 /** @see {@link CommandTokenKind#Prefix} */
-export interface IPrefixToken extends ICommandToken {}
+export interface PrefixToken extends CommandToken {}
 
 /** @see {@link CommandTokenKind#UserMention} */
-export interface IUserMentionToken extends ITokenWithValue<string> {
+export interface UserMentionToken extends TokenWithValue<string> {
   getId(): string;
   getUser(client: Client): Promise<User>;
 }
 /** @see {@link CommandTokenKind#ChannelMention} */
-export interface IChannelMentionToken extends ITokenWithValue<string> {
+export interface ChannelMentionToken extends TokenWithValue<string> {
   getId(): string;
   getChannel(client: Client): Promise<Channel>;
 }
 /** @see {@link CommandTokenKind#RoleMention} */
-export interface IRoleMentionToken extends ITokenWithValue<string> {
+export interface RoleMentionToken extends TokenWithValue<string> {
   getId(): string;
   getRole(client: Client): Promise<Role>;
 }
 /** @see {@link CommandTokenKind#Emote} */
-export interface IEmoteToken extends ITokenWithValue<string> {
+export interface EmoteToken extends TokenWithValue<string> {
   getId(): string;
   getEmote(client: Client): Emoji;
 }
 
 /** @see {@link CommandTokenKind#CodeBlock} */
-export interface ICodeBlockToken extends ITokenWithValue<string> {
+export interface CodeBlockToken extends TokenWithValue<string> {
   language: string;
 }
 
 /** @see {@link CommandTokenKind#StringExpandable} */
-export interface IStringExpandableToken extends ITokenWithValue<string> {}
+export interface StringExpandableToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#StringLiteral} */
-export interface IStringLiteralToken extends ITokenWithValue<string> {}
+export interface StringLiteralToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#StringTemplate} */
-export interface IStringTemplateToken extends ITokenWithValue<string> {}
+export interface StringTemplateToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#Number} */
-export interface INumberToken extends ITokenWithValue<number> {}
+export interface NumberToken extends TokenWithValue<number> {}
 
 /** @see {@link CommandTokenKind#Generic} */
-export interface IGenericToken extends ICommandToken {}
+export interface GenericToken extends CommandToken {}
 
 // TODO: Allow variables and keywords in template / expandable strings
 /** @see {@link CommandTokenKind#Identifier} */
-export interface IIdentifierToken extends ITokenWithValue<string> {}
+export interface dentifierToken extends TokenWithValue<string> {}
 
 /** @see {@link CommandTokenKind#Parameter} */
-export interface IParameterToken extends ITokenWithValue<string> {
+export interface ParameterToken extends TokenWithValue<string> {
   doubleDashed: boolean;
 }
 
@@ -162,12 +162,12 @@ export interface IParameterToken extends ITokenWithValue<string> {
  */
 
 /** @see {@link CommandTokenKind#NewLine} */
-export interface INewLineToken extends ICommandToken {}
+export interface NewLineToken extends CommandToken {}
 /** @see {@link CommandTokenKind#WhiteSpace} */
-export interface IWhiteSpaceToken extends ICommandToken {}
+export interface WhiteSpaceToken extends CommandToken {}
 /** @see {@link CommandTokenKind#EOM} */
-export interface IEndOfMessageToken extends ICommandToken {}
+export interface EndOfMessageToken extends CommandToken {}
 /** @see {@link CommandTokenKind#Dash} */
-export interface IDashToken extends ICommandToken {}
+export interface DashToken extends CommandToken {}
 /** @see {@link CommandTokenKind#DashDash} */
-export interface IDashDashToken extends ICommandToken {}
+export interface DashDashToken extends CommandToken {}

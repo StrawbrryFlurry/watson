@@ -1,9 +1,9 @@
-import { PARAM_METADATA } from "../../constants";
-import { mergeDefaults } from "../../utils";
+import { PARAM_METADATA } from '../../constants';
+import { mergeDefaults } from '../../utils';
 
-export interface ICommandParameterMetadata<T = any> {
+export interface CommandParameterOptions<T = any> {
   /**
-   * Internal name the parameter should be reffered as.
+   * Internal name the parameter should be referred as.
    * It can then also be used to get the pram data using the @\param() decorator
    */
   name?: string;
@@ -55,9 +55,9 @@ export interface ICommandParameterMetadata<T = any> {
  * `RoleArgument`
  */
 export function Param(): ParameterDecorator;
-export function Param(options?: ICommandParameterMetadata): ParameterDecorator;
+export function Param(options?: CommandParameterOptions): ParameterDecorator;
 export function Param(
-  options: ICommandParameterMetadata = {}
+  options: CommandParameterOptions = {}
 ): ParameterDecorator {
   return (
     target: object,

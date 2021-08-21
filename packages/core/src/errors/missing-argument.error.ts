@@ -2,14 +2,14 @@ import { ICommandParam } from '@watsonjs/common';
 
 import { commandExampleUtil, ReadableArgumentTypeHelper } from '../util';
 import { createBaseError } from './create-error';
-import { IErrorOptions } from './error-host';
+import { ErrorOptions } from './error-host';
 
-export interface IMissingArgumentErrorOptions extends IErrorOptions {
+export interface MissingArgumentErrorOptions extends ErrorOptions {
   parameters: ICommandParam | ICommandParam[];
 }
 
 export const MISSING_ARGUMENT_ERROR = (
-  options: IMissingArgumentErrorOptions
+  options: MissingArgumentErrorOptions
 ) => {
   const title = "Missing argument exception";
   const { parameters, route } = options;

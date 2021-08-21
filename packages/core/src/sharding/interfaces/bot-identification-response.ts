@@ -1,4 +1,4 @@
-export interface IBotIdentificationResponse {
+export interface BotIdentificationResponse {
   url: string;
   shards: number;
   session_start_limit: {

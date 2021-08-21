@@ -2,7 +2,7 @@ import { Type } from '@watsonjs/common';
 
 import { Module } from './module';
 
-export interface IInstanceWrapperArgs<T = any> {
+export interface InstanceWrapperArgs<T = any> {
   name: string;
   metatype: Type | Function | any;
   host: Module;
@@ -11,7 +11,7 @@ export interface IInstanceWrapperArgs<T = any> {
   inject?: unknown[];
 }
 
-export type TInstanceFactory<T, D extends any[]> = (...deps: D) => T;
+export type InstanceFactory<T, D extends any[]> = (...deps: D) => T;
 
 // TODO:
 // Use custom DI tokens + factory and deps
@@ -30,7 +30,7 @@ export class InstanceWrapper<T = any, D extends any[] = unknown[]> {
    * the type to its value using
    * using dependencies if necessary
    */
-  public readonly factory: TInstanceFactory<T, D>;
+  public readonly factory: InstanceFactory<T, D>;
   /**
    * Dependencies of the factory
    */
@@ -40,18 +40,18 @@ export class InstanceWrapper<T = any, D extends any[] = unknown[]> {
   public instance: T;
   public inject?: Type[];
 
-  constructor(args: IInstanceWrapperArgs) {
+  constructor(args: InstanceWrapperArgs) {
     this.init(args);
   }
 
-  private init(withData: IInstanceWrapperArgs) {
+  private init(withData: InstanceWrapperArgs) {
     const isResolved = withData.isResolved || false;
 
     Object.assign(this, { ...withData, isResolved });
   }
 
   public setInstance(instance: Type) {
-    this.instance = (instance as unknown) as T;
+    this.instance = instance as unknown as T;
     this.isResolved = true;
   }
 }

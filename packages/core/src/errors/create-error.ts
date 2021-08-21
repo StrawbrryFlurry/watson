@@ -1,9 +1,9 @@
 import { MessageEmbed } from 'discord.js';
 
-import { IErrorOptions } from './error-host';
+import { ErrorOptions } from './error-host';
 
 export const createBaseError = (
-  options: IErrorOptions,
+  options: ErrorOptions,
   title: string,
   description: string
 ) => {

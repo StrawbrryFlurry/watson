@@ -4,7 +4,7 @@ import {
   ICommandCooldown,
   ICommandOptions,
   ICommandParameterMetadata,
-  ICommandPrefix,
+  IPrefix,
   IReceiverOptions,
   isEmpty,
   isNil,
@@ -14,12 +14,12 @@ import { PermissionResolvable } from 'discord.js';
 
 import { ApplicationConfig } from '../../application-config';
 import { CommandConfigurationException } from '../../exceptions';
-import { IMethodValue } from '../../injector';
+import { MethodValue } from '../../injector';
 import { CommandPrefixHost } from './command-prefix-host';
 import { CommandRoute } from './command-route-host';
 
 export class CommandConfigurationHost implements CommandConfiguration {
-  public prefix: ICommandPrefix;
+  public prefix: IPrefix;
   public name: string;
   public alias: string[];
   public caseSensitive: boolean;
@@ -41,7 +41,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
     private commandOptions: ICommandOptions,
     private receiverOptions: IReceiverOptions,
     private config: ApplicationConfig,
-    private method: IMethodValue
+    private method: MethodValue
   ) {
     this.setName();
     this.setPrefix();
@@ -70,10 +70,8 @@ export class CommandConfigurationHost implements CommandConfiguration {
       return this.applyPrefix(namedPrefix, true);
     }
 
-    const {
-      prefix: receiverPrefix,
-      namedPrefix: receiverNamedPrefix,
-    } = this.receiverOptions;
+    const { prefix: receiverPrefix, namedPrefix: receiverNamedPrefix } =
+      this.receiverOptions;
 
     if (receiverPrefix) {
       return this.applyPrefix(receiverPrefix);
@@ -92,7 +90,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
     this.prefix = undefined;
   }
 
-  private applyPrefix(prefix: string | ICommandPrefix, named?: boolean) {
+  private applyPrefix(prefix: string | IPrefix, named?: boolean) {
     if (isString(prefix)) {
       this.prefix = new CommandPrefixHost(prefix, named);
     } else {

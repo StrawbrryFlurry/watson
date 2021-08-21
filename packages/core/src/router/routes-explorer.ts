@@ -19,7 +19,7 @@ import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND } from 
 import { WatsonContainer } from '../watson-container';
 import { CommandRoute } from './command';
 import { EventRouteHost } from './event';
-import { RouteHandlerFactory, THandlerFactory, TLifecycleFunction } from './route-handler-factory';
+import { HandlerFactory, LifecycleFunction, RouteHandlerFactory } from './route-handler-factory';
 import { SlashRoute } from './slash';
 
 export class RouteExplorer {
@@ -43,9 +43,8 @@ export class RouteExplorer {
 
   public async explore() {
     this.logger.logMessage(EXPLORE_START());
-    const receivers = this.container.globalInstanceHost.getAllInstancesOfType(
-      "receiver"
-    );
+    const receivers =
+      this.container.globalInstanceHost.getAllInstancesOfType("receiver");
 
     for (const receiver of receivers) {
       const { wrapper } = receiver;
@@ -109,7 +108,7 @@ export class RouteExplorer {
     routeType: Type,
     eventProxyType: Type<EventProxy>,
     proxyArgs: unknown[],
-    handlerFactory: THandlerFactory,
+    handlerFactory: HandlerFactory,
     collectionRef: Set<IBaseRoute>,
     eventFunction: (metadata: unknown) => WatsonEvent,
     logMessage: Function,
@@ -215,7 +214,7 @@ export class RouteExplorer {
     event: WatsonEvent,
     route: IBaseRoute,
     proxyType: Type,
-    handler: TLifecycleFunction,
+    handler: LifecycleFunction,
     exceptionHandler: ExceptionHandler,
     proxyArgs: unknown[]
   ) {

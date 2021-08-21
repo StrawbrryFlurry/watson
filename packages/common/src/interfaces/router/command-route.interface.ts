@@ -1,13 +1,14 @@
-import { ICommandParameterMetadata } from '../../decorators';
-import { ICommandPrefix } from '../command';
-import { IBaseRoute } from './base-route.interface';
-import { CommandConfiguration } from './configuration';
+import { Prefix } from '@interfaces/command';
+
+import { CommandConfiguration } from '.';
+import { CommandParameterOptions } from '../..';
+import { BaseRoute } from './base-route.interface';
 
 /**
  * Represents a command *route* which is mapped
  * to the event handler
  */
-export interface ICommandRoute extends IBaseRoute {
+export interface CommandRoute extends BaseRoute {
   /**
    * The name of the command
    */
@@ -15,25 +16,21 @@ export interface ICommandRoute extends IBaseRoute {
   /**
    * The parameters registered for this command
    */
-  params: ICommandParameterMetadata[];
-  /**
-   * The prefix used for this command
-   */
-  prefix: string;
+  params: CommandParameterOptions[];
   /**
    * The prefix declaration for this command
    * that implements the `CommandPrefix` interface
    */
-  commandPrefix: ICommandPrefix;
+  commandPrefix: Prefix;
   /**
    * Alias for this command
    */
   alias: string[];
   /**
-   * Returns the command configuration set in the
+   * The command configuration set in the
    * `@Command()` decorator
    */
-  getConfiguration(): CommandConfiguration;
+  configuration: CommandConfiguration;
   /**
    * Checks if this route supports a given
    * command name

@@ -1,4 +1,4 @@
-import { ITokenPosition } from './token.interface';
+import { TokenPosition } from './token.interface';
 
 export enum CommandAstType {
   /** The root node of a command AST */
@@ -14,25 +14,25 @@ export enum CommandAstType {
   Parameter,
 }
 
-export interface IAstElement<T = any> {
-  position: ITokenPosition;
+export interface AstElement<T = any> {
+  position: TokenPosition;
   /** Raw text that this element was parsed from */
   text: string;
   /** The value that this element holds */
   value?: T;
 }
 
-export interface IAstPrefix extends IAstElement<string> {
+export interface AstPrefix extends AstElement<string> {
   type: CommandAstType.Prefix;
 }
 
-export interface IAstCommand extends IAstElement<string> {
+export interface AstCommand extends AstElement<string> {
   type: CommandAstType.Command;
   /** Sub commands for this command */
-  subCommand?: IAstCommand[];
+  subCommand?: AstCommand[];
 }
 
-export interface IAstArgument<T = any> extends IAstElement<T> {
+export interface AstArgument<T = any> extends AstElement<T> {
   type: CommandAstType.Argument;
   /** The parameter this argument belongs to */
   parameter: {
@@ -115,14 +115,14 @@ export interface IAstArgument<T = any> extends IAstElement<T> {
  * };
  * ```
  */
-export interface ICommandAst<Arguments = any> {
+export interface CommandAst<Arguments = any> {
   type: CommandAstType.WatsonCommand;
   /** Prefix used for the command */
-  prefix: IAstPrefix;
+  prefix: AstPrefix;
   /** The main command and all subsequent sub commands used */
-  command: IAstCommand;
+  command: AstCommand;
   /** Arguments provided for the command */
   arguments: {
-    [K in keyof Arguments]: IAstArgument;
+    [K in keyof Arguments]: AstArgument;
   };
 }

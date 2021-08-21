@@ -1,17 +1,11 @@
-import {
-  CanActivate,
-  EventExceptionHandler,
-  ICommandPrefix,
-  PassThrough,
-  PipeTransform,
-} from "@watsonjs/common";
-import { ClientOptions, Snowflake } from "discord.js";
+import { CanActivate, EventExceptionHandler, IPrefix, PassThrough, PipeTransform } from '@watsonjs/common';
+import { ClientOptions, Snowflake } from 'discord.js';
 
-import { AbstractDiscordAdapter } from "./adapters";
-import { IWatsonApplicationOptions } from "./interfaces";
+import { AbstractDiscordAdapter } from './adapters';
+import { WatsonApplicationOptions } from './interfaces';
 
 export class ApplicationConfig<DiscordClient = any> {
-  public globalCommandPrefix: ICommandPrefix;
+  public globalCommandPrefix: IPrefix;
   public clientOptions: ClientOptions;
   public discordAuthToken: string;
   public acknowledgementReaction: string | Snowflake;
@@ -44,7 +38,7 @@ export class ApplicationConfig<DiscordClient = any> {
     this.acknowledgementReaction = reaction;
   }
 
-  public setGlobalPrefix(prefix: ICommandPrefix) {
+  public setGlobalPrefix(prefix: IPrefix) {
     this.globalCommandPrefix = prefix;
   }
 
@@ -52,9 +46,7 @@ export class ApplicationConfig<DiscordClient = any> {
     this.globalExceptionHandlers.add(handler);
   }
 
-  public assignOptions(
-    options: Partial<IWatsonApplicationOptions> | undefined
-  ) {
+  public assignOptions(options: Partial<WatsonApplicationOptions> | undefined) {
     Object.assign(this, options);
   }
 

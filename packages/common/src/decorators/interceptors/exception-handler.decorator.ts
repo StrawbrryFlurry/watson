@@ -1,5 +1,4 @@
 import { EXCEPTION_HANDLER_METADATA } from '../../constants';
-import { EventExceptionHandler } from '../../exceptions';
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 export type TExceptionHanlderMetadata = typeof EventExceptionHandler[];

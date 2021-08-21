@@ -1,8 +1,8 @@
 import { RECEIVER_METADATA } from '../../constants';
-import { ICommandPrefix } from '../../interfaces';
+import { Prefix } from '../../interfaces';
 import { isNil, isObject, isString } from '../../utils/shared.utils';
 
-export interface IReceiverOptions {
+export interface ReceiverOptions {
   /**
    * The prefix for underlying commands if none is specified.
    *
@@ -10,7 +10,7 @@ export interface IReceiverOptions {
    * !ban @username
    * Where `!` is the prefix
    */
-  prefix?: string | ICommandPrefix;
+  prefix?: string | Prefix;
   /**
    * The named prefix for underlying commands if none is specified.
    *
@@ -38,10 +38,10 @@ export function Receiver(group?: string): ClassDecorator;
  * Receiver options can be used to apply configuration to the underlying
  * event handlers.
  */
-export function Receiver(reciverOptions: IReceiverOptions): ClassDecorator;
-export function Receiver(arg?: string | IReceiverOptions): ClassDecorator {
+export function Receiver(reciverOptions: ReceiverOptions): ClassDecorator;
+export function Receiver(arg?: string | ReceiverOptions): ClassDecorator {
   return (target: Function) => {
-    let options: Partial<IReceiverOptions> = {};
+    let options: Partial<ReceiverOptions> = {};
 
     if (isString(arg)) {
       options["groupName"] = arg;

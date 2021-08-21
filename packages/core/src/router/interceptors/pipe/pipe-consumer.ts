@@ -3,7 +3,7 @@ import { PipelineBase, PipeTransform, TPipesMetadata } from '@watsonjs/common';
 import { CommandArgumentsHost, CommandPipelineHost } from '../../../command';
 import { resolveAsyncValue } from '../../../util/resolve-async-value';
 import { WatsonContainer } from '../../../watson-container';
-import { IContextCreatorArguments } from '../context-creator-arguments.interface';
+import { ContextCreatorArguments } from '../context-creator-arguments.interface';
 import { InterceptorsConsumer } from '../interceptors-consumer';
 
 export class PipesConsumer extends InterceptorsConsumer {
@@ -15,7 +15,7 @@ export class PipesConsumer extends InterceptorsConsumer {
     receiver,
     metadata,
     moduleKey,
-  }: IContextCreatorArguments<TPipesMetadata>) {
+  }: ContextCreatorArguments<TPipesMetadata>) {
     const pipes = metadata.map((pipe) =>
       this.getInstance<TPipesMetadata, PipeTransform>(
         "pipe",

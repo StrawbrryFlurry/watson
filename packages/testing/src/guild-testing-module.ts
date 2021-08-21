@@ -5,7 +5,7 @@ import { TestClientAdapter } from './adapter';
 import { TestChannel, TestGuild } from './discord';
 import { TestEnvironment } from './test-environment';
 
-export interface ITestGuildOptions {
+export interface TestGuildOptions {
   testGuild: string;
   testChannelId: string;
 }

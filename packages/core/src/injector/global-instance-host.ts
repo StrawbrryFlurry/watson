@@ -6,7 +6,7 @@ import { WatsonContainer } from '../watson-container';
 import { InstanceWrapper } from './instance-wrapper';
 import { Module } from './module';
 
-export interface IInstanceData {
+export interface InstanceData {
   type: IInstanceType;
   wrapper: InstanceWrapper;
   host: Module;
@@ -16,7 +16,7 @@ export interface IInstanceData {
  * Keeps the instances of all providers and receviers of modules in a globla context.
  */
 export class GlobalInstanceHost {
-  private instanceMap = new Map<string, IInstanceData[]>();
+  private instanceMap = new Map<string, InstanceData[]>();
   private container: WatsonContainer;
 
   constructor(container: WatsonContainer) {
@@ -31,7 +31,7 @@ export class GlobalInstanceHost {
         )
         .map(([string, instanceData]) => instanceData)
         .reduce(
-          (instances: IInstanceData[], instanceDataArr) => [
+          (instances: InstanceData[], instanceDataArr) => [
             ...instances,
             ...instanceDataArr,
           ],
@@ -41,7 +41,7 @@ export class GlobalInstanceHost {
     );
   }
 
-  getInstance(name: string, type?: IInstanceType): IInstanceData | null {
+  getInstance(name: string, type?: IInstanceType): InstanceData | null {
     if (typeof type === "undefined") {
       if (this.instanceMap.has(name)) {
         return this.instanceMap.get(name)[-1];
@@ -50,13 +50,14 @@ export class GlobalInstanceHost {
       return null;
     }
 
-    
     if (isNil(this.instanceMap.get(name))) {
       return null;
     }
 
     const instanceData = this.instanceMap.get(name);
-    return instanceData.find((instanceType) => instanceType.type === type) ?? null;
+    return (
+      instanceData.find((instanceType) => instanceType.type === type) ?? null
+    );
   }
 
   applyInstances() {
@@ -88,7 +89,7 @@ export class GlobalInstanceHost {
       return this.instanceMap.set(name, data);
     }
 
-    const data: IInstanceData[] = [
+    const data: InstanceData[] = [
       {
         type,
         wrapper,

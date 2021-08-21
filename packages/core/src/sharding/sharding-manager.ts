@@ -5,10 +5,10 @@ import { DISCORD_GATEWAY_URL, DISCORD_GATEWAY_VERSION, DISCORD_URL } from '../co
 import { containerInstanceHelper } from '../util';
 import { WatsonContainer } from '../watson-container';
 import { ClusterManager } from './cluster';
-import { IBotIdentificationResponse, IFetchableShardValue } from './interfaces';
+import { BotIdentificationResponse, IFetchableShardValue } from './interfaces';
 import { Shard } from './shard';
 
-export interface IShardingManagerOptions {
+export interface ShardingManagerOptions {
   /**
    * If undefined Watson will figure out the reccomended amount
    * of shards for the client.
@@ -17,7 +17,7 @@ export interface IShardingManagerOptions {
   token: string;
 }
 
-const DEFAULT_SHARDING_OPTIONS: Partial<IShardingManagerOptions> = {
+const DEFAULT_SHARDING_OPTIONS: Partial<ShardingManagerOptions> = {
   shardCount: undefined,
 };
 
@@ -35,9 +35,9 @@ export class ShardingManager {
   private token: string;
   private shardCount: number;
 
-  private identificationStats: IBotIdentificationResponse;
+  private identificationStats: BotIdentificationResponse;
 
-  constructor(options: Partial<IShardingManagerOptions>) {
+  constructor(options: Partial<ShardingManagerOptions>) {
     const { shardCount, token } = mergeDefaults(
       options,
       DEFAULT_SHARDING_OPTIONS
@@ -69,7 +69,7 @@ export class ShardingManager {
 
   private fetchReccomendedShardCount() {
     return this.http
-      .get<IBotIdentificationResponse>(
+      .get<BotIdentificationResponse>(
         `${DISCORD_URL}/${DISCORD_GATEWAY_VERSION}/${DISCORD_GATEWAY_URL}/bot`,
         {
           headers: {

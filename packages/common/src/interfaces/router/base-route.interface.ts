@@ -2,12 +2,12 @@ import { WatsonEvent } from '../../enums';
 import { ContextType } from '../pipeline';
 import { Type } from '../type.interface';
 
-export interface IBaseRoute {
+export interface BaseRoute {
   /**
    * The type of the execution context
    * Execution contexts be either `"slash"`, `event` or `"command"`
    */
-  getType(): ContextType;
+  getType<T extends string = ContextType>(): T;
   /**
    * The handler method descriptor whose decorator registered this route:
    * e.g @Command, @Event
@@ -19,7 +19,7 @@ export interface IBaseRoute {
    */
   getHost<T extends Type<any>>(): T;
   /**
-   * Returns the internal application container
+   * Returns the internal DI container
    * which holds metadata, configurations as well
    * as instances for all components.
    *

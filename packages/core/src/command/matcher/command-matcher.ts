@@ -1,4 +1,4 @@
-import { ICommandPrefix, UnknownCommandException } from '@watsonjs/common';
+import { IPrefix, UnknownCommandException } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
 import { CommandRoute } from '../../router';
@@ -7,13 +7,13 @@ import { CommandContainer } from '../pipe';
 
 export interface CommandMatchResult {
   command: string;
-  prefix: ICommandPrefix;
+  prefix: IPrefix;
   route: CommandRoute;
 }
 
 export class CommandMatcher {
   private container: CommandContainer;
-  private prefixes: ICommandPrefix[];
+  private prefixes: IPrefix[];
   private commands: Map<string, string>;
   /**
    * Because this class will be insanciated

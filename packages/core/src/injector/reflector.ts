@@ -1,7 +1,7 @@
 import { BootstrapException } from '@exceptions';
 import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, isNil, Type } from '@watsonjs/common';
 
-export interface IMethodDescriptor {
+export interface MethodDescriptor {
   propertyKey: string;
   value: Function;
 }
@@ -23,7 +23,7 @@ export class Reflector {
    * from its prototype. The constructor
    * descriptor will be ignored.
    */
-  public reflectMethodsOfType(metatype: Type): IMethodDescriptor[] {
+  public reflectMethodsOfType(metatype: Type): MethodDescriptor[] {
     const { prototype } = metatype;
 
     if (isNil(prototype)) {
@@ -33,9 +33,8 @@ export class Reflector {
       );
     }
 
-    const { constructor, ...descriptors } = Object.getOwnPropertyDescriptors(
-      prototype
-    );
+    const { constructor, ...descriptors } =
+      Object.getOwnPropertyDescriptors(prototype);
 
     const descriptorValues = Object.entries(descriptors).map(
       ([propertyKey, descriptor]) => ({

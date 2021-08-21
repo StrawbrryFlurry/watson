@@ -1,3 +1,3 @@
-import { IListeningOptions } from './listening-options.interface';
+import { ListeningOptions as ListeningOptions } from './listening-options.interface';
 
-export type IInquirableOptions = IListeningOptions;
+export type InquirableOptions = ListeningOptions;

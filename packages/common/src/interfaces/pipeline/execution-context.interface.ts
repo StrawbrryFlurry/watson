@@ -1,9 +1,14 @@
+import { DiscordAdapter } from '@interfaces/adapter';
 import { Base, Client } from 'discord.js';
 
-import { DiscordAdapter } from '../adapters';
+import { PipelineHost } from '..';
 import { Type } from '../type.interface';
-import { PipelineHost } from './pipeline-host.interface';
 
+/**
+ * The ExecutionContext holds all relevant information
+ * about the current command / event route invocation it
+ * belongs to.
+ */
 export interface ExecutionContext extends PipelineHost {
   /**
    * Returns the receiver from which this
