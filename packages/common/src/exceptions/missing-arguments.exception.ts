@@ -1,12 +1,10 @@
-import { EventException } from '.';
-import { ICommandParameterMetadata } from '../decorators';
+import { CommandParameterOptions } from '@decorators/common';
+import { RuntimeException } from '@exceptions';
 
-export class MissingArgumentException extends EventException {
+export class MissingArgumentException extends RuntimeException {
   constructor(
-    public readonly params:
-      | ICommandParameterMetadata
-      | ICommandParameterMetadata[]
+    public readonly params: CommandParameterOptions | CommandParameterOptions[]
   ) {
-    super();
+    super(params);
   }
 }

@@ -1,21 +1,21 @@
 import {
+  AstArgument,
+  AstCommand,
+  AstPrefix,
+  CommandAst,
   CommandAstType,
-  IAstArgument,
-  IAstCommand,
-  IAstPrefix,
-  ICommandAst,
-  IGenericToken,
-  IPrefixToken,
-  ITokenPosition,
+  GenericToken,
+  PrefixToken,
+  TokenPosition,
 } from '@watsonjs/common';
 
-export class AstPrefix implements IAstPrefix {
+export class AstPrefixImpl implements AstPrefix {
   public readonly type: CommandAstType.Prefix;
-  public readonly position: ITokenPosition;
+  public readonly position: TokenPosition;
   public readonly text: string;
   public value?: string;
 
-  constructor(token: IPrefixToken) {
+  constructor(token: PrefixToken) {
     const { text, position } = token;
     this.text = text;
     this.value = text;
@@ -23,15 +23,15 @@ export class AstPrefix implements IAstPrefix {
   }
 }
 
-export class AstCommand implements IAstCommand {
+export class AstCommandImpl implements AstCommand {
   public readonly type: CommandAstType.Command;
-  public readonly position: ITokenPosition;
+  public readonly position: TokenPosition;
   public readonly text: string;
   public value?: string;
   /** Sub commands for this command */
-  subCommand?: IAstCommand[];
+  subCommand?: AstCommand[];
 
-  constructor(token: IGenericToken) {
+  constructor(token: GenericToken) {
     const { text, position } = token;
     this.text = text;
     this.value = text;
@@ -39,17 +39,17 @@ export class AstCommand implements IAstCommand {
   }
 }
 
-export class AstArgument<T = any> implements IAstArgument<T> {
+export class AstArgumentImpl<T = any> implements AstArgument<T> {
   public readonly type: CommandAstType.Argument;
-  public readonly position: ITokenPosition;
+  public readonly position: TokenPosition;
   public readonly text: string;
   public value?: T;
   public parameter: { type: CommandAstType.Parameter; name: string };
 }
 
-export class CommandAst implements ICommandAst {
+export class CommandAstImpl implements CommandAst {
   public readonly type: CommandAstType.WatsonCommand;
-  public prefix: IAstPrefix;
-  public command: IAstCommand;
-  public arguments: { [x: string]: IAstArgument };
+  public prefix: AstPrefix;
+  public command: AstCommand;
+  public arguments: { [x: string]: AstArgument };
 }

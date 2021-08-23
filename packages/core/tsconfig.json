@@ -1,7 +1,11 @@
 {
   "extends": "./../../tsconfig.json",
   "compilerOptions": {
-    "sourceRoot": "src"
+    "sourceRoot": "src",
+    "paths": {
+      "@utils": ["packages/core/src/util"],
+      "@watsonjs/common": ["packages/common/src"]
+    }
   },
   "include": ["*.ts", "**/*.ts"]
 }

@@ -6,21 +6,21 @@ import * as dayjs from 'dayjs';
  * @information Infrmation type is logged in yellow
  * @error Error type is logged in red
  */
-export type ILogInformationType = "status" | "information" | "error";
+export type LogInformationType = "status" | "information" | "error";
 /**
  * The Context the message is logged from
  * @example WatsonFactory
  */
-export type IlogContext = string;
+export type LogContext = string;
 
 export class Logger {
   private messagePrefix = `${yellow("[Watson]")} ${white(
     `[${(() => this.getDateString())()}] ${yellow(`[${this.context || ""}]`)}`
   )}`;
 
-  constructor(private readonly context?: IlogContext) {}
+  constructor(private readonly context?: LogContext) {}
 
-  public log(messageArg: string | string[], type: ILogInformationType) {
+  public log(messageArg: string | string[], type: LogInformationType) {
     let message: string;
 
     if (Array.isArray(messageArg)) {
@@ -51,7 +51,7 @@ export class Logger {
     console.error(stack);
   }
 
-  private colorMessage(message: string, type: ILogInformationType) {
+  private colorMessage(message: string, type: LogInformationType) {
     if (type === "information") {
       return yellow(message);
     } else if (type === "status") {

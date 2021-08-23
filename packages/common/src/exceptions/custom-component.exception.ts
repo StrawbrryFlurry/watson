@@ -1,6 +1,6 @@
-import { EventException } from './event.exception';
+import { RuntimeException } from '@exceptions';
 
-export class CustomComponentException extends EventException {
+export class CustomComponentException extends RuntimeException {
   constructor(message: string) {
     super(message);
   }

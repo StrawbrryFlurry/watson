@@ -1,20 +1,19 @@
-import { CommandTokenKind, ICommandAst, IParser, IToken } from '@watsonjs/common';
+import { CommandAst, Parser, Token } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
 import { ParsingException } from '../exceptions';
-import { AstPrefix, CommandAst } from './ast';
-import { isPrefixToken, isTokenKind } from './parse-helper';
-import { GenericToken } from './token';
+import { AstPrefixImpl, CommandAstImpl } from './ast';
+import { isPrefixToken } from './parse-helper';
 import { CommandTokenizer } from './tokenizer';
 
-export class CommandParser implements IParser<ICommandAst> {
-  parseInput(tokenList: IToken<any>[]): ICommandAst {
+export class CommandParser implements Parser<CommandAst> {
+  parseInput(tokenList: Token<any>[]): CommandAst {
     throw new Error("Method not implemented.");
   }
 
-  parseMessage(message: Message, prefixLength: number): ICommandAst {
+  parseMessage(message: Message, prefixLength: number): CommandAst {
     const tokenizer = new CommandTokenizer(this);
-    const ast = new CommandAst();
+    const ast = new CommandAstImpl();
     const { content } = message;
     const tokens = tokenizer.tokenize(content, prefixLength);
 
@@ -24,12 +23,15 @@ export class CommandParser implements IParser<ICommandAst> {
       throw new ParsingException("No valid prefix found");
     }
 
-    ast.prefix = new AstPrefix(prefix);
+    ast.prefix = new AstPrefixImpl(prefix);
 
-    for (const token of tokens) {
-      if (isTokenKind<GenericToken>(token, CommandTokenKind.Generic)) {
-        token.kind;
-      }
+    // Trying to find the command
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens.shift();
+    }
+
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
     }
 
     return "" as any;

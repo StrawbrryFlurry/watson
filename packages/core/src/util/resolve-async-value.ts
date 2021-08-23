@@ -1,33 +1,33 @@
 import { Observable } from 'rxjs';
 
-export type IAsyncType<T = any> = Observable<T> | Promise<T> | IAsyncType[];
+export type AsyncType<T = any> = T | Observable<T> | Promise<T> | AsyncType[];
+
+type AsyncResolutionType<T extends AsyncType> = T extends Observable<infer R>
+  ? R
+  : T extends Promise<infer R>
+  ? R
+  : T extends AsyncType<infer R>[]
+  ? R
+  : T extends T
+  ? T
+  : never;
 
 /**
  * Resolves asynchronous data to a single promise whose value can be awaited.
  */
-export async function resolveAsyncValue<R = any, T = any>(
-  result: IAsyncType<T> | T
-): Promise<R | T> {
-  if (result instanceof Promise) {
-    return await resolveFromPromise(result);
-  } else if (result instanceof Observable) {
-    return await resolveFromObservable(result);
-  } else if (Array.isArray(result)) {
-    return ((await resolveAsyncArray(result)) as unknown) as R;
+export async function resolveAsyncValue<
+  R extends AsyncResolutionType<T>,
+  T extends AsyncType = any
+>(v: T): Promise<R> {
+  if (v instanceof Promise) {
+    return v;
+  } else if (v instanceof Observable) {
+    return v.toPromise();
+  } else if (Array.isArray(v)) {
+    return Promise.all(
+      v.map((asyncValue) => resolveAsyncValue(asyncValue))
+    ) as any;
   } else {
-    return result;
+    return v as R;
   }
-}
-
-async function resolveFromPromise<T = any>(promise: Promise<T>) {
-  return await resolveAsyncValue(await promise);
-}
-
-async function resolveFromObservable<T = any>(observable: Observable<T>) {
-  const asPromise = observable.toPromise();
-  return await resolveAsyncValue(asPromise);
-}
-
-async function resolveAsyncArray<T extends IAsyncType>(arr: T[]) {
-  return Promise.all(arr.map((asyncValue) => resolveAsyncValue(asyncValue)));
 }

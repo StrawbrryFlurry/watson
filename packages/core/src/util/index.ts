@@ -1,5 +1,4 @@
 export * from "./command-example.util";
-export * from "./command-token-factory";
 export * from "./container-instance.helper";
 export * from "./module-token-factory";
 export * from "./random-string.helper";

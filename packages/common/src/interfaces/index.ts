@@ -2,6 +2,7 @@ export * from "./adapter";
 export * from "./command";
 export * from "./common";
 export * from "./discord";
+export * from "./exceptions";
 export * from "./hooks";
 export * from "./interceptors";
 export * from "./pipeline";

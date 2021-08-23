@@ -1,7 +1,6 @@
+import { Inject, Injectable } from '@decorators/common';
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { from, Observable } from 'rxjs';
-
-import { Inject, Injectable } from '../../decorators';
 
 export type HTTPBody = { [key: string]: any };
 

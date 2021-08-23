@@ -6,4 +6,3 @@ export * from "./injectable.decorator";
 export * from "./module.decorator";
 export * from "./param.decorator";
 export * from "./receiver.decorator";
-export * from "./slash.decorator";

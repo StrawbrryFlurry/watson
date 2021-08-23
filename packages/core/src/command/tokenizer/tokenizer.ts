@@ -1,30 +1,30 @@
 import {
   char,
+  CommandAst,
   CommandTokenKind,
-  ICommandAst,
-  IParser,
   isNil,
-  ITokenizer,
-  ITokenPosition,
+  Parser,
   StringBuilder,
+  Token,
+  Tokenizer,
+  TokenPosition,
 } from '@watsonjs/common';
 
 import {
-  ChannelMentionToken,
-  CodeBlockToken,
-  GenericToken,
-  IdentifierToken,
-  NumberToken,
-  ParameterToken,
-  PrefixToken,
-  RoleMentionToken,
-  StringExpandableToken,
-  StringLiteralToken,
-  StringTemplateToken,
-  Token,
+  ChannelMentionTokenImpl,
+  CodeBlockTokenImpl,
+  GenericTokenImpl,
+  IdentifierTokenImpl,
+  NumberTokenImpl,
+  ParameterTokenImpl,
+  PrefixTokenImpl,
+  RoleMentionTokenImpl,
+  StringExpandableTokenImpl,
+  StringLiteralTokenImpl,
+  StringTemplateTokenImpl,
   TokenKindIdentifier,
-  TokenPosition,
-  UserMentionToken,
+  TokenPositionImpl,
+  UserMentionTokenImpl,
 } from './token';
 
 /**
@@ -32,12 +32,12 @@ import {
  * Local StringBuilder queue to avoid
  * creating new instances for every token - less gc
  */
-export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
+export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
   private _input: string;
   private _index: number = 0;
   private _tokenStart: number = 0;
   private _tokens: Token[] = [];
-  private _parser: IParser<ICommandAst>;
+  private _parser: Parser<CommandAst>;
   /**
    * If set to true will stop the processing of the current
    * token and move on to the next one
@@ -46,11 +46,11 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
 
   private _stringBuilders: StringBuilder[] = [];
 
-  constructor(parser: IParser<ICommandAst>) {
+  constructor(parser: Parser<CommandAst>) {
     this._parser = parser;
   }
 
-  get parser(): IParser<ICommandAst> {
+  get parser(): Parser<CommandAst> {
     return this._parser;
   }
 
@@ -91,7 +91,7 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   public tokenize(
     input: string,
     prefixLength: number,
-    parser?: IParser
+    parser?: Parser
   ): Token<CommandTokenKind>[] {
     /* Reset internal state */
     this._input = input;
@@ -170,13 +170,13 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     this._index = index ?? this.tokenStart;
   }
 
-  protected resyncToPosition(position: ITokenPosition) {
+  protected resyncToPosition(position: TokenPosition) {
     const { tokenStart } = position;
     this._index = tokenStart - 1;
   }
 
-  protected currentPosition(): ITokenPosition {
-    return new TokenPosition(this._input, this._tokenStart, this._index);
+  protected currentPosition(): TokenPosition {
+    return new TokenPositionImpl(this._input, this._tokenStart, this._index);
   }
 
   protected isSkippable(char: char): boolean {
@@ -331,7 +331,7 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     return false;
   }
 
-  protected reportError(error: string, position: ITokenPosition) {
+  protected reportError(error: string, position: TokenPosition) {
     // TODO: Implement optional error handling
   }
 
@@ -343,62 +343,64 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   }
 
   protected newPrefixToken(sb: string) {
-    return this.saveToken(new PrefixToken(sb, this.currentPosition()));
+    return this.saveToken(new PrefixTokenImpl(sb, this.currentPosition()));
   }
 
   protected newNumberToken(sb: StringBuilder) {
     return this.saveToken(
-      new NumberToken(sb.toString(), this.currentPosition())
+      new NumberTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newGenericToken(sb: StringBuilder): GenericToken {
+  protected newGenericToken(sb: StringBuilder): GenericTokenImpl {
     return this.saveToken(
-      new GenericToken(sb.toString(), this.currentPosition())
+      new GenericTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newStringExpandableToken(sb: StringBuilder): StringExpandableToken {
+  protected newStringExpandableToken(
+    sb: StringBuilder
+  ): StringExpandableTokenImpl {
     return this.saveToken(
-      new StringExpandableToken(sb.toString(), this.currentPosition())
+      new StringExpandableTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newStringLiteralToken(sb: StringBuilder): StringLiteralToken {
+  protected newStringLiteralToken(sb: StringBuilder): StringLiteralTokenImpl {
     return this.saveToken(
-      new StringLiteralToken(sb.toString(), this.currentPosition())
+      new StringLiteralTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newStringTemplateToken(sb: StringBuilder): StringTemplateToken {
+  protected newStringTemplateToken(sb: StringBuilder): StringTemplateTokenImpl {
     return this.saveToken(
-      new StringTemplateToken(sb.toString(), this.currentPosition())
+      new StringTemplateTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newUserMentionToken(sb: StringBuilder): UserMentionToken {
+  protected newUserMentionToken(sb: StringBuilder): UserMentionTokenImpl {
     return this.saveToken(
-      new UserMentionToken(sb.toString(), this.currentPosition())
+      new UserMentionTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newRoleMentionToken(sb: StringBuilder): RoleMentionToken {
+  protected newRoleMentionToken(sb: StringBuilder): RoleMentionTokenImpl {
     return this.saveToken(
-      new RoleMentionToken(sb.toString(), this.currentPosition())
+      new RoleMentionTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
-  protected newChannelMentionToken(sb: StringBuilder): ChannelMentionToken {
+  protected newChannelMentionToken(sb: StringBuilder): ChannelMentionTokenImpl {
     return this.saveToken(
-      new ChannelMentionToken(sb.toString(), this.currentPosition())
+      new ChannelMentionTokenImpl(sb.toString(), this.currentPosition())
     );
   }
 
   protected newIdentifierToken(
     value: StringBuilder,
     text: StringBuilder
-  ): IdentifierToken {
-    return new IdentifierToken(
+  ): IdentifierTokenImpl {
+    return new IdentifierTokenImpl(
       value.toString(),
       text.toString(),
       this.currentPosition()
@@ -408,8 +410,8 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
   protected newParameterToken(
     value: StringBuilder,
     doubleDashed: boolean = false
-  ): IdentifierToken {
-    return new ParameterToken(
+  ): IdentifierTokenImpl {
+    return new ParameterTokenImpl(
       value.toString(),
       doubleDashed,
       this.currentPosition()
@@ -422,7 +424,7 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     language: StringBuilder
   ) {
     return this.saveToken(
-      new CodeBlockToken(
+      new CodeBlockTokenImpl(
         text.toString(),
         value.toString(),
         language.toString(),
@@ -745,9 +747,9 @@ export class CommandTokenizer implements ITokenizer<CommandTokenKind> {
     return this.newCodeBlockToken(text, sb, language);
   }
 
-  protected scanGenericToken(sb: StringBuilder): GenericToken;
-  protected scanGenericToken(char: char): GenericToken;
-  protected scanGenericToken(input: char | StringBuilder): GenericToken {
+  protected scanGenericToken(sb: StringBuilder): GenericTokenImpl;
+  protected scanGenericToken(char: char): GenericTokenImpl;
+  protected scanGenericToken(input: char | StringBuilder): GenericTokenImpl {
     const sb = new StringBuilder(input);
 
     while (!this.forceNewToken && !this.atEom()) {

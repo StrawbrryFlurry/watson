@@ -1,67 +1,66 @@
 import {
+  ChannelMentionToken,
+  CodeBlockToken,
   CommandTokenKind,
-  IChannelMentionToken,
-  ICodeBlockToken,
-  IDashDashToken,
-  IDashToken,
-  IEmoteToken,
-  IEndOfMessageToken,
-  IGenericToken,
-  IIdentifierToken,
-  INewLineToken,
-  INumberToken,
-  IParameterToken,
-  IPrefixToken,
-  IRoleMentionToken,
-  IStringExpandableToken,
-  IStringLiteralToken,
-  IStringTemplateToken,
-  IToken,
-  IUserMentionToken,
-  IWhiteSpaceToken,
+  DashDashToken,
+  DashToken,
+  EmoteToken,
+  EndOfMessageToken,
+  GenericToken,
+  IdentifierToken,
+  NewLineToken,
+  NumberToken,
+  ParameterToken,
+  PrefixToken,
+  RoleMentionToken,
+  StringExpandableToken,
+  StringLiteralToken,
+  StringTemplateToken,
+  Token,
+  UserMentionToken,
+  WhiteSpaceToken,
 } from '@watsonjs/common';
 
-export const isGenericToken = (token: IToken): token is IGenericToken =>
+export const isGenericToken = (token: Token): token is GenericToken =>
   token.kind === CommandTokenKind.Generic;
 export const isChannelMentionToken = (
-  token: IToken
-): token is IChannelMentionToken =>
+  token: Token
+): token is ChannelMentionToken =>
   token.kind === CommandTokenKind.ChannelMention;
-export const isCodeBlockToken = (token: IToken): token is ICodeBlockToken =>
+export const isCodeBlockToken = (token: Token): token is CodeBlockToken =>
   token.kind === CommandTokenKind.CodeBlock;
-export const isDashToken = (token: IToken): token is IDashToken =>
+export const isDashToken = (token: Token): token is DashToken =>
   token.kind === CommandTokenKind.Dash;
-export const isDashDashToken = (token: IToken): token is IDashDashToken =>
+export const isDashDashToken = (token: Token): token is DashDashToken =>
   token.kind === CommandTokenKind.DashDash;
-export const isEmoteToken = (token: IToken): token is IEmoteToken =>
+export const isEmoteToken = (token: Token): token is EmoteToken =>
   token.kind === CommandTokenKind.Emote;
-export const isEomToken = (token: IToken): token is IEndOfMessageToken =>
+export const isEomToken = (token: Token): token is EndOfMessageToken =>
   token.kind === CommandTokenKind.Eom;
-export const isIdentifierToken = (token: IToken): token is IIdentifierToken =>
+export const isdentifierToken = (token: Token): token is IdentifierToken =>
   token.kind === CommandTokenKind.Identifier;
-export const isNewLineToken = (token: IToken): token is INewLineToken =>
+export const isNewLineToken = (token: Token): token is NewLineToken =>
   token.kind === CommandTokenKind.NewLine;
-export const isNumberToken = (token: IToken): token is INumberToken =>
+export const isNumberToken = (token: Token): token is NumberToken =>
   token.kind === CommandTokenKind.Number;
-export const isParameterToken = (token: IToken): token is IParameterToken =>
+export const isParameterToken = (token: Token): token is ParameterToken =>
   token.kind === CommandTokenKind.Parameter;
-export const isPrefixToken = (token: IToken): token is IPrefixToken =>
+export const isPrefixToken = (token: Token): token is PrefixToken =>
   token.kind === CommandTokenKind.Prefix;
-export const isRoleMentionToken = (token: IToken): token is IRoleMentionToken =>
+export const isRoleMentionToken = (token: Token): token is RoleMentionToken =>
   token.kind === CommandTokenKind.RoleMention;
-export const isWhiteSpaceToken = (token: IToken): token is IWhiteSpaceToken =>
+export const isWhiteSpaceToken = (token: Token): token is WhiteSpaceToken =>
   token.kind === CommandTokenKind.WhiteSpace;
-export const isUserMentionToken = (token: IToken): token is IUserMentionToken =>
+export const isUserMentionToken = (token: Token): token is UserMentionToken =>
   token.kind === CommandTokenKind.UserMention;
 export const isStringTemplateToken = (
-  token: IToken
-): token is IStringTemplateToken =>
+  token: Token
+): token is StringTemplateToken =>
   token.kind === CommandTokenKind.StringTemplate;
 export const isStringLiteralToken = (
-  token: IToken
-): token is IStringLiteralToken =>
-  token.kind === CommandTokenKind.StringLiteral;
+  token: Token
+): token is StringLiteralToken => token.kind === CommandTokenKind.StringLiteral;
 export const isStringExpandableToken = (
-  token: IToken
-): token is IStringExpandableToken =>
+  token: Token
+): token is StringExpandableToken =>
   token.kind === CommandTokenKind.StringExpandable;

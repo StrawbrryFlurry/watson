@@ -1,7 +1,7 @@
+import { Module } from '@decorators/common';
+import { DynamicModule, FactoryProvider, ValueProvider } from '@interfaces/common';
 import { AxiosRequestConfig } from 'axios';
 
-import { Module } from '../../decorators';
-import { DynamicModule, FactoryProvider, ValueProvider } from '../../interfaces';
 import { httpClientFactory } from './http-client.provider';
 import { HttpClient } from './http.service';
 

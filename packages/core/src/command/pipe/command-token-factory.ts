@@ -1,8 +1,8 @@
 import * as hash from 'object-hash';
 
-import { CommandRoute } from '../router';
-import { CommandPrefixHost } from '../router/command/command-prefix-host';
-import { genearateRandomString } from './random-string.helper';
+import { CommandRoute } from '../../router';
+import { CommandPrefixHost } from '../../router/command/command-prefix-host';
+import { generateId } from '../../util/random-string.helper';
 
 interface TokenData {
   id: string;
@@ -30,7 +30,7 @@ export class CommandTokenFactory {
       return this.commandIdCache.get(command);
     }
 
-    const id = genearateRandomString();
+    const id = generateId();
     this.commandIdCache.set(command, id);
 
     return id;

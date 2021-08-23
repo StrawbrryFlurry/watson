@@ -1,6 +1,7 @@
-import { EventExceptionHandler, IPrefix, isString, RuntimeException, Type } from '@watsonjs/common';
+import { isString, Prefix, RuntimeException, Type } from '@watsonjs/common';
 import { ActivityOptions, Client, Snowflake } from 'discord.js';
 
+import { ExceptionHandler } from '.';
 import { AbstractDiscordAdapter } from './adapters';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
@@ -91,7 +92,7 @@ export class WatsonApplication {
    * Sets a global prefix for all commands.
    * It it will only be applied if none is specified for either a receiver or a command.
    */
-  public addGlobalPrefix(prefix: IPrefix | string) {
+  public addGlobalPrefix(prefix: Prefix | string) {
     const prefixHost = isString(prefix)
       ? new CommandPrefixHost(prefix)
       : prefix;
@@ -102,7 +103,7 @@ export class WatsonApplication {
   /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
-  public addGlobalExceptionsHandler(handler: EventExceptionHandler) {
+  public addGlobalExceptionsHandler(handler: ExceptionHandler) {
     this.config.addGlobalExceptionHandler(handler);
   }
 

@@ -1,27 +1,27 @@
 import {
+  ChannelMentionToken,
+  CodeBlockToken,
   CommandTokenKind,
-  IChannelMentionToken,
-  ICodeBlockToken,
-  IDashDashToken,
-  IDashToken,
-  IEmoteToken,
-  IEndOfMessageToken,
-  IGenericToken,
-  IIdentifierToken,
-  INewLineToken,
-  INumberToken,
-  IParameterToken,
-  IPrefixToken,
+  DashToken,
+  EmoteToken,
+  EndOfMessageToken,
+  GenericToken,
+  IdentifierToken,
   isNil,
-  IStringExpandableToken,
-  IStringLiteralToken,
-  IStringTemplateToken,
-  IToken,
-  ITokenPosition,
-  IUserMentionToken,
-  IWhiteSpaceToken,
+  NewLineToken,
+  NumberToken,
+  ParameterToken,
+  PrefixToken,
+  RoleMentionToken,
+  StringExpandableToken,
+  StringLiteralToken,
+  StringTemplateToken,
+  Token,
+  TokenPosition,
+  UserMentionToken,
+  WhiteSpaceToken,
 } from '@watsonjs/common';
-import { Channel, Client, Emoji, User } from 'discord.js';
+import { Channel, Client, Emoji, Guild, Role, User } from 'discord.js';
 
 export enum TokenKindIdentifier {
   /** New line */
@@ -38,19 +38,19 @@ export enum TokenKindIdentifier {
   VerticalTab = "\v",
 }
 
-export class Token<T = any> implements IToken<T> {
+export class TokenImpl<T = any> implements Token<T> {
   public text: string;
   public kind: T;
-  public position: ITokenPosition;
+  public position: TokenPosition;
 
-  constructor(kind: T, text: string, position: ITokenPosition) {
+  constructor(kind: T, text: string, position: TokenPosition) {
     this.kind = kind;
     this.text = text;
     this.position = position;
   }
 }
 
-export class TokenPosition implements ITokenPosition {
+export class TokenPositionImpl implements TokenPosition {
   public tokenStart: number;
   public tokenEnd: number;
   public text: string;
@@ -62,44 +62,44 @@ export class TokenPosition implements ITokenPosition {
   }
 }
 
-export class DiscordToken extends Token<CommandTokenKind> {
+export class DiscordTokenImpl extends TokenImpl<CommandTokenKind> {
   getId(): string {
     const [id] = this.text.match(/\d/);
     return id;
   }
 }
 
-export class GenericToken
-  extends Token<CommandTokenKind>
-  implements IGenericToken
+export class GenericTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements GenericToken
 {
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.Generic, text, position);
     this.text = text;
   }
 }
 
-export class IdentifierToken
-  extends Token<CommandTokenKind>
-  implements IIdentifierToken
+export class IdentifierTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements IdentifierToken
 {
   public value: string;
 
-  constructor(value: string, text: string, position: ITokenPosition) {
+  constructor(value: string, text: string, position: TokenPosition) {
     super(CommandTokenKind.Identifier, text, position);
     this.text = text;
     this.value = value;
   }
 }
 
-export class ParameterToken
-  extends Token<CommandTokenKind>
-  implements IParameterToken
+export class ParameterTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements ParameterToken
 {
   public value: string;
   public doubleDashed: boolean;
 
-  constructor(value: string, doubleDashed: boolean, position: ITokenPosition) {
+  constructor(value: string, doubleDashed: boolean, position: TokenPosition) {
     const text = `-${doubleDashed ? "-" : ""}${value}`;
     super(CommandTokenKind.Generic, text, position);
     this.text = text;
@@ -108,74 +108,74 @@ export class ParameterToken
   }
 }
 
-export class PrefixToken
-  extends Token<CommandTokenKind>
-  implements IPrefixToken
+export class PrefixTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements PrefixToken
 {
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.Prefix, text, position);
   }
 }
 
-export class NumberToken
-  extends Token<CommandTokenKind>
-  implements INumberToken
+export class NumberTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements NumberToken
 {
   value: number;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.Number, text, position);
     this.text = text;
     this.value = Number(text);
   }
 }
 
-export class StringExpandableToken
-  extends Token<CommandTokenKind>
-  implements IStringExpandableToken
+export class StringExpandableTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements StringExpandableToken
 {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.StringExpandable, text, position);
     this.text = `"${text}"`;
     this.value = String(text);
   }
 }
 
-export class StringLiteralToken
-  extends Token<CommandTokenKind>
-  implements IStringLiteralToken
+export class StringLiteralTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements StringLiteralToken
 {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.StringLiteral, text, position);
     this.text = `'${text}'`;
     this.value = String(text);
   }
 }
 
-export class StringTemplateToken
-  extends Token<CommandTokenKind>
-  implements IStringTemplateToken
+export class StringTemplateTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements StringTemplateToken
 {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.StringTemplate, text, position);
     this.text = `\`${text}\``;
     this.value = String(text);
   }
 }
 
-export class ChannelMentionToken
-  extends DiscordToken
-  implements IChannelMentionToken
+export class ChannelMentionTokenImpl
+  extends DiscordTokenImpl
+  implements ChannelMentionToken
 {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.ChannelMention, text, position);
     this.text = text;
     this.value = this.getId();
@@ -187,13 +187,13 @@ export class ChannelMentionToken
   }
 }
 
-export class UserMentionToken
-  extends DiscordToken
-  implements IUserMentionToken
+export class UserMentionTokenImpl
+  extends DiscordTokenImpl
+  implements UserMentionToken
 {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.UserMention, text, position);
     this.text = text;
     this.value = this.getId();
@@ -205,28 +205,28 @@ export class UserMentionToken
   }
 }
 
-export class RoleMentionToken
-  extends DiscordToken
-  implements IUserMentionToken
+export class RoleMentionTokenImpl
+  extends DiscordTokenImpl
+  implements RoleMentionToken
 {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.RoleMention, text, position);
     this.text = text;
     this.value = this.getId();
   }
 
-  getUser(client: Client): Promise<User> {
+  getRole(client: Client, guild: Guild): Promise<Role> {
     const id = this.getId();
-    return client.users.fetch(id);
+    return guild.roles.fetch(id);
   }
 }
 
-export class EmoteToken extends DiscordToken implements IEmoteToken {
+export class EmoteTokenImpl extends DiscordTokenImpl implements EmoteToken {
   value: string;
 
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.Emote, text, position);
     this.text = text;
     this.value = this.getId();
@@ -248,7 +248,7 @@ export class EmoteToken extends DiscordToken implements IEmoteToken {
   }
 }
 
-export class CodeBlockToken extends Token implements ICodeBlockToken {
+export class CodeBlockTokenImpl extends TokenImpl implements CodeBlockToken {
   public language: string;
   public value: string;
 
@@ -256,7 +256,7 @@ export class CodeBlockToken extends Token implements ICodeBlockToken {
     text: string,
     codeblock: string,
     language: string,
-    position: ITokenPosition
+    position: TokenPosition
   ) {
     super(CommandTokenKind.CodeBlock, text, position);
     this.value = codeblock;
@@ -272,48 +272,41 @@ export class CodeBlockToken extends Token implements ICodeBlockToken {
  * If you need to have access to these tokens in
  * your program please implement your own tokenizer.
  */
-export class NewLineToken
-  extends Token<CommandTokenKind>
-  implements INewLineToken
+export class NewLineTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements NewLineToken
 {
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.NewLine, text, position);
     this.text = text;
   }
 }
 
-export class WhiteSpaceToken
-  extends Token<CommandTokenKind>
-  implements IWhiteSpaceToken
+export class WhiteSpaceTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements WhiteSpaceToken
 {
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.WhiteSpace, text, position);
     this.text = text;
   }
 }
 
-export class DashToken extends Token<CommandTokenKind> implements IDashToken {
-  constructor(text: string, position: ITokenPosition) {
+export class DashTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements DashToken
+{
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.Dash, text, position);
     this.text = text;
   }
 }
 
-export class DashDashToken
-  extends Token<CommandTokenKind>
-  implements IDashDashToken
+export class EndOfMessageTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements EndOfMessageToken
 {
-  constructor(text: string, position: ITokenPosition) {
-    super(CommandTokenKind.DashDash, text, position);
-    this.text = text;
-  }
-}
-
-export class EndOfMessageToken
-  extends Token<CommandTokenKind>
-  implements IEndOfMessageToken
-{
-  constructor(text: string, position: ITokenPosition) {
+  constructor(text: string, position: TokenPosition) {
     super(CommandTokenKind.Eom, text, position);
     this.text = text;
   }

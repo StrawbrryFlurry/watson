@@ -1,4 +1,4 @@
-import { Channel, Client, Emoji, Role, User } from 'discord.js';
+import { Channel, Client, Emoji, Guild, Role, User } from 'discord.js';
 
 import { Token } from './token.interface';
 
@@ -122,7 +122,7 @@ export interface ChannelMentionToken extends TokenWithValue<string> {
 /** @see {@link CommandTokenKind#RoleMention} */
 export interface RoleMentionToken extends TokenWithValue<string> {
   getId(): string;
-  getRole(client: Client): Promise<Role>;
+  getRole(client: Client, guild: Guild): Promise<Role>;
 }
 /** @see {@link CommandTokenKind#Emote} */
 export interface EmoteToken extends TokenWithValue<string> {
@@ -149,7 +149,7 @@ export interface GenericToken extends CommandToken {}
 
 // TODO: Allow variables and keywords in template / expandable strings
 /** @see {@link CommandTokenKind#Identifier} */
-export interface dentifierToken extends TokenWithValue<string> {}
+export interface IdentifierToken extends TokenWithValue<string> {}
 
 /** @see {@link CommandTokenKind#Parameter} */
 export interface ParameterToken extends TokenWithValue<string> {

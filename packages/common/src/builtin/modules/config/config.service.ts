@@ -1,6 +1,5 @@
+import { Injectable } from '@decorators/common';
 import { config, DotenvConfigOptions } from 'dotenv';
-
-import { Injectable } from '../../decorators';
 
 @Injectable()
 export class ConfigService {
@@ -39,6 +38,9 @@ export class ConfigService {
    */
   get<T = any>(path: string): T {
     const segments = path.split(".");
-    return segments.reduce((val, segment) => (val = val[segment]), this.config) as T;
+    return segments.reduce(
+      (val, segment) => (val = val[segment]),
+      this.config
+    ) as T;
   }
 }

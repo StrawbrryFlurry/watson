@@ -1,3 +1,3 @@
-import { EventException } from './event.exception';
+import { RuntimeException } from '@exceptions';
 
-export class UnknownCommandException extends EventException {}
+export class UnknownCommandException extends RuntimeException {}
