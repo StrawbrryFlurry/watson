@@ -1,7 +1,7 @@
+import { ArgumentOutOfRangeException } from '@exceptions';
 import { EOL } from 'os';
 
-import { ArgumentOutOfRangeException } from '../exceptions';
-import { isNil, isString } from '../utils/shared.utils';
+import { isNil, isString } from '../../utils';
 
 /**
  * While not strictly necessary this StringBuilder
