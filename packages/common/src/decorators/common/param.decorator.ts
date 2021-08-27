@@ -1,3 +1,5 @@
+import { Type } from '@interfaces/type.interface';
+
 import { PARAM_METADATA } from '../../constants';
 import { mergeDefaults } from '../../utils';
 
@@ -11,6 +13,8 @@ export interface CommandParameterOptions<T = any> {
    * Label that describes the parameter
    */
   label?: string;
+  /** The type this parameter will be parsed as */
+  type?: Type;
   /**
    * Makes the parameter optional.
    * Optional parameters cannot be followed by mandatory ones.
@@ -28,11 +32,6 @@ export interface CommandParameterOptions<T = any> {
    * The default value if none was provided
    */
   default?: T;
-  /**
-   * An array of options the user can choose from
-   * for this argument.
-   */
-  choices?: T[];
 }
 
 /**

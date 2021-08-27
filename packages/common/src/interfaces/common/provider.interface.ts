@@ -1,1 +1,1 @@
-export type TProvider = unknown;
+export type ProviderDef = unknown;

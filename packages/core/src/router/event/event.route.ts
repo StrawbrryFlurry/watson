@@ -1,18 +1,20 @@
-import { EventRoute, TReceiver, WatsonEvent } from '@watsonjs/common';
+import { EventRoute, ReceiverDef, WatsonEvent } from '@watsonjs/common';
 
+import { RouteRef } from '..';
 import { InstanceWrapper } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
-import { AbstractRoute } from '../abstract-route';
 
+// TODO:
 export class EventRouteHost<T extends WatsonEvent>
-  extends AbstractRoute<T>
-  implements EventRoute {
+  extends RouteRef<T>
+  implements EventRoute
+{
   public handler: Function;
-  public host: InstanceWrapper<TReceiver>;
+  public host: InstanceWrapper<ReceiverDef>;
 
   constructor(
     event: T,
-    receiver: InstanceWrapper<TReceiver>,
+    receiver: InstanceWrapper<ReceiverDef>,
     handler: Function,
     container: WatsonContainer
   ) {

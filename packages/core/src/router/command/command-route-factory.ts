@@ -8,7 +8,7 @@ import {
   mergeDefaults,
   NON_DECLARATIVE_PARAM_METADATA,
   PARAM_METADATA,
-  TReceiver,
+  ReceiverDef,
   Type,
 } from '@watsonjs/common';
 import { WatsonContainer } from 'watson-container';
@@ -22,7 +22,7 @@ export class CommandRouteFactory {
 
   constructor(private readonly container: WatsonContainer) {}
 
-  public fromReceiver(receiver: InstanceWrapper<TReceiver>) {
+  public fromReceiver(receiver: InstanceWrapper<ReceiverDef>) {
     const { metatype } = receiver;
 
     const methods = this.reflector.reflectMethodsOfType(metatype);

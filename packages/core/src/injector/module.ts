@@ -2,12 +2,12 @@ import {
   ClassProvider,
   CustomProvider,
   FactoryProvider,
+  InjectableDef,
   isConstructor,
   isFunction,
   isNil,
   isString,
-  TInjectable,
-  TReceiver,
+  ReceiverDef,
   Type,
   ValueProvider,
 } from '@watsonjs/common';
@@ -31,15 +31,18 @@ export class Module {
    * This set contains the names of all providers exported by the module
    */
   private readonly _exports = new Set<string>();
-  private readonly _receivers = new Map<any, InstanceWrapper<TReceiver>>();
+  private readonly _receivers = new Map<any, InstanceWrapper<ReceiverDef>>();
   /**
    * Injectables are services such as guards and filters.
    */
-  private readonly _injectables = new Map<any, InstanceWrapper<TInjectable>>();
+  private readonly _injectables = new Map<
+    any,
+    InstanceWrapper<InjectableDef>
+  >();
   /**
    * Providers are a map of InstanceWrappers that can be used by the injector to inject parameters for methods and or construcotrs.
    */
-  private readonly _providers = new Map<any, InstanceWrapper<TInjectable>>();
+  private readonly _providers = new Map<any, InstanceWrapper<InjectableDef>>();
   /**
    * @provisional
    * Contains metadata for components such as receiver events
@@ -68,7 +71,7 @@ export class Module {
     const resolver = new MetadataResolver(container);
     this._injector = new Injector(resolver);
 
-    this.registerDefaultProviders();
+    this.registerDefaulProviderDefs();
   }
 
   initProperties() {}
@@ -82,7 +85,7 @@ export class Module {
   }
 
   public addExportedProvider(
-    provider: string | Type<TInjectable> | CustomProvider
+    provider: string | Type<InjectableDef> | CustomProvider
   ) {
     if (isString(provider)) {
       if (!this.exports.has(provider as string)) {
@@ -130,7 +133,7 @@ export class Module {
   public addReceiver(receiver: Type) {
     this._receivers.set(
       receiver.name,
-      new InstanceWrapper<TReceiver>({
+      new InstanceWrapper<ReceiverDef>({
         name: receiver.name,
         metatype: receiver,
         host: this,
@@ -142,7 +145,7 @@ export class Module {
     const wrapper = this._injectables.get(injectable);
 
     if (!wrapper) {
-      const instanceWrapper = new InstanceWrapper<TInjectable>({
+      const instanceWrapper = new InstanceWrapper<InjectableDef>({
         name: injectable.name,
         metatype: injectable,
         host: this,
@@ -162,7 +165,7 @@ export class Module {
     const wrapper = this._providers.get(provider);
 
     if (!wrapper) {
-      const instanceWrapper = new InstanceWrapper<TInjectable>({
+      const instanceWrapper = new InstanceWrapper<InjectableDef>({
         name: (provider as Type).name,
         metatype: provider,
         host: this,
@@ -277,7 +280,7 @@ export class Module {
     return provider && "provide" in provider;
   }
 
-  private registerDefaultProviders() {
+  private registerDefaulProviderDefs() {
     this.providers.set(
       WATSON_CONTAINER_PROVIDER,
       new InstanceWrapper({
@@ -316,15 +319,15 @@ export class Module {
     return this._metatype;
   }
 
-  get providers(): Map<any, InstanceWrapper<TInjectable>> {
+  get providers(): Map<any, InstanceWrapper<InjectableDef>> {
     return this._providers;
   }
 
-  get injectables(): Map<any, InstanceWrapper<TInjectable>> {
+  get injectables(): Map<any, InstanceWrapper<InjectableDef>> {
     return this._injectables;
   }
 
-  get receivers(): Map<any, InstanceWrapper<TReceiver>> {
+  get receivers(): Map<any, InstanceWrapper<ReceiverDef>> {
     return this._receivers;
   }
 

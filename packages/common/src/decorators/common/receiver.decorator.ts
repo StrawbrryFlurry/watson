@@ -12,14 +12,6 @@ export interface ReceiverOptions {
    */
   prefix?: string | Prefix;
   /**
-   * The named prefix for underlying commands if none is specified.
-   *
-   * @example
-   * pls ban @username
-   * Where `pls` is the named prefix
-   */
-  namedPrefix?: string;
-  /**
    * The command group underlying commands will be mapped to.
    *
    * @example

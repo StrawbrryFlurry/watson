@@ -1,1 +1,1 @@
-export type TInjectable = unknown;
+export type InjectableDef = unknown;

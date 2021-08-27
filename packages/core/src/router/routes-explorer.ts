@@ -6,7 +6,7 @@ import {
   IBaseRoute,
   isFunction,
   RECEIVER_METADATA,
-  TReceiver,
+  ReceiverDef,
   Type,
   WatsonEvent,
 } from '@watsonjs/common';
@@ -93,9 +93,9 @@ export class RouteExplorer {
     this.logger.logMessage(COMPLETED());
   }
 
-  private async reflectCommands(receiver: InstanceWrapper<TReceiver>) {
+  private async reflectCommands(receiver: InstanceWrapper<ReceiverDef>) {
     const { metatype } = receiver;
-    const receiverMethods = this.reflectReceiverMehtods(metatype);
+    const receiverMethods = this.reflecReceiverDefMehtods(metatype);
     for (const method of receiverMethods) {
       const { descriptor, name } = method;
       this.scanner.getMetadata<unknown[]>(DESIGN_PARAMETERS, metatype, name);
@@ -103,7 +103,7 @@ export class RouteExplorer {
   }
 
   private async reflectRoute<T extends string>(
-    receiver: InstanceWrapper<TReceiver>,
+    receiver: InstanceWrapper<ReceiverDef>,
     metadataKey: string,
     routeType: Type,
     eventProxyType: Type<EventProxy>,
@@ -115,7 +115,7 @@ export class RouteExplorer {
     isWsEvent?: boolean
   ) {
     const { metatype } = receiver;
-    const receiverMethods = this.reflectReceiverMehtods(metatype);
+    const receiverMethods = this.reflecReceiverDefMehtods(metatype);
 
     for (const method of receiverMethods) {
       const { descriptor } = method;
@@ -171,7 +171,7 @@ export class RouteExplorer {
     }
   }
 
-  private reflectReceiverMehtods(receiver: Type) {
+  private reflecReceiverDefMehtods(receiver: Type) {
     return this.scanner.reflectMethodsFromMetatype(receiver);
   }
 

@@ -6,10 +6,10 @@ import {
   IParamDecoratorMetadata,
   PARAM_METADATA,
   PIPE_METADATA,
+  ReceiverDef,
   TFiltersMetadata,
   TGuardsMetadata,
   TPipesMetadata,
-  TReceiver,
 } from '@watsonjs/common';
 import { Base, Message } from 'discord.js';
 
@@ -49,7 +49,7 @@ export interface RouteMetadata {
 export type HandlerFactory = (
   route: CommandRoute,
   handler: Function,
-  receiver: InstanceWrapper<TReceiver>,
+  receiver: InstanceWrapper<ReceiverDef>,
   moduleKey: string
 ) => Promise<LifecycleFunction>;
 
@@ -69,7 +69,7 @@ export class RouteHandlerFactory {
   public async createCommandHandler<RouteResult = any>(
     route: CommandRoute,
     handler: Function,
-    receiver: InstanceWrapper<TReceiver>,
+    receiver: InstanceWrapper<ReceiverDef>,
     moduleKey: string
   ): Promise<LifecycleFunction> {
     const { filters, guards, pipes, paramsFactory } = this.getMetadata(
@@ -153,7 +153,7 @@ export class RouteHandlerFactory {
   private reflectKey<T>(
     metadataKey: string,
     handler: Function,
-    receiver: InstanceWrapper<TReceiver>
+    receiver: InstanceWrapper<ReceiverDef>
   ): T[] {
     const { metatype } = receiver;
 
@@ -171,7 +171,7 @@ export class RouteHandlerFactory {
 
   private getMetadata(
     handler: Function,
-    receiver: InstanceWrapper<TReceiver>
+    receiver: InstanceWrapper<ReceiverDef>
   ): RouteMetadata {
     const guards = this.reflectKey<TGuardsMetadata>(
       GUARD_METADATA,
@@ -203,7 +203,7 @@ export class RouteHandlerFactory {
   }
 
   private reflectParams(
-    receiver: InstanceWrapper<TReceiver>,
+    receiver: InstanceWrapper<ReceiverDef>,
     handle: Function
   ) {
     return (

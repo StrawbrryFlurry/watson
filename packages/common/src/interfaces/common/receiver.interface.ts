@@ -1,1 +1,1 @@
-export type TReceiver = unknown;
+export type ReceiverDef = unknown;

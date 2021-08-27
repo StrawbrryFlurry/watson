@@ -1,7 +1,21 @@
-import { CommandToken, CommandTokenKind } from '.';
+import { CommandToken, Token } from '.';
 
-export interface CommandArgument<T = any> {
+export interface CommandArgument<T = any, K extends Token = CommandToken> {
+  name: string;
+  label: string;
+
   value: T;
-  type: CommandTokenKind;
-  token: CommandToken;
+  defaultValue?: T;
+
+  /** The command token kind of the argument */
+  type: K["kind"];
+  token: K;
+
+  /**
+   * If the argument is hungry,
+   * it will "eat" all the following
+   * tokens for the rest of the message.
+   */
+  hungry: boolean;
+  optional: boolean;
 }

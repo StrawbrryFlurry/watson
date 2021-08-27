@@ -5,6 +5,8 @@ export type PrefixResolutionFn = (
   message: Message
 ) => string | Promise<string> | Observable<string>;
 
+export type Prefix = PrefixResolvable | string;
+
 /**
  * Implement this interface when creating your own
  * prefix class. This can for example be used if
@@ -13,7 +15,7 @@ export type PrefixResolutionFn = (
  *
  * ```ts
  * \@Injectable()
- * export class GuildPrefix implement IPrefix {
+ * export class GuildPrefix implement PrefixResolvable {
  *  constructor(private readonly guildService) {  }
  *
  *  public async resolve(message: Message) {
@@ -24,22 +26,10 @@ export type PrefixResolutionFn = (
  * }
  * ```
  */
-export interface Prefix {
-  /**
-   * If the prefix is static this
-   * property holds the string value
-   * of the prefix.
-   *
-   * @WARN
-   * Don't set this property if you want
-   * the prefix to be resolved by the
-   * resolution function. If it is set
-   * we'll assume that it's save to use.
-   */
-  prefix?: string;
+export interface PrefixResolvable {
   /**
    * This method returns the prefix that should
    * be applied when matching incoming messages.
    */
-  resolve?: PrefixResolutionFn;
+  resolve: PrefixResolutionFn;
 }

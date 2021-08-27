@@ -1,16 +1,26 @@
-import { ContextType, IBaseRoute, TReceiver, Type, WatsonEvent } from '@watsonjs/common';
+import { BaseRoute, ContextType, ReceiverDef, Type, WatsonEvent } from '@watsonjs/common';
 
 import { InstanceWrapper } from '../injector';
 import { WatsonContainer } from '../watson-container';
 
-export abstract class AbstractRoute<Event extends WatsonEvent = any>
-  implements IBaseRoute {
+/**
+ * Represents a route of any type
+ * that can handle an event registered
+ * in the application.
+ */
+export abstract class RouteRef<Event extends WatsonEvent = any>
+  implements BaseRoute
+{
   /**
-   * The type of the execution context Execution contexts be either "slash", event or "command"
+   * The type of the Execution
+   * context:
+   * - "slash"
+   * - "event"
+   * - "command"
    */
   public readonly type: ContextType;
   /**
-   * The event name this route will map to
+   * The event type this route will map to
    * @example
    * `WatsonEvent.MESSAGE_CREATE`
    */
@@ -23,7 +33,7 @@ export abstract class AbstractRoute<Event extends WatsonEvent = any>
   /**
    * The host receiver that this route was registered in
    */
-  public abstract readonly host: InstanceWrapper<TReceiver>;
+  public abstract readonly host: InstanceWrapper<ReceiverDef>;
   public readonly container: WatsonContainer;
 
   constructor(type: ContextType, event: Event, container: WatsonContainer) {
@@ -32,23 +42,23 @@ export abstract class AbstractRoute<Event extends WatsonEvent = any>
     this.event = event;
   }
 
-  getType(): ContextType {
-    return this.type;
+  public getType<T extends string = ContextType>(): T {
+    return this.type as T;
   }
 
-  getHandler(): Function {
+  public getHandler(): Function {
     return this.handler;
   }
 
-  getHost<T extends Type<any>>(): T {
+  public getHost<T extends Type<any>>(): T {
     return this.host.instance as T;
   }
 
-  getContainer<T = any>(): T {
-    return (this.container as unknown) as T;
+  public getContainer<T = any>(): T {
+    return this.container as unknown as T;
   }
 
-  getEvent(): Event {
+  public getEvent(): Event {
     return this.event;
   }
 }

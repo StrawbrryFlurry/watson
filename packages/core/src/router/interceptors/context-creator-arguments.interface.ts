@@ -1,11 +1,11 @@
-import { TReceiver } from '@watsonjs/common';
+import { ReceiverDef } from '@watsonjs/common';
 
+import { RouteRef } from '..';
 import { InstanceWrapper } from '../../injector';
-import { AbstractRoute } from '../abstract-route';
 
 export interface ContextCreatorArguments<T = any> {
-  route: AbstractRoute;
-  receiver: InstanceWrapper<TReceiver>;
+  route: RouteRef;
+  receiver: InstanceWrapper<ReceiverDef>;
   moduleKey: string;
   metadata: T[];
 }

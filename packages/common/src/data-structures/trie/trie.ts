@@ -1,3 +1,4 @@
+import { isNil } from '../..';
 import { TRIE_ROOT_NODE, TrieNode } from './trie-node';
 
 export class Trie {
@@ -11,7 +12,7 @@ export class Trie {
       let char = word[i];
       const nextNode = node.get(char);
 
-      if (!nextNode) {
+      if (isNil(nextNode)) {
         return false;
       }
 
@@ -34,7 +35,7 @@ export class Trie {
       let char = word[i];
       const nextNode = node.get(char);
 
-      if (!nextNode) {
+      if (isNil(nextNode)) {
         return lastLeafMatch;
       }
 

@@ -1,33 +1,27 @@
-import {
-  CommandConfiguration,
-  ICommandOptions,
-  ICommandRoute,
-  IParamDecoratorMetadata,
-  IReceiverOptions,
-  TReceiver,
-  WatsonEvent,
-} from '@watsonjs/common';
+import { CommandOptions, CommandRoute, Prefix, ReceiverDef, ReceiverOptions, WatsonEvent } from '@watsonjs/common';
 
+import { RouteRef } from '..';
 import { InstanceWrapper, MethodValue } from '../../injector';
 import { WatsonContainer } from '../../watson-container';
-import { AbstractRoute } from '../abstract-route';
 import { CommandConfigurationHost } from './command-configuration-host';
-import { CommandPrefixHost } from './command-prefix-host';
 
-export interface ParamDecorator extends IParamDecoratorMetadata {}
-
-export class CommandRoute
-  extends AbstractRoute<WatsonEvent.MESSAGE_CREATE>
-  implements ICommandRoute
+export class CommandRouteImpl
+  extends RouteRef<WatsonEvent.MESSAGE_CREATE>
+  implements CommandRoute
 {
+  // TODO:
+  // Have this as a separate class to hold command meta
+  // or store everything on this class
+  // Pref option 2.
   public readonly configuration: CommandConfigurationHost;
   public readonly handler: Function;
-  public readonly host: InstanceWrapper<TReceiver>;
+  public readonly host: InstanceWrapper<ReceiverDef>;
+  public readonly commandPrefix: Prefix;
 
   constructor(
-    commandOptions: ICommandOptions,
-    receiverOptions: IReceiverOptions,
-    receiver: InstanceWrapper<TReceiver>,
+    commandOptions: CommandOptions,
+    receiverOptions: ReceiverOptions,
+    receiver: InstanceWrapper<ReceiverDef>,
     handler: MethodValue,
     container: WatsonContainer
   ) {
@@ -45,20 +39,12 @@ export class CommandRoute
     this.host = receiver;
   }
 
-  public getConfiguration(): CommandConfiguration {
-    return this.configuration;
-  }
-
   public get name() {
     return this.configuration.name;
   }
 
   public get params() {
     return this.configuration.params || [];
-  }
-
-  public get commandPrefix(): CommandPrefixHost {
-    return this.configuration.prefix;
   }
 
   public get prefix() {

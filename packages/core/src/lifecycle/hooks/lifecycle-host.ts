@@ -5,13 +5,13 @@ import {
   OnApplicationShutdown,
   OnModuleDestroy,
   OnModuleInit,
-  TProvider,
-  TReceiver,
-} from "@watsonjs/common";
-import iterate from "iterare";
+  ProviderDef,
+  ReceiverDef,
+} from '@watsonjs/common';
+import iterate from 'iterare';
 
-import { InstanceWrapper, Module } from "../../injector";
-import { WatsonContainer } from "../../watson-container";
+import { InstanceWrapper, Module } from '../../injector';
+import { WatsonContainer } from '../../watson-container';
 
 type ComponentWithLifecycleFunction = { [key: string]: Function };
 
@@ -73,7 +73,7 @@ export class LifecycleHost {
 
   private getModuleComponents(
     module: Module
-  ): InstanceWrapper<TReceiver | TProvider>[] {
+  ): InstanceWrapper<ReceiverDef | ProviderDef>[] {
     const { receivers, providers } = module;
 
     const receiverWrappers = iterate(receivers).map(

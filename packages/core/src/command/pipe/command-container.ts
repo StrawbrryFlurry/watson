@@ -1,9 +1,9 @@
-import { IPrefix, isNil } from '@watsonjs/common';
+import { isNil } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { CommandRoute } from '../../router';
 import { CommandPrefixHost } from '../../router/command/command-prefix-host';
-import { CommandTokenFactory } from '../../util';
+import { CommandTokenFactory } from './command-token-factory';
 
 export class CommandContainer extends Map<string, CommandRoute> {
   constructor(private commandTokenFactory = new CommandTokenFactory()) {

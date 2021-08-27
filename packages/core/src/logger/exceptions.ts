@@ -1,4 +1,4 @@
-import { TReceiver } from '@watsonjs/common';
+import { ReceiverDef } from '@watsonjs/common';
 import { blue, cyan, green, red } from 'cli-color';
 
 import { InstanceWrapper } from '../injector';
@@ -13,8 +13,8 @@ export const EXCEPTION_STACK = (s: string) => red(s);
 export const DUPLICATE_COMMAND_NAME = (
   conflict: string,
   prefix: string,
-  existing: InstanceWrapper<TReceiver>,
-  duplicate: InstanceWrapper<TReceiver>
+  existing: InstanceWrapper<ReceiverDef>,
+  duplicate: InstanceWrapper<ReceiverDef>
 ) =>
   `The command with name ${cyan(`${prefix}${conflict}`)} in receiver ${blue(
     duplicate.name

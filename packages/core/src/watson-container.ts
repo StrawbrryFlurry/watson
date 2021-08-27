@@ -111,9 +111,8 @@ export class WatsonContainer {
       throw new UnknownModuleException("WatsonContainer");
     }
 
-    const importedModuleToken = this.moduleTokenFactory.getTokenByModuleType(
-      metatype
-    );
+    const importedModuleToken =
+      this.moduleTokenFactory.getTokenByModuleType(metatype);
     const importedModuleRef = this.modules.get(importedModuleToken);
     const moduleRef = this.modules.get(token);
 
@@ -192,12 +191,8 @@ export class WatsonContainer {
     return [];
   }
 
-  public getModuleByToken(token: string): Module {
-    if (this.modules.has(token)) {
-      return this.modules.get(token);
-    }
-
-    return undefined;
+  public getModuleByToken(token: string): Module | null {
+    return this.modules.get(token) ?? null;
   }
 
   public setRootModule(token: string) {
