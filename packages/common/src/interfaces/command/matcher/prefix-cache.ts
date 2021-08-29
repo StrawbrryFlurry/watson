@@ -1,4 +1,4 @@
-import { Prefix } from '@interfaces/command';
+import { Prefix } from '@interfaces';
 
 /**
  * Holds a map of value - prefix pairs.

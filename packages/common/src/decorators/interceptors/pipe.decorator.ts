@@ -1,13 +1,16 @@
 import { PIPE_METADATA } from '@constants';
-import { CommandArgument } from '@interfaces/command';
-import { PipeTransform } from '@interfaces/interceptors';
-import { Type } from '@interfaces/type.interface';
+import { CommandArgument, PipeTransform } from '@interfaces';
+import { isMethodDecorator } from '@utils';
 
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 type PipeTransformFn = <T extends CommandArgument, R>(argument: T) => R;
 
-export type PipesMetadata = (PipeTransform | Type | PipeTransformFn)[];
+interface WithPipeTransform {
+  prototype: PipeTransform;
+}
+
+export type PipesMetadata = PipeTransform | WithPipeTransform | PipeTransformFn;
 
 /**
  * TODO:
@@ -15,19 +18,17 @@ export type PipesMetadata = (PipeTransform | Type | PipeTransformFn)[];
  * ```
  */
 export function UsePipes(
-  ...pipes: PipesMetadata
+  ...pipes: PipesMetadata[]
 ): MethodDecorator & ClassDecorator {
   return (
-    target: any,
+    target: object,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    // Is method decorator
-    if (typeof descriptor !== "undefined") {
-      applyStackableMetadata(PIPE_METADATA, pipes, descriptor.value);
+    if (isMethodDecorator(descriptor)) {
+      return applyStackableMetadata(PIPE_METADATA, descriptor.value, pipes);
     }
 
-    // Is class decorator
-    applyStackableMetadata(PIPE_METADATA, pipes, target);
+    applyStackableMetadata(PIPE_METADATA, target.constructor, pipes);
   };
 }

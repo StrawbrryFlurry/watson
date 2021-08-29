@@ -1,9 +1,16 @@
-import { CommandOptions, CommandRoute, Prefix, ReceiverDef, ReceiverOptions, WatsonEvent } from '@watsonjs/common';
+import {
+  CommandOptions,
+  CommandRoute,
+  Prefix,
+  ReceiverDef,
+  ReceiverOptions,
+  WatsonEvent,
+} from "@watsonjs/common";
 
-import { RouteRef } from '..';
-import { InstanceWrapper, MethodValue } from '../../injector';
-import { WatsonContainer } from '../../watson-container';
-import { CommandConfigurationHost } from './command-configuration-host';
+import { RouteRef } from "..";
+import { InstanceWrapper, MethodValue } from "../../injector";
+import { WatsonContainer } from "../../watson-container";
+import { CommandConfigurationHost } from "./command-configuration-host";
 
 export class CommandRouteImpl
   extends RouteRef<WatsonEvent.MESSAGE_CREATE>

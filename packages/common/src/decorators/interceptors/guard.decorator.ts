@@ -1,23 +1,27 @@
+import { isMethodDecorator } from '@utils';
+
 import { GUARD_METADATA } from '../../constants';
-import { CanActivate, Type } from '../../interfaces';
+import { CanActivate } from '../../interfaces';
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
-export type TGuardsMetadata = CanActivate | Type;
+interface WithCanActivate {
+  prototype: CanActivate;
+}
+
+export type GuardsMetadata = CanActivate | WithCanActivate;
 
 export function UseGuards(
-  ...guards: TGuardsMetadata[]
+  ...guards: GuardsMetadata[]
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    // Is method decorator
-    if (typeof descriptor !== "undefined") {
-      applyStackableMetadata(GUARD_METADATA, guards, descriptor.value);
+    if (isMethodDecorator(descriptor)) {
+      return applyStackableMetadata(GUARD_METADATA, descriptor.value, guards);
     }
 
-    // Is class decorator
-    applyStackableMetadata(GUARD_METADATA, guards, target);
+    applyStackableMetadata(GUARD_METADATA, target.constructor, guards);
   };
 }

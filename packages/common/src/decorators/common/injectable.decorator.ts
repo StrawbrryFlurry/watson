@@ -1,20 +1,24 @@
-import { INJECTABLE_METADATA } from '../../constants';
-import { isUndefined } from '../../utils';
+import { INJECTABLE_METADATA } from '@constants';
+import { mergeDefaults } from '@utils';
 
-export type InjectionScope = "singleton" | "request" | "transient";
-
-export interface InjectableOptions {
-  scope: InjectionScope;
+export enum InjectionScope {
+  Singleton,
+  Request,
+  Transient,
 }
 
-export function Injectable(
-  injectableOptions?: InjectableOptions
-): ClassDecorator {
-  const options = isUndefined(injectableOptions)
-    ? undefined
-    : injectableOptions;
+export interface InjectableOptions {
+  scope?: InjectionScope;
+}
+
+const DEFAULT_SCOPE = InjectionScope.Singleton;
+
+export function Injectable(options?: InjectableOptions): ClassDecorator {
+  const metadata = mergeDefaults(options, {
+    scope: DEFAULT_SCOPE,
+  });
 
   return (target: Object) => {
-    Reflect.defineMetadata(INJECTABLE_METADATA, options, target);
+    Reflect.defineMetadata(INJECTABLE_METADATA, metadata, target);
   };
 }

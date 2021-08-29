@@ -1,4 +1,4 @@
-import { MODULE_GLOBAL_METADATA } from '../../constants';
+import { MODULE_GLOBAL_METADATA } from '@constants';
 
 export function Global(): ClassDecorator {
   return (target: Object) => {

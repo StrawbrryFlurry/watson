@@ -204,7 +204,11 @@ export class MetadataResolver {
     target: Type,
     propertyKey: string | symbol
   ): unknown[] {
-    return Reflect.getMetadata(DESIGN_PARAMETERS, target, propertyKey);
+    return Reflect.getMetadata(
+      DESIGN_PARAMETERS,
+      target.constructor,
+      propertyKey
+    );
   }
 
   public reflectModuleMetadata(target: Type | DynamicModule) {
@@ -285,7 +289,7 @@ export class MetadataResolver {
     propertyKey?: string
   ): T {
     if (propertyKey) {
-      return Reflect.getMetadata(metadataKey, target, propertyKey);
+      return Reflect.getMetadata(metadataKey, target.constructor, propertyKey);
     }
 
     return Reflect.getMetadata(metadataKey, target);

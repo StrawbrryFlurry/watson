@@ -1,8 +1,8 @@
 import { ConfigService } from '@builtin';
-import { Module } from '@decorators/common';
-import { DynamicModule, ValueProvider } from '@interfaces/common';
+import { Module } from '@decorators';
+import { DynamicModule, ValueProvider } from '@interfaces';
+import { isNil } from '@utils';
 import { DotenvConfigOptions } from 'dotenv';
-import { isNil } from 'packages/common/src';
 
 export interface ConfigModuleOptions<T = any> {
   dotEnv?: DotenvConfigOptions;

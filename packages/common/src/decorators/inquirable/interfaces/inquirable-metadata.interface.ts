@@ -1,4 +1,4 @@
-import { InquirableOptions } from '@decorators/inquirable';
+import { InquirableOptions } from '@decorators';
 
 import { InquirableType } from '../../../enums';
 

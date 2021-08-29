@@ -1,6 +1,7 @@
-import { ExceptionHandler } from '@interfaces/exceptions';
+import { EXCEPTION_HANDLER_METADATA } from '@constants';
+import { ExceptionHandler } from '@interfaces';
+import { isMethodDecorator } from '@utils';
 
-import { EXCEPTION_HANDLER_METADATA } from '../../constants';
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
 export function UseExceptionHandler(
@@ -11,16 +12,18 @@ export function UseExceptionHandler(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    // Is method decorator
-    if (typeof descriptor !== "undefined") {
-      applyStackableMetadata(
+    if (isMethodDecorator(descriptor)) {
+      return applyStackableMetadata(
         EXCEPTION_HANDLER_METADATA,
-        handlers,
-        descriptor.value
+        descriptor.value,
+        handlers
       );
     }
 
-    // Is class decorator
-    applyStackableMetadata(EXCEPTION_HANDLER_METADATA, handlers, target);
+    applyStackableMetadata(
+      EXCEPTION_HANDLER_METADATA,
+      target.constructor,
+      handlers
+    );
   };
 }

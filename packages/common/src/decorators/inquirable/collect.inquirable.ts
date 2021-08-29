@@ -1,8 +1,5 @@
 import { CollectorOptions, MessageEmbed } from 'discord.js';
 
-import { InquirableType } from '../../enums';
-import { createInquirableDecorator } from './create-inquirable-decorator';
-
 /**
  * @param message The message that should be sent to the channel.
  * @param filter The filter for the collector.
@@ -21,5 +18,5 @@ export type CollectFunction<T = any> = (
  * Injects the `collect` function to the command handler.
  */
 export function InjectCollect() {
-  return createInquirableDecorator(InquirableType.COLLECT);
+  // return createInquirableDecorator(InquirableType.COLLECT);
 }

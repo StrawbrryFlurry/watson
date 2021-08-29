@@ -1,5 +1,5 @@
+import { mergeDefaults } from '../..';
 import { CustomProvider, DynamicModule, Type } from '../../interfaces';
-import { isUndefined } from '../../utils';
 
 export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
@@ -8,19 +8,17 @@ export interface ModuleOptions {
   exports?: (Type | CustomProvider)[];
 }
 
-export function Module(moduleOptions?: ModuleOptions): ClassDecorator {
-  const options = isUndefined(moduleOptions)
-    ? {
-        imports: undefined,
-        receivers: undefined,
-        providers: undefined,
-        exports: undefined,
-      }
-    : moduleOptions;
+export function Module(options?: ModuleOptions): ClassDecorator {
+  const metadata = mergeDefaults(options, {
+    exports: undefined,
+    imports: undefined,
+    providers: undefined,
+    receivers: undefined,
+  });
 
   return (target: Object) => {
-    Object.entries(options).forEach(([key, value]) => {
-      Reflect.defineMetadata(`module:${key}`, value, target);
-    });
+    for (const [key, value] of Object.entries(metadata)) {
+      Reflect.defineMetadata(`module-${key}:meta`, value, target);
+    }
   };
 }

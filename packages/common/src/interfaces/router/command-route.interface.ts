@@ -1,4 +1,4 @@
-import { Prefix } from '@interfaces/command';
+import { Prefix } from '@interfaces';
 
 import { CommandConfiguration } from '.';
 import { CommandParameterOptions } from '../..';

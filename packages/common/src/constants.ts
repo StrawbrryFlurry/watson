@@ -1,37 +1,35 @@
+/** @Metadata */
+
 export const MODULE_METADATA = {
-  PROVIDERS: "module:providers",
-  IMPORTS: "module:imports",
-  RECEIVER: "module:receivers",
-  EXPORTS: "module:exports",
+  PROVIDERS: "module-providers:meta",
+  IMPORTS: "module-imports:meta",
+  RECEIVER: "module-receivers:meta",
+  EXPORTS: "module-exports:meta",
 };
 
-export const MODULE_GLOBAL_METADATA = "module:global";
-
-export const RECEIVER_METADATA = "receiver:meta";
-export const EVENT_METADATA = "event:meta";
-export const COMMAND_METADATA = "command:meta";
-export const SLASH_COMMAND_METADATA = "slashcommands:meta";
-export const PARAM_METADATA = "param:meta";
+export const MODULE_GLOBAL_METADATA = "module-global:meta";
 
 export const INJECTABLE_METADATA = "injectable:meta";
+
+export const RECEIVER_METADATA = "receiver:meta";
+
+export const EVENT_METADATA = "event:meta";
+export const SLASH_COMMAND_METADATA = "slash-command:meta";
+export const COMMAND_METADATA = "command:meta";
+export const PARAM_METADATA = "param:meta";
+
+export const COOLDOWN_METADATA = "cooldown:meta";
+export const PREFIX_METADATA = "prefix:meta";
 
 export const PIPE_METADATA = "pipe:meta";
 export const GUARD_METADATA = "guard:meta";
 export const FILTER_METADATA = "filter:meta";
-export const EXCEPTION_HANDLER_METADATA = "exception.handler:meta";
-export const PREFIX_METADATA = "prefix:meta";
-
-export const NON_DECLARATIVE_PARAM_METADATA = "param:non.declarative:meta";
-
-export const RECEIVER_ERROR_HANDLER_METADATA = "receiver:error:meta";
-export const COMMAND_ERROR_HANDLER_METADATA = "command:error:meta";
-
-export const INQUIRABLE_METADATA = "inquirable:meta";
+export const EXCEPTION_HANDLER_METADATA = "exception-handler:meta";
 
 export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
 
 /**
- * The parmeter types that the decoratee descriptor value
+ * The parameter types that the decoratee descriptor value
  * takes.
  *
  * Class prototype parameters
@@ -56,7 +54,7 @@ export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
  * // [ String, SomeClass, Object ]
  *```
  */
-export const DESIGN_PARAMETERS = "design:paramtypes";
+export const DESIGN_PARAMETERS = "design:param-types";
 /**
  * The return type of the decoratee descriptor
  * is `void` e.g `undefined` if not explicitly
@@ -72,7 +70,7 @@ export const DESIGN_PARAMETERS = "design:paramtypes";
  * // String
  * ```
  */
-export const DESIGN_RETURN_TYPE = "design:returntype";
+export const DESIGN_RETURN_TYPE = "design:return-type";
 /**
  * The type of the decoratee
  * ```ts

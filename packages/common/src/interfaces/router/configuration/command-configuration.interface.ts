@@ -1,5 +1,5 @@
-import { CommandOptions, CommandParameterOptions } from '@decorators/common';
-import { Prefix } from '@interfaces/command';
+import { CommandOptions, CommandParameterOptions } from '@decorators';
+import { Prefix } from '@interfaces';
 import { PermissionResolvable } from 'discord.js';
 
 export interface CommandConfiguration extends CommandOptions {

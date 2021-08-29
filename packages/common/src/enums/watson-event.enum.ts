@@ -14,7 +14,7 @@ export enum WatsonEvent {
   GUILD_INTEGRATIONS_UPDATE = "event:guild.integrations.update",
   GUILD_ROLE_CREATE = "event:role.create",
   GUILD_ROLE_DELETE = "event:role.delete",
-  INVITE_CREATE = "event:invite.dreate",
+  INVITE_CREATE = "event:invite.create",
   INVITE_DELETE = "event:invite.delete",
   GUILD_ROLE_UPDATE = "event:role.update",
   GUILD_EMOJI_CREATE = "event:emoji.create",

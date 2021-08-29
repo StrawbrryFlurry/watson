@@ -1,7 +1,6 @@
 import { AwaitMessagesOptions, MessageEmbed, MessageReaction, User } from 'discord.js';
 
-import { InquirableType } from '../../enums';
-import { createInquirableDecorator } from './create-inquirable-decorator';
+// TODO: #10
 
 /**
  * @param message The message or message embed to send.
@@ -19,5 +18,5 @@ export type ReactFunction<T = any> = (
  * Injects the `react` function to the command handler.
  */
 export function InjectReact() {
-  return createInquirableDecorator(InquirableType.REACT);
+  // return createInquirableDecorator(InquirableType.REACT);
 }

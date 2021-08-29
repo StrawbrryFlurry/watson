@@ -1,67 +1,35 @@
+import { applyStackableMetadata, CommandParameterMetadata } from '@decorators';
+
 import { PARAM_METADATA } from '../constants';
-import { RouteParamType } from '../enums';
 import { ExecutionContext } from '../interfaces';
 
-export type ParamFactoryFunction = (ctx: ExecutionContext) => unknown;
+export type ParamFactoryFn<T = any> = (ctx: ExecutionContext) => T;
 
-export interface ParamDecoratorMetadata<O = any> {
-  type: RouteParamType;
-  paramIndex: number;
-  options?: O;
-  factory?: ParamFactoryFunction;
+export interface ParameterMetadata {
+  parameterIndex: number;
+  factory?: (ctx: ExecutionContext) => unknown;
 }
 
-export function createParamDecorator<O = any>(
-  parm: RouteParamType,
-  options?: O
-): ParameterDecorator {
-  return (
-    target: Object,
-    propertyKey: string | symbol,
-    parameterIndex: number
-  ) => {
-    const existing: ParamDecoratorMetadata[] =
-      Reflect.getMetadata(PARAM_METADATA, target.constructor, propertyKey) ||
-      [];
-
-    const args = [
-      ...existing,
-      {
-        paramIndex: parameterIndex,
-        type: parm,
-        options: options,
-      } as ParamDecoratorMetadata,
-    ];
-
-    Reflect.defineMetadata(
-      PARAM_METADATA,
-      args,
-      target.constructor,
-      propertyKey
-    );
-  };
-}
-
-export function createCustomParamDecorator(paramFactory: ParamFactoryFunction) {
-  return (target: Object, propertyKey: string, parameterIndex: number) => {
-    const existing: ParamDecoratorMetadata[] =
-      Reflect.getMetadata(PARAM_METADATA, target.constructor, propertyKey) ||
-      [];
-
-    const args = [
-      ...existing,
-      {
-        type: "param:factory",
-        paramIndex: parameterIndex,
+export function createCustomParamDecorator<T = any>(
+  paramFactory: ParamFactoryFn<T>
+): () => ParameterDecorator {
+  return function () {
+    return (
+      target: Object,
+      propertyKey: string | symbol,
+      parameterIndex: number
+    ) => {
+      const metadata: CommandParameterMetadata = {
+        parameterIndex,
         factory: paramFactory,
-      } as ParamDecoratorMetadata,
-    ];
+      };
 
-    Reflect.defineMetadata(
-      PARAM_METADATA,
-      args,
-      target.constructor,
-      propertyKey
-    );
+      applyStackableMetadata(
+        PARAM_METADATA,
+        target.constructor,
+        [metadata],
+        propertyKey
+      );
+    };
   };
 }

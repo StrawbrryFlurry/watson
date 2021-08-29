@@ -1,4 +1,4 @@
-import { Parser } from '@interfaces/command';
+import { Parser } from '@interfaces';
 
 import { char } from './char.interface';
 import { Token } from './token.interface';

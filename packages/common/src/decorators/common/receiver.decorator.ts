@@ -1,6 +1,6 @@
-import { RECEIVER_METADATA } from '../../constants';
-import { Prefix } from '../../interfaces';
-import { isNil, isObject, isString } from '../../utils/shared.utils';
+import { RECEIVER_METADATA } from '@constants';
+import { Prefix } from '@interfaces';
+import { isNil, isObject, isString } from '@utils';
 
 export interface ReceiverOptions {
   /**
@@ -22,7 +22,7 @@ export interface ReceiverOptions {
 
 export function Receiver(): ClassDecorator;
 /**
- * @param commandGroup The group all underyling commands will be mapped to.
+ * @param commandGroup The group all underlying commands will be mapped to.
  * @default commandGroup the name of the receiver without the `Receiver` suffix.
  */
 export function Receiver(group?: string): ClassDecorator;
@@ -30,22 +30,26 @@ export function Receiver(group?: string): ClassDecorator;
  * Receiver options can be used to apply configuration to the underlying
  * event handlers.
  */
-export function Receiver(reciverOptions: ReceiverOptions): ClassDecorator;
-export function Receiver(arg?: string | ReceiverOptions): ClassDecorator {
+export function Receiver(receiverOptions: ReceiverOptions): ClassDecorator;
+export function Receiver(options?: string | ReceiverOptions): ClassDecorator {
   return (target: Function) => {
-    let options: Partial<ReceiverOptions> = {};
+    let metadata: Partial<ReceiverOptions> = {};
+    const groupAlternativeName = target.name.replace("Receiver", "");
 
-    if (isString(arg)) {
-      options["groupName"] = arg;
-    } else if (isObject(arg)) {
-      options = {
-        ...arg,
-        groupName: isNil(arg.groupName)
-          ? target.name.replace("Receiver", "")
-          : arg.groupName,
+    if (isString(options)) {
+      metadata["groupName"] = options;
+    } else if (isObject(options)) {
+      const { groupName } = options;
+      metadata = {
+        ...options,
+        groupName: isNil(groupName) ? groupAlternativeName : groupName,
+      };
+    } else {
+      metadata = {
+        groupName: groupAlternativeName,
       };
     }
 
-    Reflect.defineMetadata(RECEIVER_METADATA, options, target);
+    Reflect.defineMetadata(RECEIVER_METADATA, metadata, target);
   };
 }

@@ -1,6 +1,7 @@
-import { Type } from '@interfaces/type.interface';
+import { PARAM_METADATA } from '@constants';
+import { applyStackableMetadata, ParameterMetadata } from '@decorators';
+import { Type } from '@interfaces';
 
-import { PARAM_METADATA } from '../../constants';
 import { mergeDefaults } from '../../utils';
 
 export interface CommandParameterOptions<T = any> {
@@ -34,6 +35,10 @@ export interface CommandParameterOptions<T = any> {
   default?: T;
 }
 
+export interface CommandParameterMetadata<T = any>
+  extends CommandParameterOptions<T>,
+    ParameterMetadata {}
+
 /**
  * Injects the parameters of a command to the argument in the command handler method.
  * @param options Options to configure the parameter.
@@ -63,17 +68,18 @@ export function Param(
     propertyKey: string | symbol,
     parameterIndex: number
   ) => {
-    const metadata = mergeDefaults(options, {
-      name: propertyKey,
+    const metadata = mergeDefaults<CommandParameterMetadata>(options, {
+      name: propertyKey as string,
+      parameterIndex: parameterIndex,
       hungry: false,
       optional: false,
     });
 
-    const existingMetadata =
-      Reflect.getMetadata(PARAM_METADATA, target, propertyKey) || [];
-
-    const mergedMetadata = [...existingMetadata, metadata];
-
-    Reflect.defineMetadata(PARAM_METADATA, mergedMetadata, target, propertyKey);
+    applyStackableMetadata(
+      PARAM_METADATA,
+      target.constructor,
+      [metadata],
+      propertyKey
+    );
   };
 }

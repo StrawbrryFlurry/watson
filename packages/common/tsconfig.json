@@ -5,9 +5,10 @@
     "paths": {
       "@builtin": ["packages/common/src/builtin"],
       "@exceptions": ["packages/common/src/exceptions"],
-      "@interfaces/*": ["packages/common/src/interfaces/*"],
-      "@decorators/*": ["packages/common/src/decorators/*"],
-      "@command/*": ["packages/common/src/command/*"],
+      "@interfaces": ["packages/common/src/interfaces"],
+      "@decorators": ["packages/common/src/decorators"],
+      "@command": ["packages/common/src/command"],
+      "@utils": ["packages/common/src/utils"],
       "@constants": ["packages/common/src/constants.ts"]
     }
   },

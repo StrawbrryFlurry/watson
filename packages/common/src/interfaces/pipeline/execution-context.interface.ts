@@ -1,7 +1,7 @@
-import { DiscordAdapter } from '@interfaces/adapter';
+import { DiscordAdapter } from '@interfaces';
 import { Base, Client } from 'discord.js';
 
-import { PipelineHost } from '..';
+import { BaseRoute, CommandPipeline, ContextType, EventPipeline, PipelineHost, SlashPipeline } from '..';
 import { Type } from '../type.interface';
 
 /**
@@ -9,32 +9,39 @@ import { Type } from '../type.interface';
  * about the current command / event route invocation it
  * belongs to.
  */
-export interface ExecutionContext extends PipelineHost {
+export abstract class ExecutionContext implements PipelineHost {
   /**
    * Returns the receiver from which this
    * context originated
    */
-  getClass<T extends Type<any>>(): T;
+  public abstract getClass<T extends Type<any>>(): T;
   /**
    * Returns the next handler function for this context
    */
-  getNext(): Function;
+  public abstract getNext(): Function;
   /**
    * Returns the handler function in the receiver whose
    * whose decorator registered the route this context
    * originated from.
    */
-  getHandler(): Function;
+  public abstract getHandler(): Function;
   /**
    * Returns the raw event data as an array
    */
-  getEvent<T, R = T extends Array<Base> ? T : [T]>(): R;
+  public abstract getEvent<T, R = T extends Array<Base> ? T : [T]>(): R;
   /**
    * Returns the client that has emitted the event.
    */
-  getClient(): Client;
+  public abstract getClient(): Client;
   /**
    * Returns the Watson DiscordAdapter instance
    */
-  getAdapter(): DiscordAdapter;
+  public abstract getAdapter(): DiscordAdapter;
+
+  /** @PipelineHost */
+  public abstract switchToCommand(): CommandPipeline;
+  public abstract switchToSlash(): SlashPipeline;
+  public abstract switchToEvent(): EventPipeline;
+  public abstract getType<T extends string = ContextType>(): T;
+  public abstract getRoute(): BaseRoute;
 }

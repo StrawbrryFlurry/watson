@@ -1,23 +1,27 @@
-import { FILTER_METADATA } from '../../constants';
-import { PassThrough, Type } from '../../interfaces';
+import { FILTER_METADATA } from '@constants';
+import { PassThrough } from '@interfaces';
+import { isMethodDecorator } from '@utils';
+
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
-export type TFiltersMetadata = PassThrough | Type;
+interface WithPassThrough {
+  prototype: PassThrough;
+}
+
+export type FiltersMetadata = PassThrough | WithPassThrough;
 
 export function UseFilters(
-  ...filters: TFiltersMetadata[]
+  ...filters: FiltersMetadata[]
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    // Is method decorator
-    if (typeof descriptor !== "undefined") {
-      applyStackableMetadata(FILTER_METADATA, filters, descriptor.value);
+    if (isMethodDecorator(descriptor)) {
+      return applyStackableMetadata(FILTER_METADATA, descriptor.value, filters);
     }
 
-    // Is class decorator
-    applyStackableMetadata(FILTER_METADATA, filters, target);
+    applyStackableMetadata(FILTER_METADATA, target.constructor, filters);
   };
 }

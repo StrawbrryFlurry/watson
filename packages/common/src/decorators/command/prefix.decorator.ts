@@ -1,22 +1,22 @@
+import { isMethodDecorator } from '@utils';
+
 import { PREFIX_METADATA } from '../../constants';
 import { Prefix } from '../../interfaces';
-import { isNil } from '../../utils';
 
 /**
- * Assings a custom prefix class to the decorated command.
+ * Assigns a prefix to the decorated
+ * command or receiver.
  */
-export function UsePrefix(prefix: Prefix): MethodDecorator {
+export function UsePrefix(prefix: Prefix): ClassDecorator | MethodDecorator {
   return (
     target: Object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ) => {
-    // Is method decorator
-    if (!isNil(descriptor)) {
+    if (isMethodDecorator(descriptor)) {
       return Reflect.defineMetadata(PREFIX_METADATA, prefix, descriptor.value);
     }
 
-    // Is class decorator
     Reflect.defineMetadata(PREFIX_METADATA, prefix, target);
   };
 }
