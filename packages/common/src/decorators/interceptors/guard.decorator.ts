@@ -1,12 +1,14 @@
+import { GUARD_METADATA } from '@constants';
+import { applyStackableMetadata } from '@decorators';
 import { isMethodDecorator } from '@utils';
 
-import { GUARD_METADATA } from '../../constants';
-import { CanActivate } from '../../interfaces';
-import { applyStackableMetadata } from '../apply-stackable-metadata';
+import { CanActivate, ExecutionContext } from '../..';
 
 interface WithCanActivate {
   prototype: CanActivate;
 }
+
+export type GuardFn = (ctx: ExecutionContext) => boolean;
 
 export type GuardsMetadata = CanActivate | WithCanActivate;
 

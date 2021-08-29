@@ -1,5 +1,5 @@
 import { FILTER_METADATA } from '@constants';
-import { PassThrough } from '@interfaces';
+import { ExecutionContext, PassThrough } from '@interfaces';
 import { isMethodDecorator } from '@utils';
 
 import { applyStackableMetadata } from '../apply-stackable-metadata';
@@ -8,7 +8,9 @@ interface WithPassThrough {
   prototype: PassThrough;
 }
 
-export type FiltersMetadata = PassThrough | WithPassThrough;
+export type FilterFn = (ctx: ExecutionContext) => boolean;
+
+export type FiltersMetadata = PassThrough | WithPassThrough | FilterFn;
 
 export function UseFilters(
   ...filters: FiltersMetadata[]

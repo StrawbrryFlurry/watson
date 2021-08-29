@@ -4,11 +4,11 @@ import { isMethodDecorator } from '@utils';
 
 import { applyStackableMetadata } from '../apply-stackable-metadata';
 
-type PipeTransformFn = <T extends CommandArgument, R>(argument: T) => R;
-
 interface WithPipeTransform {
   prototype: PipeTransform;
 }
+
+export type PipeTransformFn = <T extends CommandArgument, R>(argument: T) => R;
 
 export type PipesMetadata = PipeTransform | WithPipeTransform | PipeTransformFn;
 
