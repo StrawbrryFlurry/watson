@@ -8,12 +8,17 @@ export interface CommandConfiguration extends CommandOptions {
 
   prefix: Prefix;
   alias: string[];
-  caseSensitive: boolean;
+
   params?: CommandParameterOptions[];
+
   tags: string[];
+  commandGroup: string;
+
+  hidden: boolean;
+  caseSensitive: boolean;
   guild: boolean;
   dm: boolean;
-  commandGroup: string;
+
+  // TODO: How to make this easy to use?
   clientPermissions: PermissionResolvable[];
-  hidden: boolean;
 }

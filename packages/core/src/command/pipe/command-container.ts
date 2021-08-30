@@ -6,79 +6,63 @@ export class CommandContainer extends Map<
   /* RouteToken */ string,
   CommandRoute
 > {
-  /**
-   * Holds the same routes as the map
-   * but allows for faster iteration trough
-   * all entries than using iterators.
-   */
-  private _routes: CommandRoute[] = [];
-  /**
-   * Don't touch this..
-   *
-   * Saves the array index of a given route
-   * in `_routes`
-   */
-  private __routeIdx = new Map<string, number>();
+  public readonly commands = new Map<
+    /* Command alias */ string,
+    /* RouteToken */ string
+  >();
 
   constructor(private _tokenFactory = new EventTokenFactory()) {
     super();
   }
 
   public apply(route: CommandRoute) {
+    const { name, alias } = route;
     const token = this._tokenFactory.create(route);
     this.set(token, route);
-    const arrayIdx = this._routes.push(route) - 1;
-    this.__routeIdx.set(token, arrayIdx);
+
+    this.commands.set(name, token);
+
+    if (alias.length === 0) {
+      return;
+    }
+
+    for (let i = 0; i < alias.length; i++) {
+      const name = alias[i];
+      this.commands.set(name, token);
+    }
   }
 
   public remove(route: CommandRoute): void;
   public remove(id: string): void;
   public remove(route: CommandRoute | string) {
+    const cleanupNames = (route: CommandRoute) => {
+      const { name, alias } = route;
+      const names = [...alias, name];
+
+      for (let i = 0; i < names.length; i++) {
+        const name = names[i];
+        this.commands.delete(name);
+      }
+    };
+
     if (isString(route)) {
-      const arrayIdx = this.__routeIdx.get(route);
-      this._routes.splice(arrayIdx, 1);
+      const routeRef = this.get(route);
+      cleanupNames(routeRef);
       return this.delete(route);
     }
 
+    cleanupNames(route);
     const token = this._tokenFactory.get(route);
     this.delete(token);
-    const arrayIdx = this.__routeIdx.get(token);
-    this._routes.splice(arrayIdx, 1);
-  }
-
-  public getCommandByName(nameOrAlias: string, prefix: string = "") {
-    throw "Not implemented yet";
   }
 
   public getPrefixes(): Prefix[] {
     const prefixes: Prefix[] = [];
-    for (let i = 0; i < this._routes.length; i++) {
-      const { commandPrefix } = this._routes[i];
+    for (const [name, token] of this.commands.entries()) {
+      const { commandPrefix } = this.get(token);
       prefixes.push(commandPrefix);
     }
 
     return prefixes;
-  }
-
-  public getCommandsMap(): Map<string, string> {
-    const commands = new Map<string, string>();
-
-    for (let i = 0; i < this._routes.length; i++) {
-      const route = this._routes[i];
-      const routeToken = this._tokenFactory.get(route);
-      const { name, alias } = route;
-      commands.set(name.toLowerCase(), routeToken);
-
-      if (alias.length === 0) {
-        continue;
-      }
-
-      for (let y = 0; y < alias.length; y++) {
-        const name = alias[y];
-        commands.set(name, routeToken);
-      }
-    }
-
-    return commands;
   }
 }
