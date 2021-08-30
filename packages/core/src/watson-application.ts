@@ -1,5 +1,5 @@
 import { isString, Prefix, RuntimeException, Type } from '@watsonjs/common';
-import { ActivityOptions, Client, Snowflake } from 'discord.js';
+import { ActivityOptions, Client, ClientOptions, Intents, Snowflake } from 'discord.js';
 
 import { ExceptionHandler } from '.';
 import { AbstractDiscordAdapter } from './adapters';
@@ -12,6 +12,16 @@ import { APP_STARTING, APP_STRATED, Logger } from './logger';
 import { RouteExplorer } from './router';
 import { CommandPrefixHost } from './router/command/command-prefix-host';
 import { WatsonContainer } from './watson-container';
+
+export interface WatsonApplicationOptions {
+  discordAuthToken?: string;
+  clientOptions?: ClientOptions;
+  botDescription?: string;
+  intents?: Intents;
+  acknowledgeReaction?: string;
+  client?: Client;
+  acknowledgementReaction?: string | Snowflake;
+}
 
 /**
  * Main Application class

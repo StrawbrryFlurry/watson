@@ -37,7 +37,7 @@ export const isEmoteToken = (token: Token): token is EmoteToken =>
   token.kind === CommandTokenKind.Emote;
 export const isEomToken = (token: Token): token is EndOfMessageToken =>
   token.kind === CommandTokenKind.Eom;
-export const isdentifierToken = (token: Token): token is IdentifierToken =>
+export const isIdentifierToken = (token: Token): token is IdentifierToken =>
   token.kind === CommandTokenKind.Identifier;
 export const isNewLineToken = (token: Token): token is NewLineToken =>
   token.kind === CommandTokenKind.NewLine;

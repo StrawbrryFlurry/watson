@@ -1,65 +1,84 @@
-import { isNil } from '@watsonjs/common';
-import iterate from 'iterare';
+import { CommandRoute, isString, Prefix } from '@watsonjs/common';
 
-import { CommandRoute } from '../../router';
-import { CommandPrefixHost } from '../../router/command/command-prefix-host';
-import { CommandTokenFactory } from './command-token-factory';
+import { EventTokenFactory } from './event-token-factory';
 
-export class CommandContainer extends Map<string, CommandRoute> {
-  constructor(private commandTokenFactory = new CommandTokenFactory()) {
+export class CommandContainer extends Map<
+  /* RouteToken */ string,
+  CommandRoute
+> {
+  /**
+   * Holds the same routes as the map
+   * but allows for faster iteration trough
+   * all entries than using iterators.
+   */
+  private _routes: CommandRoute[] = [];
+  /**
+   * Don't touch this..
+   *
+   * Saves the array index of a given route
+   * in `_routes`
+   */
+  private __routeIdx = new Map<string, number>();
+
+  constructor(private _tokenFactory = new EventTokenFactory()) {
     super();
   }
 
   public apply(route: CommandRoute) {
-    const token = this.commandTokenFactory.create(route);
+    const token = this._tokenFactory.create(route);
+    this.set(token, route);
+    const arrayIdx = this._routes.push(route) - 1;
+    this.__routeIdx.set(token, arrayIdx);
+  }
 
-    if (this.has(token)) {
-      return;
+  public remove(route: CommandRoute): void;
+  public remove(id: string): void;
+  public remove(route: CommandRoute | string) {
+    if (isString(route)) {
+      const arrayIdx = this.__routeIdx.get(route);
+      this._routes.splice(arrayIdx, 1);
+      return this.delete(route);
     }
 
-    this.set(token, route);
+    const token = this._tokenFactory.get(route);
+    this.delete(token);
+    const arrayIdx = this.__routeIdx.get(token);
+    this._routes.splice(arrayIdx, 1);
   }
 
-  public getCommandByName(name: string, prefix?: string) {
-    return isNil(prefix)
-      ? this.commands.find((route) => route.hasName(name))
-      : this.commands.find(
-          (route) => route.hasName(name) && route.prefix === prefix
-        );
+  public getCommandByName(nameOrAlias: string, prefix: string = "") {
+    throw "Not implemented yet";
   }
 
-  public getPrefixesAsArray(): IPrefix[] {
-    return iterate(this.getPrefixes()).toArray();
-  }
+  public getPrefixes(): Prefix[] {
+    const prefixes: Prefix[] = [];
+    for (let i = 0; i < this._routes.length; i++) {
+      const { commandPrefix } = this._routes[i];
+      prefixes.push(commandPrefix);
+    }
 
-  public getPrefixes(): Set<CommandPrefixHost> {
-    return iterate(this)
-      .map(([_, route]) => route.commandPrefix)
-      .reduce((prefixes, prefix) => {
-        prefixes.add(prefix);
-        return prefixes;
-      }, new Set());
+    return prefixes;
   }
 
   public getCommandsMap(): Map<string, string> {
     const commands = new Map<string, string>();
 
-    for (const [id, route] of this) {
+    for (let i = 0; i < this._routes.length; i++) {
+      const route = this._routes[i];
+      const routeToken = this._tokenFactory.get(route);
       const { name, alias } = route;
+      commands.set(name.toLowerCase(), routeToken);
 
-      commands.set(name, id);
+      if (alias.length === 0) {
+        continue;
+      }
 
-      for (const aliasName of alias) {
-        commands.set(aliasName, id);
+      for (let y = 0; y < alias.length; y++) {
+        const name = alias[y];
+        commands.set(name, routeToken);
       }
     }
 
     return commands;
-  }
-
-  public get commands() {
-    return iterate(this)
-      .toArray()
-      .map(([id, route]) => route);
   }
 }
