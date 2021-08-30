@@ -33,23 +33,31 @@ export function Receiver(group?: string): ClassDecorator;
 export function Receiver(receiverOptions: ReceiverOptions): ClassDecorator;
 export function Receiver(options?: string | ReceiverOptions): ClassDecorator {
   return (target: Function) => {
-    let metadata: Partial<ReceiverOptions> = {};
     const groupAlternativeName = target.name.replace("Receiver", "");
 
+    const apply = (metadata: ReceiverOptions) =>
+      Reflect.defineMetadata(RECEIVER_METADATA, metadata, target);
+
     if (isString(options)) {
-      metadata["groupName"] = options;
-    } else if (isObject(options)) {
+      const metadata: Partial<ReceiverOptions> = {
+        groupName: options,
+      };
+
+      return apply(metadata);
+    }
+
+    if (isObject(options)) {
       const { groupName } = options;
-      metadata = {
+      const metadata: Partial<ReceiverOptions> = {
         ...options,
         groupName: isNil(groupName) ? groupAlternativeName : groupName,
       };
-    } else {
-      metadata = {
-        groupName: groupAlternativeName,
-      };
+
+      return apply(metadata);
     }
 
-    Reflect.defineMetadata(RECEIVER_METADATA, metadata, target);
+    apply({
+      groupName: groupAlternativeName,
+    });
   };
 }

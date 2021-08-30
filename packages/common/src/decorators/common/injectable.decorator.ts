@@ -3,7 +3,7 @@ import { mergeDefaults } from '@utils';
 
 export enum InjectionScope {
   Singleton,
-  Request,
+  Scoped,
   Transient,
 }
 
@@ -22,3 +22,19 @@ export function Injectable(options?: InjectableOptions): ClassDecorator {
     Reflect.defineMetadata(INJECTABLE_METADATA, metadata, target);
   };
 }
+
+/**
+ * TODO:
+ * Guild injectables are
+ * scoped providers that
+ * allow you to implement guild
+ * specific features by having
+ * access to data on the
+ * execution context like the guildID.
+ *
+ * A guild injectable is cached in a
+ * `Map<GuildId, InjectableWrapper>`
+ * so that it doesn't have to be
+ * re-created on every request.
+ */
+export function GuildInjectable() {}

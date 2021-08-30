@@ -2,7 +2,7 @@ import { PermissionResolvable } from 'discord.js';
 
 import { COMMAND_METADATA } from '../../constants';
 import { Prefix } from '../../interfaces';
-import { isNil, isObject, isString } from '../../utils/shared.utils';
+import { isNil, isString } from '../../utils/shared.utils';
 
 export interface CommandOptions {
   /**
@@ -107,17 +107,22 @@ export function Command(
     propertyKey: string | Symbol,
     descriptor: PropertyDescriptor
   ) => {
-    let options: CommandOptions = {};
+    const apply = (metadata: CommandOptions) =>
+      Reflect.defineMetadata(COMMAND_METADATA, metadata, descriptor.value);
 
     if (!isNil(commandOptions)) {
-      options["command"] = command as string;
-      options = commandOptions;
-    } else if (isString(command)) {
-      options["command"] = command;
-    } else if (isObject(command)) {
-      options = command;
+      const options: CommandOptions = {
+        ...commandOptions,
+        name: command as string,
+      };
+
+      return apply(options);
     }
 
-    Reflect.defineMetadata(COMMAND_METADATA, options, descriptor.value);
+    if (isString(command)) {
+      return apply({ name: command });
+    }
+
+    apply(command);
   };
 }
