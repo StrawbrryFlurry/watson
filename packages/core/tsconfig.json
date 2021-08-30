@@ -3,6 +3,15 @@
   "compilerOptions": {
     "sourceRoot": "src",
     "paths": {
+      "@adapters": ["packages/core/src/adapters"],
+      "@command": ["packages/core/src/command"],
+      "@injector": ["packages/core/src/injector"],
+      "@router": ["packages/core/src/router"],
+      "@errors": ["packages/core/src/errors"],
+      "@logger": ["packages/core/src/logger"],
+      "@interfaces": ["packages/core/src/interfaces"],
+      "@lifecycle": ["packages/core/src/lifecycle"],
+      "@exceptions": ["packages/core/src/exceptions"],
       "@utils": ["packages/core/src/util"],
       "@watsonjs/common": ["packages/common/src"]
     }
