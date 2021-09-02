@@ -16,6 +16,7 @@ export const RECEIVER_METADATA = "receiver:meta";
 export const EVENT_METADATA = "event:meta";
 export const SLASH_COMMAND_METADATA = "slash-command:meta";
 export const COMMAND_METADATA = "command:meta";
+export const SUB_COMMAND_METADATA = "sub-command:meta";
 export const PARAM_METADATA = "param:meta";
 
 export const COOLDOWN_METADATA = "cooldown:meta";

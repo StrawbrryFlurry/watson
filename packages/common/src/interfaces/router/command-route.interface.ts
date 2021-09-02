@@ -32,8 +32,24 @@ export interface CommandRoute extends BaseRoute {
    */
   configuration: CommandConfiguration;
   /**
+   * Wether the command is a sub command
+   */
+  isSubCommand: boolean;
+  /**
+   * The parent command route e.g.
+   * the host command - `null` if
+   * this is the parent command
+   */
+  parent: CommandRoute | null;
+  /**
+   * A map of sub commands for
+   * this route. - `null` if there
+   * are no sub commands.
+   */
+  children: Map<string, string> | null;
+  /**
    * Checks if this route supports a given
    * command name
    */
-  hasName(name: string): boolean;
+  hasName(name: string, exact?: boolean): boolean;
 }

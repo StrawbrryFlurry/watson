@@ -99,7 +99,7 @@ export function Command(
   commandOptions: CommandOptions
 ): MethodDecorator;
 export function Command(
-  command?: string | CommandOptions,
+  nameOrOptions?: string | CommandOptions,
   commandOptions?: CommandOptions
 ): MethodDecorator {
   return (
@@ -113,16 +113,16 @@ export function Command(
     if (!isNil(commandOptions)) {
       const options: CommandOptions = {
         ...commandOptions,
-        name: command as string,
+        name: nameOrOptions as string,
       };
 
       return apply(options);
     }
 
-    if (isString(command)) {
-      return apply({ name: command });
+    if (isString(nameOrOptions)) {
+      return apply({ name: nameOrOptions });
     }
 
-    apply(command);
+    apply(nameOrOptions);
   };
 }

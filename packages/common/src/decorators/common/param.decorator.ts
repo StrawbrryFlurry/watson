@@ -1,6 +1,5 @@
 import { PARAM_METADATA } from '@constants';
 import { applyStackableMetadata, ParameterMetadata } from '@decorators';
-import { Type } from '@interfaces';
 
 import { mergeDefaults } from '../../utils';
 
@@ -24,7 +23,8 @@ export interface CommandParameterOptions<T = any> {
    */
   optional?: boolean;
   /**
-   * Uses the rest of the message content
+   * Uses the rest of the message content **nom**
+   *
    * This option can only be used for the last parameter
    * @default false
    */

@@ -1,4 +1,5 @@
 import { CommandRoute, isString, Prefix } from '@watsonjs/common';
+import iterate from 'iterare';
 
 import { EventTokenFactory } from './event-token-factory';
 
@@ -8,15 +9,24 @@ export class CommandContainer extends Map<
 > {
   public readonly commands = new Map<
     /* Command alias */ string,
-    /* RouteToken */ string
+    /* Route Token */ string
   >();
 
   constructor(private _tokenFactory = new EventTokenFactory()) {
     super();
   }
 
-  public apply(route: CommandRoute) {
-    const { name, alias } = route;
+  public apply(route: CommandRoute): void {
+    const { name, alias, isSubCommand } = route;
+
+    /**
+     * Don't process sub commands
+     * as they will be mapped by their parent
+     */
+    if (isSubCommand) {
+      return;
+    }
+
     const token = this._tokenFactory.create(route);
     this.set(token, route);
 
@@ -54,6 +64,10 @@ export class CommandContainer extends Map<
     cleanupNames(route);
     const token = this._tokenFactory.get(route);
     this.delete(token);
+  }
+
+  public getAll() {
+    return iterate(this.entries()).toArray();
   }
 
   public getPrefixes(): Prefix[] {

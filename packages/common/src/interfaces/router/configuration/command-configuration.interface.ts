@@ -1,15 +1,16 @@
 import { CommandOptions, CommandParameterOptions } from '@decorators';
 import { Prefix } from '@interfaces';
-import { PermissionResolvable } from 'discord.js';
 
 export interface CommandConfiguration extends CommandOptions {
   name: string;
-  description: string;
-
-  prefix: Prefix;
   alias: string[];
+  prefix: Prefix;
 
-  params?: CommandParameterOptions[];
+  description: string;
+  fullDescription: string;
+  usage: string;
+
+  params: CommandParameterOptions[];
 
   tags: string[];
   commandGroup: string;
@@ -19,6 +20,5 @@ export interface CommandConfiguration extends CommandOptions {
   guild: boolean;
   dm: boolean;
 
-  // TODO: How to make this easy to use?
-  clientPermissions: PermissionResolvable[];
+  deleteCommandMessage: boolean;
 }
