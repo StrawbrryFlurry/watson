@@ -1,12 +1,10 @@
-import { PermissionResolvable } from 'discord.js';
-
 import { COMMAND_METADATA } from '../../constants';
 import { Prefix } from '../../interfaces';
 import { isNil, isString } from '../../utils/shared.utils';
 
 export interface CommandOptions {
   /**
-   * Name of the command
+   * The preferred name of the command
    * @default The descriptor name will be used.
    */
   name?: string;
@@ -21,17 +19,28 @@ export interface CommandOptions {
    */
   description?: string;
   /**
+   * A detailed description
+   * of the command.
+   * @default none
+   */
+  fullDescription?: string;
+  /**
+   * Usage details for the command.
+   * If none are provided they will
+   * be auto generated from the info
+   * available.
+   */
+  usage?: string | string[];
+  /**
    * Tags of the command
    * @example
    * NSFW, Fun
    * @default none
+   *
+   * This has no affect on the command
+   * and is solely for cosmetic purposes
    */
   tags?: string[];
-  /**
-   * The permissions required by the client to run this command
-   * @default none
-   */
-  clientPermissions?: PermissionResolvable[];
   /**
    * Sets the prefix for the command.
    * If no prefix was set the receiver prefix is used.
@@ -58,6 +67,12 @@ export interface CommandOptions {
    * @default false
    */
   hidden?: boolean;
+  /**
+   * Removes the message that triggered
+   * the command.
+   * @default false
+   */
+  deleteCommandMessage?: boolean;
 }
 
 /**

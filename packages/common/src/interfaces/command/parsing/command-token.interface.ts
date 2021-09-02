@@ -98,6 +98,9 @@ export enum CommandTokenKind {
   WhiteSpace,
   /** End of the message */
   Eom,
+  // TODO:
+  /** A http URL */
+  URL,
 }
 
 export interface CommandToken extends Token<CommandTokenKind> {}

@@ -1,4 +1,4 @@
-import { CommandOptions, CommandParameterOptions } from '@decorators';
+import { CommandOptions } from '@decorators';
 import { Prefix } from '@interfaces';
 
 export interface CommandConfiguration extends CommandOptions {
@@ -10,15 +10,11 @@ export interface CommandConfiguration extends CommandOptions {
   fullDescription: string;
   usage: string;
 
-  params: CommandParameterOptions[];
-
   tags: string[];
   commandGroup: string;
 
   hidden: boolean;
   caseSensitive: boolean;
-  guild: boolean;
-  dm: boolean;
 
   deleteCommandMessage: boolean;
 }

@@ -1,8 +1,8 @@
 import { Prefix } from '@interfaces';
 
 import { CommandConfiguration } from '.';
-import { CommandParameterOptions } from '../..';
 import { BaseRoute } from './base-route.interface';
+import { ParameterConfiguration } from './configuration/parameter-configuration.interface';
 
 /**
  * Represents a command *route* which is mapped
@@ -16,7 +16,7 @@ export interface CommandRoute extends BaseRoute {
   /**
    * The parameters registered for this command
    */
-  params: CommandParameterOptions[];
+  params: ParameterConfiguration[];
   /**
    * The prefix declaration for this command
    * that implements the `CommandPrefix` interface
@@ -52,4 +52,8 @@ export interface CommandRoute extends BaseRoute {
    * command name
    */
   hasName(name: string, exact?: boolean): boolean;
+  /**
+   * Returns the commands configuration object
+   */
+  getConfiguration(): CommandConfiguration;
 }

@@ -1,3 +1,5 @@
+import { GenericToken } from '@interfaces';
+
 import { TokenPosition } from './token.interface';
 
 export enum CommandAstType {
@@ -30,6 +32,8 @@ export interface AstCommand extends AstElement<string> {
   type: CommandAstType.Command;
   /** Sub commands for this command */
   subCommand?: AstCommand[];
+  /** Applies a sub command to this command node */
+  applySubCommand(token: GenericToken): void;
 }
 
 export interface AstArgument<T = any> extends AstElement<T> {
@@ -41,6 +45,11 @@ export interface AstArgument<T = any> extends AstElement<T> {
     name: string;
   };
 }
+
+export type ParsedAstArguments<
+  A extends Object = any,
+  K extends keyof A = keyof A
+> = Map<K, A[K]>;
 
 /**
  *
@@ -122,7 +131,5 @@ export interface CommandAst<Arguments = any> {
   /** The main command and all subsequent sub commands used */
   command: AstCommand;
   /** Arguments provided for the command */
-  arguments: {
-    [K in keyof Arguments]: AstArgument;
-  };
+  arguments: ParsedAstArguments<Arguments>;
 }

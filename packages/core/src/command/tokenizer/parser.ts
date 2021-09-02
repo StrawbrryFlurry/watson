@@ -1,6 +1,26 @@
-import { CommandContainer } from '@command';
-import { CommandAst, CommandRoute, CommandTokenKind, isNil, Parser, Token } from '@watsonjs/common';
+import { AstArgumentImpl, AstCommandImpl, CommandContainer, isParameterToken } from '@command';
+import {
+  ADate,
+  ArgumentsOf,
+  AstArgument,
+  AstCommand,
+  CommandAst,
+  CommandRoute,
+  CommandTokenKind,
+  DateParameterOptions,
+  isEmpty,
+  isNil,
+  OmitFirstElement,
+  ParsedAstArguments,
+  Parser,
+  Token,
+  TokenPosition,
+} from '@watsonjs/common';
 import { Message } from 'discord.js';
+import { DateTime, DateTimeOptions } from 'luxon';
+import {
+  ParameterConfiguration,
+} from 'packages/common/src/interfaces/router/configuration/parameter-configuration.interface';
 
 import { WatsonContainer } from '../..';
 import { ParsingException } from '../exceptions';
@@ -18,50 +38,181 @@ export class CommandParser implements Parser<CommandAst> {
     this._commands = this._commandContainer.commands;
   }
 
-  public parseInput(tokenList: Token<any>[]): CommandAst {
+  public async parseInput(tokenList: Token<any>[]): Promise<CommandAst> {
     throw new Error("Method not implemented.");
   }
 
-  public parseMessage(message: Message, prefixLength: number): CommandAst {
+  public async parseMessage(
+    message: Message,
+    prefixLength: number
+  ): Promise<CommandAst> {
     const tokenizer = new CommandTokenizer(this);
     const ast = new CommandAstImpl();
     const { content } = message;
     const tokens = tokenizer.tokenize(content, prefixLength);
 
-    const prefix = tokens.shift();
+    const prefixToken = tokens.shift();
 
-    if (!isPrefixToken(prefix)) {
-      throw new ParsingException("No valid prefix found");
+    if (!isPrefixToken(prefixToken)) {
+      throw new ParsingException("No valid prefixToken found");
     }
 
-    ast.prefix = new AstPrefixImpl(prefix);
+    const astPrefix = new AstPrefixImpl(prefixToken);
 
-    // Trying to find the command
-    const token = tokens.shift();
-    const { text, kind } = token;
+    const commandToken = tokens.shift();
+    const { text: commandText, kind } = commandToken;
 
     if (kind !== CommandTokenKind.Generic) {
       throw new Error("No command specified");
     }
 
-    const commandId = this._commands.get(text.toLowerCase());
+    const commandId = this._commands.get(commandText.toLowerCase());
 
     if (!commandId) {
       throw new Error("No matching command found");
     }
 
+    const astCommand = new AstCommandImpl(commandToken);
     const routeRef = this._commandContainer.get(commandId);
-    const resolvedRouteRef = this.resolveSubCommand(routeRef, tokens);
+    const resolvedRouteRef = this.resolveSubCommand(
+      routeRef,
+      tokens,
+      astCommand
+    );
 
-    const { configuration } = routeRef;
+    const parsedArguments = await this.resolveArguments(
+      resolvedRouteRef,
+      tokens
+    );
 
-    // Parsing arguments
+    return ast
+      .applyPrefix(astPrefix)
+      .applyCommand(astCommand)
+      .applyArguments(parsedArguments);
+  }
 
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i];
+  public async resolveArguments(
+    route: CommandRoute,
+    tokens: Token[]
+  ): Promise<ParsedAstArguments> {
+    const { params } = route;
+    const astArguments = new Map<string, AstArgument>();
+
+    for (let i = 0; i < params.length; i++) {
+      const param = params[i];
+      const {
+        configuration,
+        default: defaultValue,
+        name,
+        optional,
+        type,
+      } = param;
+
+      const forAllTokensLeft = async <
+        T extends (...args: any) => any,
+        R extends ReturnType<T>
+      >(
+        cb: T,
+        ...args: any[]
+      ) => {
+        const parsedValues: R[] = [];
+        const text: string[] = [];
+
+        for (let i = 0; i < tokens.length; i++) {
+          const token = tokens[i];
+          const parsed = (await cb.apply(this, [token, ...args])) as R;
+          parsedValues.push(parsed);
+          text.push(token.text);
+        }
+
+        const fullText = text.join(" ");
+        const position: TokenPosition = {
+          text: fullText,
+          tokenStart: tokens[0].position.tokenStart,
+          tokenEnd: tokens[tokens.length - 1].position.tokenEnd,
+        };
+
+        return {
+          position,
+          fullText,
+          parsedValues,
+        };
+      };
+
+      const applyParseFn = async <
+        T extends (...args: any) => any,
+        R extends ReturnType<T>,
+        A extends OmitFirstElement<ArgumentsOf<T>>
+      >(
+        cb: T,
+        param: ParameterConfiguration,
+        ...args: A
+      ) => {
+        const { hungry } = param;
+        let parsed: R | R[];
+        let text: string;
+        let position: TokenPosition;
+
+        if (hungry) {
+          const hungryParsed = await forAllTokensLeft<T, R>(cb, ...args);
+
+          position = hungryParsed.position;
+          text = hungryParsed.fullText;
+          parsed = hungryParsed.parsedValues;
+
+          if (optional && isEmpty(parsed)) {
+            return;
+          }
+        } else {
+          const token = tokens.shift();
+
+          if (isParameterToken(token)) {
+          }
+
+          parsed = (await cb.apply(this, [token, ...args])) as R;
+          text = token.text;
+          position = token.position;
+        }
+
+        const astArgument = new AstArgumentImpl(position, text, param, parsed);
+        astArguments.set(name, astArgument);
+      };
+
+      if (this.matchParameterType(type, ADate)) {
+        const { format, options } = configuration as DateParameterOptions;
+        applyParseFn(this.parseToDate, param, format, options);
+      }
     }
 
-    return "" as any;
+    return astArguments;
+  }
+
+  public parseToDate(
+    dateString: string,
+    format?: string,
+    options?: DateTimeOptions
+  ): DateTime {
+    if (isNil(format)) {
+      return DateTime.fromISO(dateString);
+    }
+
+    return DateTime.fromFormat(dateString, format, options);
+  }
+
+  public parseToUser() {}
+
+  public parseToEmote() {}
+
+  public parseToRole() {}
+
+  public parseToChannel() {}
+
+  public parseToMember() {}
+
+  public parseToString() {}
+
+  public matchParameterType<T>(type: any, resultType: T): type is T {
+    return type === resultType;
   }
 
   /**
@@ -71,7 +222,8 @@ export class CommandParser implements Parser<CommandAst> {
    */
   public resolveSubCommand(
     route: CommandRoute,
-    tokens: Token<CommandTokenKind>[]
+    tokens: Token<CommandTokenKind>[],
+    astCommand: AstCommand
   ): CommandRoute {
     let routeRef = route;
 
@@ -120,6 +272,7 @@ export class CommandParser implements Parser<CommandAst> {
         }
       }
 
+      astCommand.applySubCommand(nextToken);
       routeRef = childRef;
     }
 

@@ -1,7 +1,12 @@
 import { PARAM_METADATA } from '@constants';
 import { applyStackableMetadata, ParameterMetadata } from '@decorators';
+import { ADate, DateParameterOptions, Type } from '@interfaces';
 
 import { mergeDefaults } from '../../utils';
+
+type GetConfigurationsFromParameterType<T> = T extends ADate
+  ? DateParameterOptions
+  : never;
 
 export interface CommandParameterOptions<T = any> {
   /**
@@ -26,6 +31,14 @@ export interface CommandParameterOptions<T = any> {
    * Uses the rest of the message content **nom**
    *
    * This option can only be used for the last parameter
+   *
+   * If you want to specify this option, you'll
+   * have to use the `type` parameter option
+   * to specify the actual type you want this
+   * argument to be. Tsc will emit this type
+   * as `[Array]` which we can't infer the desired
+   * type from. - The output will always be an array
+   * of that type.
    * @default false
    */
   hungry?: boolean;
@@ -33,6 +46,14 @@ export interface CommandParameterOptions<T = any> {
    * The default value if none was provided
    */
   default?: T;
+  /**
+   * Supply some additional configuration
+   * for the parameter. You can get suggestions
+   * about what configurations can be applied
+   * by specifying the parameter type as a generic
+   * to this decorator.
+   */
+  configuration?: GetConfigurationsFromParameterType<T>;
 }
 
 export interface CommandParameterMetadata<T = any>
@@ -46,17 +67,27 @@ export interface CommandParameterMetadata<T = any>
  * Valid Parameter types include:
  *
  * Primitives:
- * `String`,
- * `TextArgument`,
- * `Boolean`,
- * `Number`
+ * ---
+ * - `String`
+ * - `Boolean`
+ * - `Number`
+ * - `Date`
  *
  * Data structures:
- * `Date`,
- * `UserArgument`,
- * `ChannelArgument`,
- * `VoiceChannelArgument`,
- * `RoleArgument`
+ * ---
+ * - `AStringExpandable`
+ * - `AStringLiteral`
+ * - `AStringTemplate`
+ * - `AURL`
+ * - `ADate`
+ *
+ * Discord Types:
+ * ---
+ * - `AChannel`
+ * - `ARole`
+ * - `AUser`
+ * - `AEmote`
+ * - `ACodeBlock`
  */
 export function Param(): ParameterDecorator;
 export function Param(options?: CommandParameterOptions): ParameterDecorator;
