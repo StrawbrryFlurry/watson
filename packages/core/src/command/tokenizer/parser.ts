@@ -1,41 +1,73 @@
-import { AstArgumentImpl, AstCommandImpl, CommandContainer, isParameterToken } from '@command';
+import {
+  AstArgumentImpl,
+  CommandContainer,
+  isGenericToken,
+  isParameterToken,
+  isPrefixToken,
+  ParsingException,
+} from '@command';
 import {
   ADate,
   ArgumentsOf,
   AstArgument,
   AstCommand,
+  AstPrefix,
+  ChannelMentionToken,
+  CodeBlock,
   CommandAst,
   CommandRoute,
   CommandTokenKind,
   DateParameterOptions,
+  DiscordAdapter,
+  EmoteToken,
   isEmpty,
   isNil,
   OmitFirstElement,
+  ParameterConfiguration,
   ParsedAstArguments,
   Parser,
+  RoleMentionToken,
+  StringLikeToken,
   Token,
   TokenPosition,
+  UserMentionToken,
 } from '@watsonjs/common';
-import { Message } from 'discord.js';
+import { Client, Guild, Message, User } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
-import {
-  ParameterConfiguration,
-} from 'packages/common/src/interfaces/router/configuration/parameter-configuration.interface';
 
 import { WatsonContainer } from '../..';
-import { ParsingException } from '../exceptions';
-import { AstPrefixImpl, CommandAstImpl } from './ast';
-import { isGenericToken, isPrefixToken } from './parse-helper';
+import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
 import { CommandTokenizer } from './tokenizer';
 
 export class CommandParser implements Parser<CommandAst> {
   private _commands: Map<string, string>;
+  private readonly tokenizer: CommandTokenizer;
+
+  public get isDisposed(): boolean {
+    return this._disposed;
+  }
+
+  public set isDisposed(status: boolean) {
+    if (this._disposed === true) {
+      return;
+    }
+
+    this._disposed = status;
+  }
+  private _disposed: boolean = false;
+  private _tokens: Token[];
 
   constructor(
     private _diContainer: WatsonContainer,
     private _commandContainer: CommandContainer
   ) {
     this._commands = this._commandContainer.commands;
+  }
+
+  public parseMessageTokens(message: Message, prefixLength: number) {
+    const { content } = message;
+    const tokenizer = new CommandTokenizer(this);
+    this._tokens = tokenizer.tokenize(content, prefixLength);
   }
 
   public async parseInput(tokenList: Token<any>[]): Promise<CommandAst> {
@@ -46,20 +78,39 @@ export class CommandParser implements Parser<CommandAst> {
     message: Message,
     prefixLength: number
   ): Promise<CommandAst> {
-    const tokenizer = new CommandTokenizer(this);
-    const ast = new CommandAstImpl();
-    const { content } = message;
-    const tokens = tokenizer.tokenize(content, prefixLength);
+    if (this.isDisposed) {
+      throw new Error(
+        "Parser is already disposed - Create a new parser instance"
+      );
+    }
 
-    const prefixToken = tokens.shift();
+    this.parseMessageTokens(message, prefixLength);
+
+    const prefixAst = this.getPrefixAst();
+    const { commandAst, routeRef } = this.getCommandAst();
+    const parsedArguments = await this.getArgumentsAst(routeRef);
+
+    return new CommandAstImpl()
+      .applyPrefix(prefixAst)
+      .applyCommand(commandAst)
+      .applyArguments(parsedArguments);
+  }
+
+  public getPrefixAst(): AstPrefix {
+    const prefixToken = this.getNextToken();
 
     if (!isPrefixToken(prefixToken)) {
       throw new ParsingException("No valid prefixToken found");
     }
 
-    const astPrefix = new AstPrefixImpl(prefixToken);
+    return new AstPrefixImpl(prefixToken);
+  }
 
-    const commandToken = tokens.shift();
+  public getCommandAst(): {
+    routeRef: CommandRoute;
+    commandAst: AstCommand;
+  } {
+    const commandToken = this.getNextToken();
     const { text: commandText, kind } = commandToken;
 
     if (kind !== CommandTokenKind.Generic) {
@@ -74,26 +125,79 @@ export class CommandParser implements Parser<CommandAst> {
 
     const astCommand = new AstCommandImpl(commandToken);
     const routeRef = this._commandContainer.get(commandId);
-    const resolvedRouteRef = this.resolveSubCommand(
-      routeRef,
-      tokens,
-      astCommand
-    );
+    const resolvedRouteRef = this.resolveSubCommand(routeRef, astCommand);
 
-    const parsedArguments = await this.resolveArguments(
-      resolvedRouteRef,
-      tokens
-    );
-
-    return ast
-      .applyPrefix(astPrefix)
-      .applyCommand(astCommand)
-      .applyArguments(parsedArguments);
+    return {
+      routeRef: resolvedRouteRef,
+      commandAst: astCommand,
+    };
   }
 
-  public async resolveArguments(
+  /**
+   * Resolves a command route using
+   * the parsed command tokens to find
+   * the deepest nested command.
+   */
+  public resolveSubCommand(
     route: CommandRoute,
-    tokens: Token[]
+    astCommand: AstCommand
+  ): CommandRoute {
+    let routeRef = route;
+
+    while (!isNil(routeRef.children)) {
+      const { children } = routeRef;
+      const nextToken = this.getNextToken();
+
+      if (!isGenericToken(nextToken)) {
+        this.ungetToken(nextToken);
+        break;
+      }
+
+      const { text } = nextToken;
+      const childToken = children.get(text.toLowerCase());
+
+      if (isNil(childToken)) {
+        this.ungetToken(nextToken);
+
+        break;
+      }
+
+      const childRef = this._commandContainer.get(childToken);
+      const { caseSensitive } = childRef.configuration;
+
+      if (caseSensitive) {
+        const hasName = childRef.hasName(text, true);
+
+        if (!hasName) {
+          /**
+           * TODO:
+           * This might break bots where
+           * there is a sub command which
+           * requires a case sensitive name
+           * but also an argument that is
+           * the same string but in lower case:
+           *
+           * !help User - lists help for all user commands
+           * !help user - Gets help for the user command
+           * -----------------------------------------------
+           * Should we just accept the last matched route
+           * and interpret this token as an argument?
+           */
+          throw new Error(
+            "Command was matched but does not have correct casing"
+          );
+        }
+      }
+
+      astCommand.applySubCommand(nextToken);
+      routeRef = childRef;
+    }
+
+    return routeRef;
+  }
+
+  public async getArgumentsAst(
+    route: CommandRoute
   ): Promise<ParsedAstArguments> {
     const { params } = route;
     const astArguments = new Map<string, AstArgument>();
@@ -164,7 +268,7 @@ export class CommandParser implements Parser<CommandAst> {
             return;
           }
         } else {
-          const token = tokens.shift();
+          const token = this.getNextToken();
 
           if (isParameterToken(token)) {
           }
@@ -199,85 +303,108 @@ export class CommandParser implements Parser<CommandAst> {
     return DateTime.fromFormat(dateString, format, options);
   }
 
-  public parseToUser() {}
+  public parseToUser(token: StringLikeToken | UserMentionToken): Promise<User> {
+    if (token.kind !== CommandTokenKind.UserMention) {
+      const userId = token.text;
+      return this.getClient().users.fetch(userId);
+    }
 
-  public parseToEmote() {}
+    return (token as UserMentionToken).getUser(this.getAdapter());
+  }
 
-  public parseToRole() {}
+  public parseToRole(guild: Guild, token: StringLikeToken | RoleMentionToken) {
+    if (token.kind !== CommandTokenKind.RoleMention) {
+      const roleId = token.text;
+      return guild.roles.fetch(roleId);
+    }
 
-  public parseToChannel() {}
+    return (token as RoleMentionToken).getRole(guild);
+  }
 
-  public parseToMember() {}
+  public parseToChannel(token: StringLikeToken | ChannelMentionToken) {
+    if (token.kind !== CommandTokenKind.ChannelMention) {
+      const channelId = token.text;
+      return this.getClient().channels.fetch(channelId);
+    }
 
-  public parseToString() {}
+    return (token as ChannelMentionToken).getChannel(this.getAdapter());
+  }
+
+  public parseToEmote(token: StringLikeToken | EmoteToken) {
+    if (token.kind !== CommandTokenKind.Emote) {
+      const emoteId = token.text;
+      return this.getClient().emojis.resolve(emoteId);
+    }
+
+    return (token as EmoteToken).getEmote(this.getAdapter());
+  }
+
+  public parseToString(token: StringLikeToken): string {
+    return "";
+  }
+
+  public parseToCodeBlock(): CodeBlock {}
+
+  public parseToStringExpandable() {}
+  public parseToStringLiteral() {}
+  public parseToStringTemplate() {}
+
+  public parseToBoolean() {}
+
+  public parseToNumber() {}
+
+  public parseToUrl() {}
 
   public matchParameterType<T>(type: any, resultType: T): type is T {
     return type === resultType;
   }
 
-  /**
-   * Resolves a command route using
-   * the parsed command tokens to find
-   * the deepest nested command.
-   */
-  public resolveSubCommand(
-    route: CommandRoute,
-    tokens: Token<CommandTokenKind>[],
-    astCommand: AstCommand
-  ): CommandRoute {
-    let routeRef = route;
+  private expectNextTokenToBeOfKind(
+    ...validKinds: CommandTokenKind[]
+  ): CommandTokenKind {
+    const { kind, position } = this.peekNextToken();
 
-    while (!isNil(routeRef.children)) {
-      const { children } = routeRef;
-      const nextToken = tokens.shift();
-
-      if (!isGenericToken(nextToken)) {
-        tokens.unshift(nextToken);
-        break;
+    for (let i = 0; i < validKinds.length; i++) {
+      const kind = validKinds[i];
+      if (kind === kind) {
+        return kind;
       }
-
-      const { text } = nextToken;
-      const childToken = children.get(text.toLowerCase());
-
-      if (isNil(childToken)) {
-        tokens.unshift(nextToken);
-
-        break;
-      }
-
-      const childRef = this._commandContainer.get(childToken);
-      const { caseSensitive } = childRef.configuration;
-
-      if (caseSensitive) {
-        const hasName = childRef.hasName(text, true);
-
-        if (!hasName) {
-          /**
-           * TODO:
-           * This might break bots where
-           * there is a sub command which
-           * requires a case sensitive name
-           * but also an argument that is
-           * the same string but in lower case:
-           *
-           * !help User - lists help for all user commands
-           * !help user - Gets help for the user command
-           * -----------------------------------------------
-           * Should we just accept the last matched route
-           * and interpret this token as an argument?
-           */
-          throw new Error(
-            "Command was matched but does not have correct casing"
-          );
-        }
-      }
-
-      astCommand.applySubCommand(nextToken);
-      routeRef = childRef;
     }
 
-    return routeRef;
+    throw new ParsingException(
+      `Expected token at position ${position} to be one of ${validKinds.join(
+        ", "
+      )} but got ${kind}`
+    );
   }
 
-  private readonly tokenizer: CommandTokenizer;
+  private getNextToken(): Token<CommandTokenKind> {
+    return this._tokens.shift();
+  }
+
+  private peekNextToken(): Token<CommandTokenKind> {
+    return this._tokens[0];
+  }
+
+  private ungetToken(token: Token): void {
+    this._tokens.unshift(token);
+  }
+
+  private getTokenPositionBounds(): Omit<TokenPosition, "text"> {
+    const [{ position: firstPosition }] = this._tokens;
+    const { position: lastPosition } = this._tokens[this._tokens.length - 1];
+
+    return {
+      tokenStart: firstPosition.tokenStart,
+      tokenEnd: lastPosition.tokenEnd,
+    };
+  }
+
+  private getAdapter(): DiscordAdapter {
+    return this._diContainer.getClientAdapter();
+  }
+
+  private getClient(): Client {
+    return this._diContainer.getClient<Client>();
+  }
 }

@@ -3,6 +3,7 @@ import {
   CodeBlockToken,
   CommandTokenKind,
   DashToken,
+  DiscordAdapter,
   EmoteToken,
   EndOfMessageToken,
   GenericToken,
@@ -59,6 +60,10 @@ export class TokenPositionImpl implements TokenPosition {
     this.tokenStart = tokenStart;
     this.tokenEnd = tokenEnd;
     this.text = text;
+  }
+
+  public toString() {
+    return `${this.tokenStart} - ${this.tokenEnd}`;
   }
 }
 
@@ -181,7 +186,10 @@ export class ChannelMentionTokenImpl
     this.value = this.getId();
   }
 
-  getChannel(client: Client): Promise<Channel> {
+  getChannel(adapter: DiscordAdapter<Client>): Promise<Channel> {
+    // TODO: Replace this with a
+    // fetch method on the client adapter
+    const client = adapter.getClient();
     const id = this.getId();
     return client.channels.fetch(id);
   }
@@ -199,7 +207,8 @@ export class UserMentionTokenImpl
     this.value = this.getId();
   }
 
-  getUser(client: Client): Promise<User> {
+  getUser(adapter: DiscordAdapter<Client>): Promise<User> {
+    const client = adapter.getClient();
     const id = this.getId();
     return client.users.fetch(id);
   }
@@ -217,7 +226,7 @@ export class RoleMentionTokenImpl
     this.value = this.getId();
   }
 
-  getRole(client: Client, guild: Guild): Promise<Role> {
+  getRole(guild: Guild): Promise<Role> {
     const id = this.getId();
     return guild.roles.fetch(id);
   }
@@ -242,7 +251,8 @@ export class EmoteTokenImpl extends DiscordTokenImpl implements EmoteToken {
     return id;
   }
 
-  getEmote(client: Client): Emoji {
+  getEmote(adapter: DiscordAdapter<Client>): Emoji {
+    const client = adapter.getClient();
     const id = this.getId();
     return client.emojis.resolve(id);
   }

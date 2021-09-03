@@ -1,4 +1,5 @@
-import { Channel, Client, Emoji, Guild, Role, User } from 'discord.js';
+import { DiscordAdapter } from '@interfaces';
+import { Channel, Emoji, Guild, Role, User } from 'discord.js';
 
 import { Token } from './token.interface';
 
@@ -103,6 +104,12 @@ export enum CommandTokenKind {
   URL,
 }
 
+export type StringLikeToken =
+  | GenericToken
+  | StringExpandableToken
+  | StringLiteralToken
+  | StringTemplateToken;
+
 export interface CommandToken extends Token<CommandTokenKind> {}
 
 export interface TokenWithValue<T> extends CommandToken {
@@ -115,22 +122,22 @@ export interface PrefixToken extends CommandToken {}
 /** @see {@link CommandTokenKind#UserMention} */
 export interface UserMentionToken extends TokenWithValue<string> {
   getId(): string;
-  getUser(client: Client): Promise<User>;
+  getUser(adapter: DiscordAdapter): Promise<User>;
 }
 /** @see {@link CommandTokenKind#ChannelMention} */
 export interface ChannelMentionToken extends TokenWithValue<string> {
   getId(): string;
-  getChannel(client: Client): Promise<Channel>;
+  getChannel(adapter: DiscordAdapter): Promise<Channel>;
 }
 /** @see {@link CommandTokenKind#RoleMention} */
 export interface RoleMentionToken extends TokenWithValue<string> {
   getId(): string;
-  getRole(client: Client, guild: Guild): Promise<Role>;
+  getRole(guild: Guild): Promise<Role>;
 }
 /** @see {@link CommandTokenKind#Emote} */
 export interface EmoteToken extends TokenWithValue<string> {
   getId(): string;
-  getEmote(client: Client): Emoji;
+  getEmote(adapter: DiscordAdapter): Emoji;
 }
 
 /** @see {@link CommandTokenKind#CodeBlock} */

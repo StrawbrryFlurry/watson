@@ -241,6 +241,10 @@ export class WatsonContainer {
     return this.config.clientAdapter;
   }
 
+  public getClient<T>(): T {
+    return this.config.clientAdapter.client;
+  }
+
   public getRootModule() {
     return this.rootModule;
   }
