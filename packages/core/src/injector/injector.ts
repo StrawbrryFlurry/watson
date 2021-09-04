@@ -7,6 +7,15 @@ import { InstanceWrapper } from './instance-wrapper';
 import { MetadataResolver } from './metadata-resolver';
 import { Module } from './module';
 
+// Base injector
+export abstract class _Injector {
+  protected readonly parent: _Injector | null;
+  protected readonly _records: Map<any, any> = new Map<any, any>();
+
+  public abstract create<T>(): T;
+  public abstract get<T>(): T;
+}
+
 export class Injector {
   private logger = new Logger("InstanceLoader");
 
@@ -70,7 +79,7 @@ export class Injector {
       const instance = new wrapper.metatype(...dependencies);
       wrapper.setInstance(instance);
     } else {
-      const factory = (wrapper.metatype as any) as Function;
+      const factory = wrapper.metatype as any as Function;
       const factoryResult = await factory(...dependencies);
       wrapper.setInstance(factoryResult);
     }
