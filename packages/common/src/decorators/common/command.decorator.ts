@@ -138,6 +138,6 @@ export function Command(
       return apply({ name: nameOrOptions });
     }
 
-    apply(nameOrOptions);
+    apply(nameOrOptions!);
   };
 }

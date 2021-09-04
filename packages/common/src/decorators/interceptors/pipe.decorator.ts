@@ -26,7 +26,7 @@ export function UsePipes(
     descriptor?: PropertyDescriptor
   ) => {
     if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(PIPE_METADATA, descriptor.value, pipes);
+      return applyStackableMetadata(PIPE_METADATA, descriptor!.value, pipes);
     }
 
     applyStackableMetadata(PIPE_METADATA, target.constructor, pipes);

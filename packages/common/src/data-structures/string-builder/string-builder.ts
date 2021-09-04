@@ -76,7 +76,7 @@ export class StringBuilder {
    */
   public insert(value: string, index: number = 0): StringBuilder {
     if (isNil(value)) {
-      return;
+      return this;
     }
     const v = value.split("");
     this._chars.splice(index, 0, ...v);

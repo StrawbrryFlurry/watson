@@ -29,7 +29,7 @@ export class Trie {
   public find(word: string, best: boolean = false) {
     let node = this._node;
     word = this.normalizeInput(word);
-    let lastLeafMatch: TrieNode = null;
+    let lastLeafMatch: TrieNode | null = null;
 
     for (let i = 0; i < word.length; i++) {
       let char = word[i];

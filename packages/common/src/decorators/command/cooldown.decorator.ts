@@ -51,7 +51,7 @@ export function UseCooldown(
   options: CommandCooldownOptions
 ): ClassDecorator | MethodDecorator;
 export function UseCooldown(
-  options?: CommandCooldownOptions
+  options: CommandCooldownOptions = {}
 ): ClassDecorator | MethodDecorator {
   const metadata = mergeDefaults(options, {
     cooldown: DEFAULT_COOLDOWN,
@@ -68,7 +68,7 @@ export function UseCooldown(
       return Reflect.defineMetadata(
         COOLDOWN_METADATA,
         metadata,
-        descriptor.value
+        descriptor!.value
       );
     }
 

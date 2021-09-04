@@ -18,7 +18,7 @@
     "sourceMap": true,
     "allowJs": false,
     "strict": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "types": ["node"],
     "moduleResolution": "node",
     "baseUrl": ".",

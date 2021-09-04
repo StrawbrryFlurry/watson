@@ -1,2 +1,2 @@
-export * from "./inject-param.decorator";
+export * from "./cooldown.decorator";
 export * from "./prefix.decorator";

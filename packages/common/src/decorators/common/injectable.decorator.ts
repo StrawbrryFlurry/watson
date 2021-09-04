@@ -13,7 +13,7 @@ export interface InjectableOptions {
 
 const DEFAULT_SCOPE = InjectionScope.Singleton;
 
-export function Injectable(options?: InjectableOptions): ClassDecorator {
+export function Injectable(options: InjectableOptions = {}): ClassDecorator {
   const metadata = mergeDefaults(options, {
     scope: DEFAULT_SCOPE,
   });

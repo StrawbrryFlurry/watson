@@ -7,8 +7,8 @@ export function applyStackableMetadata<T>(
   propertyKey?: string | symbol
 ) {
   const existing =
-    Reflect.getMetadata(key, target.constructor, propertyKey) || [];
+    Reflect.getMetadata(key, target.constructor, propertyKey!) || [];
   const payload = [...existing, ...metadata];
 
-  Reflect.defineMetadata(key, payload, target.constructor, propertyKey);
+  Reflect.defineMetadata(key, payload, target.constructor, propertyKey!);
 }

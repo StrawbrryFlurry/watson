@@ -21,7 +21,11 @@ export function UseFilters(
     descriptor?: PropertyDescriptor
   ) => {
     if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(FILTER_METADATA, descriptor.value, filters);
+      return applyStackableMetadata(
+        FILTER_METADATA,
+        descriptor!.value,
+        filters
+      );
     }
 
     applyStackableMetadata(FILTER_METADATA, target.constructor, filters);

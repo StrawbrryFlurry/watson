@@ -8,8 +8,8 @@ export interface ModuleOptions {
   exports?: (Type | CustomProvider)[];
 }
 
-export function Module(options?: ModuleOptions): ClassDecorator {
-  const metadata = mergeDefaults(options, {
+export function Module(options: ModuleOptions = {}): ClassDecorator {
+  const metadata = mergeDefaults<any>(options, {
     exports: undefined,
     imports: undefined,
     providers: undefined,

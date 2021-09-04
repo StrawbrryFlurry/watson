@@ -21,7 +21,7 @@ export function UseGuards(
     descriptor?: PropertyDescriptor
   ) => {
     if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(GUARD_METADATA, descriptor.value, guards);
+      return applyStackableMetadata(GUARD_METADATA, descriptor!.value, guards);
     }
 
     applyStackableMetadata(GUARD_METADATA, target.constructor, guards);

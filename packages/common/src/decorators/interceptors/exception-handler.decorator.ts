@@ -27,7 +27,7 @@ export function UseExceptionHandler(
     if (isMethodDecorator(descriptor)) {
       return applyStackableMetadata(
         EXCEPTION_HANDLER_METADATA,
-        descriptor.value,
+        descriptor!.value,
         handlers
       );
     }

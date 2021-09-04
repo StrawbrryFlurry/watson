@@ -1,5 +1,3 @@
-import { Prefix } from '@interfaces';
-
 /**
  * Holds a map of value - prefix pairs.
  *
@@ -7,8 +5,7 @@ import { Prefix } from '@interfaces';
  * cache in DI.
  */
 export abstract class PrefixCache<K = any, V = any> extends Map<K, V> {
-  protected toNormalizedPrefix(prefixRef: Prefix): string {
-    const { prefix } = prefixRef;
-    return prefix?.trim()?.toLowerCase();
+  protected toNormalizedPrefix(prefix: string): string {
+    return prefix.trim().toLowerCase();
   }
 }

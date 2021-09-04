@@ -51,6 +51,6 @@ export function SubCommand(
       return apply({ name: nameOrOptions });
     }
 
-    apply(nameOrOptions);
+    apply(nameOrOptions!);
   };
 }
