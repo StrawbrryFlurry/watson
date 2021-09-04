@@ -1,8 +1,5 @@
 import { AwaitMessagesOptions, MessageEmbed } from 'discord.js';
 
-import { InquirableType } from '../../enums';
-import { createInquirableDecorator } from './create-inquirable-decorator';
-
 /**
  * @param message The message or message embed to send.
  * @param collectorOptions Configurable options for the collector.
@@ -17,6 +14,6 @@ export type AskFunction<T = any> = (
 /**
  * Injects the `ask` function to the command handler.
  */
-export function InjectAsk(): ParameterDecorator {
-  return createInquirableDecorator(InquirableType.ASK);
+export function InjectAsk() {
+  // return createInquirableDecorator(InquirableType.ASK);
 }
