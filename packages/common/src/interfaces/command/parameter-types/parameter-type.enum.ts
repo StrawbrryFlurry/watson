@@ -1,0 +1,16 @@
+export enum CommandParameterType {
+  String,
+  Boolean,
+  Number,
+  StringExpandable,
+  StringLiteral,
+  StringTemplate,
+  URL,
+  Date,
+  Channel,
+  User,
+  Role,
+  Emote,
+  CodeBlock,
+  Custom,
+}

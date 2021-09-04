@@ -69,7 +69,7 @@ export class TokenPositionImpl implements TokenPosition {
 
 export class DiscordTokenImpl extends TokenImpl<CommandTokenKind> {
   getId(): string {
-    const [id] = this.text.match(/\d/);
+    const [id] = this.text.match(/\d/)!;
     return id;
   }
 }
@@ -228,7 +228,7 @@ export class RoleMentionTokenImpl
 
   getRole(guild: Guild): Promise<Role> {
     const id = this.getId();
-    return guild.roles.fetch(id);
+    return guild.roles.fetch(id) as Promise<Role>;
   }
 }
 
@@ -247,14 +247,14 @@ export class EmoteTokenImpl extends DiscordTokenImpl implements EmoteToken {
     }
 
     const withoutName = this.text.replace(/\<\:.*\:/, "");
-    const [id] = withoutName.match(/\d+/);
+    const [id] = withoutName.match(/\d+/)!;
     return id;
   }
 
   getEmote(adapter: DiscordAdapter<Client>): Emoji {
     const client = adapter.getClient();
     const id = this.getId();
-    return client.emojis.resolve(id);
+    return client.emojis.resolve(id)!;
   }
 }
 

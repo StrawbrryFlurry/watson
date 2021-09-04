@@ -15,6 +15,7 @@ import {
   ChannelMentionToken,
   CodeBlock,
   CommandAst,
+  CommandParameterType,
   CommandRoute,
   CommandTokenKind,
   DateParameterOptions,
@@ -24,6 +25,7 @@ import {
   isNil,
   OmitFirstElement,
   ParameterConfiguration,
+  Parsable,
   ParsedAstArguments,
   Parser,
   RoleMentionToken,
@@ -42,6 +44,9 @@ import { CommandTokenizer } from './tokenizer';
 export class CommandParser implements Parser<CommandAst> {
   private _commands: Map<string, string>;
   private readonly tokenizer: CommandTokenizer;
+
+  // TODO: Add context injector to the command pipe
+  private readonly contextInjector: any;
 
   public get isDisposed(): boolean {
     return this._disposed;
@@ -96,8 +101,14 @@ export class CommandParser implements Parser<CommandAst> {
       .applyArguments(parsedArguments);
   }
 
+  /** @Section Check Prefix */
+
   public getPrefixAst(): AstPrefix {
     const prefixToken = this.getNextToken();
+
+    if (!prefixToken) {
+      throw new ParsingException("No prefix present");
+    }
 
     if (!isPrefixToken(prefixToken)) {
       throw new ParsingException("No valid prefixToken found");
@@ -106,11 +117,18 @@ export class CommandParser implements Parser<CommandAst> {
     return new AstPrefixImpl(prefixToken);
   }
 
+  /** @Section Resolve Command Used */
+
   public getCommandAst(): {
     routeRef: CommandRoute;
     commandAst: AstCommand;
   } {
     const commandToken = this.getNextToken();
+
+    if (isNil(commandToken)) {
+      throw new ParsingException("No command found");
+    }
+
     const { text: commandText, kind } = commandToken;
 
     if (kind !== CommandTokenKind.Generic) {
@@ -119,12 +137,13 @@ export class CommandParser implements Parser<CommandAst> {
 
     const commandId = this._commands.get(commandText.toLowerCase());
 
-    if (!commandId) {
+    if (isNil(commandId)) {
       throw new Error("No matching command found");
     }
 
     const astCommand = new AstCommandImpl(commandToken);
-    const routeRef = this._commandContainer.get(commandId);
+    // If we have an Id, we'll always get route
+    const routeRef = this._commandContainer.get(commandId)!;
     const resolvedRouteRef = this.resolveSubCommand(routeRef, astCommand);
 
     return {
@@ -148,6 +167,10 @@ export class CommandParser implements Parser<CommandAst> {
       const { children } = routeRef;
       const nextToken = this.getNextToken();
 
+      if (isNil(nextToken)) {
+        break;
+      }
+
       if (!isGenericToken(nextToken)) {
         this.ungetToken(nextToken);
         break;
@@ -162,7 +185,7 @@ export class CommandParser implements Parser<CommandAst> {
         break;
       }
 
-      const childRef = this._commandContainer.get(childToken);
+      const childRef = this._commandContainer.get(childToken)!;
       const { caseSensitive } = childRef.configuration;
 
       if (caseSensitive) {
@@ -196,6 +219,8 @@ export class CommandParser implements Parser<CommandAst> {
     return routeRef;
   }
 
+  /** @Section Parse Arguments */
+
   public async getArgumentsAst(
     route: CommandRoute
   ): Promise<ParsedAstArguments> {
@@ -204,13 +229,123 @@ export class CommandParser implements Parser<CommandAst> {
 
     for (let i = 0; i < params.length; i++) {
       const param = params[i];
-      const {
-        configuration,
-        default: defaultValue,
-        name,
-        optional,
-        type,
-      } = param;
+      const { name } = param;
+      const parameterValue = await this.processNextParameter(param);
+      astArguments.set(name, parameterValue);
+    }
+
+    return astArguments;
+  }
+
+  /**
+   * !help user @username @otherUser hey, you thingies
+   *
+   */
+
+  public async processNextParameter<T = any>(
+    param: ParameterConfiguration,
+    accumulator: T[] = []
+  ): Promise<T | null> {
+    const {
+      default: defaultValue,
+      configuration,
+      hungry,
+      name,
+      paramType,
+      optional,
+    } = param;
+
+    const nextToken = this.getNextToken();
+
+    if (isNil(nextToken)) {
+      if (optional) {
+        return null;
+      }
+
+      if (defaultValue) {
+        return defaultValue;
+      }
+
+      throw new ParsingException(
+        `Could not find not optional parameter with name ${name} in the command message`
+      );
+    }
+
+    if (isParameterToken(nextToken)) {
+      if (paramType === CommandParameterType.Boolean) {
+        return true as unknown as T;
+      }
+    }
+
+    return null;
+  }
+
+  public getParseFn<T>(
+    param: ParameterConfiguration,
+    type: CommandParameterType
+  ): (...args: any[]) => T {
+    let fn: Function;
+
+    switch (type) {
+      case CommandParameterType.Boolean:
+        fn = this.parseToBoolean;
+        break;
+      case CommandParameterType.Number:
+        fn = this.parseToNumber;
+        break;
+      case CommandParameterType.String:
+        fn = this.parseToString;
+        break;
+      case CommandParameterType.StringExpandable:
+        fn = this.parseToStringExpandable;
+        break;
+      case CommandParameterType.StringLiteral:
+        fn = this.parseToStringLiteral;
+        break;
+      case CommandParameterType.StringTemplate:
+        fn = this.parseToStringTemplate;
+        break;
+      case CommandParameterType.URL:
+        fn = this.parseToUrl;
+        break;
+      case CommandParameterType.Date:
+        fn = this.parseToDate;
+        break;
+      case CommandParameterType.Channel:
+        fn = this.parseToChannel;
+        break;
+      case CommandParameterType.Role:
+        fn = this.parseToRole;
+        break;
+      case CommandParameterType.User:
+        fn = this.parseToUser;
+        break;
+      case CommandParameterType.Emote:
+        fn = this.parseToEmote;
+        break;
+      case CommandParameterType.CodeBlock:
+        fn = this.parseToCodeBlock;
+        break;
+      case CommandParameterType.Custom:
+        const parsableRef = this.contextInjector.create(param.type) as Parsable;
+        parsableRef.parser = this;
+        parsableRef.getNextToken = this.getNextToken.bind(this);
+        fn = parsableRef.parse.bind(parsableRef);
+        break;
+    }
+
+    return fn!.bind(this);
+  }
+
+  public async _getArgumentsAst(
+    route: CommandRoute
+  ): Promise<ParsedAstArguments> {
+    const { params } = route;
+    const astArguments = new Map<string, AstArgument>();
+
+    for (let i = 0; i < params.length; i++) {
+      const param = params[i];
+      const {} = param;
 
       const forAllTokensLeft = async <
         T extends (...args: any) => any,
@@ -305,6 +440,7 @@ export class CommandParser implements Parser<CommandAst> {
 
   public parseToUser(token: StringLikeToken | UserMentionToken): Promise<User> {
     if (token.kind !== CommandTokenKind.UserMention) {
+      // TODO: Improve this
       const userId = token.text;
       return this.getClient().users.fetch(userId);
     }
@@ -343,7 +479,9 @@ export class CommandParser implements Parser<CommandAst> {
     return "";
   }
 
-  public parseToCodeBlock(): CodeBlock {}
+  public parseToCodeBlock(): CodeBlock {
+    return "" as any;
+  }
 
   public parseToStringExpandable() {}
   public parseToStringLiteral() {}
@@ -354,10 +492,6 @@ export class CommandParser implements Parser<CommandAst> {
   public parseToNumber() {}
 
   public parseToUrl() {}
-
-  public matchParameterType<T>(type: any, resultType: T): type is T {
-    return type === resultType;
-  }
 
   private expectNextTokenToBeOfKind(
     ...validKinds: CommandTokenKind[]
@@ -378,15 +512,17 @@ export class CommandParser implements Parser<CommandAst> {
     );
   }
 
-  private getNextToken(): Token<CommandTokenKind> {
-    return this._tokens.shift();
+  /** @Section Utilities */
+
+  public getNextToken(): Token<CommandTokenKind> | null {
+    return this._tokens.shift() ?? null;
   }
 
-  private peekNextToken(): Token<CommandTokenKind> {
+  public peekNextToken(): Token<CommandTokenKind> {
     return this._tokens[0];
   }
 
-  private ungetToken(token: Token): void {
+  public ungetToken(token: Token): void {
     this._tokens.unshift(token);
   }
 

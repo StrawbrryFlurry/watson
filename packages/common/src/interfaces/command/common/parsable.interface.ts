@@ -1,12 +1,17 @@
 import { Observable } from 'rxjs';
 
-import { Token } from '../parsing';
+import { Parser, Token } from '../parsing';
 
 /**
  * All command arguments must implement this interface
  * in order to parse the token to its value.
  */
 export interface Parsable<T = any> {
+  /*
+   * This method will be set on the object
+   * by Watson at runtime.
+   */
+  parser: Parser;
   /**
    * This method is used to parsed the `token`
    * extracted from the message content to the
@@ -30,8 +35,11 @@ export interface Parsable<T = any> {
    * If you decide you don't want to use the
    * next token, you can also unget it by using
    * the parser instance in the command argument.
+   *
+   * This method will be created on the object
+   * by Watson at runtime.
    */
-  getNextToken?(): Token;
+  getNextToken?(): Token | null;
 }
 
 /**

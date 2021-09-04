@@ -7,12 +7,12 @@ export class StaticPrefixCache extends PrefixCache<string, Prefix> {
     super();
 
     for (let i = 0; i < prefixes.length; i++) {
-      const prefixRef = prefixes[i];
+      const prefixRef = prefixes[i] as string;
       this._applyPrefix(prefixRef);
     }
   }
 
-  private _applyPrefix(prefix: Prefix) {
+  private _applyPrefix(prefix: string) {
     const normalizedPrefix = this.toNormalizedPrefix(prefix);
     this.set(normalizedPrefix, prefix);
 

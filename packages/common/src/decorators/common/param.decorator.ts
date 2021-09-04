@@ -71,7 +71,6 @@ export interface CommandParameterMetadata<T = any>
  * - `String`
  * - `Boolean`
  * - `Number`
- * - `Date`
  *
  * Data structures:
  * ---

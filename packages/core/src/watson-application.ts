@@ -111,6 +111,15 @@ export class WatsonApplication {
   }
 
   /**
+   * TODO: For all add xxx
+   * Creates a new instance of `handler` and
+   * adds it as a global exception handler
+   */
+  public async addGlobalExceptionHandlerAsync(
+    handler: Type<ExceptionHandler>
+  ) {}
+
+  /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
   public addGlobalExceptionsHandler(handler: ExceptionHandler) {
