@@ -1,4 +1,4 @@
-import { Channel, VoiceChannel } from 'discord.js';
+import { Channel, Message, VoiceChannel } from "discord.js";
 
 /**
  * Injects the channel that the
@@ -12,3 +12,9 @@ export abstract class ChannelCtx extends Channel {}
  * is in.
  */
 export abstract class VoiceChannelCtx extends VoiceChannel {}
+
+/**
+ * Injects the message that emitted
+ * the event
+ */
+export abstract class MessageCtx extends Message {}
