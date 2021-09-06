@@ -32,6 +32,7 @@ import {
   StringLikeToken,
   Token,
   TokenPosition,
+  TokenWithValue,
   UserMentionToken,
 } from '@watsonjs/common';
 import { Client, Guild, Message, User } from 'discord.js';
@@ -41,9 +42,13 @@ import { WatsonContainer } from '../..';
 import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
 import { CommandTokenizer } from './tokenizer';
 
+const ACCEPTED_BOOLEAN_VALUES: string[] = ["true", "false", "yes", "no"];
+
 export class CommandParser implements Parser<CommandAst> {
   private _commands: Map<string, string>;
   private readonly tokenizer: CommandTokenizer;
+
+  private _parsedPrams: ParameterConfiguration[];
 
   // TODO: Add context injector to the command pipe
   private readonly contextInjector: any;
@@ -229,6 +234,11 @@ export class CommandParser implements Parser<CommandAst> {
 
     for (let i = 0; i < params.length; i++) {
       const param = params[i];
+
+      if (this.shouldSkipParam(param)) {
+        continue;
+      }
+
       const { name } = param;
       const parameterValue = await this.processNextParameter(param);
       astArguments.set(name, parameterValue);
@@ -272,8 +282,15 @@ export class CommandParser implements Parser<CommandAst> {
     }
 
     if (isParameterToken(nextToken)) {
+      const { value } = nextToken;
+      const argumentOrParameter = this.peekNextToken();
+
+      // Checking for switch parameter
       if (paramType === CommandParameterType.Boolean) {
-        return true as unknown as T;
+        // Argument was used as switch
+        if (isParameterToken(argumentOrParameter)) {
+          return true as unknown as T;
+        }
       }
     }
 
@@ -335,6 +352,29 @@ export class CommandParser implements Parser<CommandAst> {
     }
 
     return fn!.bind(this);
+  }
+
+  private shouldSkipParam(param: ParameterConfiguration): boolean {
+    return this._parsedPrams.includes(param);
+  }
+
+  private isBooleanToken(argument: Token): boolean {
+    const value = (argument as TokenWithValue).value;
+
+    if (isNil(value)) {
+      return false;
+    }
+
+    const lowerCaseValue = value.toLowerCase();
+    for (let i = 0; i < ACCEPTED_BOOLEAN_VALUES.length; i++) {
+      const booleanValue = ACCEPTED_BOOLEAN_VALUES[i];
+
+      if (lowerCaseValue === booleanValue) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public async _getArgumentsAst(

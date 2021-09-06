@@ -112,7 +112,7 @@ export type StringLikeToken =
 
 export interface CommandToken extends Token<CommandTokenKind> {}
 
-export interface TokenWithValue<T> extends CommandToken {
+export interface TokenWithValue<T = any> extends CommandToken {
   value: T;
 }
 
