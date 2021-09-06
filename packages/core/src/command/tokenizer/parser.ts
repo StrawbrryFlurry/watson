@@ -5,10 +5,9 @@ import {
   isParameterToken,
   isPrefixToken,
   ParsingException,
+  TokenPositionImpl,
 } from '@command';
 import {
-  ADate,
-  ArgumentsOf,
   AstArgument,
   AstCommand,
   AstPrefix,
@@ -16,20 +15,21 @@ import {
   CodeBlock,
   CommandAst,
   CommandParameterType,
+  CommandPipeline,
   CommandRoute,
   CommandTokenKind,
-  DateParameterOptions,
   DiscordAdapter,
   EmoteToken,
-  isEmpty,
+  GenericToken,
   isNil,
-  OmitFirstElement,
   ParameterConfiguration,
+  ParameterToken,
   Parsable,
   ParsedAstArguments,
   Parser,
   RoleMentionToken,
   StringLikeToken,
+  StringLiteralToken,
   Token,
   TokenPosition,
   TokenWithValue,
@@ -39,33 +39,26 @@ import { Client, Guild, Message, User } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
 
 import { WatsonContainer } from '../..';
+import { ContextInjector } from '../../injector/context-injector';
 import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
 import { CommandTokenizer } from './tokenizer';
 
-const ACCEPTED_BOOLEAN_VALUES: string[] = ["true", "false", "yes", "no"];
+const ACCEPTED_BOOLEAN_VALUES: string[] = [
+  "true",
+  "false",
+  "yes",
+  "no",
+  "y",
+  "n",
+];
+
+export type NextTokenFn = () => Token | null;
+export type PeekTokenFn = () => Token | null;
+export type UngetTokenFn = (token: Token) => void;
 
 export class CommandParser implements Parser<CommandAst> {
   private _commands: Map<string, string>;
   private readonly tokenizer: CommandTokenizer;
-
-  private _parsedPrams: ParameterConfiguration[];
-
-  // TODO: Add context injector to the command pipe
-  private readonly contextInjector: any;
-
-  public get isDisposed(): boolean {
-    return this._disposed;
-  }
-
-  public set isDisposed(status: boolean) {
-    if (this._disposed === true) {
-      return;
-    }
-
-    this._disposed = status;
-  }
-  private _disposed: boolean = false;
-  private _tokens: Token[];
 
   constructor(
     private _diContainer: WatsonContainer,
@@ -77,7 +70,7 @@ export class CommandParser implements Parser<CommandAst> {
   public parseMessageTokens(message: Message, prefixLength: number) {
     const { content } = message;
     const tokenizer = new CommandTokenizer(this);
-    this._tokens = tokenizer.tokenize(content, prefixLength);
+    return tokenizer.tokenize(content, prefixLength);
   }
 
   public async parseInput(tokenList: Token<any>[]): Promise<CommandAst> {
@@ -86,19 +79,40 @@ export class CommandParser implements Parser<CommandAst> {
 
   public async parseMessage(
     message: Message,
-    prefixLength: number
+    prefixLength: number,
+    pipeLine: CommandPipeline
   ): Promise<CommandAst> {
-    if (this.isDisposed) {
-      throw new Error(
-        "Parser is already disposed - Create a new parser instance"
-      );
-    }
+    const tokens = this.parseMessageTokens(message, prefixLength);
 
-    this.parseMessageTokens(message, prefixLength);
+    /**
+     * These methods allow us to change the
+     * state of `tokens` in this lexical scope
+     * throughout the parser and as well as `Parsables`.
+     *
+     * ??? WHY ???
+     * Doing this we can use one parser instance
+     * across the app and still allow users to
+     * update references to a token or such through
+     * a function.
+     */
+    const nextTokenFn = (): Token | null => tokens.shift() ?? null;
+    const peekTokenFn = () => tokens[0];
+    const ungetTokenFn = (token: Token): void => {
+      tokens.unshift(token);
+    };
 
-    const prefixAst = this.getPrefixAst();
-    const { commandAst, routeRef } = this.getCommandAst();
-    const parsedArguments = await this.getArgumentsAst(routeRef);
+    const prefixAst = this.getPrefixAst(nextTokenFn);
+    const { commandAst, routeRef } = this.getCommandAst(
+      nextTokenFn,
+      peekTokenFn,
+      ungetTokenFn
+    );
+    const parsedArguments = await this.getArgumentsAst(
+      routeRef,
+      nextTokenFn,
+      peekTokenFn,
+      ungetTokenFn
+    );
 
     return new CommandAstImpl()
       .applyPrefix(prefixAst)
@@ -108,8 +122,8 @@ export class CommandParser implements Parser<CommandAst> {
 
   /** @Section Check Prefix */
 
-  public getPrefixAst(): AstPrefix {
-    const prefixToken = this.getNextToken();
+  public getPrefixAst(nextTokenFn: NextTokenFn): AstPrefix {
+    const prefixToken = nextTokenFn();
 
     if (!prefixToken) {
       throw new ParsingException("No prefix present");
@@ -124,11 +138,15 @@ export class CommandParser implements Parser<CommandAst> {
 
   /** @Section Resolve Command Used */
 
-  public getCommandAst(): {
+  public getCommandAst(
+    nextTokenFn: NextTokenFn,
+    peekTokenFn: PeekTokenFn,
+    ungetTokenFn: UngetTokenFn
+  ): {
     routeRef: CommandRoute;
     commandAst: AstCommand;
   } {
-    const commandToken = this.getNextToken();
+    const commandToken = nextTokenFn();
 
     if (isNil(commandToken)) {
       throw new ParsingException("No command found");
@@ -149,7 +167,13 @@ export class CommandParser implements Parser<CommandAst> {
     const astCommand = new AstCommandImpl(commandToken);
     // If we have an Id, we'll always get route
     const routeRef = this._commandContainer.get(commandId)!;
-    const resolvedRouteRef = this.resolveSubCommand(routeRef, astCommand);
+    const resolvedRouteRef = this.resolveSubCommand(
+      routeRef,
+      astCommand,
+      nextTokenFn,
+      peekTokenFn,
+      ungetTokenFn
+    );
 
     return {
       routeRef: resolvedRouteRef,
@@ -164,20 +188,23 @@ export class CommandParser implements Parser<CommandAst> {
    */
   public resolveSubCommand(
     route: CommandRoute,
-    astCommand: AstCommand
+    astCommand: AstCommand,
+    nextTokenFn: NextTokenFn,
+    peekTokenFn: PeekTokenFn,
+    ungetTokenFn: UngetTokenFn
   ): CommandRoute {
     let routeRef = route;
 
     while (!isNil(routeRef.children)) {
       const { children } = routeRef;
-      const nextToken = this.getNextToken();
+      const nextToken = nextTokenFn();
 
       if (isNil(nextToken)) {
         break;
       }
 
       if (!isGenericToken(nextToken)) {
-        this.ungetToken(nextToken);
+        ungetTokenFn(nextToken);
         break;
       }
 
@@ -185,7 +212,7 @@ export class CommandParser implements Parser<CommandAst> {
       const childToken = children.get(text.toLowerCase());
 
       if (isNil(childToken)) {
-        this.ungetToken(nextToken);
+        ungetTokenFn(nextToken);
 
         break;
       }
@@ -227,20 +254,33 @@ export class CommandParser implements Parser<CommandAst> {
   /** @Section Parse Arguments */
 
   public async getArgumentsAst(
-    route: CommandRoute
+    route: CommandRoute,
+    nextTokenFn: NextTokenFn,
+    peekTokenFn: PeekTokenFn,
+    ungetTokenFn: UngetTokenFn
   ): Promise<ParsedAstArguments> {
     const { params } = route;
-    const astArguments = new Map<string, AstArgument>();
+    const astArguments = new Map<string, AstArgument | null>();
 
     for (let i = 0; i < params.length; i++) {
       const param = params[i];
 
-      if (this.shouldSkipParam(param)) {
+      if (this.shouldSkipParam(params, param)) {
         continue;
       }
 
       const { name } = param;
-      const parameterValue = await this.processNextParameter(param);
+      const parameterValue = await this.processNextParameter(
+        param,
+        route,
+        astArguments,
+        [],
+        [],
+        nextTokenFn,
+        peekTokenFn,
+        ungetTokenFn
+      );
+
       astArguments.set(name, parameterValue);
     }
 
@@ -252,10 +292,15 @@ export class CommandParser implements Parser<CommandAst> {
    *
    */
 
-  public async processNextParameter<T = any>(
+  public async processNextParameter<T extends any = any>(
     param: ParameterConfiguration,
-    accumulator: T[] = []
-  ): Promise<T | null> {
+    route: CommandRoute,
+    accumulator: T[],
+    parsedParams: ParameterConfiguration[],
+    nextTokenFn: NextTokenFn,
+    peekTokenFn: PeekTokenFn,
+    ungetTokenFn: UngetTokenFn
+  ): Promise<AstArgument> {
     const {
       default: defaultValue,
       configuration,
@@ -265,15 +310,25 @@ export class CommandParser implements Parser<CommandAst> {
       optional,
     } = param;
 
-    const nextToken = this.getNextToken();
+    const nextToken = nextTokenFn();
 
     if (isNil(nextToken)) {
       if (optional) {
-        return null;
+        return new AstArgumentImpl(
+          new TokenPositionImpl("End Of Message", 0, 0),
+          "null",
+          param,
+          null
+        );
       }
 
       if (defaultValue) {
-        return defaultValue;
+        return new AstArgumentImpl(
+          new TokenPositionImpl("End Of Message", 0, 0),
+          `${defaultValue}`,
+          param,
+          defaultValue
+        );
       }
 
       throw new ParsingException(
@@ -283,23 +338,50 @@ export class CommandParser implements Parser<CommandAst> {
 
     if (isParameterToken(nextToken)) {
       const { value } = nextToken;
-      const argumentOrParameter = this.peekNextToken();
+      const argumentOrParameter = peekTokenFn();
 
       // Checking for switch parameter
       if (paramType === CommandParameterType.Boolean) {
         // Argument was used as switch
-        if (isParameterToken(argumentOrParameter)) {
-          return true as unknown as T;
+        if (
+          isNil(argumentOrParameter) ||
+          isParameterToken(argumentOrParameter)
+        ) {
+          parsedParams.push(param);
+          return new AstArgumentImpl(nextToken.position, value, param, true);
         }
+
+        if (this.isBooleanToken(argumentOrParameter)) {
+          parsedParams.push(param);
+          return this.parseToBoolean(
+            argumentOrParameter as GenericToken,
+            param
+          );
+        }
+
+        const { kind, position } = argumentOrParameter;
+
+        throw new ParsingException(
+          `Unexpected token at position ${position}. Expected BOOLEAN got ${kind}`
+        );
       }
+
+      const valueToParse = this.getParameterInRouteFromToken(
+        nextToken as ParameterToken,
+        route
+      );
     }
 
-    return null;
+    return null as any;
   }
 
   public getParseFn<T>(
     param: ParameterConfiguration,
-    type: CommandParameterType
+    type: CommandParameterType,
+    injector: ContextInjector,
+    nextTokenFn: NextTokenFn,
+    peekTokenFn: PeekTokenFn,
+    ungetTokenFn: UngetTokenFn
   ): (...args: any[]) => T {
     let fn: Function;
 
@@ -344,18 +426,25 @@ export class CommandParser implements Parser<CommandAst> {
         fn = this.parseToCodeBlock;
         break;
       case CommandParameterType.Custom:
-        const parsableRef = this.contextInjector.create(param.type) as Parsable;
+        const parsableRef = injector.create(param.type) as Parsable;
         parsableRef.parser = this;
-        parsableRef.getNextToken = this.getNextToken.bind(this);
-        fn = parsableRef.parse.bind(parsableRef);
-        break;
+        parsableRef.nextToken = nextTokenFn;
+        parsableRef.peekToken = peekTokenFn;
+        parsableRef.ungetToken = ungetTokenFn;
+        // In this case we don't want
+        // to bind the function to the
+        // `this` context of the parser.
+        return parsableRef.parse.bind(parsableRef);
     }
 
     return fn!.bind(this);
   }
 
-  private shouldSkipParam(param: ParameterConfiguration): boolean {
-    return this._parsedPrams.includes(param);
+  private shouldSkipParam(
+    parsed: ParameterConfiguration[],
+    param: ParameterConfiguration
+  ): boolean {
+    return parsed.includes(param);
   }
 
   private isBooleanToken(argument: Token): boolean {
@@ -377,100 +466,40 @@ export class CommandParser implements Parser<CommandAst> {
     return false;
   }
 
-  public async _getArgumentsAst(
+  private getParameterInRouteFromToken(
+    token: ParameterToken,
     route: CommandRoute
-  ): Promise<ParsedAstArguments> {
+  ) {
+    const { value } = token;
     const { params } = route;
-    const astArguments = new Map<string, AstArgument>();
 
     for (let i = 0; i < params.length; i++) {
       const param = params[i];
-      const {} = param;
+      const { name } = param;
 
-      const forAllTokensLeft = async <
-        T extends (...args: any) => any,
-        R extends ReturnType<T>
-      >(
-        cb: T,
-        ...args: any[]
-      ) => {
-        const parsedValues: R[] = [];
-        const text: string[] = [];
-
-        for (let i = 0; i < tokens.length; i++) {
-          const token = tokens[i];
-          const parsed = (await cb.apply(this, [token, ...args])) as R;
-          parsedValues.push(parsed);
-          text.push(token.text);
-        }
-
-        const fullText = text.join(" ");
-        const position: TokenPosition = {
-          text: fullText,
-          tokenStart: tokens[0].position.tokenStart,
-          tokenEnd: tokens[tokens.length - 1].position.tokenEnd,
-        };
-
-        return {
-          position,
-          fullText,
-          parsedValues,
-        };
-      };
-
-      const applyParseFn = async <
-        T extends (...args: any) => any,
-        R extends ReturnType<T>,
-        A extends OmitFirstElement<ArgumentsOf<T>>
-      >(
-        cb: T,
-        param: ParameterConfiguration,
-        ...args: A
-      ) => {
-        const { hungry } = param;
-        let parsed: R | R[];
-        let text: string;
-        let position: TokenPosition;
-
-        if (hungry) {
-          const hungryParsed = await forAllTokensLeft<T, R>(cb, ...args);
-
-          position = hungryParsed.position;
-          text = hungryParsed.fullText;
-          parsed = hungryParsed.parsedValues;
-
-          if (optional && isEmpty(parsed)) {
-            return;
-          }
-        } else {
-          const token = this.getNextToken();
-
-          if (isParameterToken(token)) {
-          }
-
-          parsed = (await cb.apply(this, [token, ...args])) as R;
-          text = token.text;
-          position = token.position;
-        }
-
-        const astArgument = new AstArgumentImpl(position, text, param, parsed);
-        astArguments.set(name, astArgument);
-      };
-
-      if (this.matchParameterType(type, ADate)) {
-        const { format, options } = configuration as DateParameterOptions;
-        applyParseFn(this.parseToDate, param, format, options);
+      if (name === value) {
+        return param;
       }
     }
 
-    return astArguments;
+    throw new ParsingException(
+      `Could not find parameter with name ${value} at position ${token.position}`
+    );
   }
 
   public parseToDate(
-    dateString: string,
+    token: StringLikeToken,
     format?: string,
     options?: DateTimeOptions
   ): DateTime {
+    let dateString: string = "";
+
+    if (isGenericToken(token)) {
+      dateString = token.text;
+    } else {
+      dateString = (token as StringLiteralToken).value;
+    }
+
     if (isNil(format)) {
       return DateTime.fromISO(dateString);
     }
@@ -527,16 +556,30 @@ export class CommandParser implements Parser<CommandAst> {
   public parseToStringLiteral() {}
   public parseToStringTemplate() {}
 
-  public parseToBoolean() {}
+  public parseToBoolean(
+    token: StringLikeToken,
+    param: ParameterConfiguration
+  ): AstArgument {
+    let value;
+
+    if (isGenericToken(token)) {
+      value = Boolean(token.text);
+    } else {
+      value = Boolean((token as StringLiteralToken).value);
+    }
+
+    return new AstArgumentImpl(token.position, token.text, param, value);
+  }
 
   public parseToNumber() {}
 
   public parseToUrl() {}
 
   private expectNextTokenToBeOfKind(
+    peekToken: PeekTokenFn,
     ...validKinds: CommandTokenKind[]
   ): CommandTokenKind {
-    const { kind, position } = this.peekNextToken();
+    const { kind, position } = peekToken() ?? {};
 
     for (let i = 0; i < validKinds.length; i++) {
       const kind = validKinds[i];
@@ -554,21 +597,9 @@ export class CommandParser implements Parser<CommandAst> {
 
   /** @Section Utilities */
 
-  public getNextToken(): Token<CommandTokenKind> | null {
-    return this._tokens.shift() ?? null;
-  }
-
-  public peekNextToken(): Token<CommandTokenKind> {
-    return this._tokens[0];
-  }
-
-  public ungetToken(token: Token): void {
-    this._tokens.unshift(token);
-  }
-
-  private getTokenPositionBounds(): Omit<TokenPosition, "text"> {
-    const [{ position: firstPosition }] = this._tokens;
-    const { position: lastPosition } = this._tokens[this._tokens.length - 1];
+  private getTokenPositionBounds(tokens: Token[]): Omit<TokenPosition, "text"> {
+    const [{ position: firstPosition }] = tokens;
+    const { position: lastPosition } = tokens[tokens.length - 1];
 
     return {
       tokenStart: firstPosition.tokenStart,

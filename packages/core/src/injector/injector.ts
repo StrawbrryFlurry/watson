@@ -12,7 +12,7 @@ export abstract class _Injector {
   protected readonly parent: _Injector | null;
   protected readonly _records: Map<any, any> = new Map<any, any>();
 
-  public abstract create<T>(): T;
+  public abstract create<T>(...args: any[]): T;
   public abstract get<T>(): T;
 }
 

@@ -6,7 +6,7 @@ import { Parser, Token } from '../parsing';
  * All command arguments must implement this interface
  * in order to parse the token to its value.
  */
-export interface Parsable<T = any> {
+export abstract class Parsable<T = any> {
   /*
    * This method will be set on the object
    * by Watson at runtime.
@@ -24,7 +24,7 @@ export interface Parsable<T = any> {
    * "Some message!"
    * ```
    */
-  parse(token: Token): T | Promise<T> | Observable<T>;
+  abstract parse(token: Token): T | Promise<T> | Observable<T>;
 
   /**
    * Returns the next token that would be parsed.
@@ -39,7 +39,9 @@ export interface Parsable<T = any> {
    * This method will be created on the object
    * by Watson at runtime.
    */
-  getNextToken?(): Token | null;
+  nextToken?(): Token | null;
+  peekToken?(): Token | null;
+  ungetToken?(token: Token): void;
 }
 
 /**
