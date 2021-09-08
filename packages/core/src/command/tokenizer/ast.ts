@@ -7,6 +7,7 @@ import {
   GenericToken,
   ParsedAstArguments,
   PrefixToken,
+  Token,
   TokenPosition,
 } from '@watsonjs/common';
 import {
@@ -55,19 +56,19 @@ export class AstArgumentImpl<T = any> implements AstArgument<T> {
   public value?: T;
   public parameter: { type: CommandAstType.Parameter; name: string };
 
-  constructor(
-    position: TokenPosition,
-    text: string,
-    parameter: ParameterConfiguration,
-    value: T
-  ) {
-    this.position = position;
-    this.text = text;
+  constructor(token: Token, parameter: ParameterConfiguration, value?: T) {
+    this.position = token.position;
+    this.text = token.text;
     this.value = value;
     this.parameter = {
       type: CommandAstType.Parameter,
       name: parameter.name,
     };
+  }
+
+  public withValue(value: T) {
+    this.value = value;
+    return this;
   }
 }
 

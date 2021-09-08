@@ -1,6 +1,8 @@
 export interface Token<T = any> {
-  text: string;
-  kind: T;
+  /** Is null if the token was made for a default value */
+  text: string | null;
+  /** Is null if the token was made for a default value */
+  kind: T | null;
   position: TokenPosition;
 }
 
@@ -11,14 +13,24 @@ export interface Token<T = any> {
 export interface TokenPosition {
   /**
    * The zero based starting index
+   *
+   * `null` if the token was made
+   * for a default value
    */
-  tokenStart: number;
+  tokenStart: number | null;
   /**
    * The exclusive end index
+   * 
+   * `null` if the token was made
+   * for a default value
+   
    */
-  tokenEnd: number;
+  tokenEnd: number | null;
   /**
    * The Text this token came from.
+   *
+   * `null` if the token was made
+   * for a default value
    */
-  text: string;
+  text: string | null;
 }

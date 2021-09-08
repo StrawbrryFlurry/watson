@@ -40,11 +40,11 @@ export enum TokenKindIdentifier {
 }
 
 export class TokenImpl<T = any> implements Token<T> {
-  public text: string;
-  public kind: T;
+  public text: string | null;
+  public kind: T | null;
   public position: TokenPosition;
 
-  constructor(kind: T, text: string, position: TokenPosition) {
+  constructor(kind: T | null, text: string | null, position: TokenPosition) {
     this.kind = kind;
     this.text = text;
     this.position = position;
@@ -52,11 +52,15 @@ export class TokenImpl<T = any> implements Token<T> {
 }
 
 export class TokenPositionImpl implements TokenPosition {
-  public tokenStart: number;
-  public tokenEnd: number;
-  public text: string;
+  public tokenStart: number | null;
+  public tokenEnd: number | null;
+  public text: string | null;
 
-  constructor(text: string, tokenStart: number, tokenEnd: number) {
+  constructor(
+    text: string | null,
+    tokenStart: number | null,
+    tokenEnd: number | null
+  ) {
     this.tokenStart = tokenStart;
     this.tokenEnd = tokenEnd;
     this.text = text;
@@ -69,7 +73,7 @@ export class TokenPositionImpl implements TokenPosition {
 
 export class DiscordTokenImpl extends TokenImpl<CommandTokenKind> {
   getId(): string {
-    const [id] = this.text.match(/\d/)!;
+    const [id] = this.text!.match(/\d/)!;
     return id;
   }
 }
@@ -246,7 +250,7 @@ export class EmoteTokenImpl extends DiscordTokenImpl implements EmoteToken {
       return this.value;
     }
 
-    const withoutName = this.text.replace(/\<\:.*\:/, "");
+    const withoutName = this.text!.replace(/\<\:.*\:/, "");
     const [id] = withoutName.match(/\d+/)!;
     return id;
   }

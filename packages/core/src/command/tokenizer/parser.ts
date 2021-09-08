@@ -2,55 +2,110 @@ import {
   AstArgumentImpl,
   CommandContainer,
   isGenericToken,
+  isNumberToken,
   isParameterToken,
   isPrefixToken,
   ParsingException,
+  TokenImpl,
   TokenPositionImpl,
 } from '@command';
 import {
   AstArgument,
   AstCommand,
   AstPrefix,
-  ChannelMentionToken,
   CodeBlock,
+  CodeBlockToken,
   CommandAst,
   CommandParameterType,
   CommandPipeline,
   CommandRoute,
   CommandTokenKind,
-  DiscordAdapter,
-  EmoteToken,
   GenericToken,
   isNil,
+  NumberToken,
   ParameterConfiguration,
   ParameterToken,
   Parsable,
   ParsedAstArguments,
   Parser,
-  RoleMentionToken,
+  StringExpandableToken,
   StringLikeToken,
   StringLiteralToken,
+  StringTemplateToken,
   Token,
   TokenPosition,
   TokenWithValue,
-  UserMentionToken,
 } from '@watsonjs/common';
-import { Client, Guild, Message, User } from 'discord.js';
+import { Message } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
+import { URL } from 'url';
 
 import { WatsonContainer } from '../..';
 import { ContextInjector } from '../../injector/context-injector';
 import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
 import { CommandTokenizer } from './tokenizer';
 
-const ACCEPTED_BOOLEAN_VALUES: string[] = [
-  "true",
-  "false",
-  "yes",
-  "no",
-  "y",
-  "n",
+export interface BooleanLikeValue {
+  name: string;
+  value: boolean;
+}
+
+const ACCEPTED_BOOLEAN_VALUES: BooleanLikeValue[] = [
+  { name: "true", value: true },
+  { name: "false", value: false },
+  { name: "yes", value: true },
+  { name: "no", value: false },
+  { name: "y", value: true },
+  { name: "n", value: false },
 ];
+
+/**
+ * Makes the passing of
+ * closure reference arguments
+ * a little easier
+ */
+interface ClosureCtx {
+  nextTokenFn: NextTokenFn;
+  peekTokenFn: PeekTokenFn;
+  ungetTokenFn: UngetTokenFn;
+  injector: ContextInjector;
+}
+
+const STRING_LIKE_TOKENS = [
+  CommandTokenKind.Generic,
+  CommandTokenKind.StringExpandable,
+  CommandTokenKind.StringLiteral,
+  CommandTokenKind.StringTemplate,
+];
+
+/**
+ * A map of parameter types and the
+ * token kinds they accept.
+ */
+const PARAMETER_TOKEN_TYPE_MAP = {
+  [CommandParameterType.Boolean]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.Channel]: [
+    ...STRING_LIKE_TOKENS,
+    CommandTokenKind.ChannelMention,
+  ],
+  [CommandParameterType.CodeBlock]: [CommandTokenKind.CodeBlock],
+  [CommandParameterType.Date]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.Emote]: [CommandTokenKind.Emote],
+  [CommandParameterType.Number]: [
+    ...STRING_LIKE_TOKENS,
+    CommandTokenKind.Number,
+  ],
+  [CommandParameterType.Role]: [
+    ...STRING_LIKE_TOKENS,
+    CommandTokenKind.RoleMention,
+  ],
+  [CommandParameterType.User]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.String]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.StringExpandable]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.StringLiteral]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.StringTemplate]: [...STRING_LIKE_TOKENS],
+  [CommandParameterType.URL]: [...STRING_LIKE_TOKENS],
+};
 
 export type NextTokenFn = () => Token | null;
 export type PeekTokenFn = () => Token | null;
@@ -101,18 +156,16 @@ export class CommandParser implements Parser<CommandAst> {
       tokens.unshift(token);
     };
 
+    const closureCtx: ClosureCtx = {
+      injector: pipeLine.getInjector(),
+      nextTokenFn,
+      peekTokenFn,
+      ungetTokenFn,
+    };
+
     const prefixAst = this.getPrefixAst(nextTokenFn);
-    const { commandAst, routeRef } = this.getCommandAst(
-      nextTokenFn,
-      peekTokenFn,
-      ungetTokenFn
-    );
-    const parsedArguments = await this.getArgumentsAst(
-      routeRef,
-      nextTokenFn,
-      peekTokenFn,
-      ungetTokenFn
-    );
+    const { commandAst, routeRef } = this.getCommandAst(closureCtx);
+    const parsedArguments = await this.getArgumentsAst(routeRef, closureCtx);
 
     return new CommandAstImpl()
       .applyPrefix(prefixAst)
@@ -138,15 +191,11 @@ export class CommandParser implements Parser<CommandAst> {
 
   /** @Section Resolve Command Used */
 
-  public getCommandAst(
-    nextTokenFn: NextTokenFn,
-    peekTokenFn: PeekTokenFn,
-    ungetTokenFn: UngetTokenFn
-  ): {
+  public getCommandAst(ctx: ClosureCtx): {
     routeRef: CommandRoute;
     commandAst: AstCommand;
   } {
-    const commandToken = nextTokenFn();
+    const commandToken = ctx.nextTokenFn();
 
     if (isNil(commandToken)) {
       throw new ParsingException("No command found");
@@ -158,7 +207,7 @@ export class CommandParser implements Parser<CommandAst> {
       throw new Error("No command specified");
     }
 
-    const commandId = this._commands.get(commandText.toLowerCase());
+    const commandId = this._commands.get(commandText!.toLowerCase());
 
     if (isNil(commandId)) {
       throw new Error("No matching command found");
@@ -167,13 +216,7 @@ export class CommandParser implements Parser<CommandAst> {
     const astCommand = new AstCommandImpl(commandToken);
     // If we have an Id, we'll always get route
     const routeRef = this._commandContainer.get(commandId)!;
-    const resolvedRouteRef = this.resolveSubCommand(
-      routeRef,
-      astCommand,
-      nextTokenFn,
-      peekTokenFn,
-      ungetTokenFn
-    );
+    const resolvedRouteRef = this.resolveSubCommand(routeRef, astCommand, ctx);
 
     return {
       routeRef: resolvedRouteRef,
@@ -189,10 +232,9 @@ export class CommandParser implements Parser<CommandAst> {
   public resolveSubCommand(
     route: CommandRoute,
     astCommand: AstCommand,
-    nextTokenFn: NextTokenFn,
-    peekTokenFn: PeekTokenFn,
-    ungetTokenFn: UngetTokenFn
+    ctx: ClosureCtx
   ): CommandRoute {
+    const { nextTokenFn, ungetTokenFn } = ctx;
     let routeRef = route;
 
     while (!isNil(routeRef.children)) {
@@ -209,7 +251,7 @@ export class CommandParser implements Parser<CommandAst> {
       }
 
       const { text } = nextToken;
-      const childToken = children.get(text.toLowerCase());
+      const childToken = children.get(text!.toLowerCase());
 
       if (isNil(childToken)) {
         ungetTokenFn(nextToken);
@@ -221,7 +263,7 @@ export class CommandParser implements Parser<CommandAst> {
       const { caseSensitive } = childRef.configuration;
 
       if (caseSensitive) {
-        const hasName = childRef.hasName(text, true);
+        const hasName = childRef.hasName(text!, true);
 
         if (!hasName) {
           /**
@@ -255,9 +297,7 @@ export class CommandParser implements Parser<CommandAst> {
 
   public async getArgumentsAst(
     route: CommandRoute,
-    nextTokenFn: NextTokenFn,
-    peekTokenFn: PeekTokenFn,
-    ungetTokenFn: UngetTokenFn
+    ctx: ClosureCtx
   ): Promise<ParsedAstArguments> {
     const { params } = route;
     const astArguments = new Map<string, AstArgument | null>();
@@ -273,12 +313,9 @@ export class CommandParser implements Parser<CommandAst> {
       const parameterValue = await this.processNextParameter(
         param,
         route,
-        astArguments,
         [],
         [],
-        nextTokenFn,
-        peekTokenFn,
-        ungetTokenFn
+        ctx
       );
 
       astArguments.set(name, parameterValue);
@@ -297,9 +334,7 @@ export class CommandParser implements Parser<CommandAst> {
     route: CommandRoute,
     accumulator: T[],
     parsedParams: ParameterConfiguration[],
-    nextTokenFn: NextTokenFn,
-    peekTokenFn: PeekTokenFn,
-    ungetTokenFn: UngetTokenFn
+    ctx: ClosureCtx
   ): Promise<AstArgument> {
     const {
       default: defaultValue,
@@ -309,23 +344,27 @@ export class CommandParser implements Parser<CommandAst> {
       paramType,
       optional,
     } = param;
-
+    const { nextTokenFn, peekTokenFn } = ctx;
     const nextToken = nextTokenFn();
 
     if (isNil(nextToken)) {
       if (optional) {
         return new AstArgumentImpl(
-          new TokenPositionImpl("End Of Message", 0, 0),
-          "null",
+          new TokenImpl(null, null, new TokenPositionImpl(null, null, null)),
           param,
           null
         );
       }
 
       if (defaultValue) {
+        const defaultString: null | string =
+          defaultValue ?? defaultValue.toString();
         return new AstArgumentImpl(
-          new TokenPositionImpl("End Of Message", 0, 0),
-          `${defaultValue}`,
+          new TokenImpl(
+            null,
+            defaultString,
+            new TokenPositionImpl(defaultString, null, null)
+          ),
           param,
           defaultValue
         );
@@ -337,7 +376,6 @@ export class CommandParser implements Parser<CommandAst> {
     }
 
     if (isParameterToken(nextToken)) {
-      const { value } = nextToken;
       const argumentOrParameter = peekTokenFn();
 
       // Checking for switch parameter
@@ -348,7 +386,7 @@ export class CommandParser implements Parser<CommandAst> {
           isParameterToken(argumentOrParameter)
         ) {
           parsedParams.push(param);
-          return new AstArgumentImpl(nextToken.position, value, param, true);
+          return new AstArgumentImpl(nextToken, param, true);
         }
 
         if (this.isBooleanToken(argumentOrParameter)) {
@@ -378,10 +416,7 @@ export class CommandParser implements Parser<CommandAst> {
   public getParseFn<T>(
     param: ParameterConfiguration,
     type: CommandParameterType,
-    injector: ContextInjector,
-    nextTokenFn: NextTokenFn,
-    peekTokenFn: PeekTokenFn,
-    ungetTokenFn: UngetTokenFn
+    ctx: ClosureCtx
   ): (...args: any[]) => T {
     let fn: Function;
 
@@ -426,7 +461,8 @@ export class CommandParser implements Parser<CommandAst> {
         fn = this.parseToCodeBlock;
         break;
       case CommandParameterType.Custom:
-        const parsableRef = injector.create(param.type) as Parsable;
+        const { injector, nextTokenFn, peekTokenFn, ungetTokenFn } = ctx;
+        const parsableRef = injector.create<Parsable>(param.type as Parsable);
         parsableRef.parser = this;
         parsableRef.nextToken = nextTokenFn;
         parsableRef.peekToken = peekTokenFn;
@@ -489,91 +525,198 @@ export class CommandParser implements Parser<CommandAst> {
 
   public parseToDate(
     token: StringLikeToken,
+    param: ParameterConfiguration,
     format?: string,
     options?: DateTimeOptions
-  ): DateTime {
-    let dateString: string = "";
-
-    if (isGenericToken(token)) {
-      dateString = token.text;
-    } else {
-      dateString = (token as StringLiteralToken).value;
-    }
+  ): AstArgument<DateTime> {
+    const argument = new AstArgumentImpl<DateTime>(token, param);
+    const dateString = this.getValueFromStringLikeToken(token);
 
     if (isNil(format)) {
-      return DateTime.fromISO(dateString);
+      return argument.withValue(DateTime.fromISO(dateString));
     }
 
-    return DateTime.fromFormat(dateString, format, options);
+    return argument.withValue(DateTime.fromFormat(dateString, format, options));
   }
 
-  public parseToUser(token: StringLikeToken | UserMentionToken): Promise<User> {
+  /*
+  TODO: Clean up discord parsing
+  public parseToUser(
+    token: StringLikeToken | UserMentionToken
+  ): Promise<AstArgument<User>> {
     if (token.kind !== CommandTokenKind.UserMention) {
       // TODO: Improve this
-      const userId = token.text;
+      const userId = token.text!;
       return this.getClient().users.fetch(userId);
     }
 
     return (token as UserMentionToken).getUser(this.getAdapter());
   }
 
-  public parseToRole(guild: Guild, token: StringLikeToken | RoleMentionToken) {
+  public parseToRole(
+    guild: Guild,
+    token: StringLikeToken | RoleMentionToken
+  ): Promise<AstArgument<Role>> {
     if (token.kind !== CommandTokenKind.RoleMention) {
-      const roleId = token.text;
+      const roleId = token.text!;
       return guild.roles.fetch(roleId);
     }
 
     return (token as RoleMentionToken).getRole(guild);
   }
 
-  public parseToChannel(token: StringLikeToken | ChannelMentionToken) {
+  public parseToChannel(
+    token: StringLikeToken | ChannelMentionToken
+  ): Promise<AstArgument<Channel>> {
     if (token.kind !== CommandTokenKind.ChannelMention) {
-      const channelId = token.text;
+      const channelId = token.text!;
       return this.getClient().channels.fetch(channelId);
     }
 
     return (token as ChannelMentionToken).getChannel(this.getAdapter());
   }
 
-  public parseToEmote(token: StringLikeToken | EmoteToken) {
+  public parseToEmote(
+    token: StringLikeToken | EmoteToken
+  ): Promise<AstArgument<Emoji>> {
     if (token.kind !== CommandTokenKind.Emote) {
-      const emoteId = token.text;
+      const emoteId = token.text!;
       return this.getClient().emojis.resolve(emoteId);
     }
 
     return (token as EmoteToken).getEmote(this.getAdapter());
   }
 
-  public parseToString(token: StringLikeToken): string {
-    return "";
+  */
+
+  public parseToString(
+    token: StringLikeToken,
+    param: ParameterConfiguration
+  ): AstArgument<string> {
+    const value = this.getValueFromStringLikeToken(token);
+    return new AstArgumentImpl<string>(token, param, value);
   }
 
-  public parseToCodeBlock(): CodeBlock {
-    return "" as any;
+  public parseToCodeBlock(
+    token: CodeBlockToken,
+    param: ParameterConfiguration
+  ): AstArgument<CodeBlock> {
+    const argument = new AstArgumentImpl<CodeBlock>(token, param);
+    const { language, text, value } = token;
+    const codeBlock: CodeBlock = {
+      code: value,
+      language: language,
+      raw: text!,
+    };
+
+    return argument.withValue(codeBlock);
   }
 
-  public parseToStringExpandable() {}
-  public parseToStringLiteral() {}
-  public parseToStringTemplate() {}
+  // In the future we might allow
+  // for variables in strings
+  // or other templating features
+  public parseToStringExpandable(
+    token: StringExpandableToken,
+    param: ParameterConfiguration
+  ): AstArgument<string> {
+    const argument = new AstArgumentImpl<string>(token, param);
+    return argument.withValue(token.value);
+  }
+
+  public parseToStringLiteral(
+    token: StringLiteralToken,
+    param: ParameterConfiguration
+  ): AstArgument<string> {
+    const argument = new AstArgumentImpl<string>(token, param);
+    return argument.withValue(token.value);
+  }
+
+  public parseToStringTemplate(
+    token: StringTemplateToken,
+    param: ParameterConfiguration
+  ): AstArgument<string> {
+    const argument = new AstArgumentImpl<string>(token, param);
+    return argument.withValue(token.value);
+  }
 
   public parseToBoolean(
     token: StringLikeToken,
     param: ParameterConfiguration
-  ): AstArgument {
-    let value;
+  ): AstArgument<boolean> {
+    const boolean = this.getValueFromStringLikeToken(token);
+    const inferBooleanLikeValue = () => {
+      const lowerCaseValue = boolean.toLowerCase();
+      for (let i = 0; i < ACCEPTED_BOOLEAN_VALUES.length; i++) {
+        const { name, value } = ACCEPTED_BOOLEAN_VALUES[i];
 
-    if (isGenericToken(token)) {
-      value = Boolean(token.text);
-    } else {
-      value = Boolean((token as StringLiteralToken).value);
+        if (lowerCaseValue === name) {
+          return value;
+        }
+      }
+
+      return null;
+    };
+
+    const booleanLikeValue = inferBooleanLikeValue();
+    const argument = new AstArgumentImpl<boolean>(token, param);
+
+    if (!isNil(booleanLikeValue)) {
+      return argument.withValue(booleanLikeValue);
     }
 
-    return new AstArgumentImpl(token.position, token.text, param, value);
+    return argument.withValue(Boolean(boolean));
   }
 
-  public parseToNumber() {}
+  public parseToNumber(
+    token: StringLikeToken | NumberToken,
+    param: ParameterConfiguration
+  ): AstArgument<number> {
+    const argument = new AstArgumentImpl<number>(token, param);
+    const { text, position } = token;
 
-  public parseToUrl() {}
+    const checkNaN = (number: number) => {
+      if (isNaN(number)) {
+        throw new ParsingException(
+          `Unexpected token "${text}" at position ${position}. Expected Number got NaN.`
+        );
+      }
+    };
+
+    if (isNumberToken(token)) {
+      const number = token.value;
+      checkNaN(number);
+      return argument.withValue(number);
+    }
+
+    const value = this.getValueFromStringLikeToken(token);
+    const number = Number(value);
+    checkNaN(number);
+    return argument.withValue(number);
+  }
+
+  public parseToUrl(
+    token: StringLikeToken,
+    param: ParameterConfiguration
+  ): AstArgument<URL> {
+    const url = this.getValueFromStringLikeToken(token);
+    let parsed: URL;
+
+    try {
+      parsed = new URL(url);
+    } catch (err) {
+      throw new ParsingException(
+        `Failed to parse token "${url}" of kind "${token.kind}" type URL`
+      );
+    }
+
+    return new AstArgumentImpl<URL>(token, param, parsed);
+  }
+
+  private getValueFromStringLikeToken(token: StringLikeToken): string {
+    return isGenericToken(token)
+      ? (token.text as string)
+      : ((token as StringLiteralToken).value as string);
+  }
 
   private expectNextTokenToBeOfKind(
     peekToken: PeekTokenFn,
@@ -605,13 +748,5 @@ export class CommandParser implements Parser<CommandAst> {
       tokenStart: firstPosition.tokenStart,
       tokenEnd: lastPosition.tokenEnd,
     };
-  }
-
-  private getAdapter(): DiscordAdapter {
-    return this._diContainer.getClientAdapter();
-  }
-
-  private getClient(): Client {
-    return this._diContainer.getClient<Client>();
   }
 }
