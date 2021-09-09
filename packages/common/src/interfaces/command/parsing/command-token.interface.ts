@@ -6,42 +6,42 @@ import { Token } from './token.interface';
 export type NewLineCharacter = "\n" | "\r" | "\r\n";
 
 export enum CommandTokenKind {
-  None = 1,
+  None = 1 << 0,
   /**
    * A user mention is formatted as follows: `<@USER_ID>`
    * and parsed using the {@link USER_MENTION_REGEXP}
    * regular expression.
    */
-  UserMention = 2,
+  UserMention = 1 << 1,
   /**
    * A channel mention is formatted as follows: `<#CHANNEL_ID>`
    * and parsed using the {@link CHANNEL_MENTION_REGEXP}
    * regular expression.
    */
-  ChannelMention = 4,
+  ChannelMention = 1 << 2,
   /**
    * A role mention is formatted as follows: `<@&CHANNEL_ID>`
    * and parsed using the {@link ROLE_MENTION_REGEXP}
    * regular expression.
    */
-  RoleMention = 8,
+  RoleMention = 1 << 3,
   /**
    * An emote is formatted as follows: `<:EMOTE_NAME:EMOTE_ID`
    * <:ayy:305818615712579584>
    */
-  Emote = 16,
+  Emote = 1 << 4,
   /**
    * Double quoted string literal - `"`
    * Expandable strings could reference variables
    * in future releases
    */
-  StringExpandable = 32,
+  StringExpandable = 1 << 5,
   /** Single quoted string literal - `'` */
-  StringLiteral = 64,
+  StringLiteral = 1 << 6,
   /** A string string literal quoted with a single back tick - '`' */
-  StringTemplate = 128,
+  StringTemplate = 1 << 7,
   /** Any numeric literal */
-  Number = 256,
+  Number = 1 << 8,
   /**
    * A code block starts with three back-ticks and is ended accordingly
    * ```
@@ -50,12 +50,12 @@ export enum CommandTokenKind {
    * \`\`\`
    * ```
    */
-  CodeBlock = 512,
+  CodeBlock = 1 << 9,
   /**
    * An identifier is either a keyword
    * or a variable.
    */
-  Identifier = 1028,
+  Identifier = 1 << 10,
   /**
    * The length of the prefix used is passed to the tokenizer
    * after it was determined in the command pipeline. It has
@@ -65,11 +65,11 @@ export enum CommandTokenKind {
    * A prefix can be any character / characters formatted
    * like it was specified by the prefix configuration.
    *
-   * @see {@link IPrefix}
+   * @see {@link Prefix}
    */
-  Prefix = 2056,
+  Prefix = 1 << 11,
   /** Text prefixed with a Dash or DoubleDash is treated as a parameter */
-  Parameter = 4112,
+  Parameter = 1 << 12,
   /**
    * Message content that could not be matched with any kind
    * @example
@@ -89,17 +89,17 @@ export enum CommandTokenKind {
    * adding a parsed argument following or preceding a generic back
    * to its original.
    */
-  Generic = 8224,
+  Generic = 1 << 13,
   /** A dash for command arguments - '-' */
-  Dash = 16448,
+  Dash = 1 << 14,
   /** A double dash for command arguments - '--' */
-  DashDash = 32896,
+  DashDash = 1 << 15,
   /** A new line character - '\n', '\r', or '\r\n' */
-  NewLine = 65792,
+  NewLine = 1 << 16,
   /** A white space character - '\w', ' ', or '\w+' */
-  WhiteSpace = 131584,
+  WhiteSpace = 1 << 17,
   /** End of the message */
-  Eom = 263168,
+  Eom = 1 << 18,
 }
 
 export type StringLikeToken =
