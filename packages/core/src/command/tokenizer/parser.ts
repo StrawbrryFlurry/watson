@@ -71,40 +71,33 @@ interface ClosureCtx {
   injector: ContextInjector;
 }
 
-const STRING_LIKE_TOKENS = [
-  CommandTokenKind.Generic,
-  CommandTokenKind.StringExpandable,
-  CommandTokenKind.StringLiteral,
-  CommandTokenKind.StringTemplate,
-];
+const STRING_LIKE_TOKENS =
+  CommandTokenKind.Generic |
+  CommandTokenKind.StringExpandable |
+  CommandTokenKind.StringLiteral |
+  CommandTokenKind.StringTemplate;
 
 /**
  * A map of parameter types and the
  * token kinds they accept.
  */
-const PARAMETER_TOKEN_TYPE_MAP = {
-  [CommandParameterType.Boolean]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.Channel]: [
-    ...STRING_LIKE_TOKENS,
-    CommandTokenKind.ChannelMention,
-  ],
-  [CommandParameterType.CodeBlock]: [CommandTokenKind.CodeBlock],
-  [CommandParameterType.Date]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.Emote]: [CommandTokenKind.Emote],
-  [CommandParameterType.Number]: [
-    ...STRING_LIKE_TOKENS,
-    CommandTokenKind.Number,
-  ],
-  [CommandParameterType.Role]: [
-    ...STRING_LIKE_TOKENS,
-    CommandTokenKind.RoleMention,
-  ],
-  [CommandParameterType.User]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.String]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.StringExpandable]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.StringLiteral]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.StringTemplate]: [...STRING_LIKE_TOKENS],
-  [CommandParameterType.URL]: [...STRING_LIKE_TOKENS],
+const PARAMETER_TOKEN_MAP = {
+  [CommandParameterType.String]: STRING_LIKE_TOKENS,
+  [CommandParameterType.StringExpandable]: CommandTokenKind.StringExpandable,
+  [CommandParameterType.StringLiteral]: CommandTokenKind.StringLiteral,
+  [CommandParameterType.StringTemplate]: CommandTokenKind.StringTemplate,
+  [CommandParameterType.Boolean]: STRING_LIKE_TOKENS,
+  [CommandParameterType.Number]: STRING_LIKE_TOKENS | CommandTokenKind.Number,
+  [CommandParameterType.URL]: STRING_LIKE_TOKENS,
+  [CommandParameterType.Date]: STRING_LIKE_TOKENS,
+  [CommandParameterType.Channel]:
+    STRING_LIKE_TOKENS | CommandTokenKind.ChannelMention,
+  [CommandParameterType.Role]:
+    STRING_LIKE_TOKENS | CommandTokenKind.RoleMention,
+  [CommandParameterType.User]:
+    STRING_LIKE_TOKENS | CommandTokenKind.UserMention,
+  [CommandParameterType.Emote]: CommandTokenKind.Emote,
+  [CommandParameterType.CodeBlock]: CommandTokenKind.CodeBlock,
 };
 
 export type NextTokenFn = () => Token | null;
@@ -142,7 +135,7 @@ export class CommandParser implements Parser<CommandAst> {
     /**
      * These methods allow us to change the
      * state of `tokens` in this lexical scope
-     * throughout the parser and as well as `Parsables`.
+     * throughout the parser as well as in `Parsables`.
      *
      * ??? WHY ???
      * Doing this we can use one parser instance
