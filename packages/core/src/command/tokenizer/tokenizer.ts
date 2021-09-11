@@ -115,9 +115,9 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     return this._tokens;
   }
 
-  // utils
+  /** @Section Utilities */
 
-  public getChar(): char {
+  public getChar(): char | null {
     this._index += 1;
 
     // New index is out of bounds
@@ -128,7 +128,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     return this._input[this._index];
   }
 
-  public peekChar(): char {
+  public peekChar(): char | null {
     // New index is out of bounds
     if (this.index + 1 === this.length) {
       return null;
@@ -160,7 +160,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
    * Pops the last token off the token list
    */
   protected pop(): Token {
-    return this._tokens.pop();
+    return this._tokens.pop()!;
   }
 
   /**
@@ -173,36 +173,15 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
 
   protected resyncToPosition(position: TokenPosition) {
     const { tokenStart } = position;
-    this._index = tokenStart - 1;
+    this._index = tokenStart! - 1;
   }
 
   protected currentPosition(): TokenPosition {
     return new TokenPositionImpl(this._input, this._tokenStart, this._index);
   }
 
-  protected isSkippable(char: char): boolean {
+  protected canBeSkipped(char: char): boolean {
     return this.isWhiteSpace(char) || this.isNewLine(char);
-  }
-
-  protected initStringBuilders() {
-    this._stringBuilders = [
-      new StringBuilder(),
-      new StringBuilder(),
-      new StringBuilder(),
-    ];
-  }
-
-  protected getStringBuilder(value: string | StringBuilder) {
-    return (
-      this._stringBuilders.pop().append(value as string) ||
-      new StringBuilder(value)
-    );
-  }
-
-  protected releaseStringBuilder(sb: StringBuilder): string {
-    const string = sb.toString();
-    sb.clear();
-    return string;
   }
 
   protected isWhiteSpace(char: char): boolean {
@@ -239,8 +218,10 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
    */
   protected isDiscordToken(): boolean {
     const idx = this.index;
-    const sb = new StringBuilder("<");
-    let kind: CommandTokenKind;
+    const text = new StringBuilder("<");
+    const id = new StringBuilder();
+    let semicolonCount = 0;
+    let kind: CommandTokenKind = CommandTokenKind.None;
 
     while (!this.atEom()) {
       const c = this.getChar();
@@ -260,12 +241,17 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
            * as it's already checked in a later
            * step if the rest of the token is valid
            */
-          sb.append(c);
+          text.append(c);
+
+          if (kind !== CommandTokenKind.Emote || semicolonCount === 2) {
+            id.append(c);
+          }
+
           continue;
         }
         case "#":
         case "@": {
-          if (sb.has(c) || sb.length > 0) {
+          if (text.has(c) || text.length > 1) {
             this.resync(idx);
             return false;
           }
@@ -273,41 +259,80 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
             c === "@"
               ? CommandTokenKind.UserMention
               : CommandTokenKind.ChannelMention;
-          sb.append(c);
+          text.append(c);
           continue;
         }
         case "&": {
-          if (sb.has(c) || sb.length > 1 || !sb.has("@")) {
+          if (text.has(c) || text.length > 1 || !text.has("@")) {
             this.resync(idx);
             return false;
           }
+
           kind = CommandTokenKind.RoleMention;
-          sb.append(c);
+          text.append(c);
+          continue;
+        }
+        case ":": {
+          if (semicolonCount > 1) {
+            this.resync(idx);
+            return false;
+          }
+
+          semicolonCount++;
+          kind = CommandTokenKind.Emote;
+          text.append(c);
           continue;
         }
         case ">": {
-          if (sb.has("@") || sb.has("#")) {
+          if (text.has("@") || text.has("#")) {
             this.resync(idx);
             return false;
           }
           let token: Token;
-          sb.append(c);
+          text.append(c);
 
           switch (kind) {
             case CommandTokenKind.UserMention:
-              token = this.newUserMentionToken(sb);
+              token = this.newUserMentionToken(text, id);
               break;
             case CommandTokenKind.RoleMention:
-              token = this.newRoleMentionToken(sb);
+              token = this.newRoleMentionToken(text, id);
               break;
             case CommandTokenKind.ChannelMention:
-              token = this.newChannelMentionToken(sb);
+              token = this.newChannelMentionToken(text, id);
               break;
+            case CommandTokenKind.Emote:
+              token = this.newEmoteToken(text, id);
+              break;
+            default: {
+              this.resync(idx);
+              return false;
+            }
           }
 
           return true;
         }
         default: {
+          if (isNil(c)) {
+            this.resync(idx);
+            return false;
+          }
+
+          /**
+           *  Emote tokens can have all kinds of
+           * crazy characters in them so we don't want
+           * to look for all of them.
+           */
+          if (kind === CommandTokenKind.Emote) {
+            /**
+             * Checking if token looks like:
+             * "<:xxx"
+             */
+            if (semicolonCount !== 2) {
+              text.append(c);
+            }
+          }
+
           this.resync(idx);
           return false;
         }
@@ -336,7 +361,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     // TODO: Implement optional error handling
   }
 
-  // Newable helpers
+  /** @Section Newable helpers */
 
   public saveToken<T extends Token<CommandTokenKind>>(token: T): T {
     this._tokens.push(token);
@@ -464,7 +489,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     );
   }
 
-  // Scanners
+  /** @Section Scanners */
 
   protected scanPrefixToken(length: number): string {
     const prefix = this._input.substr(0, length);
@@ -553,7 +578,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     resyncTo?: number
   ): boolean {
     while (!this.forceNewToken && !this.atEom()) {
-      const c = this.getChar();
+      const c = this.getChar()!;
 
       switch (c) {
         // Is valid identifier
@@ -637,7 +662,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     }
 
     this.resync();
-    return this.scanGenericToken(this.getChar());
+    return this.scanGenericToken(this.getChar()!);
   }
 
   /**
@@ -705,7 +730,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     const backTicks = ["`"];
 
     while (!this.forceNewToken && !this.atEom()) {
-      const c = this.getChar();
+      const c = this.getChar()!;
 
       switch (c) {
         case "`": {
@@ -784,7 +809,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     const sb = new StringBuilder(input);
 
     while (!this.forceNewToken && !this.atEom()) {
-      const c = this.getChar();
+      const c = this.getChar()!;
 
       switch (c) {
         case TokenKindIdentifier.WhiteSpace:
@@ -813,7 +838,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
 
   public nextToken(): Token<CommandTokenKind> {
     this._tokenStart = this._index;
-    const c = this.getChar();
+    const c = this.getChar()!;
 
     switch (c) {
       /**
@@ -858,7 +883,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
         return this.scanDiscordIdentifier(c);
       }
       case "-": {
-        const next = this.peekChar();
+        const next = this.peekChar()!;
 
         // Is probably part of some text
         // The parser will try to piece the
@@ -868,7 +893,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
         }
 
         if (this.isNumber(next)) {
-          const next = this.getChar();
+          const next = this.getChar()!;
           return this.scanNumber(next, true);
         }
 
