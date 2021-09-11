@@ -5,4 +5,7 @@
  * TODO: Might be useful in the
  * future..?
  */
-export enum TokenFlag {}
+export enum TokenFlag {
+  Variable = 1 << 0,
+  Keyword = 1 << 1,
+}

@@ -1,7 +1,7 @@
 import { DiscordAdapter } from '@interfaces';
 import { Base, Client } from 'discord.js';
 
-import { BaseRoute, CommandPipeline, ContextType, EventPipeline, PipelineHost, SlashPipeline } from '..';
+import { BaseRoute, CommandPipeline, ContextType, EventPipeline, InteractionPipeline, PipelineHost } from '..';
 import { Type } from '../type.interface';
 
 /**
@@ -40,7 +40,7 @@ export abstract class ExecutionContext implements PipelineHost {
 
   /** @PipelineHost */
   public abstract switchToCommand(): CommandPipeline;
-  public abstract switchToSlash(): SlashPipeline;
+  public abstract switchToInteraction(): InteractionPipeline;
   public abstract switchToEvent(): EventPipeline;
   public abstract getType<T extends string = ContextType>(): T;
   public abstract getRoute(): BaseRoute;

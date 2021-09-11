@@ -4,8 +4,8 @@ import {
   EventPipeline,
   ExecutionContext,
   IBaseRoute,
+  InteractionPipeline,
   PipelineBase,
-  SlashPipeline,
   Type,
 } from '@watsonjs/common';
 import { Base as DjsBaseClass, Client } from 'discord.js';
@@ -18,7 +18,7 @@ export class ExecutionContextHost<
   PipelineHost extends
     | CommandPipelineHost
     | EventPipeline
-    | SlashPipeline = PipelineBase,
+    | InteractionPipeline = PipelineBase,
   EventData extends DjsBaseClass[] = any
 > implements ExecutionContext
 {
@@ -72,7 +72,7 @@ export class ExecutionContextHost<
     return this.pipeline as CommandPipelineHost;
   }
 
-  public switchToSlash(): SlashPipeline {
+  public switchToSlash(): InteractionPipeline {
     throw new Error("Method not implemented.");
   }
 

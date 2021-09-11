@@ -1,7 +1,7 @@
 import { BaseRoute } from '../router';
 import { CommandPipeline } from './command-pipeline.interface';
 import { EventPipeline } from './event-pipeline.interface';
-import { SlashPipeline } from './slash-pipeline.interface';
+import { InteractionPipeline } from './interaction-pipeline.interface';
 
 /** The type of a pipeline context */
 export type ContextType = "command" | "event" | "slash";
@@ -15,17 +15,17 @@ export type ContextType = "command" | "event" | "slash";
  */
 export interface PipelineHost {
   /**
-   * Returns the CommandPipelineHost class for
+   * Returns the CommandPipeline for
    * this executions context.
    */
   switchToCommand(): CommandPipeline;
   /**
-   * Returns the SlashPipelineHost class for
+   * Returns the InteractionPipeline for
    * this executions context.
    */
-  switchToSlash(): SlashPipeline;
+  switchToInteraction(): InteractionPipeline;
   /**
-   * Returns the EventPipelineHost class for
+   * Returns the EventPipeline for
    * this executions context.
    */
   switchToEvent(): EventPipeline;
