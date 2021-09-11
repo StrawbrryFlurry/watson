@@ -9,10 +9,8 @@ import {
   PrefixToken,
   Token,
   TokenPosition,
-} from '@watsonjs/common';
-import {
-  ParameterConfiguration,
-} from 'packages/common/src/interfaces/router/configuration/parameter-configuration.interface';
+} from "@watsonjs/common";
+import { ParameterConfiguration } from "packages/common/src/interfaces/router/configuration/parameter-configuration.interface";
 
 export class AstPrefixImpl implements AstPrefix {
   public readonly type: CommandAstType.Prefix;

@@ -21,8 +21,8 @@ import {
   TokenPosition,
   UserMentionToken,
   WhiteSpaceToken,
-} from '@watsonjs/common';
-import { Channel, Client, Emoji, Guild, Role, User } from 'discord.js';
+} from "@watsonjs/common";
+import { Channel, Client, Emoji, Guild, Role, User } from "discord.js";
 
 export enum TokenKindIdentifier {
   /** New line */
@@ -48,6 +48,28 @@ export class TokenImpl<T = any> implements Token<T> {
     this.kind = kind;
     this.text = text;
     this.position = position;
+  }
+
+  public toString(): string {
+    return this.text ?? "";
+  }
+}
+
+/**
+ * A token that was not parsed form
+ * a message string but generated
+ * by the framework.
+ */
+export class NullToken implements Token<CommandTokenKind> {
+  text: string | null;
+  kind: CommandTokenKind;
+  position: TokenPosition;
+
+  constructor(text?: string | null) {
+    const tokenText = text ?? null;
+    this.text = tokenText;
+    this.kind = CommandTokenKind.None;
+    this.position = new TokenPositionImpl(tokenText, null, null);
   }
 }
 

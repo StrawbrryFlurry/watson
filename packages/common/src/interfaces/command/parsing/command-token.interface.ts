@@ -1,11 +1,9 @@
-import { DiscordAdapter } from '@interfaces';
-import { Channel, Emoji, Guild, Role, User } from 'discord.js';
-
-import { Token } from './token.interface';
+import { Token } from "./token.interface";
 
 export type NewLineCharacter = "\n" | "\r" | "\r\n";
 
 export enum CommandTokenKind {
+  /** An empty token / One that doesn't exist */
   None = 1 << 0,
   /**
    * A user mention is formatted as follows: `<@USER_ID>`
@@ -118,25 +116,13 @@ export interface TokenWithValue<T = any> extends CommandToken {
 export interface PrefixToken extends CommandToken {}
 
 /** @see {@link CommandTokenKind#UserMention} */
-export interface UserMentionToken extends TokenWithValue<string> {
-  getId(): string;
-  getUser(adapter: DiscordAdapter): Promise<User>;
-}
+export interface UserMentionToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#ChannelMention} */
-export interface ChannelMentionToken extends TokenWithValue<string> {
-  getId(): string;
-  getChannel(adapter: DiscordAdapter): Promise<Channel>;
-}
+export interface ChannelMentionToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#RoleMention} */
-export interface RoleMentionToken extends TokenWithValue<string> {
-  getId(): string;
-  getRole(guild: Guild): Promise<Role>;
-}
+export interface RoleMentionToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#Emote} */
-export interface EmoteToken extends TokenWithValue<string> {
-  getId(): string;
-  getEmote(adapter: DiscordAdapter): Emoji;
-}
+export interface EmoteToken extends TokenWithValue<string> {}
 
 /** @see {@link CommandTokenKind#CodeBlock} */
 export interface CodeBlockToken extends TokenWithValue<string> {

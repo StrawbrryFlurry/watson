@@ -1,19 +1,30 @@
-import { CustomProvider, DESIGN_PARAMETERS, isNil, isString, TInjectable, TReceiver, Type } from '@watsonjs/common';
+import {
+  CustomProvider,
+  DESIGN_PARAMETERS,
+  isNil,
+  isString,
+  TInjectable,
+  TReceiver,
+  Type,
+} from "@watsonjs/common";
 
-import { CircularDependencyException, UnknownProviderException } from '../exceptions';
-import { UnknownComponentReferenceException } from '../exceptions/unknown-component-reference.exception';
-import { CREATE_INSTANCE, Logger } from '../logger';
-import { InstanceWrapper } from './instance-wrapper';
-import { MetadataResolver } from './metadata-resolver';
-import { Module } from './module';
+import {
+  CircularDependencyException,
+  UnknownProviderException,
+} from "../exceptions";
+import { UnknownComponentReferenceException } from "../exceptions/unknown-component-reference.exception";
+import { CREATE_INSTANCE, Logger } from "../logger";
+import { InstanceWrapper } from "./instance-wrapper";
+import { MetadataResolver } from "./metadata-resolver";
+import { Module } from "./module";
 
 // Base injector
 export abstract class _Injector {
   protected readonly parent: _Injector | null;
   protected readonly _records: Map<any, any> = new Map<any, any>();
 
-  public abstract create<T>(...args: any[]): T;
-  public abstract get<T>(): T;
+  public abstract create<T extends any>(...args: any[]): T;
+  public abstract get(typeOrToken: any): any;
 }
 
 export class Injector {

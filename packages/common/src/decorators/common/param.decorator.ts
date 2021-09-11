@@ -1,8 +1,8 @@
-import { PARAM_METADATA } from '@constants';
-import { applyStackableMetadata, ParameterMetadata } from '@decorators';
-import { ADate, DateParameterOptions, Type } from '@interfaces';
+import { PARAM_METADATA } from "@constants";
+import { applyStackableMetadata, ParameterMetadata } from "@decorators";
+import { ADate, DateParameterOptions, Type } from "@interfaces";
 
-import { mergeDefaults } from '../../utils';
+import { mergeDefaults } from "../../utils";
 
 type GetConfigurationsFromParameterType<T> = T extends ADate
   ? DateParameterOptions

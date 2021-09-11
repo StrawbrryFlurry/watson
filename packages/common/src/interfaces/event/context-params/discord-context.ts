@@ -1,4 +1,4 @@
-import { Channel, Message, VoiceChannel } from "discord.js";
+import { Channel, Client, Guild, Message, VoiceChannel } from "discord.js";
 
 /**
  * Injects the channel that the
@@ -18,3 +18,18 @@ export abstract class VoiceChannelCtx extends VoiceChannel {}
  * the event
  */
 export abstract class MessageCtx extends Message {}
+
+/**
+ * Injects the discord client from
+ * which the event was emitted.
+ *
+ * Will be `null` if the event wasn't
+ * emitted from a guild.
+ */
+export abstract class GuildCtx extends Guild {}
+
+/**
+ * Injects the discord client from
+ * which the event was emitted.
+ */
+export abstract class ClientCtx extends Client {}

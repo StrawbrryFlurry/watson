@@ -1,4 +1,5 @@
 export * from "./get-id.helper";
+export * from "./is-flag-set.utils";
 export * from "./is-method-decorator.utils";
 export * from "./merge-default.utils";
 export * from "./shared.utils";

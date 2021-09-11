@@ -1,7 +1,7 @@
-import { ArgumentOutOfRangeException } from '@exceptions';
-import { EOL } from 'os';
+import { ArgumentOutOfRangeException } from "@exceptions";
+import { EOL } from "os";
 
-import { isNil, isString } from '../../utils';
+import { isNil, isString } from "../../utils";
 
 /**
  * While not strictly necessary this StringBuilder
@@ -56,8 +56,16 @@ export class StringBuilder {
   public append(value: number[]): StringBuilder;
   public append(value: StringBuilder): StringBuilder;
   public append(value: boolean): StringBuilder;
+  public append(value: null): StringBuilder;
   public append(
-    value: string | StringBuilder | string[] | number | number[] | boolean
+    value:
+      | string
+      | StringBuilder
+      | string[]
+      | number
+      | number[]
+      | boolean
+      | null
   ): StringBuilder {
     if (Array.isArray(value)) {
       for (let i = 0; i < value.length; i++) {
@@ -153,7 +161,7 @@ export class StringBuilder {
    * makes sure the value is a string
    */
   private _saveAppendAsCharArray(
-    value?: string | number | boolean | StringBuilder
+    value?: null | string | number | boolean | StringBuilder
   ): void {
     if (isNil(value)) {
       return;

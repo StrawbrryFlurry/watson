@@ -1,7 +1,20 @@
-import { RuntimeException } from '@watsonjs/common';
+import {
+  ParameterConfiguration,
+  RuntimeException,
+  Token,
+} from "@watsonjs/common";
 
 export class ParsingException extends RuntimeException {
-  constructor(message: string) {
+  public readonly token: Token | null;
+  public readonly parameter: ParameterConfiguration | null;
+
+  constructor(
+    token: Token | null,
+    parameter: ParameterConfiguration | null,
+    message: string
+  ) {
     super(message);
+    this.token = token;
+    this.parameter = parameter;
   }
 }

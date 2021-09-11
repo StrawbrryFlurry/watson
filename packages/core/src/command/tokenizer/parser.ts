@@ -5,14 +5,17 @@ import {
   isNumberToken,
   isParameterToken,
   isPrefixToken,
+  NullToken,
   ParsingException,
   TokenImpl,
   TokenPositionImpl,
-} from '@command';
+} from "@command";
 import {
   AstArgument,
   AstCommand,
   AstPrefix,
+  ChannelMentionToken,
+  ClientCtx,
   CodeBlock,
   CodeBlockToken,
   CommandAst,
@@ -20,7 +23,10 @@ import {
   CommandPipeline,
   CommandRoute,
   CommandTokenKind,
+  EmoteToken,
   GenericToken,
+  GuildCtx,
+  isFlagSet,
   isNil,
   NumberToken,
   ParameterConfiguration,
@@ -28,22 +34,32 @@ import {
   Parsable,
   ParsedAstArguments,
   Parser,
+  RoleMentionToken,
+  StringBuilder,
   StringExpandableToken,
   StringLikeToken,
   StringLiteralToken,
   StringTemplateToken,
   Token,
-  TokenPosition,
   TokenWithValue,
-} from '@watsonjs/common';
-import { Message } from 'discord.js';
-import { DateTime, DateTimeOptions } from 'luxon';
-import { URL } from 'url';
+  UserMentionToken,
+} from "@watsonjs/common";
+import { Channel, Client, Emoji, Guild, Message, Role, User } from "discord.js";
+import { DateTime, DateTimeOptions } from "luxon";
+import { URL } from "url";
 
-import { WatsonContainer } from '../..';
-import { ContextInjector } from '../../injector/context-injector';
-import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
-import { CommandTokenizer } from './tokenizer';
+import { WatsonContainer } from "../..";
+import { ContextInjector } from "../../injector/context-injector";
+import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from "./ast";
+import { CommandTokenizer } from "./tokenizer";
+
+type ParseFn<T> = (
+  token: Token,
+  param: ParameterConfiguration,
+  ctx: ClosureCtx,
+  configuration?: any,
+  ...args: any[]
+) => T | Promise<T>;
 
 export interface BooleanLikeValue {
   name: string;
@@ -71,7 +87,7 @@ interface ClosureCtx {
   injector: ContextInjector;
 }
 
-const STRING_LIKE_TOKENS =
+const STRING_LIKE_TOKEN_FLAGS =
   CommandTokenKind.Generic |
   CommandTokenKind.StringExpandable |
   CommandTokenKind.StringLiteral |
@@ -82,20 +98,21 @@ const STRING_LIKE_TOKENS =
  * token kinds they accept.
  */
 const PARAMETER_TOKEN_MAP = {
-  [CommandParameterType.String]: STRING_LIKE_TOKENS,
+  [CommandParameterType.String]: STRING_LIKE_TOKEN_FLAGS,
   [CommandParameterType.StringExpandable]: CommandTokenKind.StringExpandable,
   [CommandParameterType.StringLiteral]: CommandTokenKind.StringLiteral,
   [CommandParameterType.StringTemplate]: CommandTokenKind.StringTemplate,
-  [CommandParameterType.Boolean]: STRING_LIKE_TOKENS,
-  [CommandParameterType.Number]: STRING_LIKE_TOKENS | CommandTokenKind.Number,
-  [CommandParameterType.URL]: STRING_LIKE_TOKENS,
-  [CommandParameterType.Date]: STRING_LIKE_TOKENS,
+  [CommandParameterType.Boolean]: STRING_LIKE_TOKEN_FLAGS,
+  [CommandParameterType.Number]:
+    STRING_LIKE_TOKEN_FLAGS | CommandTokenKind.Number,
+  [CommandParameterType.URL]: STRING_LIKE_TOKEN_FLAGS,
+  [CommandParameterType.Date]: STRING_LIKE_TOKEN_FLAGS,
   [CommandParameterType.Channel]:
-    STRING_LIKE_TOKENS | CommandTokenKind.ChannelMention,
+    STRING_LIKE_TOKEN_FLAGS | CommandTokenKind.ChannelMention,
   [CommandParameterType.Role]:
-    STRING_LIKE_TOKENS | CommandTokenKind.RoleMention,
+    STRING_LIKE_TOKEN_FLAGS | CommandTokenKind.RoleMention,
   [CommandParameterType.User]:
-    STRING_LIKE_TOKENS | CommandTokenKind.UserMention,
+    STRING_LIKE_TOKEN_FLAGS | CommandTokenKind.UserMention,
   [CommandParameterType.Emote]: CommandTokenKind.Emote,
   [CommandParameterType.CodeBlock]: CommandTokenKind.CodeBlock,
 };
@@ -172,11 +189,15 @@ export class CommandParser implements Parser<CommandAst> {
     const prefixToken = nextTokenFn();
 
     if (!prefixToken) {
-      throw new ParsingException("No prefix present");
+      throw new ParsingException(null, null, "No prefix present");
     }
 
     if (!isPrefixToken(prefixToken)) {
-      throw new ParsingException("No valid prefixToken found");
+      throw new ParsingException(
+        prefixToken,
+        null,
+        "No valid prefixToken found"
+      );
     }
 
     return new AstPrefixImpl(prefixToken);
@@ -191,7 +212,7 @@ export class CommandParser implements Parser<CommandAst> {
     const commandToken = ctx.nextTokenFn();
 
     if (isNil(commandToken)) {
-      throw new ParsingException("No command found");
+      throw new ParsingException(commandToken, null, "No command found");
     }
 
     const { text: commandText, kind } = commandToken;
@@ -293,25 +314,24 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<ParsedAstArguments> {
     const { params } = route;
+    const { peekTokenFn, nextTokenFn } = ctx;
+
     const astArguments = new Map<string, AstArgument | null>();
+    const parsedArguments: ParameterConfiguration[] = [];
 
-    for (let i = 0; i < params.length; i++) {
-      const param = params[i];
-
-      if (this.shouldSkipParam(params, param)) {
-        continue;
-      }
-
-      const { name } = param;
-      const parameterValue = await this.processNextParameter(
-        param,
+    while (parsedArguments.length < params.length) {
+      const argumentAst = await this.parseNextParameter(
         route,
-        [],
-        [],
+        parsedArguments,
         ctx
       );
+      const { name } = parsedArguments[parsedArguments.length - 1];
+      astArguments.set(name, argumentAst);
+    }
 
-      astArguments.set(name, parameterValue);
+    // Clean up overflowing tokens
+    if (!isNil(peekTokenFn())) {
+      this.cleanUpTokenOverflow(astArguments, parsedArguments, ctx);
     }
 
     return astArguments;
@@ -322,98 +342,306 @@ export class CommandParser implements Parser<CommandAst> {
    *
    */
 
-  public async processNextParameter<T extends any = any>(
-    param: ParameterConfiguration,
+  public async parseNextParameter<T extends any = any>(
     route: CommandRoute,
-    accumulator: T[],
     parsedParams: ParameterConfiguration[],
     ctx: ClosureCtx
-  ): Promise<AstArgument> {
-    const {
-      default: defaultValue,
-      configuration,
-      hungry,
-      name,
-      paramType,
-      optional,
-    } = param;
-    const { nextTokenFn, peekTokenFn } = ctx;
-    const nextToken = nextTokenFn();
+  ): Promise<AstArgument<T>> {
+    const { nextTokenFn, peekTokenFn, ungetTokenFn } = ctx;
+    const token = nextTokenFn();
+    const param = this.getNextParameter(route, parsedParams)!;
 
-    if (isNil(nextToken)) {
+    if (isNil(token)) {
+      return this.parseEmptyNextToken<T>(param, parsedParams);
+    }
+
+    if (isParameterToken(token)) {
+      return this.parseParameterToken<T>(route, token, parsedParams, ctx);
+    }
+
+    /**
+     * At this point the next token will be a
+     * regular text token in the command message:
+     *
+     * !help -All user
+     *            ^
+     */
+
+    const { configuration, optional, default: defaultValue, paramType } = param;
+    const parseFn = this.getParseFn(param, ctx);
+    let parsed: T;
+
+    this.validateArgumentToken(token, param);
+
+    try {
+      parsed = (await parseFn(token, param, ctx, configuration)) as T;
+    } catch (err: unknown) {
       if (optional) {
         return new AstArgumentImpl(
-          new TokenImpl(null, null, new TokenPositionImpl(null, null, null)),
+          new NullToken(),
           param,
           null
-        );
+        ) as AstArgument<T>;
       }
 
       if (defaultValue) {
-        const defaultString: null | string =
-          defaultValue ?? defaultValue.toString();
-        return new AstArgumentImpl(
-          new TokenImpl(
-            null,
-            defaultString,
-            new TokenPositionImpl(defaultString, null, null)
-          ),
-          param,
-          defaultValue
-        );
+        const text = defaultValue?.toString() ?? null;
+        return new AstArgumentImpl(new NullToken(text), param, text);
       }
+
+      throw err;
+    }
+
+    return new AstArgumentImpl(token, param, parsed);
+  }
+
+  private async parseParameterToken<T extends any = any>(
+    route: CommandRoute,
+    paramToken: Token,
+    parsedParams: ParameterConfiguration[],
+    ctx: ClosureCtx
+  ): Promise<AstArgument<T>> {
+    const { peekTokenFn, nextTokenFn } = ctx;
+    const argumentOrParameter = peekTokenFn();
+    const param = this.getParameterInRouteFromToken(
+      paramToken as ParameterToken,
+      route
+    );
+
+    parsedParams.push(param);
+
+    // Checking for switch parameter
+    if (param.paramType === CommandParameterType.Boolean) {
+      // Argument was used as switch
+      if (isNil(argumentOrParameter) || isParameterToken(argumentOrParameter)) {
+        parsedParams.push(param);
+        return new AstArgumentImpl(paramToken, param, true) as AstArgument<T>;
+      }
+
+      if (this.isBooleanToken(argumentOrParameter)) {
+        parsedParams.push(param);
+        return this.parseToBoolean(
+          argumentOrParameter as GenericToken,
+          param
+        ) as AstArgumentImpl<T>;
+      }
+
+      const { kind, position } = argumentOrParameter;
 
       throw new ParsingException(
-        `Could not find not optional parameter with name ${name} in the command message`
+        paramToken,
+        param,
+        `Unexpected token at position ${position}. Expected BOOLEAN got ${kind}`
       );
     }
 
-    if (isParameterToken(nextToken)) {
-      const argumentOrParameter = peekTokenFn();
+    /** The parameter had no values */
+    if (isNil(argumentOrParameter) || isParameterToken(argumentOrParameter)) {
+      return this.parseEmptyNextToken(param, parsedParams);
+    }
 
-      // Checking for switch parameter
-      if (paramType === CommandParameterType.Boolean) {
-        // Argument was used as switch
-        if (
-          isNil(argumentOrParameter) ||
-          isParameterToken(argumentOrParameter)
-        ) {
-          parsedParams.push(param);
-          return new AstArgumentImpl(nextToken, param, true);
-        }
+    const parseFn = this.getParseFn<T>(param, ctx);
+    const { hungry, configuration } = param;
 
-        if (this.isBooleanToken(argumentOrParameter)) {
-          parsedParams.push(param);
-          return this.parseToBoolean(
-            argumentOrParameter as GenericToken,
-            param
-          );
-        }
+    if (hungry) {
+      return this.parseHungryArguments<T>(param, parseFn, ctx);
+    }
 
-        const { kind, position } = argumentOrParameter;
+    this.validateArgumentToken(argumentOrParameter, param);
 
-        throw new ParsingException(
-          `Unexpected token at position ${position}. Expected BOOLEAN got ${kind}`
-        );
+    /** Pops `argumentOrParameter` off the tokens array */
+    nextTokenFn();
+    const parsed = await parseFn(
+      argumentOrParameter,
+      param,
+      ctx,
+      configuration
+    );
+
+    return new AstArgumentImpl(argumentOrParameter, param, parsed);
+  }
+
+  private async parseHungryArguments<T extends any = any>(
+    param: ParameterConfiguration,
+    parseFn: ParseFn<T>,
+    ctx: ClosureCtx
+  ): Promise<AstArgument<T>> {
+    const { peekTokenFn, nextTokenFn, ungetTokenFn } = ctx;
+    const { configuration, paramType } = param;
+    const parsedArguments: any[] = [];
+    const parsedTokens: Token[] = [];
+
+    while (!isNil(peekTokenFn())) {
+      const argumentOrParameter = nextTokenFn()!;
+
+      // We've reached a new parameter
+      if (isParameterToken(argumentOrParameter)) {
+        ungetTokenFn(argumentOrParameter);
+        const hungryToken = this.createHungryToken(parsedTokens);
+        return new AstArgumentImpl(
+          hungryToken,
+          param,
+          parsedArguments
+        ) as AstArgumentImpl<T>;
       }
 
-      const valueToParse = this.getParameterInRouteFromToken(
-        nextToken as ParameterToken,
-        route
+      this.validateArgumentToken(argumentOrParameter, param);
+
+      const parsed = await parseFn(
+        argumentOrParameter,
+        param,
+        ctx,
+        configuration
+      );
+
+      parsedArguments.push(parsed);
+      parsedTokens.push(argumentOrParameter);
+    }
+
+    const hungryToken = this.createHungryToken(parsedTokens);
+
+    return new AstArgumentImpl(
+      hungryToken,
+      param,
+      parsedArguments
+    ) as AstArgumentImpl<T>;
+  }
+
+  private validateArgumentToken(
+    token: Token,
+    param: ParameterConfiguration
+  ): void {
+    const { name, paramType } = param;
+    const { kind, position } = token;
+    const validKinds = PARAMETER_TOKEN_MAP[paramType];
+
+    if (!isFlagSet(kind, validKinds)) {
+      throw new ParsingException(
+        token,
+        param,
+        `Unexpected token "${token}" at position ${position} while parsing "${name}".`
+      );
+    }
+  }
+
+  private parseEmptyNextToken<T = any>(
+    param: ParameterConfiguration,
+    parsedParams: ParameterConfiguration[]
+  ): AstArgument<T> {
+    const { name, optional, default: defaultValue } = param;
+
+    parsedParams.push(param);
+
+    if (optional) {
+      return new AstArgumentImpl(
+        new NullToken(),
+        param,
+        null
+      ) as AstArgument<T>;
+    }
+
+    if (defaultValue) {
+      const defaultString: null | string = defaultValue?.toString() ?? null;
+
+      return new AstArgumentImpl(
+        new NullToken(defaultString),
+        param,
+        defaultValue
       );
     }
 
-    return null as any;
+    throw new ParsingException(
+      null,
+      param,
+      `Could not find required parameter with name ${name} in the command message`
+    );
+  }
+
+  /**
+   * If there are generic tokens at the end of
+   * the token list which we didn't parse
+   * before we add them to the last argument
+   * parsed, given it was a generic token.
+   */
+  private cleanUpTokenOverflow(
+    argumentAst: Map<string, AstArgument | null>,
+    parsedArguments: ParameterConfiguration[],
+    ctx: ClosureCtx
+  ) {
+    const { nextTokenFn, peekTokenFn } = ctx;
+    let token = peekTokenFn()!;
+    const { name, paramType } = parsedArguments[parsedArguments.length - 1];
+
+    /**
+     * We only append to `String` parameters
+     * as all the other ones should be encapsulated
+     * in `"`.
+     */
+    if (paramType !== CommandParameterType.String) {
+      return;
+    }
+
+    const argumentToExpand = argumentAst.get(name)!;
+    const { position } = argumentToExpand;
+    const previousToken = new TokenImpl(CommandTokenKind.None, null, position);
+
+    while (!isNil(peekTokenFn())) {
+      token = nextTokenFn()!;
+      /**
+       * Right now we ignore non
+       * generic tokens as we don't
+       * have a way to concatenate
+       * them with a previous token.
+       */
+      if (!isFlagSet(token.kind, STRING_LIKE_TOKEN_FLAGS)) {
+        return;
+      }
+
+      const value = this.getValueFromStringLikeToken(token);
+      argumentToExpand.value += ` ${value}`;
+      argumentToExpand.text += token.text;
+    }
+
+    const { position: updatedPosition } = this.createHungryToken([
+      previousToken,
+      token,
+    ]);
+
+    argumentToExpand.position = updatedPosition;
+  }
+
+  /**
+   * Returns the next parameter that
+   * should be processed by the parser.
+   */
+  private getNextParameter(
+    route: CommandRoute,
+    parsedParams: ParameterConfiguration[]
+  ): ParameterConfiguration | null {
+    const { params } = route;
+
+    for (let i = 0; i < params.length; i++) {
+      const param = params[i];
+
+      for (let y = 0; y < parsedParams.length; y++) {
+        const parsed = parsedParams[y];
+        if (parsed === param) {
+          return param;
+        }
+      }
+    }
+
+    return null;
   }
 
   public getParseFn<T>(
     param: ParameterConfiguration,
-    type: CommandParameterType,
     ctx: ClosureCtx
-  ): (...args: any[]) => T {
+  ): ParseFn<T> {
     let fn: Function;
+    const { paramType } = param;
 
-    switch (type) {
+    switch (paramType) {
       case CommandParameterType.Boolean:
         fn = this.parseToBoolean;
         break;
@@ -469,13 +697,6 @@ export class CommandParser implements Parser<CommandAst> {
     return fn!.bind(this);
   }
 
-  private shouldSkipParam(
-    parsed: ParameterConfiguration[],
-    param: ParameterConfiguration
-  ): boolean {
-    return parsed.includes(param);
-  }
-
   private isBooleanToken(argument: Token): boolean {
     const value = (argument as TokenWithValue).value;
 
@@ -506,19 +727,22 @@ export class CommandParser implements Parser<CommandAst> {
       const param = params[i];
       const { name } = param;
 
-      if (name === value) {
+      if (name.toLowerCase() === value.toLowerCase()) {
         return param;
       }
     }
 
     throw new ParsingException(
-      `Could not find parameter with name ${value} at position ${token.position}`
+      token,
+      null,
+      `A parameter cannot be found that matches parameter name "${value}" at position ${token.position}`
     );
   }
 
   public parseToDate(
     token: StringLikeToken,
     param: ParameterConfiguration,
+    ctx: ClosureCtx,
     format?: string,
     options?: DateTimeOptions
   ): AstArgument<DateTime> {
@@ -532,55 +756,81 @@ export class CommandParser implements Parser<CommandAst> {
     return argument.withValue(DateTime.fromFormat(dateString, format, options));
   }
 
-  /*
-  TODO: Clean up discord parsing
-  public parseToUser(
-    token: StringLikeToken | UserMentionToken
+  public async parseToUser(
+    token: StringLikeToken | UserMentionToken,
+    param: ParameterConfiguration,
+    ctx: ClosureCtx
   ): Promise<AstArgument<User>> {
+    const { injector } = ctx;
+    const client = injector.get<Client>(ClientCtx);
+    let userId: string;
+
     if (token.kind !== CommandTokenKind.UserMention) {
-      // TODO: Improve this
-      const userId = token.text!;
-      return this.getClient().users.fetch(userId);
+      userId = token.text!;
+    } else {
+      userId = (token as UserMentionToken).value;
     }
 
-    return (token as UserMentionToken).getUser(this.getAdapter());
+    const user = await client.users.fetch(userId);
+    return new AstArgumentImpl(token, param, user);
   }
 
-  public parseToRole(
-    guild: Guild,
-    token: StringLikeToken | RoleMentionToken
+  public async parseToRole(
+    token: StringLikeToken | RoleMentionToken,
+    param: ParameterConfiguration,
+    ctx: ClosureCtx
   ): Promise<AstArgument<Role>> {
+    const { injector } = ctx;
+    const guild = injector.get<Guild>(GuildCtx);
+    let roleId: string;
+
     if (token.kind !== CommandTokenKind.RoleMention) {
-      const roleId = token.text!;
-      return guild.roles.fetch(roleId);
+      roleId = token.text!;
+    } else {
+      roleId = (token as RoleMentionToken).value;
     }
 
-    return (token as RoleMentionToken).getRole(guild);
+    const role = await guild.roles.fetch(roleId);
+    return new AstArgumentImpl(token, param, role!);
   }
 
-  public parseToChannel(
-    token: StringLikeToken | ChannelMentionToken
+  public async parseToChannel(
+    token: StringLikeToken | ChannelMentionToken,
+    param: ParameterConfiguration,
+    ctx: ClosureCtx
   ): Promise<AstArgument<Channel>> {
+    const { injector } = ctx;
+    const guild = injector.get<Guild>(GuildCtx);
+    let channelId: string;
+
     if (token.kind !== CommandTokenKind.ChannelMention) {
-      const channelId = token.text!;
-      return this.getClient().channels.fetch(channelId);
+      channelId = token.text!;
+    } else {
+      channelId = (token as ChannelMentionToken).value;
     }
 
-    return (token as ChannelMentionToken).getChannel(this.getAdapter());
+    const channel = guild.channels.resolve(channelId);
+    return new AstArgumentImpl(token, param, channel!);
   }
 
-  public parseToEmote(
-    token: StringLikeToken | EmoteToken
+  public async parseToEmote(
+    token: StringLikeToken | EmoteToken,
+    param: ParameterConfiguration,
+    ctx: ClosureCtx
   ): Promise<AstArgument<Emoji>> {
+    const { injector } = ctx;
+    const client = injector.get<Client>(ClientCtx);
+    let emojiId: string;
+
     if (token.kind !== CommandTokenKind.Emote) {
-      const emoteId = token.text!;
-      return this.getClient().emojis.resolve(emoteId);
+      emojiId = token.text!;
+    } else {
+      emojiId = (token as EmoteToken).value;
     }
 
-    return (token as EmoteToken).getEmote(this.getAdapter());
+    const emoji = client.emojis.resolve(emojiId);
+    return new AstArgumentImpl(token, param, emoji!);
   }
-
-  */
 
   public parseToString(
     token: StringLikeToken,
@@ -670,6 +920,8 @@ export class CommandParser implements Parser<CommandAst> {
     const checkNaN = (number: number) => {
       if (isNaN(number)) {
         throw new ParsingException(
+          token,
+          param,
           `Unexpected token "${text}" at position ${position}. Expected Number got NaN.`
         );
       }
@@ -698,6 +950,8 @@ export class CommandParser implements Parser<CommandAst> {
       parsed = new URL(url);
     } catch (err) {
       throw new ParsingException(
+        token,
+        param,
         `Failed to parse token "${url}" of kind "${token.kind}" type URL`
       );
     }
@@ -715,7 +969,8 @@ export class CommandParser implements Parser<CommandAst> {
     peekToken: PeekTokenFn,
     ...validKinds: CommandTokenKind[]
   ): CommandTokenKind {
-    const { kind, position } = peekToken() ?? {};
+    const token = peekToken() ?? {};
+    const { kind, position } = token as Token;
 
     for (let i = 0; i < validKinds.length; i++) {
       const kind = validKinds[i];
@@ -725,6 +980,8 @@ export class CommandParser implements Parser<CommandAst> {
     }
 
     throw new ParsingException(
+      token as Token,
+      null,
       `Expected token at position ${position} to be one of ${validKinds.join(
         ", "
       )} but got ${kind}`
@@ -733,13 +990,27 @@ export class CommandParser implements Parser<CommandAst> {
 
   /** @Section Utilities */
 
-  private getTokenPositionBounds(tokens: Token[]): Omit<TokenPosition, "text"> {
-    const [{ position: firstPosition }] = tokens;
+  private createHungryToken(tokens: Token[]): Token {
+    const [{ position: firstPosition, kind }] = tokens;
     const { position: lastPosition } = tokens[tokens.length - 1];
+    const { tokenStart } = firstPosition;
+    const { tokenEnd } = lastPosition;
 
-    return {
-      tokenStart: firstPosition.tokenStart,
-      tokenEnd: lastPosition.tokenEnd,
-    };
+    const sb = new StringBuilder();
+
+    for (let i = 0; i < tokens.length; i++) {
+      const { text } = tokens[i];
+      sb.append(text!);
+      sb.append(" ");
+    }
+
+    const tokenText = sb.toString();
+    const tokenPosition = new TokenPositionImpl(
+      tokenText,
+      tokenStart,
+      tokenEnd
+    );
+
+    return new TokenImpl(kind, sb.toString(), tokenPosition);
   }
 }
