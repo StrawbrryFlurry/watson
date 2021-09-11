@@ -1,3 +1,4 @@
+import { EmoteTokenImpl } from "@command";
 import {
   char,
   CommandAst,
@@ -8,7 +9,7 @@ import {
   Token,
   Tokenizer,
   TokenPosition,
-} from '@watsonjs/common';
+} from "@watsonjs/common";
 
 import {
   ChannelMentionTokenImpl,
@@ -25,7 +26,7 @@ import {
   TokenKindIdentifier,
   TokenPositionImpl,
   UserMentionTokenImpl,
-} from './token';
+} from "./token";
 
 /**
  * TODO:
@@ -378,21 +379,51 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     );
   }
 
-  protected newUserMentionToken(sb: StringBuilder): UserMentionTokenImpl {
+  protected newUserMentionToken(
+    text: StringBuilder,
+    id: StringBuilder
+  ): UserMentionTokenImpl {
     return this.saveToken(
-      new UserMentionTokenImpl(sb.toString(), this.currentPosition())
+      new UserMentionTokenImpl(
+        text.toString(),
+        id.toString(),
+        this.currentPosition()
+      )
     );
   }
 
-  protected newRoleMentionToken(sb: StringBuilder): RoleMentionTokenImpl {
+  protected newRoleMentionToken(
+    text: StringBuilder,
+    id: StringBuilder
+  ): RoleMentionTokenImpl {
     return this.saveToken(
-      new RoleMentionTokenImpl(sb.toString(), this.currentPosition())
+      new RoleMentionTokenImpl(
+        text.toString(),
+        id.toString(),
+        this.currentPosition()
+      )
     );
   }
 
-  protected newChannelMentionToken(sb: StringBuilder): ChannelMentionTokenImpl {
+  protected newChannelMentionToken(
+    text: StringBuilder,
+    id: StringBuilder
+  ): ChannelMentionTokenImpl {
     return this.saveToken(
-      new ChannelMentionTokenImpl(sb.toString(), this.currentPosition())
+      new ChannelMentionTokenImpl(
+        text.toString(),
+        id.toString(),
+        this.currentPosition()
+      )
+    );
+  }
+
+  protected newEmoteToken(
+    text: StringBuilder,
+    id: StringBuilder
+  ): EmoteTokenImpl {
+    return this.saveToken(
+      new EmoteTokenImpl(text.toString(), id.toString(), this.currentPosition())
     );
   }
 

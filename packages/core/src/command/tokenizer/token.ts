@@ -3,12 +3,10 @@ import {
   CodeBlockToken,
   CommandTokenKind,
   DashToken,
-  DiscordAdapter,
   EmoteToken,
   EndOfMessageToken,
   GenericToken,
   IdentifierToken,
-  isNil,
   NewLineToken,
   NumberToken,
   ParameterToken,
@@ -22,7 +20,6 @@ import {
   UserMentionToken,
   WhiteSpaceToken,
 } from "@watsonjs/common";
-import { Channel, Client, Emoji, Guild, Role, User } from "discord.js";
 
 export enum TokenKindIdentifier {
   /** New line */
@@ -90,13 +87,6 @@ export class TokenPositionImpl implements TokenPosition {
 
   public toString() {
     return `${this.tokenStart} - ${this.tokenEnd}`;
-  }
-}
-
-export class DiscordTokenImpl extends TokenImpl<CommandTokenKind> {
-  getId(): string {
-    const [id] = this.text!.match(/\d/)!;
-    return id;
   }
 }
 
@@ -201,86 +191,54 @@ export class StringTemplateTokenImpl
 }
 
 export class ChannelMentionTokenImpl
-  extends DiscordTokenImpl
+  extends TokenImpl<CommandTokenKind>
   implements ChannelMentionToken
 {
   value: string;
 
-  constructor(text: string, position: TokenPosition) {
+  constructor(text: string, id: string, position: TokenPosition) {
     super(CommandTokenKind.ChannelMention, text, position);
     this.text = text;
-    this.value = this.getId();
-  }
-
-  getChannel(adapter: DiscordAdapter<Client>): Promise<Channel> {
-    // TODO: Replace this with a
-    // fetch method on the client adapter
-    const client = adapter.getClient();
-    const id = this.getId();
-    return client.channels.fetch(id);
+    this.value = id;
   }
 }
 
 export class UserMentionTokenImpl
-  extends DiscordTokenImpl
+  extends TokenImpl<CommandTokenKind>
   implements UserMentionToken
 {
   value: string;
 
-  constructor(text: string, position: TokenPosition) {
+  constructor(text: string, id: string, position: TokenPosition) {
     super(CommandTokenKind.UserMention, text, position);
     this.text = text;
-    this.value = this.getId();
-  }
-
-  getUser(adapter: DiscordAdapter<Client>): Promise<User> {
-    const client = adapter.getClient();
-    const id = this.getId();
-    return client.users.fetch(id);
+    this.value = id;
   }
 }
 
 export class RoleMentionTokenImpl
-  extends DiscordTokenImpl
+  extends TokenImpl<CommandTokenKind>
   implements RoleMentionToken
 {
   value: string;
 
-  constructor(text: string, position: TokenPosition) {
+  constructor(text: string, id: string, position: TokenPosition) {
     super(CommandTokenKind.RoleMention, text, position);
     this.text = text;
-    this.value = this.getId();
-  }
-
-  getRole(guild: Guild): Promise<Role> {
-    const id = this.getId();
-    return guild.roles.fetch(id) as Promise<Role>;
+    this.value = id;
   }
 }
 
-export class EmoteTokenImpl extends DiscordTokenImpl implements EmoteToken {
+export class EmoteTokenImpl
+  extends TokenImpl<CommandTokenKind>
+  implements EmoteToken
+{
   value: string;
 
-  constructor(text: string, position: TokenPosition) {
+  constructor(text: string, id: string, position: TokenPosition) {
     super(CommandTokenKind.Emote, text, position);
     this.text = text;
-    this.value = this.getId();
-  }
-
-  getId(): string {
-    if (!isNil(this.value)) {
-      return this.value;
-    }
-
-    const withoutName = this.text!.replace(/\<\:.*\:/, "");
-    const [id] = withoutName.match(/\d+/)!;
-    return id;
-  }
-
-  getEmote(adapter: DiscordAdapter<Client>): Emoji {
-    const client = adapter.getClient();
-    const id = this.getId();
-    return client.emojis.resolve(id)!;
+    this.value = id;
   }
 }
 
