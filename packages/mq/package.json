@@ -1,0 +1,34 @@
+{
+  "name": "@watsonjs/mq",
+  "version": "0.0.1",
+  "description": "Fast, scalable framework for building Discord applications (@mq)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
+  },
+  "keywords": [
+    "discord",
+    "message queueing"
+  ],
+  "authors": [
+    "Michael S."
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bullmq": "^1.46.4",
+    "tslib": "^2.0.3",
+    "typescript": "^4.1.3"
+  },
+  "devDependencies": {
+    "@types/reflect-metadata": "^0.1.0"
+  },
+  "peerDependencies": {
+    "@watsonjs/common": "1.0.0",
+    "@watsonjs/core": "1.0.0",
+    "reflect-metadata": "^0.1.12"
+  },
+  "homepage": "https://watsonjs.io",
+  "publishConfig": {
+    "access": "public"
+  }
+}
