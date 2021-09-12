@@ -19,7 +19,7 @@ import {
   TokenPosition,
   UserMentionToken,
   WhiteSpaceToken,
-} from "@watsonjs/common";
+} from '@watsonjs/common';
 
 export enum TokenKindIdentifier {
   /** New line */
@@ -233,9 +233,9 @@ export class EmoteTokenImpl
   extends TokenImpl<CommandTokenKind>
   implements EmoteToken
 {
-  value: string;
+  value: string | null;
 
-  constructor(text: string, id: string, position: TokenPosition) {
+  constructor(text: string, id: string | null, position: TokenPosition) {
     super(CommandTokenKind.Emote, text, position);
     this.text = text;
     this.value = id;

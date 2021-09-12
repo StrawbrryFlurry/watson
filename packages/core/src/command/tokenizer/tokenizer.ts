@@ -1,4 +1,4 @@
-import { EmoteTokenImpl } from "@command";
+import { EmoteTokenImpl } from '@command';
 import {
   char,
   CommandAst,
@@ -9,7 +9,8 @@ import {
   Token,
   Tokenizer,
   TokenPosition,
-} from "@watsonjs/common";
+  UNICODE_EMOJI_REGEX,
+} from '@watsonjs/common';
 
 import {
   ChannelMentionTokenImpl,
@@ -26,13 +27,8 @@ import {
   TokenKindIdentifier,
   TokenPositionImpl,
   UserMentionTokenImpl,
-} from "./token";
+} from './token';
 
-/**
- * TODO:
- * Local StringBuilder queue to avoid
- * creating new instances for every token - less gc
- */
 export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
   private _input: string;
   private _index: number = 0;
@@ -208,138 +204,67 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     return Number(char) !== NaN;
   }
 
-  /**
-   * Do the next characters represent a
-   * discord token?
-   *
-   * The first leading '<' was already consumed.
-   *
-   * "<@123812383218031299123891021832>".match(/^\<(\@|\#)\d+\>.*$/)
-   */
-  protected isDiscordToken(): boolean {
-    const idx = this.index;
-    const text = new StringBuilder("<");
-    const id = new StringBuilder();
-    let semicolonCount = 0;
-    let kind: CommandTokenKind = CommandTokenKind.None;
-
-    while (!this.atEom()) {
-      const c = this.getChar();
-      switch (c) {
-        case "0":
-        case "1":
-        case "2":
-        case "3":
-        case "4":
-        case "5":
-        case "6":
-        case "7":
-        case "8":
-        case "9": {
-          /**
-           * No check for @ or # needed here
-           * as it's already checked in a later
-           * step if the rest of the token is valid
-           */
-          text.append(c);
-
-          if (kind !== CommandTokenKind.Emote || semicolonCount === 2) {
-            id.append(c);
-          }
-
-          continue;
-        }
-        case "#":
-        case "@": {
-          if (text.has(c) || text.length > 1) {
-            this.resync(idx);
-            return false;
-          }
-          kind =
-            c === "@"
-              ? CommandTokenKind.UserMention
-              : CommandTokenKind.ChannelMention;
-          text.append(c);
-          continue;
-        }
-        case "&": {
-          if (text.has(c) || text.length > 1 || !text.has("@")) {
-            this.resync(idx);
-            return false;
-          }
-
-          kind = CommandTokenKind.RoleMention;
-          text.append(c);
-          continue;
-        }
-        case ":": {
-          if (semicolonCount > 1) {
-            this.resync(idx);
-            return false;
-          }
-
-          semicolonCount++;
-          kind = CommandTokenKind.Emote;
-          text.append(c);
-          continue;
-        }
-        case ">": {
-          if (text.has("@") || text.has("#")) {
-            this.resync(idx);
-            return false;
-          }
-          let token: Token;
-          text.append(c);
-
-          switch (kind) {
-            case CommandTokenKind.UserMention:
-              token = this.newUserMentionToken(text, id);
-              break;
-            case CommandTokenKind.RoleMention:
-              token = this.newRoleMentionToken(text, id);
-              break;
-            case CommandTokenKind.ChannelMention:
-              token = this.newChannelMentionToken(text, id);
-              break;
-            case CommandTokenKind.Emote:
-              token = this.newEmoteToken(text, id);
-              break;
-            default: {
-              this.resync(idx);
-              return false;
-            }
-          }
-
-          return true;
-        }
-        default: {
-          if (isNil(c)) {
-            this.resync(idx);
-            return false;
-          }
-
-          /**
-           *  Emote tokens can have all kinds of
-           * crazy characters in them so we don't want
-           * to look for all of them.
-           */
-          if (kind === CommandTokenKind.Emote) {
-            /**
-             * Checking if token looks like:
-             * "<:xxx"
-             */
-            if (semicolonCount !== 2) {
-              text.append(c);
-            }
-          }
-
-          this.resync(idx);
-          return false;
-        }
+  protected isIdentifier(char: char): boolean {
+    switch (char) {
+      case "a":
+      case "b":
+      case "c":
+      case "d":
+      case "e":
+      case "f":
+      case "g":
+      case "h":
+      case "i":
+      case "j":
+      case "k":
+      case "l":
+      case "m":
+      case "n":
+      case "o":
+      case "p":
+      case "q":
+      case "r":
+      case "s":
+      case "t":
+      case "u":
+      case "v":
+      case "w":
+      case "x":
+      case "y":
+      case "z":
+      case "A":
+      case "B":
+      case "C":
+      case "D":
+      case "E":
+      case "F":
+      case "G":
+      case "H":
+      case "I":
+      case "J":
+      case "K":
+      case "L":
+      case "M":
+      case "N":
+      case "O":
+      case "P":
+      case "Q":
+      case "R":
+      case "S":
+      case "T":
+      case "U":
+      case "V":
+      case "W":
+      case "X":
+      case "Y":
+      case "Z":
+      case "_": {
+        return true;
+      }
+      default: {
+        return false;
       }
     }
-
-    return false;
   }
 
   /**
@@ -355,10 +280,6 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     }
 
     return false;
-  }
-
-  protected reportError(error: string, position: TokenPosition) {
-    // TODO: Implement optional error handling
   }
 
   /** @Section Newable helpers */
@@ -445,10 +366,14 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
 
   protected newEmoteToken(
     text: StringBuilder,
-    id: StringBuilder
+    id: StringBuilder | null
   ): EmoteTokenImpl {
     return this.saveToken(
-      new EmoteTokenImpl(text.toString(), id.toString(), this.currentPosition())
+      new EmoteTokenImpl(
+        text.toString(),
+        id?.toString() ?? null,
+        this.currentPosition()
+      )
     );
   }
 
@@ -500,6 +425,8 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
   /**
    * @param identifier The character that marked this token
    * as an identifier
+   *
+   * !!Not yet used!!
    */
   protected scanIdentifier(identifier: char) {
     const value = new StringBuilder();
@@ -540,7 +467,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     }
 
     while (!this.atEom()) {
-      const c = this.getChar();
+      const c = this.getChar()!;
 
       switch (c) {
         case TokenKindIdentifier.WhiteSpace:
@@ -551,8 +478,163 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
         case TokenKindIdentifier.FormattedPageBreak: {
           return this.newParameterToken(sb, doubleDashed);
         }
+        default: {
+          if (this.isIdentifier(c)) {
+            sb.append(c);
+            continue;
+          }
+
+          return this.newGenericToken(sb);
+        }
       }
     }
+
+    return this.newGenericToken(sb);
+  }
+
+  /**
+   * Do the next characters represent a
+   * discord token?
+   *
+   * The first leading '<' was already consumed.
+   * If the following token is a discord
+   * token, return true and save that token.
+   */
+  protected scanDiscordToken(char: char): Token | null {
+    const idx = this.index;
+    const text = new StringBuilder(char);
+    const id = new StringBuilder();
+    let semicolonCount = 0;
+    let kind: CommandTokenKind | null = null;
+
+    while (!this.atEom()) {
+      const c = this.getChar();
+      switch (c) {
+        case "0":
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9": {
+          /**
+           * No check for @ or # needed here
+           * as it's already checked in a later
+           * step if the rest of the token is valid
+           */
+          text.append(c);
+
+          if (kind !== CommandTokenKind.Emote || semicolonCount === 2) {
+            id.append(c);
+          }
+
+          continue;
+        }
+        case "#":
+        case "@": {
+          if (kind === CommandTokenKind.Emote) {
+            text.append(c);
+            continue;
+          }
+
+          // Must be the second character
+          if (text.length > 1) {
+            this.resync(idx);
+            return null;
+          }
+          kind =
+            c === "@"
+              ? CommandTokenKind.UserMention
+              : CommandTokenKind.ChannelMention;
+          text.append(c);
+          continue;
+        }
+        case "&": {
+          if (kind === CommandTokenKind.Emote) {
+            text.append(c);
+            continue;
+          }
+
+          if (text.length !== 2 || !text.has("@")) {
+            this.resync(idx);
+            return null;
+          }
+
+          kind = CommandTokenKind.RoleMention;
+          text.append(c);
+          continue;
+        }
+        case ":": {
+          if (semicolonCount > 1) {
+            this.resync(idx);
+            return null;
+          }
+
+          semicolonCount++;
+          kind = CommandTokenKind.Emote;
+          text.append(c);
+          continue;
+        }
+        case ">": {
+          if (isNil(kind)) {
+            this.resync(idx);
+            return null;
+          }
+
+          if (kind === CommandTokenKind.Emote && semicolonCount !== 2) {
+            text.append(c);
+            continue;
+          }
+
+          text.append(c);
+
+          switch (kind) {
+            case CommandTokenKind.UserMention:
+              return this.newUserMentionToken(text, id);
+            case CommandTokenKind.RoleMention:
+              return this.newRoleMentionToken(text, id);
+            case CommandTokenKind.ChannelMention:
+              return this.newChannelMentionToken(text, id);
+            case CommandTokenKind.Emote:
+              return this.newEmoteToken(text, id);
+            default: {
+              this.resync(idx);
+              return null;
+            }
+          }
+        }
+        default: {
+          if (isNil(c)) {
+            this.resync(idx);
+            return null;
+          }
+
+          /**
+           * Emote tokens can probably have all kinds of
+           * crazy characters in them so we don't want
+           * to look for all of them.
+           */
+          if (kind === CommandTokenKind.Emote) {
+            /**
+             * Checking if token looks like:
+             * "<:xxx"
+             */
+            if (semicolonCount !== 2) {
+              text.append(c);
+            }
+          }
+
+          this.resync(idx);
+          return null;
+        }
+      }
+    }
+
+    this.resync(idx);
+    return null;
   }
 
   /**
@@ -560,7 +642,13 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
    * this method is called.
    */
   protected scanDiscordIdentifier(char: char) {
-    return this.scanGenericToken("<");
+    const discordToken = this.scanDiscordToken(char);
+
+    if (isNil(discordToken)) {
+      return this.scanGenericToken(char);
+    }
+
+    return discordToken;
   }
 
   /**
@@ -580,64 +668,6 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     while (!this.forceNewToken && !this.atEom()) {
       const c = this.getChar()!;
 
-      switch (c) {
-        // Is valid identifier
-        case "a":
-        case "b":
-        case "c":
-        case "d":
-        case "e":
-        case "f":
-        case "g":
-        case "h":
-        case "i":
-        case "j":
-        case "k":
-        case "l":
-        case "m":
-        case "n":
-        case "o":
-        case "p":
-        case "q":
-        case "r":
-        case "s":
-        case "t":
-        case "u":
-        case "v":
-        case "w":
-        case "x":
-        case "y":
-        case "z":
-        case "A":
-        case "B":
-        case "C":
-        case "D":
-        case "E":
-        case "F":
-        case "G":
-        case "H":
-        case "I":
-        case "J":
-        case "K":
-        case "L":
-        case "M":
-        case "N":
-        case "O":
-        case "P":
-        case "Q":
-        case "R":
-        case "S":
-        case "T":
-        case "U":
-        case "V":
-        case "W":
-        case "X":
-        case "Y":
-        case "Z":
-        case "_": {
-        }
-      }
-
       if (c === identifier) {
         return true;
       }
@@ -645,8 +675,24 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
       sb.append(c);
     }
 
-    this.resync(resyncTo);
+    this.resync();
     return false;
+  }
+
+  /**
+   * When this method is called the
+   * string identifier was already removed
+   */
+  protected scanStringExpandable() {
+    const sb = new StringBuilder();
+    const isValidString = this.scanStringIdentifier('"', sb);
+
+    if (isValidString) {
+      return this.newStringLiteralToken(sb);
+    }
+
+    this.resync();
+    return this.scanGenericToken(this.getChar()!);
   }
 
   /**
@@ -671,27 +717,26 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
    */
   protected scanStringTemplate() {
     const sb = new StringBuilder();
-    return this.newStringExpandableToken(sb);
-  }
+    const isValidString = this.scanStringIdentifier("`", sb);
 
-  /**
-   * When this method is called the
-   * string identifier was already removed
-   */
-  protected scanStringExpandable() {
-    const sb = new StringBuilder();
-    return this.newStringExpandableToken(sb);
+    if (isValidString) {
+      return this.newStringLiteralToken(sb);
+    }
+
+    this.resync();
+    return this.scanGenericToken(this.getChar()!);
   }
 
   protected scanNumber(char: char, isNegative?: boolean) {
     const sb = new StringBuilder(char);
+    const idx = this._index;
 
     if (isNegative) {
       sb.insert("-");
     }
 
-    while (!this.forceNewToken && !this.atEom()) {
-      const c = this.getChar();
+    while (!this.atEom()) {
+      const c = this.getChar()!;
       switch (c) {
         case ".":
         case "0":
@@ -712,7 +757,21 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
           break;
         }
         default: {
-          this.forceNewToken = true;
+          if (this.isWhiteSpace(c) || this.isNewLine(c)) {
+            return this.newNumberToken(sb);
+          }
+
+          /* The token did not start with a `-`
+           * Which marks a parameter
+           */
+          if (isNegative !== true) {
+            return this.scanGenericToken(sb);
+          }
+
+          if (this.isIdentifier(c)) {
+            this.resync(idx);
+            return this.scanParameter();
+          }
         }
       }
     }
@@ -720,58 +779,47 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
     return this.newNumberToken(sb);
   }
 
+  /**
+   * The first "`" was already removed
+   */
   protected scanCodeBlock() {
-    const sb = new StringBuilder();
+    const code = new StringBuilder();
     const language = new StringBuilder();
     const text = new StringBuilder("`");
 
-    let isScanningIdentifier = true;
-    let isScanningLanguage = false;
-    const backTicks = ["`"];
+    if (!this.isCodeBlockPattern()) {
+      return this.scanGenericToken(text);
+    }
 
-    while (!this.forceNewToken && !this.atEom()) {
+    /**
+     * Grab the next two backticks
+     * that define the code block
+     */
+    text.append(this.getChar()!);
+    text.append(this.getChar()!);
+
+    let isScanningLanguage = true;
+
+    while (!this.atEom()) {
       const c = this.getChar()!;
 
       switch (c) {
         case "`": {
-          if (backTicks.length <= 3) {
-            backTicks.push(c);
+          // Marks the end of the code block
+          if (!this.isCodeBlockPattern()) {
+            code.append(c);
             text.append(c);
             continue;
           }
 
-          if (backTicks.length === 3) {
-            if (!isScanningIdentifier) {
-              backTicks.push(c);
-              text.append(c);
-              isScanningIdentifier = true;
-              continue;
-            }
+          text.append(this.getChar()!);
+          text.append(this.getChar()!);
 
-            isScanningIdentifier = false;
-            isScanningLanguage = true;
-            continue;
-          }
-
-          const isCodeBlock = this.isCodeBlockPattern();
-
-          if (backTicks.length > 3) {
-            backTicks.push(c);
-          }
-
-          if (isCodeBlock) {
-            backTicks.push(c);
-          }
-
-          text.append(c);
-
-          if (backTicks.length === 6) {
-            this.forceNewToken = true;
-            continue;
-          }
+          return this.newCodeBlockToken(text, code, language);
         }
         case TokenKindIdentifier.FormattedPageBreak:
         case TokenKindIdentifier.CharacterReturn:
+        case TokenKindIdentifier.WhiteSpace:
         case TokenKindIdentifier.LineFeed: {
           if (isScanningLanguage) {
             isScanningLanguage = false;
@@ -780,7 +828,7 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
           }
 
           text.append(c);
-          sb.append(c);
+          code.append(c);
           continue;
         }
         default: {
@@ -791,16 +839,12 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
           }
 
           text.append(c);
-          sb.append(c);
+          code.append(c);
         }
       }
     }
 
-    if (backTicks.length < 6) {
-      return this.scanGenericToken(text);
-    }
-
-    return this.newCodeBlockToken(text, sb, language);
+    return this.scanGenericToken(text);
   }
 
   protected scanGenericToken(sb: StringBuilder): GenericTokenImpl;
@@ -822,9 +866,15 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
         }
         case "<": {
           const idx = this.index;
-          if (this.isDiscordToken()) {
+          if (!isNil(this.scanDiscordToken(c))) {
             this.resync(idx - 1);
             this.newGenericToken(sb);
+          }
+        }
+        case "`": {
+          if (this.isCodeBlockPattern()) {
+            this.ungetChar();
+            return this.newGenericToken(sb);
           }
         }
         default: {
@@ -853,7 +903,6 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
       case TokenKindIdentifier.FormattedPageBreak:
       case TokenKindIdentifier.CharacterReturn:
       case TokenKindIdentifier.LineFeed: {
-        this.skipChar();
         return this.nextToken();
       }
       case "0":
@@ -902,6 +951,10 @@ export class CommandTokenizer implements Tokenizer<CommandTokenKind> {
         }
       }
       default:
+        if (UNICODE_EMOJI_REGEX.test(c)) {
+          return this.newEmoteToken(new StringBuilder(c), null);
+        }
+
         return this.scanGenericToken(c);
     }
   }

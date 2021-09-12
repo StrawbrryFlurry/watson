@@ -1,7 +1,7 @@
-import { ArgumentOutOfRangeException } from "@exceptions";
-import { EOL } from "os";
+import { ArgumentOutOfRangeException } from '@exceptions';
+import { EOL } from 'os';
 
-import { isNil, isString } from "../../utils";
+import { isNil, isString } from '../../utils';
 
 /**
  * While not strictly necessary this StringBuilder
@@ -86,6 +86,7 @@ export class StringBuilder {
     if (isNil(value)) {
       return this;
     }
+
     const v = value.split("");
     this._chars.splice(index, 0, ...v);
     return this;

@@ -9,7 +9,7 @@ import {
   ParsingException,
   TokenImpl,
   TokenPositionImpl,
-} from "@command";
+} from '@command';
 import {
   AstArgument,
   AstCommand,
@@ -43,15 +43,15 @@ import {
   Token,
   TokenWithValue,
   UserMentionToken,
-} from "@watsonjs/common";
-import { Channel, Client, Emoji, Guild, Message, Role, User } from "discord.js";
-import { DateTime, DateTimeOptions } from "luxon";
-import { URL } from "url";
+} from '@watsonjs/common';
+import { Channel, Client, Emoji, Guild, Message, Role, User } from 'discord.js';
+import { DateTime, DateTimeOptions } from 'luxon';
+import { URL } from 'url';
 
-import { WatsonContainer } from "../..";
-import { ContextInjector } from "../../injector/context-injector";
-import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from "./ast";
-import { CommandTokenizer } from "./tokenizer";
+import { WatsonContainer } from '../..';
+import { ContextInjector } from '../../injector/context-injector';
+import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
+import { CommandTokenizer } from './tokenizer';
 
 type ParseFn<T> = (
   token: Token,
@@ -820,16 +820,23 @@ export class CommandParser implements Parser<CommandAst> {
   ): Promise<AstArgument<Emoji>> {
     const { injector } = ctx;
     const client = injector.get<Client>(ClientCtx);
+    const argument = new AstArgumentImpl(token, param);
     let emojiId: string;
 
     if (token.kind !== CommandTokenKind.Emote) {
       emojiId = token.text!;
     } else {
-      emojiId = (token as EmoteToken).value;
+      const idOrIsEmote = (token as EmoteToken).value;
+
+      if (isNil(idOrIsEmote)) {
+        return argument.withValue(token.text);
+      }
+
+      emojiId = idOrIsEmote;
     }
 
     const emoji = client.emojis.resolve(emojiId);
-    return new AstArgumentImpl(token, param, emoji!);
+    return argument.withValue(emoji!);
   }
 
   public parseToString(

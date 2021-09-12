@@ -1,4 +1,4 @@
-import { Token } from "./token.interface";
+import { Token } from './token.interface';
 
 export type NewLineCharacter = "\n" | "\r" | "\r\n";
 
@@ -122,7 +122,13 @@ export interface ChannelMentionToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#RoleMention} */
 export interface RoleMentionToken extends TokenWithValue<string> {}
 /** @see {@link CommandTokenKind#Emote} */
-export interface EmoteToken extends TokenWithValue<string> {}
+export interface EmoteToken extends CommandToken {
+  /**
+   * Value will be `null` if the
+   * emote is a unicode emoji 👀
+   */
+  value: string | null;
+}
 
 /** @see {@link CommandTokenKind#CodeBlock} */
 export interface CodeBlockToken extends TokenWithValue<string> {
