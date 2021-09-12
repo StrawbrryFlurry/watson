@@ -9,8 +9,10 @@ import {
   PrefixToken,
   Token,
   TokenPosition,
-} from "@watsonjs/common";
-import { ParameterConfiguration } from "packages/common/src/interfaces/router/configuration/parameter-configuration.interface";
+} from '@watsonjs/common';
+import {
+  ParameterConfiguration,
+} from 'packages/common/src/interfaces/router/configuration/parameter-configuration.interface';
 
 export class AstPrefixImpl implements AstPrefix {
   public readonly type: CommandAstType.Prefix;
@@ -20,8 +22,8 @@ export class AstPrefixImpl implements AstPrefix {
 
   constructor(token: PrefixToken) {
     const { text, position } = token;
-    this.text = text;
-    this.value = text;
+    this.text = text!;
+    this.value = text!;
     this.position = position;
   }
 }
@@ -36,8 +38,8 @@ export class AstCommandImpl implements AstCommand {
 
   constructor(token: GenericToken) {
     const { text, position } = token;
-    this.text = text;
-    this.value = text;
+    this.text = text!;
+    this.value = text!;
     this.position = position;
   }
 
@@ -56,7 +58,7 @@ export class AstArgumentImpl<T = any> implements AstArgument<T> {
 
   constructor(token: Token, parameter: ParameterConfiguration, value?: T) {
     this.position = token.position;
-    this.text = token.text;
+    this.text = token.text!;
     this.value = value;
     this.parameter = {
       type: CommandAstType.Parameter,

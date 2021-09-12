@@ -15,8 +15,7 @@ import { Message } from 'discord.js';
 
 import { CommandRoute } from '../../router';
 import { CommandArgumentWrapper } from '../command-argument-wrapper';
-import { CommandParser } from '../parser';
-import { CommandToken, CommandTokenizer } from '../tokenizer';
+import { CommandParser, CommandToken, CommandTokenizer } from '../parser';
 
 export class CommandArgumentsHost implements CommandArguments {
   public message: Message;
