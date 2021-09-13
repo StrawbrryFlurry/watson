@@ -1,7 +1,7 @@
-import { _Injector } from "@injector";
-import { Providable } from "@watsonjs/common";
+import { Injector } from '@injector';
+import { Providable } from '@watsonjs/common';
 
-export class ContextInjector extends _Injector {
+export class ContextInjector extends Injector {
   public create<T>(...args: any[]): T {
     throw new Error("Method not implemented.");
   }

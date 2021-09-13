@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { ApplicationConfig } from '../application-config';
 import { BootstrappingException } from '../exceptions';
-import { AbstractDiscordAdapter } from './abstract-discord-adapter';
+import { AbstractDiscordAdapter } from './adapter-ref';
 import { parseToDiscordJsEvent } from './event-parser';
 
 export const CLIENT_ADAPTER_SUGGESTIONS = [

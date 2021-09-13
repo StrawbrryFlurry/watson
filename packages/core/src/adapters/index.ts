@@ -1,3 +1,2 @@
-export * from "./abstract-discord-adapter";
+export * from "./adapter-ref";
 export * from "./discordjs-adapter";
-export * from "./slash-adapter";

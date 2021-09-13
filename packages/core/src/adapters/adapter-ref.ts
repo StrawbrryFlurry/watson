@@ -4,10 +4,10 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { ApplicationConfig } from '../application-config';
 import { EventProxy } from '../lifecycle';
-import { SlashCommandAdapter } from './slash-adapter';
 
-export abstract class AbstractDiscordAdapter<TClient = any, TOptions = any>
-  implements DiscordAdapter<TClient> {
+export abstract class AdapterRef<Client = any, Options = any>
+  implements DiscordAdapter<Client>
+{
   protected activity: ActivityOptions;
 
   protected configuration: ApplicationConfig;
@@ -66,11 +66,11 @@ export abstract class AbstractDiscordAdapter<TClient = any, TOptions = any>
     return subscriber;
   }
 
-  public get client(): TClient {
+  public get client(): Client {
     return this.configuration.clientInstance;
   }
 
-  public set client(instance: TClient) {
+  public set client(instance: Client) {
     this.configuration.setClientInstance(instance);
   }
 
@@ -94,7 +94,7 @@ export abstract class AbstractDiscordAdapter<TClient = any, TOptions = any>
     return this.client;
   }
 
-  public setClient(client: TClient) {
+  public setClient(client: Client) {
     if (this.ready.value === true) {
       throw new RuntimeException("The client cannot be set while it's running");
     }
@@ -110,8 +110,8 @@ export abstract class AbstractDiscordAdapter<TClient = any, TOptions = any>
     return this.configuration.authToken;
   }
 
-  protected get clientOptions(): TOptions {
-    return this.configuration.clientOptions as TOptions;
+  protected get clientOptions(): Options {
+    return this.configuration.clientOptions as Options;
   }
 
   public setActivity(options: ActivityOptions) {
