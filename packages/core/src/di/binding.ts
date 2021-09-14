@@ -6,6 +6,7 @@ export type FactoryFn<T, D extends Array<any> = any[]> = (...args: D) => T;
 
 export class Binding<
   T extends any | NewableTo<any> | FactoryFn<any, D> = any,
+  V extends any = any,
   D extends any[] = any
 > {
   /** The type this binding represents */
@@ -47,6 +48,10 @@ export class Binding<
     this.metatype = metatype;
     this.host = host;
   }
+
+  public resolve(instance: V): ResolvedBinding<T> {
+    return new ResolvedBinding<T>(this, instance);
+  }
 }
 
 /**
@@ -62,14 +67,22 @@ export class Binding<
  * how it can be instantiated and what type
  * it's coming from
  */
-export class ResolvedBinding<T = any> {
+export class ResolvedBinding<T = any, V = any> {
   /** The host binding */
-  binding: Binding<T>;
+  public readonly binding: Binding<T>;
   /** The value or instance of this binding */
-  instance: T;
+  public readonly instance: V;
   /**
    * A factory function that can be
    * called to create this instance
    */
-  factory: NewableTo<T> | FactoryFn<T>;
+  public readonly factory: NewableTo<T> | FactoryFn<T>;
+
+  /** The id of the module this binding was created in */
+  public readonly scope: string;
+
+  constructor(binding: Binding<T>, instance: V) {
+    this.binding = binding;
+    this.instance = instance;
+  }
 }

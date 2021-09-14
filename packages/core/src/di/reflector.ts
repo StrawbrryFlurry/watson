@@ -1,5 +1,5 @@
 import { BootstrapException } from '@exceptions';
-import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, isNil, Type } from '@watsonjs/common';
+import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, isNil, Type } from '@watsonjs/common';
 
 export interface MethodDescriptor {
   propertyKey: string;
@@ -7,15 +7,25 @@ export interface MethodDescriptor {
 }
 
 export class Reflector {
+  /** {@link DESIGN_PARAMETERS} */
   public reflectMethodParameters<T extends unknown[] = unknown[]>(
     metatype: Type,
     propertyKey?: string
   ): T {
-    return Reflect.getMetadata(DESIGN_PARAMETERS, metatype, propertyKey) || [];
+    return Reflect.getMetadata(DESIGN_PARAMETERS, metatype, propertyKey!) || [];
   }
 
-  public reflectMethodReturnType(metatype: Type, propertyKey: string) {
-    Reflect.getMetadata(DESIGN_RETURN_TYPE, metatype, propertyKey);
+  /** {@link DESIGN_RETURN_TYPE} */
+  public reflectMethodReturnType<T>(
+    metatype: Type,
+    propertyKey: string
+  ): Type<T> {
+    return Reflect.getMetadata(DESIGN_RETURN_TYPE, metatype, propertyKey);
+  }
+
+  /** {@link DESIGN_TYPE} */
+  public reflectPropertyType<T>(metatype: Type, propertyKey: string): Type<T> {
+    return Reflect.getMetadata(DESIGN_TYPE, metatype, propertyKey);
   }
 
   /**
@@ -24,7 +34,14 @@ export class Reflector {
    * descriptor will be ignored.
    */
   public reflectMethodsOfType(metatype: Type): MethodDescriptor[] {
-    const { prototype } = metatype;
+    if (isNil(metatype)) {
+      throw new BootstrapException(
+        "Reflector",
+        "Failed to reflect methods of type as it is `null`"
+      );
+    }
+
+    const prototype = Object.getPrototypeOf(metatype);
 
     if (isNil(prototype)) {
       throw new BootstrapException(
@@ -36,21 +53,27 @@ export class Reflector {
     const { constructor, ...descriptors } =
       Object.getOwnPropertyDescriptors(prototype);
 
-    const descriptorValues = Object.entries(descriptors).map(
+    const methodDescriptors = Object.entries(descriptors).map(
       ([propertyKey, descriptor]) => ({
         propertyKey,
         value: descriptor.value,
       })
     );
 
-    return descriptorValues;
+    return methodDescriptors;
   }
 
+  /**
+   * Returns metadata defined
+   * on `metatype` with key`key`.
+   * Optionally takes a `propertyKey`
+   * for object-property metadata.
+   */
   public reflectMetadata<T>(
     key: string,
     metatype: Type,
     propertyKey?: string
   ): T {
-    return Reflect.getMetadata(key, metatype, propertyKey) as T;
+    return Reflect.getMetadata(key, metatype, propertyKey!) as T;
   }
 }
