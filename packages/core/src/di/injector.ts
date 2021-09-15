@@ -1,13 +1,22 @@
-import { Module } from './module';
+import { ResolvedBinding } from './binding';
+import { Providable } from './injection-token';
 
-// Base injector
 export abstract class Injector {
   public readonly parent: Injector | null;
-  public readonly module: Module;
-  protected readonly _records: Map<any, any> = new Map<any, any>();
 
-  constructor(module: Module, parent?: Injector) {}
+  constructor(parent?: Injector) {
+    this.parent = parent ?? null;
+  }
 
-  public abstract create<T extends any>(...args: any[]): T;
-  public abstract get(typeOrToken: any): any;
+  /**
+   * Resolves`typeOrToken` using
+   * tokens provided by itself or
+   * the parent injector
+   * given there is one.
+   */
+  public abstract resolve<T extends any = any>(typeOrToken: Providable<T>): T;
+
+  public abstract get<T extends any = any, B extends any = any>(
+    typeOrToken: Providable<T>
+  ): ResolvedBinding<B, T>;
 }

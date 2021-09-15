@@ -33,7 +33,7 @@ export const UNICODE_EMOJI_REGEX =
   /\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]/;
 
 /**
- * The parameter types that the decoratee descriptor value
+ * The parameter types that the decorated descriptor value
  * takes.
  *
  * Class prototype parameters
@@ -60,7 +60,7 @@ export const UNICODE_EMOJI_REGEX =
  */
 export const DESIGN_PARAMETERS = "design:param-types";
 /**
- * The return type of the decoratee descriptor
+ * The return type of the decorated descriptor
  * is `void` e.g `undefined` if not explicitly
  * defined.
  *
@@ -76,7 +76,7 @@ export const DESIGN_PARAMETERS = "design:param-types";
  */
 export const DESIGN_RETURN_TYPE = "design:return-type";
 /**
- * The type of the decoratee
+ * The type of the decorated
  * ```ts
  * `@Receiver()`
  * class Foo {}

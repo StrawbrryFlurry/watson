@@ -1,17 +1,30 @@
-import { Injector } from '@injector';
 import { InjectableOptions, InjectorLifetime } from '@watsonjs/common';
+
+import { Module } from '.';
+
 
 export type NewableTo<T, D extends Array<any> = any[]> = new (...args: D) => T;
 export type FactoryFn<T, D extends Array<any> = any[]> = (...args: D) => T;
 
+/**
+ * A binding represents a provider
+ * in any given module context.
+ * 
+ * The `Binding` wrapper for a provider
+ * stores additional information about the
+ * binding which can be reused if a module
+ * provider is used in another injector
+ * context (By exporting it from the module).
+*/
 export class Binding<
   T extends any | NewableTo<any> | FactoryFn<any, D> = any,
+  V extends any = any,
   D extends any[] = any
 > {
   /** The type this binding represents */
   public readonly metatype: T;
-  /** The injector that created this binding */
-  public readonly host: Injector;
+  /** The module this binding belongs to */
+  public readonly host: Module;
   /** Resolved dependencies for this type */
   public readonly dependencies: D = [] as unknown as D;
   /**
@@ -32,20 +45,16 @@ export class Binding<
    *  all resolved values that it creates.
    */
   public readonly lifetime: InjectorLifetime;
-  /**
-   * If the binding can store a instance
-   * value or if it's newly resolved each
-   * time it is looked up by the injector.
-   */
-  public readonly isTransient: boolean;
-
-  constructor(metatype: T, host: Injector, options: InjectableOptions) {
+  
+  constructor(metatype: T, host: Module, options: InjectableOptions) {
     const { lifetime } = options;
     this.lifetime = lifetime!;
-    this.isTransient = lifetime !== InjectorLifetime.Singleton;
-
     this.metatype = metatype;
     this.host = host;
+  }
+
+  public resolve(instance: V): ResolvedBinding<T> {
+    return new ResolvedBinding<T>(this, instance);
   }
 }
 
@@ -62,14 +71,22 @@ export class Binding<
  * how it can be instantiated and what type
  * it's coming from
  */
-export class ResolvedBinding<T = any> {
+export class ResolvedBinding<T = any, V = any> {
   /** The host binding */
-  binding: Binding<T>;
+  public readonly binding: Binding<T>;
   /** The value or instance of this binding */
-  instance: T;
+  public readonly instance: V;
   /**
    * A factory function that can be
    * called to create this instance
    */
-  factory: NewableTo<T> | FactoryFn<T>;
+  public readonly factory: NewableTo<T> | FactoryFn<T>;
+
+  /** The id of the module this binding was created in */
+  public readonly scope: string;
+
+  constructor(binding: Binding<T>, instance: V) {
+    this.binding = binding;
+    this.instance = instance;
+  }
 }
