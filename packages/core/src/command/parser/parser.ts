@@ -1,5 +1,6 @@
 import {
   AstArgumentImpl,
+  CommandAstImpl,
   CommandContainer,
   isGenericToken,
   isNumberToken,
@@ -10,6 +11,7 @@ import {
   TokenImpl,
   TokenPositionImpl,
 } from '@command';
+import { ContextInjector } from '@di';
 import {
   AstArgument,
   AstCommand,
@@ -48,9 +50,7 @@ import { Channel, Client, Emoji, Guild, Message, Role, User } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
 import { URL } from 'url';
 
-import { WatsonContainer } from '../..';
-import { ContextInjector } from '../../injector/context-injector';
-import { AstCommandImpl, AstPrefixImpl, CommandAstImpl } from './ast';
+import { AstCommandImpl, AstPrefixImpl } from './ast';
 import { CommandTokenizer } from './tokenizer';
 
 type ParseFn<T> = (
@@ -123,12 +123,8 @@ export type UngetTokenFn = (token: Token) => void;
 
 export class CommandParser implements Parser<CommandAst> {
   private _commands: Map<string, string>;
-  private readonly tokenizer: CommandTokenizer;
 
-  constructor(
-    private _diContainer: WatsonContainer,
-    private _commandContainer: CommandContainer
-  ) {
+  constructor(private _commandContainer: CommandContainer) {
     this._commands = this._commandContainer.commands;
   }
 
@@ -138,17 +134,19 @@ export class CommandParser implements Parser<CommandAst> {
     return tokenizer.tokenize(content, prefixLength);
   }
 
-  public async parseInput(tokenList: Token<any>[]): Promise<CommandAst> {
-    throw new Error("Method not implemented.");
-  }
-
   public async parseMessage(
     message: Message,
     prefixLength: number,
     pipeLine: CommandPipeline
   ): Promise<CommandAst> {
     const tokens = this.parseMessageTokens(message, prefixLength);
+    return this.parseInput(tokens, pipeLine);
+  }
 
+  public async parseInput(
+    tokens: Token<any>[],
+    pipeLine: CommandPipeline
+  ): Promise<CommandAst> {
     /**
      * These methods allow us to change the
      * state of `tokens` in this lexical scope

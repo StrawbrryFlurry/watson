@@ -4,7 +4,7 @@ import { Message } from 'discord.js';
 import { Token } from './token.interface';
 
 export interface Parser<T = any> {
-  parseInput(tokenList: Token[]): Promise<T>;
+  parseInput(tokenList: Token[], pipeline: CommandPipeline): Promise<T>;
   parseMessage(
     message: Message,
     prefixLength: number,

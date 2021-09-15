@@ -5,7 +5,7 @@
     "paths": {
       "@adapters": ["packages/core/src/adapters"],
       "@command": ["packages/core/src/command"],
-      "@injector": ["packages/core/src/injector"],
+      "@di": ["packages/core/src/di"],
       "@router": ["packages/core/src/router"],
       "@errors": ["packages/core/src/errors"],
       "@logger": ["packages/core/src/logger"],
