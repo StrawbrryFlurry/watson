@@ -2,9 +2,33 @@ import { INJECTABLE_METADATA } from '@constants';
 import { mergeDefaults } from '@utils';
 
 export enum InjectorLifetime {
+  /**
+   * Instantiated during bootstrapping, shared among
+   * all modules that import the same exporting module.
+   * @default
+   */
   Singleton = 1 << 0,
+  /**
+   * Creates a new instance for every
+   * module scope.
+   */
   Scoped = 1 << 1,
+  /**
+   * Creates a new instance
+   * every time the provider is
+   * requested
+   */
   Transient = 1 << 2,
+  /**
+   * Creates a provider instance
+   * every time a new event is emitted.
+   *
+   * Note that you're required to use
+   * this provider scope if you're trying
+   * to access other provider that also
+   * provide an event scoped instance.
+   */
+  Event = 1 << 3,
 }
 
 export interface InjectableOptions {
