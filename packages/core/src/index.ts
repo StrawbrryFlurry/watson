@@ -5,7 +5,7 @@ export * from "./command";
 export * from "./errors";
 export * from "./exceptions";
 export * from "./util";
-export * from "./injector";
+export * from "./di";
 export * from "./interfaces";
 export * from "./lifecycle";
 export * from "./logger";
