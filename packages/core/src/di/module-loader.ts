@@ -1,5 +1,12 @@
 import { Reflector } from '@di';
-import { Logger } from '@logger';
+import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
+import { ADD_MODULE, COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
+import { resolveAsyncValue } from '@utils';
+import { INJECT_DEPENDENCY_METADATA, MODULE_METADATA } from 'packages/common/src/constants';
+import { DynamicModule, Type } from 'packages/common/src/interfaces';
+import { isNil } from 'packages/common/src/utils';
+
+import { WatsonContainer } from '..';
 
 /**
  * Resolves module dependencies
@@ -7,7 +14,119 @@ import { Logger } from '@logger';
  */
 export class ModuleLoader {
   private _reflector = new Reflector();
-  private logger = new Logger("");
+  private _logger = new Logger("ModuleLoader");
+  private _container: WatsonContainer;
+
+  constructor(container: WatsonContainer) {
+    this._container = container;
+  }
+
+  /**
+   * Resolves the root module to recursively add its imports to the container
+   */
+  public async resolveRootModule(metatype: Type) {
+    this._logger.logMessage(REFLECT_MODULE_IMPORTS());
+    await this.scanForModuleImports(metatype);
+    this._logger.logMessage(COMPLETED());
+    this._logger.logMessage(REFLECT_MODULE_COMPONENTS());
+    await this.resolveModuleProperties();
+  }
+
+  private async scanForModuleImports(
+    metatype: Type | DynamicModule,
+    context: (Type | DynamicModule)[] = []
+  ) {
+    this._container.addModule(metatype, context);
+
+    context.push(metatype);
+
+    const { imports, metatype: type } = await this.reflectModuleMetadata(
+      metatype
+    );
+
+    this._logger.logMessage(ADD_MODULE(type));
+
+    for (let module of imports) {
+      if (module instanceof Promise) {
+        module = await module;
+      }
+
+      if (typeof module === "undefined") {
+        throw new CircularDependencyException(
+          "ModuleLoader",
+          type,
+          context as Type[]
+        );
+      }
+
+      if (this._container.hasModule(module)) {
+        continue;
+      }
+
+      this._container.addModule(module, context);
+      await this.scanForModuleImports(module, context);
+    }
+  }
+
+  public reflectModuleMetadata(target: Type | DynamicModule) {
+    if (this.isDynamicModule(target as DynamicModule)) {
+      return this.getDataFromDynamicModule(target as DynamicModule & Type);
+    }
+
+    const imports =
+      this._reflector.reflectMetadata<Type[]>(
+        MODULE_METADATA.IMPORTS,
+        target as Type
+      ) ?? [];
+    const providers =
+      this._reflector.reflectMetadata<Type[]>(
+        MODULE_METADATA.PROVIDERS,
+        target as Type
+      ) ?? [];
+    const receivers =
+      this._reflector.reflectMetadata<Type[]>(
+        MODULE_METADATA.RECEIVER,
+        target as Type
+      ) ?? [];
+    const exports =
+      this._reflector.reflectMetadata<Type[]>(
+        MODULE_METADATA.EXPORTS,
+        target as Type
+      ) ?? [];
+
+    return {
+      imports,
+      providers,
+      receivers,
+      exports,
+      metatype: target as Type,
+    };
+  }
+
+  private async getDataFromDynamicModule(dynamicModule: DynamicModule & Type) {
+    const moduleData = await resolveAsyncValue(dynamicModule);
+
+    if (isNil(moduleData)) {
+      throw new InvalidDynamicModuleException(
+        "ModuleLoader",
+        `The dynamic module ${dynamicModule.name} did not return valid module metadata.`
+      );
+    }
+
+    const metatype = moduleData.module;
+    const imports = moduleData.imports || [];
+    const exports = moduleData.exports || [];
+    const providers = moduleData.providers || [];
+    const receivers = moduleData.receivers || [];
+
+    return {
+      metatype,
+      imports,
+      exports,
+      providers,
+      receivers,
+    };
+  }
 
   public reflectInjectedProvider(target: Type, ctorIndex: number) {
     const injectValue =
@@ -25,25 +144,6 @@ export class ModuleLoader {
     return null;
   }
 
-  /**
-   * Resolves the root module to recursively add its imports to the container
-   */
-  public async resolveRootModule(metatype: Type) {
-    this.logger.logMessage(REFLECT_MODULE_IMPORTS());
-    await this.scanForModuleImports(metatype);
-    this.logger.logMessage(COMPLETED());
-    this.logger.logMessage(REFLECT_MODULE_COMPONENTS());
-    await this.resolveModuleProperties();
-    this.logger.logMessage(BIND_GLOBAL_MODULES());
-    this.container.bindGlobalModules();
-  }
-
-  public async createTestingModule(moduelRef: DynamicModule) {
-    await this.scanForModuleImports(moduelRef);
-    await this.resolveModuleProperties();
-    this.container.bindGlobalModules();
-  }
-
   private async resolveModuleProperties() {
     const modules = this.container.getModules();
 
@@ -58,11 +158,14 @@ export class ModuleLoader {
     }
   }
 
-  private reflectImports(token: string, imports: Type[]) {
-    [
-      ...imports,
-      ...this.container.getDynamicModuleMetadataByToken(token, "imports"),
-    ].forEach((_import) => this.container.addImport(token, _import as Type));
+  private async reflectImports(token: string, imports: Type[]) {
+    const dynamicModuleImports = await Promise.all(
+      this._container.getDynamicModuleMetadataByToken(token, "imports")!
+    );
+
+    [...imports, ...dynamicModuleImports].forEach((_import) =>
+      this._container.addImport(token, _import as Type)
+    );
   }
 
   private reflectExports(token: string, exports: (Type | CustomProvider)[]) {
@@ -111,73 +214,6 @@ export class ModuleLoader {
     this.reflectComponentInjectables(metatype, token, PREFIX_METADATA);
   }
 
-  public reflectModuleMetadata(target: Type | DynamicModule) {
-    if (this.isDynamicModule(target as DynamicModule)) {
-      return this.reflectDynamicModule(target as DynamicModule & Type);
-    }
-
-    const imports = this.getArrayMetadata<Type[]>(
-      MODULE_METADATA.IMPORTS,
-      target as Type
-    );
-    const providers = this.getArrayMetadata<Type[]>(
-      MODULE_METADATA.PROVIDERS,
-      target as Type
-    );
-    const receivers = this.getArrayMetadata<Type[]>(
-      MODULE_METADATA.RECEIVER,
-      target as Type
-    );
-    const exports = this.getArrayMetadata<Type[]>(
-      MODULE_METADATA.EXPORTS,
-      target as Type
-    );
-
-    return {
-      imports,
-      providers,
-      receivers,
-      exports,
-      metatype: target as Type,
-    };
-  }
-
-  private async scanForModuleImports(
-    metatype: Type | DynamicModule,
-    context: (Type | DynamicModule)[] = []
-  ) {
-    this.container.addModule(metatype, context);
-
-    context.push(metatype);
-
-    const { imports, metatype: type } = await this.reflectModuleMetadata(
-      metatype
-    );
-
-    this.logger.logMessage(ADD_MODULE(type));
-
-    for (let module of imports) {
-      if (module instanceof Promise) {
-        module = await module;
-      }
-
-      if (typeof module === "undefined") {
-        throw new CircularDependencyException(
-          "Injector",
-          type,
-          context as Type[]
-        );
-      }
-
-      if (this.container.hasModule(module)) {
-        continue;
-      }
-
-      this.container.addModule(module, context);
-      await this.scanForModuleImports(module, context);
-    }
-  }
-
   private reflectComponentInjectables(
     metatype: Type,
     token: string,
@@ -206,31 +242,6 @@ export class ModuleLoader {
     injectables.forEach((injectable) => {
       this.container.addInjectable(token, injectable);
     });
-  }
-
-  private async reflectDynamicModule(dynamicModule: DynamicModule & Type) {
-    const moduleData = await dynamicModule;
-
-    if (!moduleData) {
-      throw new InvalidDynamicModuleException(
-        "MetadataResolver",
-        `The dynamic module ${dynamicModule.name} did not return valid module metadata.`
-      );
-    }
-
-    const metatype = moduleData.module;
-    const imports = moduleData.imports || [];
-    const exports = moduleData.exports || [];
-    const providers = moduleData.providers || [];
-    const receivers = moduleData.receivers || [];
-
-    return {
-      metatype,
-      imports,
-      exports,
-      providers,
-      receivers,
-    };
   }
 
   private isDynamicModule(module: DynamicModule): module is DynamicModule {

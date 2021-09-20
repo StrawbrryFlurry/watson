@@ -1,4 +1,4 @@
-import { Type } from '@watsonjs/common';
+import { Type } from '@interfaces';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";
 

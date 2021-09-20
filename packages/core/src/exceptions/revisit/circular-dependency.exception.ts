@@ -1,16 +1,16 @@
+import { Module } from '@di';
 import { isConstructor, isUndefined, Type } from '@watsonjs/common';
 
-import { InstanceWrapper, Module } from '../injector';
 import { BootstrappingException } from './bootstrapping.exception';
 
 export class CircularDependencyException<
-  T extends Type | Module | InstanceWrapper
+  T extends Type | Module
 > extends BootstrappingException {
   constructor(context: string, type: T, dependencyStack?: T[], idx?: number) {
     const resolveTypeName = (type: T) => {
       return isConstructor(type)
-        ? type.name.replace(/class.*{.*}.*/, "")
-        : type.name;
+        ? (type as Type).name.replace(/class.*{.*}.*/, "")
+        : (type as Type).name;
     };
 
     const dependencyGraph = isUndefined(dependencyStack)
@@ -22,7 +22,9 @@ export class CircularDependencyException<
 
     super(
       context,
-      `Circular dependency detected in ${type.name}\n${dependencyGraph}`
+      `Circular dependency detected in ${
+        (type as Type).name
+      }\n${dependencyGraph}`
     );
   }
 }

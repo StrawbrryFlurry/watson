@@ -1,13 +1,18 @@
-import { InjectableOptions, InjectorLifetime } from '@watsonjs/common';
+import { InjectorLifetime, Providable, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { Observable } from 'rxjs';
 
 import { Module } from '.';
 
 export type NewableTo<T, D extends Array<any> = any[]> = new (...args: D) => T;
 export type FactoryFn<T, D extends Array<any> = any[]> = (...args: D) => T;
 
+export interface WatsonDiProvidable {
+  [WATSON_ELEMENT_ID]: number;
+}
+
 /**
  * A binding represents a provider
- * in any given module context.
+ * in a given module context.
  *
  * The `Binding` wrapper for a provider
  * stores additional information about the
@@ -16,84 +21,94 @@ export type FactoryFn<T, D extends Array<any> = any[]> = (...args: D) => T;
  * context (By exporting it from the module).
  */
 export class Binding<
-  T extends any | NewableTo<any> | FactoryFn<any, D> = any,
-  V extends any = any,
-  D extends any[] = any
+  MetaType extends NewableTo<InstanceType> | FactoryFn<InstanceType> = any,
+  Deps extends any[] = any,
+  InstanceType extends any = any
 > {
   /** The type this binding represents */
-  public readonly metatype: T;
+  public ɵmetatype: MetaType;
+
+  /** The token with which the binding can be resolved */
+  public readonly token: Providable;
+
   /** The module this binding belongs to */
-  public readonly host: Module;
+  public readonly host: Module | null;
+
   /**
-   * If the binding is a factory, this property
-   * contains all the properties that should
-   * be injected as an argument to resolve
-   * the factory function.
+   * If the binding has any dependencies,
+   * this property contains all the tokens
+   * that should be injected as an argument
+   * to resolve the factory function.
+   *
+   * [SomeService, SomeContextProperty]
    */
-  public readonly inject: D;
+  public ɵinject: Deps;
+
   /**
-   * If the binding is not transient
-   * it's resolved `instance` is stored in this
-   * property.
+   * If the provider is a singleton,
+   * the instance type is stored in
+   * this property of the binding.
    */
   public instance: ResolvedBinding | null;
-  /**
-   *  The lifetime of this binding and
-   *  all resolved values that it creates.
-   */
-  public readonly lifetime: InjectorLifetime;
-  /** Resolved dependencies for this type */
-  public readonly dependencies: Binding[];
 
-  constructor(metatype: T, host: Module, options: InjectableOptions) {
-    const { lifetime } = options;
-    this.lifetime = lifetime!;
-    this.metatype = metatype;
+  /** The lifetime of this binding */
+  public readonly lifetime: InjectorLifetime;
+
+  constructor(
+    metatype: MetaType,
+    token: Providable,
+    host: Module | null,
+    lifetime: InjectorLifetime
+  ) {
+    this.ɵmetatype = metatype;
+    this.token = token;
     this.host = host;
+    this.lifetime = lifetime;
   }
 
-  // private _injector = new StaticInjector();
-
-  // /**
-  //  * A factory function that can be
-  //  * called to create this instance
-  //  */
-  // public async factory(): Promise<ResolvedBinding> {
-  //   const resolvedDeps = [];
-
-  //   for (let i = 0; i < this.dependencies.length; i++) {
-  //     const dep = this.dependencies[i];
-  //     const binding = await dep.factory();
-  //     resolvedDeps.push(binding.instance);
-  //   }
-
-  //   const instance = this._injector.resolve(this.metatype, resolvedDeps);
-  //   return new ResolvedBinding(this, instance);
-  // }
+  /**
+   * Internal factory function that will
+   * be called by the injector to create a
+   * new instance of the provider.
+   *
+   * This property should not be touched
+   * by the end user as changes to the
+   * binding reference will
+   * break DI if not done correctly.
+   */
+  public ɵfactory!: (
+    ...deps: Deps
+  ) => Observable<InstanceType> | Promise<InstanceType> | InstanceType;
 }
 
 /**
  * A resolved instance of a
- * {@link Binding }. Depending on
+ * {@link Binding}. Depending on
  * the lifetime of a provider there
  * can be multiple resolved bindings
  * for a given `Binding`.
  *
  * The resolved binding stores
- * the value for a resolved binding
- * as well as information about
- * how it can be instantiated and what type
- * it's coming from
+ * the value for a binding.
  */
-export class ResolvedBinding<T = any, V = any> {
+export class ResolvedBinding<
+  MetaType extends NewableTo<InstanceType> | FactoryFn<InstanceType> = any,
+  Deps extends any[] = any,
+  InstanceType extends any = any
+> {
   /** The host binding */
-  public readonly binding: Binding<T>;
+  public readonly binding: Binding<MetaType, Deps, InstanceType>;
+
   /** The value or instance of this binding */
-  public readonly instance: V;
+  public readonly instance: InstanceType;
+
   /** The id of the module this binding was resolved in */
   public readonly scope: string;
 
-  constructor(binding: Binding<T>, instance: V) {
+  constructor(
+    binding: Binding<MetaType, Deps, InstanceType>,
+    instance: InstanceType
+  ) {
     this.binding = binding;
     this.instance = instance;
   }

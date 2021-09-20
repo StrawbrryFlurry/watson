@@ -13,7 +13,8 @@
       "@lifecycle": ["packages/core/src/lifecycle"],
       "@exceptions": ["packages/core/src/exceptions"],
       "@utils": ["packages/core/src/util"],
-      "@watsonjs/common": ["packages/common/src"]
+      "@watsonjs/common": ["packages/common/src"],
+      "@watsonjs/platform-discordjs": ["packages/platform-discordjs/src"]
     }
   },
   "include": ["*.ts", "**/*.ts"]

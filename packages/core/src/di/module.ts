@@ -22,7 +22,6 @@ import { InstanceWrapper } from './instance-wrapper';
 
 /**
  * Wrapper for a class decorated with the @\Module decorator.
- * Resolves providers and imports for other dependants
  */
 export class Module {
   private readonly _id: string;
@@ -201,6 +200,14 @@ export class Module {
   }
 
   private addCustomProvider(provider: CustomProvider) {
+    // TODO:
+    /**
+     * if(isFactory)
+     *  provider.factory.__provider_type__ = 0;
+     * else
+     *  provider.class.__provider_type__ = 1;
+     *
+     */
     if (this.isClassProvider(provider)) {
       return this.addCalssProvider(provider as ClassProvider);
     } else if (this.isValueProvider(provider)) {

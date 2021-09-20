@@ -1,51 +1,39 @@
-import { isString, Prefix, RuntimeException, Type } from '@watsonjs/common';
-import { ActivityOptions, Client, ClientOptions, Intents, Snowflake } from 'discord.js';
+import { CanActivate, PipeTransform, Type } from '@watsonjs/common';
+import { ActivityOptions } from 'discord.js';
+import { PassThrough } from 'stream';
 
-import { ExceptionHandler } from '.';
-import { AbstractDiscordAdapter } from './adapters';
+import { AdapterRef, ExceptionHandler } from '.';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
 import { LifecycleHost } from './lifecycle/hooks';
-import { APP_STARTING, APP_STRATED, Logger } from './logger';
+import { APP_STARTED, APP_STARTING, Logger } from './logger';
 import { RouteExplorer } from './router';
-import { CommandPrefixHost } from './router/command/command-prefix-host';
 import { WatsonContainer } from './watson-container';
-
-export interface WatsonApplicationOptions {
-  discordAuthToken?: string;
-  clientOptions?: ClientOptions;
-  botDescription?: string;
-  intents?: Intents;
-  acknowledgeReaction?: string;
-  client?: Client;
-  acknowledgementReaction?: string | Snowflake;
-}
 
 /**
  * Main Application class
  */
 export class WatsonApplication {
-  private logger = new Logger("WatsonApplication");
-  private container: WatsonContainer;
-  private config: ApplicationConfig;
-  private routeExplorer: RouteExplorer;
-  private applicationProxy: ApplicationProxy;
-  private clientAdapter: AbstractDiscordAdapter;
-  private lifecycleHost: LifecycleHost;
+  private readonly _logger = new Logger("WatsonApplication");
+  private readonly _container: WatsonContainer;
+  private readonly _config: ApplicationConfig;
+  private readonly _routeExplorer: RouteExplorer;
+  private readonly _applicationProxy: ApplicationProxy;
+  private readonly _lifecycleHost: LifecycleHost;
+  private readonly _adapter: AdapterRef;
 
-  private isStarted: boolean = false;
-  private isInitialized: boolean = false;
-  private isDisposed = false;
+  private _isStarted: boolean = false;
+  private _isInitialized: boolean = false;
 
   constructor(config: ApplicationConfig, container: WatsonContainer) {
-    this.config = config;
-    this.container = container;
-    this.routeExplorer = new RouteExplorer(this.container);
-    this.applicationProxy = new ApplicationProxy();
-    this.lifecycleHost = new LifecycleHost(container);
-    this.clientAdapter = config.clientAdapter;
+    this._config = config;
+    this._container = container;
+    this._routeExplorer = new RouteExplorer(container);
+    this._applicationProxy = new ApplicationProxy();
+    this._lifecycleHost = new LifecycleHost(container);
+    this._adapter = config.clientAdapter;
   }
 
   /**
@@ -53,19 +41,14 @@ export class WatsonApplication {
    * Returns the client adapter instance.
    */
   public async start() {
-    if (this.isDisposed) {
-      throw new RuntimeException(
-        "Cannot start an application instance that is disposed"
-      );
-    }
     this.registerShutdownHook();
-    this.logger.logMessage(APP_STARTING());
+    this._logger.logMessage(APP_STARTING());
 
-    !this.isInitialized && (await this.init());
-    await this.clientAdapter.start();
-    this.isStarted = true;
-    this.logger.logMessage(APP_STRATED());
-    return this.clientAdapter;
+    !this._isInitialized && (await this._init());
+    await this._adapter.start();
+    this._isStarted = true;
+    this._logger.logMessage(APP_STARTED());
+    return this._adapter;
   }
 
   /**
@@ -73,18 +56,17 @@ export class WatsonApplication {
    * all listeners from the client.
    */
   public async stop() {
-    await this.clientAdapter.stop();
-    this.isDisposed = true;
+    await this._adapter.stop();
   }
 
-  private async init() {
+  private async _init() {
     await BootstrappingHandler.run(async () => {
-      await this.lifecycleHost.callOnApplicationBootstrapHook();
-      await this.routeExplorer.explore();
-      await this.clientAdapter.initialize();
-      this.applicationProxy.initFromRouteExplorer(this.routeExplorer);
-      await this.applicationProxy.initAdapter(this.clientAdapter);
-      this.isInitialized = true;
+      await this._lifecycleHost.callOnApplicationBootstrapHook();
+      await this._routeExplorer.explore();
+      await this._adapter.initialize();
+      this._applicationProxy.initFromRouteExplorer(this._routeExplorer);
+      await this._applicationProxy.initAdapter(this._adapter);
+      this._isInitialized = true;
     });
   }
 
@@ -95,23 +77,46 @@ export class WatsonApplication {
    * https://watsonjs.io/pages/providers
    */
   public getProviderInstance<T>(token: Type<T> | string): T {
-    return this.container.getInstanceOfProvider<T>(token);
+    return this._container.getInstanceOfProvider<T>(token);
   }
 
   /**
    * Sets a global prefix for all commands.
    * It it will only be applied if none is specified for either a receiver or a command.
    */
-  public addGlobalPrefix(prefix: Prefix | string) {
-    const prefixHost = isString(prefix)
-      ? new CommandPrefixHost(prefix)
-      : prefix;
-
-    this.config.globalCommandPrefix = prefixHost;
+  public setGlobalPrefix(prefix: string) {
+    this._config.globalCommandPrefix = prefix;
   }
 
   /**
-   * TODO: For all add xxx
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public addGlobalInterceptor(handler: ExceptionHandler) {
+    this._config.globalExceptionHandlers.add(handler);
+  }
+
+  /**
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public addGlobalGuard(handler: CanActivate) {
+    this._config.globalExceptionHandlers.add(handler);
+  }
+
+  /**
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public addGlobalFilter(handler: PassThrough) {
+    this._config.globalExceptionHandlers.add(handler);
+  }
+
+  /**
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public addGlobalPipe(handler: PipeTransform) {
+    this._config.globalExceptionHandlers.add(handler);
+  }
+
+  /**
    * Creates a new instance of `handler` and
    * adds it as a global exception handler
    */
@@ -122,32 +127,29 @@ export class WatsonApplication {
   /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
-  public addGlobalExceptionsHandler(handler: ExceptionHandler) {
-    this.config.addGlobalExceptionHandler(handler);
-  }
+  public async addGlobalInterceptorAsync(handler: Type<ExceptionHandler>) {}
 
   /**
-   * Reacts with this emote to any command message that is valid
-   * @param reaction A unicode Emote [✔] or Emote snowflake
+   * Adds a global exceptions handler that will be added to every event handler.
    */
-  public setAcknowledgeReaction(reaction: string | Snowflake) {
-    this.config.acknowledgementReaction = reaction;
-  }
+  public async addGlobalGuardAsync(handler: Type<CanActivate>) {}
+
+  /**
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public async addGlobalFilterAsync(handler: Type<PassThrough>) {}
+
+  /**
+   * Adds a global exceptions handler that will be added to every event handler.
+   */
+  public async addGlobalPipeAsync(handler: Type<PipeTransform>) {}
 
   /**
    * Sets the user activity of the bot
    * @param options `ActivityOptions` for the djs client.
    */
   public setActivity(options: ActivityOptions) {
-    this.clientAdapter.setActivity(options);
-  }
-
-  /**
-   * Sets an existing client for the discord adapter
-   * @param client An existing djs client instance
-   */
-  public setClient(client: Client) {
-    this.clientAdapter.setClient(client);
+    this._adapter.setActivity(options);
   }
 
   /**
@@ -155,14 +157,14 @@ export class WatsonApplication {
    * @param token The bot token string.
    */
   public setAuthToken(token: string) {
-    this.config.setAuthToken(token);
+    this._config.discordToken = token;
   }
 
   private registerShutdownHook() {
     const teardown = async () => {
-      await this.lifecycleHost.callOnApplicationShutdownHook();
+      await this._lifecycleHost.callOnApplicationShutdownHook();
 
-      if (this.isInitialized) {
+      if (this._isInitialized) {
         await this.stop();
       }
 

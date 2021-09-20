@@ -1,4 +1,4 @@
-import { Module, Reflector } from '.';
+import { Reflector } from '.';
 import { Binding, ResolvedBinding } from './binding';
 import { Providable } from './injection-token';
 import { Injector } from './injector';
@@ -15,8 +15,8 @@ export class ReflectiveInjector extends Injector {
     ResolvedBinding
   >();
 
-  constructor(module: Module, parent?: Injector) {
-    super(module, parent);
+  constructor(parent?: Injector) {
+    super(parent);
   }
 
   public resolve<T extends any>(typeOrToken: Providable<T>): T {
@@ -35,3 +35,5 @@ export class ReflectiveInjector extends Injector {
     new ResolvedBinding();
   }
 }
+
+function resolveProviderDependencies() {}

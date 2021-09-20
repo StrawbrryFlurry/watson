@@ -12,7 +12,7 @@ export const CREATE_APP_CONTEXT = () => `Creating application context...`;
 // WATSON APPLICATION
 export const APP_STARTING = () => "Starting Watson application...";
 
-export const APP_STRATED = () => `Watson application successfully started`;
+export const APP_STARTED = () => `Watson application successfully started`;
 
 // *END
 

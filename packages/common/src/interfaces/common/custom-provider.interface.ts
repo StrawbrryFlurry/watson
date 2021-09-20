@@ -1,62 +1,74 @@
-import { Type } from '../type.interface';
+import { InjectorLifetime } from '@decorators';
 
-export type IProviderFactory<T = any> = (
-  ...injectArgs: any[]
+import { Type } from '../type.interface';
+import { InjectionToken } from './injection-token';
+
+export type FactoryProviderFn<T = any, I extends any[] = any[]> = (
+  ...injectArgs: I
 ) => T | Promise<T>;
 
 /**
  * Creates a custom provider that can be injected using the @Inject parameter decorator.
  */
-export type CustomProvider = FactoryProvider | ClassProvider | ValueProvider;
+export type CustomProvider =
+  | FactoryProvider
+  | ClassProvider
+  | ValueProvider
+  | UseExistingProvider;
+
+export interface CustomProviderBase {
+  /**
+   * The name of the provider. This name can then be used as the injection token for the @inject decorator.
+   */
+  provide: InjectionToken | Function;
+  /** {@link InjectorLifetime} */
+  lifetime?: InjectorLifetime;
+}
 
 /**
  * Creates a custom factory provider that can be injected using the @Inject parameter decorator.
  */
-export interface FactoryProvider {
-  /**
-   * The name of the provider. This name can then be used as the injection token for the @inject decorator.
-   */
-  provide: string | Function;
+export interface FactoryProvider extends CustomProviderBase {
   /**
    * A factory function that returns the instance of the provider.
    */
-  useFactory: IProviderFactory;
+  useFactory: FactoryProviderFn;
   /**
    * Providers that should be injected to the factory | class constructor function when it's called.
-   * inejct: ['a'] => factory(...['a'])
+   * inejct: [SomeDependency] => factory(...[SomeDependency])
    */
-  inject?: (Type | string)[];
+  inject?: (Type | InjectionToken)[];
 }
 
 /**
- * Creates a custom calss provider that can be injected using the @Inject parameter decorator.
+ * Creates a custom class provider that can be injected using the @Inject parameter decorator.
  */
-export interface ClassProvider {
-  /**
-   * The name of the provider. This name can then be used as the injection token for the @inject decorator.
-   */
-  provide: string | Function;
+export interface ClassProvider extends CustomProviderBase {
   /**
    * A value that should whose instance should be set as the instance of the provider.
    */
   useClass: Type;
   /**
    * Providers that should be injected to the factory | class constructor function when it's called.
-   * inejct: ['a'] => factory(...['a'])
+   * inejct: [SomeDependency] => factory(...[SomeDependency])
    */
-  inject?: (Type | string)[];
+  inject?: (Type | InjectionToken)[];
 }
 
 /**
  * Creates a custom value provider that can be injected using the @Inject parameter decorator.
  */
-export interface ValueProvider {
-  /**
-   * The name of the provider. This name can then be used as the injection token for the @inject decorator.
-   */
-  provide: string | Function;
+export interface ValueProvider extends CustomProviderBase {
   /**
    * A value that should be set as the instance of the provider.
    */
   useValue: unknown;
+}
+
+/** Creates a new provider that is identical to the `useExisting` value */
+export interface UseExistingProvider extends CustomProviderBase {
+  /**
+   * A reference to the existing provider.
+   */
+  useExisting: ClassProvider | FactoryProvider | ValueProvider;
 }

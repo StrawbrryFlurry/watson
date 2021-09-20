@@ -1,12 +1,21 @@
-import { CustomProvider, DynamicModule, isEmpty, isNil, isString, MODULE_GLOBAL_METADATA, Type } from '@watsonjs/common';
+import { Module } from '@di';
+import {
+  CommandRoute,
+  CustomProvider,
+  DynamicModule,
+  isEmpty,
+  isNil,
+  isString,
+  MODULE_GLOBAL_METADATA,
+  Type,
+} from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { ApplicationConfig } from './application-config';
 import { CommandContainer } from './command';
+import { StaticInjector } from './di/static-injector';
 import { UnknownModuleException } from './exceptions';
-import { GlobalInstanceHost, Module } from './injector';
-import { CommandRoute } from './router';
-import { CommandTokenFactory, ModuleTokenFactory } from './util';
+import { ModuleTokenFactory } from './util';
 
 /**
  * Injection Container for the application
@@ -16,23 +25,44 @@ export class WatsonContainer {
   private readonly commands: CommandContainer;
   public config: ApplicationConfig;
   private moduleTokenFactory = new ModuleTokenFactory();
-  private commandTokenFactory = new CommandTokenFactory();
-  public globalInstanceHost = new GlobalInstanceHost(this);
-  private readonly globalModules = new Set<Module>();
   private dynamicModuleMetadata = new Map<string, Partial<DynamicModule>>();
 
-  private rootModule: Module;
+  private rootInjector: StaticInjector;
+
+  /**
+   * DI tokens are static
+   * properties on a provider
+   * element which is used
+   * to resolve that given
+   * provider.
+   *
+   * - 1..n: Any provider registered by the user.
+   * - 0: Internal watson providers.
+   * - -1: Context providers that can only be found
+   * in the context injector.
+   */
+  private _watsonDiTokenId = 1;
+
+  /**
+   * Returns the next DI token
+   * id and increments it by 1
+   */
+  public get DI_TOKEN_ID() {
+    const nextId = this._watsonDiTokenId;
+    this._watsonDiTokenId += 1;
+    return nextId;
+  }
 
   constructor(config: ApplicationConfig) {
     this.config = config;
-    this.commands = new CommandContainer(this.commandTokenFactory);
+    this.commands = new CommandContainer();
   }
 
-  public getModules() {
+  public getModules(): Map<string, Module> {
     return this.modules;
   }
 
-  public getCommands() {
+  public getCommands(): CommandContainer {
     return this.commands;
   }
 
@@ -75,7 +105,7 @@ export class WatsonContainer {
       return true;
     }
 
-    return Reflect.getMetadata(MODULE_GLOBAL_METADATA, module);
+    return !isNil(Reflect.getMetadata(MODULE_GLOBAL_METADATA, module));
   }
 
   private isRootModule(forwardRef: Type[] | DynamicModule[] | Type) {
@@ -184,7 +214,7 @@ export class WatsonContainer {
   ): DynamicModule[T] | [] {
     const metadata = this.dynamicModuleMetadata.get(token);
 
-    if (metadata && metadata[metadataKey]) {
+    if (metadata && !isNil(metadata[metadataKey])) {
       return metadata[metadataKey] as DynamicModule[T];
     }
 
@@ -219,15 +249,6 @@ export class WatsonContainer {
     return data.wrapper.instance as T;
   }
 
-  public getInstanceInRootModule<T extends Type>(metatype: T) {
-    const instance = this.globalInstanceHost.getInstanceInModule(
-      this.rootModule,
-      metatype
-    );
-
-    return instance;
-  }
-
   public generateTokenFromModule(module: Module) {
     const { metatype } = module;
     return this.moduleTokenFactory.generateModuleToken(metatype);
@@ -239,13 +260,5 @@ export class WatsonContainer {
 
   public getClientAdapter() {
     return this.config.clientAdapter;
-  }
-
-  public getClient<T>(): T {
-    return this.config.clientAdapter.client;
-  }
-
-  public getRootModule() {
-    return this.rootModule;
   }
 }

@@ -57,13 +57,13 @@ export class CommandContainer extends Map<
 
     if (isString(route)) {
       const routeRef = this.get(route);
-      cleanupNames(routeRef);
+      cleanupNames(routeRef!);
       return this.delete(route);
     }
 
     cleanupNames(route);
     const token = this._tokenFactory.get(route);
-    this.delete(token);
+    this.delete(token!);
   }
 
   public getAll() {
@@ -73,7 +73,7 @@ export class CommandContainer extends Map<
   public getPrefixes(): Prefix[] {
     const prefixes: Prefix[] = [];
     for (const [name, token] of this.commands.entries()) {
-      const { commandPrefix } = this.get(token);
+      const { commandPrefix } = this.get(token)!;
       prefixes.push(commandPrefix);
     }
 

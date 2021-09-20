@@ -8,5 +8,4 @@ export * from "./hooks";
 export * from "./interceptors";
 export * from "./pipeline";
 export * from "./router";
-export * from "./provideable.interface";
 export * from "./type.interface";
