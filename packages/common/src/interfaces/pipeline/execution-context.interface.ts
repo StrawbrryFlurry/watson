@@ -2,6 +2,7 @@ import { DiscordAdapter } from '@interfaces';
 import { Base, Client } from 'discord.js';
 
 import { BaseRoute, CommandPipeline, ContextType, EventPipeline, InteractionPipeline, PipelineHost } from '..';
+import { WATSON_ELEMENT_ID } from '../../fields';
 import { Type } from '../type.interface';
 
 /**
@@ -10,6 +11,8 @@ import { Type } from '../type.interface';
  * belongs to.
  */
 export abstract class ExecutionContext implements PipelineHost {
+  static [WATSON_ELEMENT_ID] = -1;
+
   /**
    * Returns the receiver from which this
    * context originated
