@@ -1,8 +1,16 @@
 import { PIPE_METADATA } from '@constants';
-import { CommandArgument, PipeTransform } from '@interfaces';
+import { CommandArgument } from '@interfaces';
 import { isMethodDecorator } from '@utils';
+import { Observable } from 'rxjs';
 
 import { applyStackableMetadata } from '../apply-stackable-metadata';
+
+/**
+ * Alters an argument passed to a route
+ */
+export interface PipeTransform<T extends CommandArgument = any, R = any> {
+  transform(argument: T): R | Promise<R> | Observable<R>;
+}
 
 interface WithPipeTransform {
   prototype: PipeTransform;

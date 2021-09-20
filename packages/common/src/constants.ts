@@ -25,6 +25,7 @@ export const PREFIX_METADATA = "prefix:meta";
 export const PIPE_METADATA = "pipe:meta";
 export const GUARD_METADATA = "guard:meta";
 export const FILTER_METADATA = "filter:meta";
+export const INTERCEPTOR_METADATA = "interceptor:meta";
 export const EXCEPTION_HANDLER_METADATA = "exception-handler:meta";
 
 export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
