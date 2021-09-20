@@ -5,7 +5,7 @@ import { WatsonEvent } from '../../enums';
 
 export type IWSEvent<T extends {}> = [data: T, shardID: number];
 
-export interface DiscordAdapter<TClient = any> {
+export interface DiscordAdapter<Client = any> {
   /**
    * Fires after the client instance is ready
    */
@@ -13,7 +13,11 @@ export interface DiscordAdapter<TClient = any> {
   /**
    * Returns the user activity
    */
-  getActivity(): ActivityOptions | undefined;
+  activity: ActivityOptions | null;
+  /**
+   * Discord client instance
+   */
+  client: Client;
   /**
    * Sets the user activity
    */
@@ -23,10 +27,6 @@ export interface DiscordAdapter<TClient = any> {
    */
   removeActivity(): Promise<void>;
   /**
-   * Returns the internal client instance
-   */
-  getClient(): TClient;
-  /**
    * You probably don't want to use this method
    */
   stop(): Promise<void>;
@@ -35,15 +35,17 @@ export interface DiscordAdapter<TClient = any> {
    */
   start(): Promise<void>;
   /**
-   * Registers a websocket listener for the event
-   * specified
+   * Creates a listener on the websocket of the client.
+   * @param name name of the event
+   * @return event observable
    */
   registerWsListener<T extends {}, E extends WatsonEvent>(
     event: E
   ): Observable<IWSEvent<T>>;
   /**
-   * Registers a listener for the event client event
-   * specified
+   * Creates a listener for the client instance.
+   * @param name name of the event
+   * @return event observable
    */
   registerListener<T, E extends WatsonEvent>(event: E): Observable<T | [T]>;
 }

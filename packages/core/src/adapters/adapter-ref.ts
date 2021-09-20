@@ -1,4 +1,4 @@
-import { DiscordAdapter, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
+import { DiscordAdapter, IWSEvent, RuntimeException, WATSON_ELEMENT_ID, WatsonEvent } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
@@ -8,24 +8,22 @@ import { EventProxy } from '../lifecycle';
 export abstract class AdapterRef<Client = any, Options = any>
   implements DiscordAdapter<Client>
 {
-  protected activity: ActivityOptions;
+  public static [WATSON_ELEMENT_ID] = 0;
 
+  protected _activity: ActivityOptions | null;
   protected configuration: ApplicationConfig;
-
   protected eventSubscriptions = new Map<
     EventProxy,
     { subscription: Subscription; observable: Observable<any> }
   >();
 
   public ready = new BehaviorSubject<boolean>(false);
-  protected slashCommandAdapter: SlashCommandAdapter;
 
   constructor(configuration: ApplicationConfig) {
     this.configuration = configuration;
   }
 
   public abstract initialize(): Promise<void>;
-  protected abstract initializeSlashCommands(): Promise<void>;
 
   protected abstract parseEvent(event: WatsonEvent): string;
 
@@ -33,20 +31,10 @@ export abstract class AdapterRef<Client = any, Options = any>
   protected abstract login(): Promise<void>;
   protected abstract destroy(): void;
 
-  /**
-   * Creates a listener for the client instance.
-   * @param name name of the event
-   * @return event observable
-   */
   public abstract registerListener<T, E extends WatsonEvent>(
     event: E
   ): Observable<T | [T]>;
 
-  /**
-   * Creates a listener on the websocket of the client.
-   * @param name name of the event
-   * @return event observable
-   */
   public abstract registerWsListener<T extends {}, E extends WatsonEvent>(
     event: E
   ): Observable<IWSEvent<T>>;
@@ -67,18 +55,17 @@ export abstract class AdapterRef<Client = any, Options = any>
   }
 
   public get client(): Client {
-    return this.configuration.clientInstance;
+    return this.configuration.client;
   }
 
   public set client(instance: Client) {
-    this.configuration.setClientInstance(instance);
+    this.configuration.client = instance;
   }
 
   public async start() {
     await this.initialize();
     this.registerDefaultListeners();
     await this.login();
-    await this.initializeSlashCommands();
   }
 
   public async stop() {
@@ -90,10 +77,6 @@ export abstract class AdapterRef<Client = any, Options = any>
     this.ready.next(false);
   }
 
-  public getClient() {
-    return this.client;
-  }
-
   public setClient(client: Client) {
     if (this.ready.value === true) {
       throw new RuntimeException("The client cannot be set while it's running");
@@ -102,12 +85,12 @@ export abstract class AdapterRef<Client = any, Options = any>
     this.client = client;
   }
 
-  public getActivity(): ActivityOptions {
+  public get activity(): ActivityOptions | null {
     return this.activity;
   }
 
   public get token() {
-    return this.configuration.authToken;
+    return this.configuration.discordToken;
   }
 
   protected get clientOptions(): Options {
@@ -115,12 +98,12 @@ export abstract class AdapterRef<Client = any, Options = any>
   }
 
   public setActivity(options: ActivityOptions) {
-    this.activity = options;
+    this._activity = options ?? null;
     return this.setUserActivity();
   }
 
   public async removeActivity() {
-    this.activity = undefined;
+    this._activity = null;
     return this.setUserActivity();
   }
 

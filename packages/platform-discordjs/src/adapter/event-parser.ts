@@ -92,4 +92,6 @@ export function parseToDiscordJsEvent(
     case WatsonEvent.VOICE_STATE_UPDATE:
       return "voiceStateUpdate";
   }
+
+  return "raw";
 }
