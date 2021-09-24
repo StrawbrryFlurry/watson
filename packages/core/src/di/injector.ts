@@ -43,9 +43,15 @@ export abstract class Injector {
   >(typeOrToken: Providable<T>): ResolvedBinding<T, D, V> | null;
 }
 
-export function isCustomProvider(
-  provider: CustomProvider
-): provider is CustomProvider {
+export function getTokenFromProvider(provider: ProviderResolvable): Providable {
+  if (!isCustomProvider(provider)) {
+    return provider;
+  }
+
+  return provider.provide;
+}
+
+export function isCustomProvider(provider: any): provider is CustomProvider {
   return provider && "provide" in provider;
 }
 
@@ -73,14 +79,6 @@ export function isValueProvider(
   return provider && "useValue" in provider;
 }
 
-export function getTokenFromProvider(provider: ProviderResolvable): Providable {
-  if (!isCustomProvider(provider)) {
-    return provider;
-  }
-
-  return provider.provide;
-}
-
 export function createBindingFromProvider(
   provider: ProviderResolvable,
   module: Module | null,
@@ -88,7 +86,8 @@ export function createBindingFromProvider(
 ): Binding {
   if (!isCustomProvider(provider)) {
     const binding = new Binding(provider, provider, module, lifetime);
-    binding.ɵfactory = (...args) => Reflect.construct(provider, args);
+
+    binding.ɵfactory = (...args) => Reflect.construct(provider as Type, args);
     return binding;
   }
 

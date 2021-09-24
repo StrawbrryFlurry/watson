@@ -145,7 +145,7 @@ export class ModuleLoader {
   }
 
   private async resolveModuleProperties() {
-    const modules = this.container.getModules();
+    const { modules } = this._container;
 
     for (const [token, { metatype }] of modules) {
       const { imports, exports, providers, receivers } =
@@ -158,13 +158,16 @@ export class ModuleLoader {
     }
   }
 
-  private async reflectImports(token: string, imports: Type[]) {
-    const dynamicModuleImports = await Promise.all(
-      this._container.getDynamicModuleMetadataByToken(token, "imports")!
+  private getDynamicModuleMetadataByKey(token: string, key: keyof DynamicModule) {
+    return Promise.all(
+      this._container.getDynamicModuleMetadataByToken(token, key)!
     );
+  }
 
-    [...imports, ...dynamicModuleImports].forEach((_import) =>
-      this._container.addImport(token, _import as Type)
+  private async reflectImports(token: string, imports: Type[]) {
+    const dynamicModuleImports = this.getDynamicModuleMetadataByKey(token, 'imports')
+     [...imports, ...dynamicModuleImports].forEach(
+      (_import) => this._container.addImport(token, _import as Type)
     );
   }
 

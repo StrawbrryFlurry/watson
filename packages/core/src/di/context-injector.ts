@@ -1,8 +1,7 @@
-import { isNil } from '@watsonjs/common';
+import { isNil, Providable } from '@watsonjs/common';
 
 import { Injector } from '.';
 import { ResolvedBinding } from './binding';
-import { Providable } from './injection-token';
 
 export class ContextInjector extends Injector {
   private readonly _contextBindings: Map<any, ResolvedBinding>;
@@ -22,11 +21,11 @@ export class ContextInjector extends Injector {
   public get(typeOrToken: Providable): ResolvedBinding | null {
     const binding = this._contextBindings.get(typeOrToken);
 
-    if (isNil(binding)) {
-      return this.parent.get(typeOrToken);
+    if (!isNil(binding)) {
+      return binding;
     }
 
-    return binding;
+    return this.parent.get?.(typeOrToken) ?? null;
   }
 
   constructor(parent: Injector, bindings: Map<any, ResolvedBinding>) {
@@ -38,7 +37,9 @@ export class ContextInjector extends Injector {
     parent: Injector,
     bindingFactory: (bindings: T) => T
   ) {
-    const bindings = bindingFactory(new Map<any, ResolvedBinding>());
+    const bindings = bindingFactory(
+      new Map<Providable, ResolvedBinding>() as T
+    );
     return new ContextInjector(parent, bindings);
   }
 }

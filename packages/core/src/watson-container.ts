@@ -21,7 +21,7 @@ import { ModuleTokenFactory } from './util';
  * Injection Container for the application
  */
 export class WatsonContainer {
-  private readonly modules = new Map<string, Module>();
+  private readonly _modules = new Map<string, Module>();
   private readonly commands: CommandContainer;
   public config: ApplicationConfig;
   private moduleTokenFactory = new ModuleTokenFactory();
@@ -58,8 +58,8 @@ export class WatsonContainer {
     this.commands = new CommandContainer();
   }
 
-  public getModules(): Map<string, Module> {
-    return this.modules;
+  public get modules() {
+    return this._modules;
   }
 
   public getCommands(): CommandContainer {

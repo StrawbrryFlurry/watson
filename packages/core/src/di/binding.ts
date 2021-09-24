@@ -1,10 +1,14 @@
-import { InjectorLifetime, Providable, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { InjectorLifetime, Providable, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
 import { Module } from '.';
 
-export type NewableTo<T, D extends Array<any> = any[]> = new (...args: D) => T;
-export type FactoryFn<T, D extends Array<any> = any[]> = (...args: D) => T;
+export type NewableTo<T = any, D extends Array<any> = any[]> = new (
+  ...args: D
+) => T;
+export type FactoryFn<T = any, D extends Array<any> = any[]> = (
+  ...args: D
+) => T;
 
 export interface WatsonDiProvidable {
   [WATSON_ELEMENT_ID]: number;
@@ -21,7 +25,10 @@ export interface WatsonDiProvidable {
  * context (By exporting it from the module).
  */
 export class Binding<
-  MetaType extends NewableTo<InstanceType> | FactoryFn<InstanceType> = any,
+  MetaType extends
+    | NewableTo<InstanceType>
+    | FactoryFn<InstanceType>
+    | Type = any,
   Deps extends any[] = any,
   InstanceType extends any = any
 > {
@@ -70,11 +77,6 @@ export class Binding<
    * Internal factory function that will
    * be called by the injector to create a
    * new instance of the provider.
-   *
-   * This property should not be touched
-   * by the end user as changes to the
-   * binding reference will
-   * break DI if not done correctly.
    */
   public ɵfactory!: (
     ...deps: Deps
