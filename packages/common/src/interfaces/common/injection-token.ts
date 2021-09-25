@@ -4,6 +4,10 @@ const INJECTION_TOKE_PREFIX = "InjectionToken";
 
 export type Providable<T = any> = InjectionToken | Type<T>;
 
+export function isInjectionToken(obj: any): obj is InjectionToken {
+  return obj instanceof InjectionToken;
+}
+
 export class InjectionToken {
   public readonly name: string;
 

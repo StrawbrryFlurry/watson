@@ -22,3 +22,7 @@ export function Module(options: ModuleOptions = {}): ClassDecorator {
     }
   };
 }
+
+export function isDynamicModule(module: Type | DynamicModule) {
+  return "module" in module;
+}

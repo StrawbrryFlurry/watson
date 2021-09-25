@@ -2,7 +2,7 @@ import { Type } from '@interfaces';
 
 export function applyStackableMetadata<T>(
   key: string,
-  target: Type,
+  target: Type | Object | object,
   metadata: T[],
   propertyKey?: string | symbol
 ) {
