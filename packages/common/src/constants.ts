@@ -29,6 +29,7 @@ export const INTERCEPTOR_METADATA = "interceptor:meta";
 export const EXCEPTION_HANDLER_METADATA = "exception-handler:meta";
 
 export const INJECT_DEPENDENCY_METADATA = "inject:dependency";
+export const OPTIONAL_DEPENDENCY_METADATA = "inject:optional";
 
 export const UNICODE_EMOJI_REGEX =
   /\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]/;
