@@ -1,7 +1,9 @@
 import { createBindingFromProvider, getTokenFromProvider, Injector, ResolvedBinding } from '@di';
-import { InjectorLifetime } from 'packages/common/src/decorators';
+import { InjectorScope } from 'packages/common/src/decorators';
 import { Providable, ValueProvider } from 'packages/common/src/interfaces';
 import { isNil } from 'packages/common/src/utils';
+
+// TODO: Prolly replace with a default injector.
 
 /**
  * The static injector holds
@@ -30,7 +32,7 @@ export class StaticInjector implements Injector {
    */
   public resolve<T extends ResolvedBinding = any>(
     provider: ValueProvider,
-    lifetime: InjectorLifetime
+    scope: InjectorScope
   ): T {
     const token = getTokenFromProvider(provider);
     const hasBinding = this._records.get(token);
@@ -39,7 +41,7 @@ export class StaticInjector implements Injector {
       return hasBinding as T;
     }
 
-    const binding = createBindingFromProvider(provider, null, lifetime);
+    const binding = createBindingFromProvider(provider, null, scope);
     const instance = binding.ɵfactory();
     const resolved = new ResolvedBinding(binding, instance);
 
@@ -66,7 +68,7 @@ export class StaticInjector implements Injector {
 
     for (let i = 0; i < providers.length; i++) {
       const provider = providers[i];
-      injector.resolve(provider, InjectorLifetime.Singleton);
+      injector.resolve(provider, InjectorScope.Singleton);
     }
 
     return injector;

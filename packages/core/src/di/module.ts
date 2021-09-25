@@ -51,7 +51,7 @@ export class Module {
   private readonly _componentMetadata = new Map<string, any>();
   public readonly name: string;
 
-  private readonly container: WatsonContainer;
+  public readonly container: WatsonContainer;
   private readonly _metatype: Type;
 
   /**

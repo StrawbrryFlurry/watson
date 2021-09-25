@@ -3,7 +3,7 @@ import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, isNil, Type } from 
 
 export interface MethodDescriptor {
   propertyKey: string;
-  value: Function;
+  descriptor: Function;
 }
 
 export class Reflector {
@@ -56,7 +56,7 @@ export class Reflector {
     const methodDescriptors = Object.entries(descriptors).map(
       ([propertyKey, descriptor]) => ({
         propertyKey,
-        value: descriptor.value,
+        descriptor: descriptor.value,
       })
     );
 

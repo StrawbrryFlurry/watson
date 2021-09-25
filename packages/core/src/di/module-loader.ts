@@ -2,9 +2,18 @@ import { Reflector } from '@di';
 import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
 import { ADD_MODULE, COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
 import { resolveAsyncValue } from '@utils';
-import { INJECT_DEPENDENCY_METADATA, MODULE_METADATA } from 'packages/common/src/constants';
-import { DynamicModule, Type } from 'packages/common/src/interfaces';
-import { isNil } from 'packages/common/src/utils';
+import {
+  EXCEPTION_HANDLER_METADATA,
+  FILTER_METADATA,
+  GUARD_METADATA,
+  INJECT_DEPENDENCY_METADATA,
+  MODULE_METADATA,
+  PIPE_METADATA,
+  PREFIX_METADATA,
+} from 'packages/common/src/constants';
+import { InjectMetadata, isDynamicModule } from 'packages/common/src/decorators';
+import { CustomProvider, DynamicModule, Type } from 'packages/common/src/interfaces';
+import { isFunction, isNil } from 'packages/common/src/utils';
 
 import { WatsonContainer } from '..';
 
@@ -69,7 +78,7 @@ export class ModuleLoader {
   }
 
   public reflectModuleMetadata(target: Type | DynamicModule) {
-    if (this.isDynamicModule(target as DynamicModule)) {
+    if (isDynamicModule(target as DynamicModule)) {
       return this.getDataFromDynamicModule(target as DynamicModule & Type);
     }
 
@@ -130,7 +139,7 @@ export class ModuleLoader {
 
   public reflectInjectedProvider(target: Type, ctorIndex: number) {
     const injectValue =
-      this._reflector.reflectMetadata<IInjectValue[]>(
+      this._reflector.reflectMetadata<InjectMetadata[]>(
         INJECT_DEPENDENCY_METADATA,
         target
       ) || [];
@@ -158,46 +167,63 @@ export class ModuleLoader {
     }
   }
 
-  private getDynamicModuleMetadataByKey(token: string, key: keyof DynamicModule) {
+  private getDynamicModuleMetadataByKey<
+    K extends Exclude<keyof DynamicModule, "global" | "module">
+  >(token: string, key: K) {
     return Promise.all(
-      this._container.getDynamicModuleMetadataByToken(token, key)!
+      this._container.getDynamicModuleMetadataByToken(token, key) as any[]
     );
   }
 
   private async reflectImports(token: string, imports: Type[]) {
-    const dynamicModuleImports = this.getDynamicModuleMetadataByKey(token, 'imports')
-     [...imports, ...dynamicModuleImports].forEach(
-      (_import) => this._container.addImport(token, _import as Type)
+    const dynamicModuleImports = await this.getDynamicModuleMetadataByKey(
+      token,
+      "imports"
+    );
+
+    [...imports, ...dynamicModuleImports].forEach((_import) =>
+      this._container.addImport(token, _import as Type)
     );
   }
 
-  private reflectExports(token: string, exports: (Type | CustomProvider)[]) {
-    [
-      ...exports,
-      ...this.container.getDynamicModuleMetadataByToken(token, "exports"),
-    ].forEach((_export) => this.container.addExport(token, _export));
+  private async reflectExports(
+    token: string,
+    exports: (Type | CustomProvider)[]
+  ) {
+    const dynamicModuleExports = await this.getDynamicModuleMetadataByKey(
+      token,
+      "exports"
+    );
+
+    [...exports, ...dynamicModuleExports].forEach((_export) =>
+      this._container.addExport(token, _export)
+    );
   }
 
-  private reflectProviders(
+  private async reflectProviders(
     token: string,
     providers: (Type | CustomProvider)[]
   ) {
-    [
-      ...providers,
-      ...this.container.getDynamicModuleMetadataByToken(token, "providers"),
-    ].forEach((provider) => {
+    const dynamicModuleProviders = await this.getDynamicModuleMetadataByKey(
+      token,
+      "providers"
+    );
+
+    [...providers, ...dynamicModuleProviders].forEach((provider) => {
       this.reflectDynamicMetadata(provider as any, token);
-      this.container.addProvider(token, provider);
+      this._container.addProvider(token, provider);
     });
   }
 
-  private reflectReceivers(token: string, receivers: Type[]) {
-    [
-      ...receivers,
-      ...this.container.getDynamicModuleMetadataByToken(token, "receivers"),
-    ].forEach((receiver) => {
+  private async reflectReceivers(token: string, receivers: Type[]) {
+    const dynamicModuleReceivers = await this.getDynamicModuleMetadataByKey(
+      token,
+      "receivers"
+    );
+
+    [...receivers, ...dynamicModuleReceivers].forEach((receiver) => {
       this.reflectDynamicMetadata(receiver, token);
-      this.container.addReceiver(token, receiver);
+      this._container.addReceiver(token, receiver);
     });
   }
 
@@ -222,32 +248,28 @@ export class ModuleLoader {
     token: string,
     metadataKey: string
   ) {
-    const prototypeInjectables = this.getArrayMetadata<any[]>(
-      metadataKey,
-      metatype
-    );
-    const prototypeMethods = this.reflectMethodsFromMetatype(metatype);
+    const prototypeInjectables =
+      this._reflector.reflectMetadata<any[]>(metadataKey, metatype) ?? [];
+
+    const prototypeMethods = this._reflector.reflectMethodsOfType(metatype);
 
     const methodInjectables = prototypeMethods
-      .map((method) =>
-        this.getArrayMetadata(metadataKey, method.descriptor as Type)
+      .map(
+        (method) =>
+          this._reflector.reflectMetadata<any[]>(
+            metadataKey,
+            method.descriptor as Type
+          ) ?? []
       )
       .filter((e) => typeof e !== "undefined");
 
-    const flattenMethodInjectables = this.flatten(
-      methodInjectables as unknown[][]
-    );
     const injectables = [
       ...prototypeInjectables,
-      ...flattenMethodInjectables,
+      ...methodInjectables.flat(),
     ].filter(isFunction);
 
     injectables.forEach((injectable) => {
-      this.container.addInjectable(token, injectable);
+      this._container.addInjectable(token, injectable);
     });
-  }
-
-  private isDynamicModule(module: DynamicModule): module is DynamicModule {
-    return module && "module" in module;
   }
 }

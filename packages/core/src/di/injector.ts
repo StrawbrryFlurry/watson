@@ -3,31 +3,24 @@ import {
   ClassProvider,
   CustomProvider,
   FactoryProvider,
-  InjectorLifetime,
+  InjectorElementId,
+  InjectorScope,
   Providable,
   Type,
   UseExistingProvider,
   ValueProvider,
+  WATSON_ELEMENT_ID,
 } from '@watsonjs/common';
 
 import { ResolvedBinding } from './binding';
+import { NullInjector } from './null-injector';
 
 export type ProviderResolvable = CustomProvider | Type;
 
 export abstract class Injector {
-  public readonly parent: Injector | null;
+  public static NULL = new NullInjector();
 
-  constructor(parent?: Injector) {
-    this.parent = parent ?? null;
-  }
-
-  /**
-   * Resolves`typeOrToken` using
-   * tokens provided by itself or
-   * the parent injector
-   * given there is one.
-   */
-  public abstract resolve(typeOrToken: any, ...args: any[]): any;
+  public parent: Injector | null = null;
 
   /**
    * If the injector stores instances
@@ -41,9 +34,11 @@ export abstract class Injector {
     D extends any[] = any,
     V extends any = any
   >(typeOrToken: Providable<T>): ResolvedBinding<T, D, V> | null;
+
+  static [WATSON_ELEMENT_ID] = InjectorElementId.Injector;
 }
 
-export function getTokenFromProvider(provider: ProviderResolvable): Providable {
+export function getTokenFromProvider(provider: ProviderReso lvable): Providable {
   if (!isCustomProvider(provider)) {
     return provider;
   }
@@ -79,20 +74,28 @@ export function isValueProvider(
   return provider && "useValue" in provider;
 }
 
+export function createBinding<T>(
+  token: Providable,
+  scope: InjectorScope,
+  factory: () => T
+) {
+  return new Binding(token, scope, factory);
+}
+
 export function createBindingFromProvider(
   provider: ProviderResolvable,
   module: Module | null,
-  lifetime: InjectorLifetime
+  scope: InjectorScope
 ): Binding {
   if (!isCustomProvider(provider)) {
-    const binding = new Binding(provider, provider, module, lifetime);
+    const binding = new Binding(provider, provider, module, scope);
 
     binding.ɵfactory = (...args) => Reflect.construct(provider as Type, args);
     return binding;
   }
 
-  const { provide, lifetime: _lifetime } = provider;
-  const binding = new Binding(null as any, provide, module, _lifetime!);
+  const { provide, scope: _scope } = provider;
+  const binding = new Binding(null as any, provide, module, _scope ?? scope);
   /**
    * UseExisting providers are handled
    * by the injector itself as they

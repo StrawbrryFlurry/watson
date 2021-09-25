@@ -208,14 +208,13 @@ export class WatsonContainer {
     });
   }
 
-  public getDynamicModuleMetadataByToken<T extends keyof DynamicModule>(
-    token: string,
-    metadataKey: T
-  ): DynamicModule[T] | [] {
+  public getDynamicModuleMetadataByToken<
+    K extends Exclude<keyof DynamicModule, "module" | "global">
+  >(token: string, metadataKey: K): DynamicModule[K] | [] {
     const metadata = this.dynamicModuleMetadata.get(token);
 
     if (metadata && !isNil(metadata[metadataKey])) {
-      return metadata[metadataKey] as DynamicModule[T];
+      return metadata[metadataKey] as DynamicModule[K];
     }
 
     return [];
