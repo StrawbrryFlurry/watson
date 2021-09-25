@@ -6,7 +6,7 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "lib": ["es2017", "dom"],
+    "lib": ["es2020", "dom"],
     "suppressImplicitAnyIndexErrors": true,
     "strictPropertyInitialization": false,
     "importHelpers": true,
