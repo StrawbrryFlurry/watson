@@ -1,7 +1,7 @@
 import { INJECTABLE_METADATA } from '@constants';
 import { mergeDefaults } from '@utils';
 
-export enum InjectorLifetime {
+export enum InjectorScope {
   /**
    * Instantiated during bootstrapping, shared among
    * all modules that import the same exporting module.
@@ -32,14 +32,16 @@ export enum InjectorLifetime {
 }
 
 export interface InjectableOptions {
-  lifetime?: InjectorLifetime;
+  scope?: InjectorScope;
 }
 
-const DEFAULT_LIFETIME = InjectorLifetime.Singleton;
+export interface InjectableMetadata extends Required<InjectableOptions> {}
+
+const DEFAULT_SCOPE = InjectorScope.Singleton;
 
 export function Injectable(options: InjectableOptions = {}): ClassDecorator {
   const metadata = mergeDefaults(options, {
-    lifetime: DEFAULT_LIFETIME,
+    scope: DEFAULT_SCOPE,
   });
 
   return (target: Object) => {

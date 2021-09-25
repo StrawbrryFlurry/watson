@@ -1,4 +1,4 @@
-import { InjectorLifetime, Providable, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { InjectorScope, Providable, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
 import { Module } from '.';
@@ -58,19 +58,17 @@ export class Binding<
    */
   public instance: ResolvedBinding | null;
 
-  /** The lifetime of this binding */
-  public readonly lifetime: InjectorLifetime;
+  /** The scope of this binding */
+  public readonly scope: InjectorScope;
 
   constructor(
-    metatype: MetaType,
     token: Providable,
-    host: Module | null,
-    lifetime: InjectorLifetime
+    scope: InjectorScope,
+    factory?: () => InstanceType
   ) {
-    this.ɵmetatype = metatype;
     this.token = token;
-    this.host = host;
-    this.lifetime = lifetime;
+    this.scope = scope;
+    this.ɵfactory = factory! ?? undefined;
   }
 
   /**
@@ -86,7 +84,7 @@ export class Binding<
 /**
  * A resolved instance of a
  * {@link Binding}. Depending on
- * the lifetime of a provider there
+ * the scope of a provider there
  * can be multiple resolved bindings
  * for a given `Binding`.
  *

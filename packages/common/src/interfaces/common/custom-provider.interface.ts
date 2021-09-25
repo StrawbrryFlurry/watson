@@ -1,4 +1,4 @@
-import { InjectorLifetime } from '@decorators';
+import { InjectorScope } from '@decorators';
 
 import { Type } from '../type.interface';
 import { InjectionToken } from './injection-token';
@@ -21,8 +21,8 @@ export interface CustomProviderBase {
    * The name of the provider. This name can then be used as the injection token for the @inject decorator.
    */
   provide: InjectionToken | Function;
-  /** {@link InjectorLifetime} */
-  lifetime?: InjectorLifetime;
+  /** {@link InjectorScope} */
+  scope?: InjectorScope;
 }
 
 /**
