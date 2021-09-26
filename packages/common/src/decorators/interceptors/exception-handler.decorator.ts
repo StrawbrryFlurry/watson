@@ -1,6 +1,7 @@
 import { EXCEPTION_HANDLER_METADATA } from '@constants';
+import { InterceptorMetadata } from '@decorators';
 import { RuntimeException } from '@exceptions';
-import { ExceptionHandler } from '@interfaces';
+import { ExceptionHandler, InjectionToken } from '@interfaces';
 import { isMethodDecorator } from '@utils';
 
 import { applyStackableMetadata } from '../apply-stackable-metadata';
@@ -10,6 +11,14 @@ interface WithCatch {
 }
 
 export type ExceptionHandlerFn = (exception: RuntimeException) => void;
+
+export const GLOBAL_EXCEPTION_HANDLER = new InjectionToken<
+  InterceptorMetadata[]
+>("Exception handler that are applied globally");
+
+export const EXCEPTION_HANDLER = new InjectionToken<InterceptorMetadata[]>(
+  "Exception handler for the current module"
+);
 
 export type ExceptionHandlerMetadata =
   | WithCatch

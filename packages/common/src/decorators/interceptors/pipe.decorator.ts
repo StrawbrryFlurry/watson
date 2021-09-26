@@ -1,5 +1,6 @@
 import { PIPE_METADATA } from '@constants';
-import { CommandArgument } from '@interfaces';
+import { InterceptorMetadata } from '@decorators';
+import { CommandArgument, InjectionToken } from '@interfaces';
 import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
 
@@ -19,6 +20,14 @@ interface WithPipeTransform {
 export type PipeTransformFn = <T extends CommandArgument, R>(argument: T) => R;
 
 export type PipesMetadata = PipeTransform | WithPipeTransform | PipeTransformFn;
+
+export const GLOBAL_PIPE = new InjectionToken<InterceptorMetadata[]>(
+  "Pipe that are applied globally"
+);
+
+export const PIPE = new InjectionToken<InterceptorMetadata[]>(
+  "Pipe for the current module"
+);
 
 /**
  * TODO:

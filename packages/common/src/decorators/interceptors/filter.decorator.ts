@@ -1,5 +1,5 @@
 import { FILTER_METADATA } from '@constants';
-import { ExecutionContext } from '@interfaces';
+import { ExecutionContext, InjectionToken } from '@interfaces';
 import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
 
@@ -24,6 +24,14 @@ interface WithPassThrough {
 export type FilterFn = (ctx: ExecutionContext) => boolean;
 
 export type FiltersMetadata = PassThrough | WithPassThrough | FilterFn;
+
+export const GLOBAL_FILTER = new InjectionToken<FiltersMetadata[]>(
+  "Filters that are applied globally"
+);
+
+export const FILTER = new InjectionToken<FiltersMetadata[]>(
+  "Filters for the current module"
+);
 
 export function UseFilters(
   ...filters: FiltersMetadata[]

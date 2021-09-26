@@ -1,6 +1,6 @@
 import { INTERCEPTOR_METADATA } from '@constants';
 import { applyStackableMetadata } from '@decorators';
-import { ExecutionContext } from '@interfaces';
+import { ExecutionContext, InjectionToken } from '@interfaces';
 import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
 
@@ -15,6 +15,14 @@ interface WithIntercept {
 }
 
 export type InterceptorMetadata = WatsonInterceptor | WithIntercept;
+
+export const GLOBAL_INTERCEPTOR = new InjectionToken<InterceptorMetadata[]>(
+  "Interceptor that are applied globally"
+);
+
+export const INTERCEPTOR = new InjectionToken<InterceptorMetadata[]>(
+  "Interceptor for the current module"
+);
 
 export function UseInterceptors(
   ...interceptors: InterceptorMetadata[]

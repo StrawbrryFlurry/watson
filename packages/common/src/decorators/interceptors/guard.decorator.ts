@@ -1,6 +1,6 @@
 import { GUARD_METADATA } from '@constants';
 import { applyStackableMetadata } from '@decorators';
-import { ExecutionContext } from '@interfaces';
+import { ExecutionContext, InjectionToken } from '@interfaces';
 import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
 
@@ -25,6 +25,14 @@ interface WithCanActivate {
 export type GuardFn = (ctx: ExecutionContext) => boolean;
 
 export type GuardsMetadata = CanActivate | WithCanActivate;
+
+export const GLOBAL_GUARD = new InjectionToken<GuardsMetadata[]>(
+  "Filter that are applied globally"
+);
+
+export const GUARD = new InjectionToken<GuardsMetadata[]>(
+  "Filter for the current module"
+);
 
 export function UseGuards(
   ...guards: GuardsMetadata[]
