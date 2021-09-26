@@ -10,8 +10,8 @@ export type FactoryProviderFn<T = any, I extends any[] = any[]> = (
 /**
  * Creates a custom provider that can be injected using the @Inject parameter decorator.
  */
-export type CustomProvider =
-  | FactoryProvider
+export type CustomProvider<T = any> =
+  | FactoryProvider<T>
   | ClassProvider
   | ValueProvider
   | UseExistingProvider;
@@ -23,21 +23,26 @@ export interface CustomProviderBase {
   provide: InjectionToken | Function;
   /** {@link InjectorScope} */
   scope?: InjectorScope;
+  /**
+   * When true, injector returns an array of instances. This is useful to allow multiple
+   * providers spread across many files to provide configuration information to a common token.
+   */
+  multi?: boolean;
 }
 
 /**
  * Creates a custom factory provider that can be injected using the @Inject parameter decorator.
  */
-export interface FactoryProvider extends CustomProviderBase {
+export interface FactoryProvider<T = any> extends CustomProviderBase {
   /**
    * A factory function that returns the instance of the provider.
    */
-  useFactory: FactoryProviderFn;
+  useFactory: FactoryProviderFn<T>;
   /**
    * Providers that should be injected to the factory | class constructor function when it's called.
-   * inejct: [SomeDependency] => factory(...[SomeDependency])
+   * deps: [SomeDependency] => factory(...[SomeDependency])
    */
-  inject?: (Type | InjectionToken)[];
+  deps?: (Type | InjectionToken)[];
 }
 
 /**
@@ -50,9 +55,9 @@ export interface ClassProvider extends CustomProviderBase {
   useClass: Type;
   /**
    * Providers that should be injected to the factory | class constructor function when it's called.
-   * inejct: [SomeDependency] => factory(...[SomeDependency])
+   * deps: [SomeDependency] => factory(...[SomeDependency])
    */
-  inject?: (Type | InjectionToken)[];
+  deps?: (Type | InjectionToken)[];
 }
 
 /**

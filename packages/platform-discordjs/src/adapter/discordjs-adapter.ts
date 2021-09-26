@@ -1,7 +1,6 @@
+import { IWSEvent, WatsonEvent } from '@watsonjs/common';
 import { AdapterRef, ApplicationConfig } from '@watsonjs/core';
 import { ClientOptions } from 'discord.js';
-import { WatsonEvent } from 'packages/common/src/enums';
-import { IWSEvent } from 'packages/common/src/interfaces';
 import { Observable } from 'rxjs';
 
 export class DiscordJsAdapter extends AdapterRef {

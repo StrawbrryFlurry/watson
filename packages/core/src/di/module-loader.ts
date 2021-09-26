@@ -1,21 +1,25 @@
-import { Reflector } from '@di';
-import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
-import { ADD_MODULE, COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
+import { Injector, ModuleImpl, Reflector } from '@di';
+import { InvalidDynamicModuleException } from '@exceptions';
+import { COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
 import { resolveAsyncValue } from '@utils';
 import {
+  CustomProvider,
+  DynamicModule,
   EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
   INJECT_DEPENDENCY_METADATA,
+  InjectMetadata,
+  isDynamicModule,
+  isFunction,
+  isNil,
   MODULE_METADATA,
   PIPE_METADATA,
   PREFIX_METADATA,
-} from 'packages/common/src/constants';
-import { InjectMetadata, isDynamicModule } from 'packages/common/src/decorators';
-import { CustomProvider, DynamicModule, Type } from 'packages/common/src/interfaces';
-import { isFunction, isNil } from 'packages/common/src/utils';
+  Type,
+} from '@watsonjs/common';
 
-import { WatsonContainer } from '..';
+import { ModuleContainer } from './module-container';
 
 /**
  * Resolves module dependencies
@@ -24,10 +28,10 @@ import { WatsonContainer } from '..';
 export class ModuleLoader {
   private _reflector = new Reflector();
   private _logger = new Logger("ModuleLoader");
-  private _container: WatsonContainer;
+  private _injector: Injector;
 
-  constructor(container: WatsonContainer) {
-    this._container = container;
+  constructor(injector: Injector) {
+    this._injector = injector;
   }
 
   /**
@@ -35,45 +39,52 @@ export class ModuleLoader {
    */
   public async resolveRootModule(metatype: Type) {
     this._logger.logMessage(REFLECT_MODULE_IMPORTS());
-    await this.scanForModuleImports(metatype);
+    await this.scanModuleRecursively(metatype);
     this._logger.logMessage(COMPLETED());
     this._logger.logMessage(REFLECT_MODULE_COMPONENTS());
     await this.resolveModuleProperties();
   }
 
-  private async scanForModuleImports(
-    metatype: Type | DynamicModule,
-    context: (Type | DynamicModule)[] = []
-  ) {
-    this._container.addModule(metatype, context);
+  private async scanModuleRecursively(metatype: Type | DynamicModule) {
+    const {
+      imports,
+      metatype: type,
+      exports,
+      providers,
+      receivers,
+    } = await this.reflectModuleMetadata(metatype);
 
-    context.push(metatype);
+    const modules = this._injector.get(ModuleContainer);
 
-    const { imports, metatype: type } = await this.reflectModuleMetadata(
-      metatype
-    );
-
-    this._logger.logMessage(ADD_MODULE(type));
-
-    for (let module of imports) {
+    for (const module of imports) {
       if (module instanceof Promise) {
-        module = await module;
+        await module;
       }
 
-      if (typeof module === "undefined") {
-        throw new CircularDependencyException(
-          "ModuleLoader",
-          type,
-          context as Type[]
-        );
-      }
+      await this.scanModuleRecursively(module as Type);
+    }
 
-      if (this._container.hasModule(module)) {
-        continue;
-      }
+    const m = new ModuleImpl(A, {
+      exports,
+      imports,
+      providers,
+      receivers,
+    });
 
-      this._container.addModule(module, context);
-      await this.scanForModuleImports(module, context);
+    modules.apply;
+  }
+
+  private resolveModuleProviders(
+    module: ModuleDef,
+    _providers: ProviderResolvable[] = []
+  ) {
+    const { imports, providers } = module;
+
+    if (isEmpty(imports)) {
+      return [..._providers, ...providers];
+    }
+
+    for (const _import of imports) {
     }
   }
 
@@ -83,22 +94,22 @@ export class ModuleLoader {
     }
 
     const imports =
-      this._reflector.reflectMetadata<Type[]>(
+      Reflector.reflectMetadata<Type[]>(
         MODULE_METADATA.IMPORTS,
         target as Type
       ) ?? [];
     const providers =
-      this._reflector.reflectMetadata<Type[]>(
+      Reflector.reflectMetadata<Type[]>(
         MODULE_METADATA.PROVIDERS,
         target as Type
       ) ?? [];
     const receivers =
-      this._reflector.reflectMetadata<Type[]>(
+      Reflector.reflectMetadata<Type[]>(
         MODULE_METADATA.RECEIVER,
         target as Type
       ) ?? [];
     const exports =
-      this._reflector.reflectMetadata<Type[]>(
+      Reflector.reflectMetadata<Type[]>(
         MODULE_METADATA.EXPORTS,
         target as Type
       ) ?? [];
@@ -139,7 +150,7 @@ export class ModuleLoader {
 
   public reflectInjectedProvider(target: Type, ctorIndex: number) {
     const injectValue =
-      this._reflector.reflectMetadata<InjectMetadata[]>(
+      Reflector.reflectMetadata<InjectMetadata[]>(
         INJECT_DEPENDENCY_METADATA,
         target
       ) || [];
@@ -249,14 +260,14 @@ export class ModuleLoader {
     metadataKey: string
   ) {
     const prototypeInjectables =
-      this._reflector.reflectMetadata<any[]>(metadataKey, metatype) ?? [];
+      Reflector.reflectMetadata<any[]>(metadataKey, metatype) ?? [];
 
-    const prototypeMethods = this._reflector.reflectMethodsOfType(metatype);
+    const prototypeMethods = Reflector.reflectMethodsOfType(metatype);
 
     const methodInjectables = prototypeMethods
       .map(
         (method) =>
-          this._reflector.reflectMetadata<any[]>(
+          Reflector.reflectMetadata<any[]>(
             metadataKey,
             method.descriptor as Type
           ) ?? []

@@ -5,14 +5,12 @@ import {
   CommandAst,
   CommandAstType,
   GenericToken,
+  ParameterConfiguration,
   ParsedAstArguments,
   PrefixToken,
   Token,
   TokenPosition,
 } from '@watsonjs/common';
-import {
-  ParameterConfiguration,
-} from 'packages/common/src/interfaces/router/configuration/parameter-configuration.interface';
 
 export class AstPrefixImpl implements AstPrefix {
   public readonly type: CommandAstType.Prefix;

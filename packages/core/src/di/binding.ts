@@ -1,7 +1,7 @@
 import { InjectorScope, Providable, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
-import { Module } from '.';
+import { ModuleInjector } from '..';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
   ...args: D
@@ -39,7 +39,7 @@ export class Binding<
   public readonly token: Providable;
 
   /** The module this binding belongs to */
-  public readonly host: Module | null;
+  public readonly host: ModuleInjector | null;
 
   /**
    * If the binding has any dependencies,
@@ -49,14 +49,16 @@ export class Binding<
    *
    * [SomeService, SomeContextProperty]
    */
-  public ɵinject: Deps;
+  public ɵdeps: Deps;
+
+  public multi: boolean = false;
 
   /**
    * If the provider is a singleton,
    * the instance type is stored in
    * this property of the binding.
    */
-  public instance: ResolvedBinding | null;
+  public instance: ResolvedBinding | ResolvedBinding[] | null;
 
   /** The scope of this binding */
   public readonly scope: InjectorScope;

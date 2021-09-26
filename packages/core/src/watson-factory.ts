@@ -1,7 +1,8 @@
-import { InstanceLoader, NewableTo } from '@di';
-import { isNil, Type } from '@watsonjs/common';
+import { InstanceLoader, Module, NewableTo } from '@di';
+import { isNil, Type, ValueProvider } from '@watsonjs/common';
+import { Client } from 'discord.js';
 
-import { AdapterRef, ApplicationConfig } from '.';
+import { AdapterRef, Injector } from '.';
 import { ModuleLoader } from './di/module-loader';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
 import { WatsonApplicationOptions } from './interfaces';
@@ -41,16 +42,35 @@ export class WatsonFactory {
     adapter?: NewableTo<AdapterRef>
   ): Promise<T> {
     this.logger.logMessage(CREATE_APP_CONTEXT());
-    const config = new ApplicationConfig();
     const AdapterCtor = await this.getAdapterOrDefault(adapter);
-    const adapterRef = new AdapterCtor(config);
-    config.clientAdapter = adapterRef;
-    config.assignOptions(options);
+    const adapterRef = new AdapterCtor(options);
+
+    const rootInjector = Injector.create(
+      this.GET_APPLICATION_PROVIDERS(config, adapterRef),
+      Injector.NULL
+    );
+
+    const applicationRef = new WatsonApplication(config, container);
+
     const container = new WatsonContainer(config);
 
     await this.initialize(module, container);
+  }
 
-    return new WatsonApplication(config, container) as T;
+  private static GET_APPLICATION_PROVIDERS(
+    appModule: Module,
+    adapter: AdapterRef
+  ): ValueProvider[] {
+    return [
+      {
+        provide: AdapterRef,
+        useValue: adapter,
+      },
+      {
+        provide: Client,
+        useValue: adapter.client,
+      },
+    ];
   }
 
   private static async initialize(module: Type, container: WatsonContainer) {

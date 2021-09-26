@@ -5,6 +5,7 @@
  * to rename them to a more compact / efficient
  * one.
  */
+import { Type } from '@interfaces';
 
 /**
  * The element ID is used by the DI
@@ -27,8 +28,13 @@
  */
 export const WATSON_ELEMENT_ID = "ɵeid";
 
+export const defineElementId = (
+  type: Type,
+  elementId: InjectorElementId
+): void => defineField(type, WATSON_ELEMENT_ID, elementId);
+
 export enum InjectorElementId {
-  Internal = 0,
+  Root = 0,
   Context = -1,
   Injector = -2,
 }
@@ -47,3 +53,16 @@ export const WATSON_INJ_IMPL = "ɵinj";
  * created.
  */
 export const WATSON_BINDING_DEF = "ɵbind";
+
+export const WATSON_PROV_SCOPE = "ɵscope";
+
+export function defineField<T>(type: Type, field: string, value: T): void {
+  type[field] = value;
+}
+
+export function getOwnDefinition<T>(
+  type: Type | Object,
+  field: string
+): T | null {
+  return (type as Object).hasOwnProperty(field) ? type[field] : null;
+}

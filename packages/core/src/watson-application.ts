@@ -1,4 +1,5 @@
-import { CanActivate, PipeTransform, Type } from '@watsonjs/common';
+import { Injector } from '@di';
+import { CanActivate, InjectorElementId, PipeTransform, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { PassThrough } from 'stream';
 
@@ -12,10 +13,24 @@ import { APP_STARTED, APP_STARTING, Logger } from './logger';
 import { RouteExplorer } from './router';
 import { WatsonContainer } from './watson-container';
 
+export abstract class ApplicationRef {
+  public get rootInjector(): Injector {
+    return this._rootInjector;
+  }
+
+  protected _rootInjector: Injector;
+
+  constructor(rootInjector: Injector) {
+    this._rootInjector = rootInjector;
+  }
+
+  static [WATSON_ELEMENT_ID] = InjectorElementId.Root;
+}
+
 /**
  * Main Application class
  */
-export class WatsonApplication {
+export class WatsonApplication extends ApplicationRef {
   private readonly _logger = new Logger("WatsonApplication");
   private readonly _container: WatsonContainer;
   private readonly _config: ApplicationConfig;
@@ -27,7 +42,9 @@ export class WatsonApplication {
   private _isStarted: boolean = false;
   private _isInitialized: boolean = false;
 
-  constructor(config: ApplicationConfig, container: WatsonContainer) {
+  constructor(rootInjector: Injector) {
+    super(rootInjector);
+
     this._config = config;
     this._container = container;
     this._routeExplorer = new RouteExplorer(container);

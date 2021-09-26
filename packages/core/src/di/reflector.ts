@@ -1,5 +1,15 @@
+import { isCustomProvider, ProviderResolvable } from '@di';
 import { BootstrapException } from '@exceptions';
-import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, isNil, Type } from '@watsonjs/common';
+import {
+  DESIGN_PARAMETERS,
+  DESIGN_RETURN_TYPE,
+  DESIGN_TYPE,
+  INJECTABLE_METADATA,
+  InjectableMetadata,
+  InjectorScope,
+  isNil,
+  Type,
+} from '@watsonjs/common';
 
 export interface MethodDescriptor {
   propertyKey: string;
@@ -8,7 +18,7 @@ export interface MethodDescriptor {
 
 export class Reflector {
   /** {@link DESIGN_PARAMETERS} */
-  public reflectMethodParameters<T extends unknown[] = unknown[]>(
+  public static reflectMethodParameters<T extends unknown[] = unknown[]>(
     metatype: Type,
     propertyKey?: string
   ): T {
@@ -16,7 +26,7 @@ export class Reflector {
   }
 
   /** {@link DESIGN_RETURN_TYPE} */
-  public reflectMethodReturnType<T>(
+  public static reflectMethodReturnType<T>(
     metatype: Type,
     propertyKey: string
   ): Type<T> {
@@ -24,7 +34,10 @@ export class Reflector {
   }
 
   /** {@link DESIGN_TYPE} */
-  public reflectPropertyType<T>(metatype: Type, propertyKey: string): Type<T> {
+  public static reflectPropertyType<T>(
+    metatype: Type,
+    propertyKey: string
+  ): Type<T> {
     return Reflect.getMetadata(DESIGN_TYPE, metatype, propertyKey);
   }
 
@@ -33,7 +46,7 @@ export class Reflector {
    * from its prototype. The constructor
    * descriptor will be ignored.
    */
-  public reflectMethodsOfType(metatype: Type): MethodDescriptor[] {
+  public static reflectMethodsOfType(metatype: Type): MethodDescriptor[] {
     if (isNil(metatype)) {
       throw new BootstrapException(
         "Reflector",
@@ -63,13 +76,28 @@ export class Reflector {
     return methodDescriptors;
   }
 
+  public static reflectProviderScope(
+    typeOrProvider: ProviderResolvable
+  ): InjectorScope {
+    if (isCustomProvider(typeOrProvider)) {
+      return typeOrProvider.scope ?? InjectorScope.Singleton;
+    }
+
+    const { scope } = Reflector.reflectMetadata<InjectableMetadata>(
+      INJECTABLE_METADATA,
+      typeOrProvider
+    );
+
+    return scope ?? InjectorScope.Singleton;
+  }
+
   /**
    * Returns metadata defined
    * on `metatype` with key`key`.
    * Optionally takes a `propertyKey`
    * for object-property metadata.
    */
-  public reflectMetadata<T>(
+  public static reflectMetadata<T>(
     key: string,
     metatype: Type,
     propertyKey?: string

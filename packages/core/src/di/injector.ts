@@ -1,44 +1,54 @@
-import { Binding, FactoryFn, Module, NewableTo } from '@di';
+import { Binding, ModuleInjector, Reflector } from '@di';
 import {
   ClassProvider,
   CustomProvider,
   FactoryProvider,
+  getOwnDefinition,
+  InjectionToken,
   InjectorElementId,
   InjectorScope,
+  isNil,
   Providable,
   Type,
   UseExistingProvider,
   ValueProvider,
+  WATSON_BINDING_DEF,
   WATSON_ELEMENT_ID,
 } from '@watsonjs/common';
 
-import { ResolvedBinding } from './binding';
+import { ApplicationRef } from '..';
 import { NullInjector } from './null-injector';
 
-export type ProviderResolvable = CustomProvider | Type;
+export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
+
+export const INJECTOR = new InjectionToken(
+  "The current module injector for a given module.",
+  InjectorElementId.Injector
+);
+
+export const ROOT_INJECTOR = new InjectionToken(
+  "The application root injector",
+  InjectorElementId.Root
+);
 
 export abstract class Injector {
   public static NULL = new NullInjector();
 
   public parent: Injector | null = null;
 
-  /**
-   * If the injector stores instances
-   * of a type this method can be
-   * used to get resolved bindings
-   * from this injector or its
-   * parents
-   */
-  public abstract get?<
-    T extends NewableTo<V> | FactoryFn<V> = any,
-    D extends any[] = any,
-    V extends any = any
-  >(typeOrToken: Providable<T>): ResolvedBinding<T, D, V> | null;
+  public abstract get<T>(typeOrToken: Providable<T>): T;
+
+  static create(
+    providers: ProviderResolvable[],
+    parent: Injector | NullInjector | null = null
+  ) {
+    return new ModuleInjector();
+  }
 
   static [WATSON_ELEMENT_ID] = InjectorElementId.Injector;
 }
 
-export function getTokenFromProvider(provider: ProviderReso lvable): Providable {
+export function getTokenFromProvider(provider: ProviderResolvable): Providable {
   if (!isCustomProvider(provider)) {
     return provider;
   }
@@ -74,42 +84,69 @@ export function isValueProvider(
   return provider && "useValue" in provider;
 }
 
-export function createBinding<T>(
-  token: Providable,
-  scope: InjectorScope,
-  factory: () => T
-) {
-  return new Binding(token, scope, factory);
+export function createResolvedBinding(provider: ValueProvider): Binding {
+  const { provide, useValue, multi, scope } = provider;
+  const binding = new Binding(provide, scope ?? InjectorScope.Singleton);
+  binding.ɵmetatype = provider;
+  binding.ɵfactory = () => useValue;
+  binding.multi = multi ?? false;
+
+  return binding;
 }
 
-export function createBindingFromProvider(
-  provider: ProviderResolvable,
-  module: Module | null,
-  scope: InjectorScope
-): Binding {
-  if (!isCustomProvider(provider)) {
-    const binding = new Binding(provider, provider, module, scope);
+export function getProviderType(
+  provider: ProviderResolvable
+): Type | InjectionToken {
+  if (isCustomProvider(provider)) {
+    return provider.provide;
+  }
 
+  return provider;
+}
+
+export function getRootInjector(injector: Injector) {
+  const { rootInjector } = injector.get(ApplicationRef);
+  return rootInjector;
+}
+
+export function createBinding(provider: ProviderResolvable): Binding {
+  const providerType = getProviderType(provider);
+  const existingBinding = getOwnDefinition<Binding>(
+    providerType,
+    WATSON_BINDING_DEF
+  );
+
+  if (!isNil(existingBinding)) {
+    return existingBinding;
+  }
+
+  const providerScope = Reflector.reflectProviderScope(provider);
+
+  if (!isCustomProvider(provider)) {
+    const binding = new Binding(provider, providerScope);
+    binding.ɵmetatype = provider;
     binding.ɵfactory = (...args) => Reflect.construct(provider as Type, args);
+    provider[WATSON_BINDING_DEF] = binding;
     return binding;
   }
 
-  const { provide, scope: _scope } = provider;
-  const binding = new Binding(null as any, provide, module, _scope ?? scope);
+  const { provide } = provider;
+  const binding = new Binding(provide, providerScope);
+  provide[WATSON_BINDING_DEF] = binding;
   /**
    * UseExisting providers are handled
    * by the injector itself as they
    * point to a different binding.
    */
   if (isClassProvider(provider)) {
-    const { useClass, inject } = provider;
+    const { useClass, deps } = provider;
     binding.ɵmetatype = useClass;
-    binding.ɵinject = inject;
+    binding.ɵdeps = deps;
     binding.ɵfactory = (...args) => Reflect.construct(useClass, args);
   } else if (isFactoryProvider(provider)) {
-    const { useFactory, inject } = provider;
+    const { useFactory, deps } = provider;
     binding.ɵmetatype = useFactory;
-    binding.ɵinject = inject;
+    binding.ɵdeps = deps;
     binding.ɵfactory = (...args) => useFactory(...args);
   } else {
     const { useValue } = provider as ValueProvider;

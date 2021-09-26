@@ -1,5 +1,4 @@
-import { WatsonEvent } from 'packages/common/src/enums';
-import { ReceiverDef } from 'packages/common/src/interfaces';
+import { ReceiverDef, WatsonEvent } from '@watsonjs/common';
 
 import { RouteRef } from '..';
 import { InstanceWrapper } from '../../injector';

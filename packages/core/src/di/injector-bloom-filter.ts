@@ -1,10 +1,20 @@
 import { WatsonDiProvidable } from '@di';
-import { isNil, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { isNil, Type } from '@watsonjs/common';
 
 import { WatsonContainer } from '..';
 
 const BLOOM_BUCKET_SIZE = 256;
 const BLOOM_MASK = BLOOM_BUCKET_SIZE - 1;
+
+/**
+ * Why is this the only global
+ * mutable property?
+ *
+ * The element ID on a type is
+ * defined on it's prototype
+ * which makes it unrestricted.
+ */
+let WATSON_ELEMENT_ID = 1;
 
 export class InjectorBloomFilter {
   /**

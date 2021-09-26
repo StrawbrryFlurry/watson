@@ -1,4 +1,4 @@
-import { CommandRoute, isString, Prefix } from '@watsonjs/common';
+import { CommandRoute, InjectorElementId, isString, Prefix, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { EventTokenFactory } from './event-token-factory';
@@ -79,4 +79,6 @@ export class CommandContainer extends Map<
 
     return prefixes;
   }
+
+  static [WATSON_ELEMENT_ID] = InjectorElementId.Root;
 }

@@ -1,5 +1,6 @@
 import { Channel, Client, Guild, Message, VoiceChannel } from 'discord.js';
-import { WATSON_ELEMENT_ID } from 'packages/common/src/fields';
+
+import { WATSON_ELEMENT_ID } from '../../../';
 
 /**
  * Injects the channel that the
