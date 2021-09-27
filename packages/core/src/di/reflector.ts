@@ -1,14 +1,19 @@
 import { isCustomProvider, ProviderResolvable } from '@di';
 import { BootstrapException } from '@exceptions';
 import {
+  DEFAULT_LIFETIME,
+  DEFAULT_SCOPE,
   DESIGN_PARAMETERS,
   DESIGN_RETURN_TYPE,
   DESIGN_TYPE,
   INJECTABLE_METADATA,
-  InjectableMetadata,
-  InjectorScope,
+  InjectableOptions,
+  InjectorLifetime,
   isNil,
+  ProvidedInScope,
   Type,
+  WATSON_PROV_LIFETIME,
+  WATSON_PROV_SCOPE,
 } from '@watsonjs/common';
 
 export interface MethodDescriptor {
@@ -78,17 +83,32 @@ export class Reflector {
 
   public static reflectProviderScope(
     typeOrProvider: ProviderResolvable
-  ): InjectorScope {
+  ): Required<InjectableOptions> {
+    let lifetime: InjectorLifetime | undefined;
+    let scope: ProvidedInScope | undefined;
+
     if (isCustomProvider(typeOrProvider)) {
-      return typeOrProvider.scope ?? InjectorScope.Singleton;
+      const { provide, lifetime: _lifetime, providedIn } = typeOrProvider;
+
+      scope = providedIn ?? provide[WATSON_PROV_LIFETIME];
+      lifetime = _lifetime ?? provide[WATSON_PROV_SCOPE];
+    } else {
+      const metadata = Reflector.reflectMetadata<InjectableOptions>(
+        INJECTABLE_METADATA,
+        typeOrProvider
+      );
+
+      lifetime = typeOrProvider[WATSON_PROV_LIFETIME] ?? metadata.lifetime;
+      scope = typeOrProvider[WATSON_PROV_SCOPE] ?? metadata.providedIn;
     }
 
-    const { scope } = Reflector.reflectMetadata<InjectableMetadata>(
-      INJECTABLE_METADATA,
-      typeOrProvider
-    );
+    lifetime ??= DEFAULT_LIFETIME;
+    scope ??= DEFAULT_SCOPE;
 
-    return scope ?? InjectorScope.Singleton;
+    return {
+      lifetime,
+      providedIn: scope,
+    } as Required<InjectableOptions>;
   }
 
   /**

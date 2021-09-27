@@ -10,7 +10,6 @@ export * from "./interfaces";
 export * from "./lifecycle";
 export * from "./logger";
 export * from "./router";
-export * from "./sharding";
 export * from "./application-config";
 export * from "./application-proxy";
 export * from "./constants";

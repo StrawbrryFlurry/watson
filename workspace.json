@@ -21,6 +21,12 @@
               "projects": "dependencies"
             }
           ]
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "packages/core/test/jest.config.js"
+          }
         }
       }
     },

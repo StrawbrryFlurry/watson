@@ -1,4 +1,4 @@
-import { InjectorScope } from '@decorators';
+import { InjectorLifetime, ProvidedInScope } from '@decorators';
 
 import { Type } from '../type.interface';
 import { InjectionToken } from './injection-token';
@@ -21,8 +21,10 @@ export interface CustomProviderBase {
    * The name of the provider. This name can then be used as the injection token for the @inject decorator.
    */
   provide: InjectionToken | Function;
-  /** {@link InjectorScope} */
-  scope?: InjectorScope;
+  /** {@link InjectorLifetime} */
+  lifetime?: InjectorLifetime;
+  /** {@link ProvidedInScope} */
+  providedIn?: ProvidedInScope;
   /**
    * When true, injector returns an array of instances. This is useful to allow multiple
    * providers spread across many files to provide configuration information to a common token.

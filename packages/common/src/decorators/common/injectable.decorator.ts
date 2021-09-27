@@ -1,7 +1,8 @@
 import { INJECTABLE_METADATA } from '@constants';
+import { Type } from '@interfaces';
 import { mergeDefaults } from '@utils';
 
-export enum InjectorScope {
+export enum InjectorLifetime {
   /**
    * Instantiated during bootstrapping, shared among
    * all modules that import the same exporting module.
@@ -31,17 +32,54 @@ export enum InjectorScope {
   Event = 1 << 3,
 }
 
+/**
+ * The injector scope in which
+ * a given dependency is provided in.
+ *
+ * - `root` Provides the provider in the
+ * root injector which means it's accessible
+ * by all other modules, plugins and elements
+ * of Watson.
+ *
+ * - `internal` Makes the provider available
+ * in the main `AppModule` injector which
+ * makes them resolvable by internal modules
+ * but not by plugins or external modules.
+ *
+ * - `external` Makes the provider available
+ * in the external injector which is used
+ * by plugins or modules like the nest adapter
+ * that connects the Nest DI system to Watson.
+ *
+ * - `Module` Restricts the provider to the module
+ * defined in `providedIn` and modules that import
+ * that module, given it is exported.
+ *
+ * @default `root`
+ */
+export type ProvidedInScope =
+  | "root"
+  | "internal"
+  | "external"
+  | "module"
+  | Type;
+
 export interface InjectableOptions {
-  scope?: InjectorScope;
+  /** {@link InjectorLifetime} */
+  lifetime?: InjectorLifetime;
+  /** {@link ProvidedInScope} */
+  providedIn?: ProvidedInScope;
 }
 
 export interface InjectableMetadata extends Required<InjectableOptions> {}
 
-const DEFAULT_SCOPE = InjectorScope.Singleton;
+export const DEFAULT_LIFETIME = InjectorLifetime.Singleton;
+export const DEFAULT_SCOPE: ProvidedInScope = "root";
 
 export function Injectable(options: InjectableOptions = {}): ClassDecorator {
   const metadata = mergeDefaults(options, {
-    scope: DEFAULT_SCOPE,
+    lifetime: DEFAULT_LIFETIME,
+    providedIn: DEFAULT_SCOPE,
   });
 
   return (target: Object) => {

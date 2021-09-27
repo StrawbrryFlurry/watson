@@ -2,7 +2,7 @@ import { EventException, EventExceptionHandler } from '@watsonjs/common';
 
 import { Logger } from '../logger';
 
-export class ExceptionHandler {
+export class ExceptionHandlerImpl {
   private handlers: EventExceptionHandler[];
   private logger = new Logger(ExceptionHandler.name);
 

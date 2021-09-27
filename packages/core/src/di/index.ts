@@ -7,6 +7,5 @@ export * from "./instance-loader";
 export * from "./instance-wrapper";
 export * from "./module-loader";
 export * from "./module";
-export * from "./module-injector";
+export * from "./dynamic-injector";
 export * from "./reflector";
-export * from "./static-injector";

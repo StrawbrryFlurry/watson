@@ -1,4 +1,4 @@
-import { Binding, ModuleInjector, Reflector } from '@di';
+import { Binding, DynamicInjector, Reflector } from '@di';
 import {
   ClassProvider,
   CustomProvider,
@@ -6,7 +6,6 @@ import {
   getOwnDefinition,
   InjectionToken,
   InjectorElementId,
-  InjectorScope,
   isNil,
   Providable,
   Type,
@@ -21,14 +20,15 @@ import { NullInjector } from './null-injector';
 
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
 
-export const INJECTOR = new InjectionToken(
+export const INJECTOR = new InjectionToken<Injector>(
   "The current module injector for a given module.",
-  InjectorElementId.Injector
+  {
+    providedIn: "module",
+  }
 );
 
-export const ROOT_INJECTOR = new InjectionToken(
-  "The application root injector",
-  InjectorElementId.Root
+export const ROOT_INJECTOR = new InjectionToken<Injector>(
+  "The application root injector"
 );
 
 export abstract class Injector {
@@ -36,13 +36,20 @@ export abstract class Injector {
 
   public parent: Injector | null = null;
 
-  public abstract get<T>(typeOrToken: Providable<T>): T;
+  public abstract get<
+    T extends InjectionToken | NewableFunction,
+    R extends T extends InjectionToken<infer R>
+      ? R
+      : T extends new (...args: any[]) => infer R
+      ? R
+      : never
+  >(typeOrToken: T): Promise<R>;
 
   static create(
     providers: ProviderResolvable[],
-    parent: Injector | NullInjector | null = null
+    parent: Injector | null = null
   ) {
-    return new ModuleInjector();
+    return new DynamicInjector(providers, parent);
   }
 
   static [WATSON_ELEMENT_ID] = InjectorElementId.Injector;
@@ -85,10 +92,13 @@ export function isValueProvider(
 }
 
 export function createResolvedBinding(provider: ValueProvider): Binding {
-  const { provide, useValue, multi, scope } = provider;
-  const binding = new Binding(provide, scope ?? InjectorScope.Singleton);
+  const { provide, useValue, multi } = provider;
+
+  const { lifetime, providedIn } = Reflector.reflectProviderScope(provider);
+
+  const binding = new Binding(provide, lifetime, providedIn, () => useValue);
+
   binding.ɵmetatype = provider;
-  binding.ɵfactory = () => useValue;
   binding.multi = multi ?? false;
 
   return binding;
@@ -104,8 +114,8 @@ export function getProviderType(
   return provider;
 }
 
-export function getRootInjector(injector: Injector) {
-  const { rootInjector } = injector.get(ApplicationRef);
+export async function getRootInjector(injector: Injector) {
+  const { rootInjector } = await injector.get(ApplicationRef);
   return rootInjector;
 }
 
@@ -120,10 +130,10 @@ export function createBinding(provider: ProviderResolvable): Binding {
     return existingBinding;
   }
 
-  const providerScope = Reflector.reflectProviderScope(provider);
+  const { lifetime, providedIn } = Reflector.reflectProviderScope(provider);
 
   if (!isCustomProvider(provider)) {
-    const binding = new Binding(provider, providerScope);
+    const binding = new Binding(provider, lifetime, providedIn);
     binding.ɵmetatype = provider;
     binding.ɵfactory = (...args) => Reflect.construct(provider as Type, args);
     provider[WATSON_BINDING_DEF] = binding;
@@ -131,7 +141,7 @@ export function createBinding(provider: ProviderResolvable): Binding {
   }
 
   const { provide } = provider;
-  const binding = new Binding(provide, providerScope);
+  const binding = new Binding(provide, lifetime, providedIn);
   provide[WATSON_BINDING_DEF] = binding;
   /**
    * UseExisting providers are handled

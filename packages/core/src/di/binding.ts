@@ -1,7 +1,6 @@
-import { InjectorScope, Providable, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { Injector } from '@di';
+import { InjectorLifetime, Providable, ProvidedInScope, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
-
-import { ModuleInjector } from '..';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
   ...args: D
@@ -39,7 +38,7 @@ export class Binding<
   public readonly token: Providable;
 
   /** The module this binding belongs to */
-  public readonly host: ModuleInjector | null;
+  public readonly host: Injector | null;
 
   /**
    * If the binding has any dependencies,
@@ -49,7 +48,7 @@ export class Binding<
    *
    * [SomeService, SomeContextProperty]
    */
-  public ɵdeps: Deps;
+  public ɵdeps: Deps | null;
 
   public multi: boolean = false;
 
@@ -60,16 +59,21 @@ export class Binding<
    */
   public instance: ResolvedBinding | ResolvedBinding[] | null;
 
-  /** The scope of this binding */
-  public readonly scope: InjectorScope;
+  /** {@link  InjectorLifetime} */
+  public readonly lifetime: InjectorLifetime;
+  /** {@link ProvidedInScope} */
+  public readonly scope: ProvidedInScope;
 
   constructor(
     token: Providable,
-    scope: InjectorScope,
+    lifetime: InjectorLifetime,
+    scope: ProvidedInScope,
     factory?: () => InstanceType
   ) {
     this.token = token;
+    this.lifetime = lifetime;
     this.scope = scope;
+
     this.ɵfactory = factory! ?? undefined;
   }
 

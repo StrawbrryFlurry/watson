@@ -1,6 +1,7 @@
+import { InjectableOptions, InjectorLifetime, ProvidedInScope } from '@decorators';
 import { Type } from '@interfaces';
 
-import { InjectorElementId, WATSON_ELEMENT_ID } from '../..';
+import { WATSON_PROV_LIFETIME, WATSON_PROV_SCOPE } from '../..';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";
 
@@ -13,14 +14,17 @@ export function isInjectionToken(obj: any): obj is InjectionToken {
 export class InjectionToken<T /* The value that this token provides */ = any> {
   public readonly name: string;
 
+  public readonly [WATSON_PROV_LIFETIME]: InjectorLifetime;
+  public readonly [WATSON_PROV_SCOPE]: ProvidedInScope;
+
   constructor(
     private readonly _description: string,
-    providedIn?: InjectorElementId | number
+    options: InjectableOptions = {}
   ) {
     this.name = `${INJECTION_TOKE_PREFIX} ${this._description}`;
+    const { lifetime, providedIn } = options;
 
-    if (providedIn) {
-      this[WATSON_ELEMENT_ID] = providedIn;
-    }
+    this[WATSON_PROV_LIFETIME] = lifetime ?? InjectorLifetime.Singleton;
+    this[WATSON_PROV_SCOPE] = providedIn ?? "root";
   }
 }

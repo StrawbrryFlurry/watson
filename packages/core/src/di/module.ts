@@ -4,7 +4,7 @@ import { InjectorElementId, Providable, ReceiverDef, Type, UniqueTypeArray, WATS
 import { ProviderResolvable } from '..';
 import { Injector } from './injector';
 
-export abstract class Module implements Injector {
+export abstract class ModuleRef implements Injector {
   public parent: Injector | null;
   public metatype: Type;
   public abstract get<T>(typeOrToken: Providable<T>): T;
@@ -24,11 +24,11 @@ export interface ModuleDef {
 /**
  * Wrapper for a class decorated with the @\Module decorator.
  */
-export class ModuleImpl extends Module implements Injector {
+export class ModuleImpl extends ModuleRef implements Injector {
   private readonly _parent: Injector;
 
   public readonly exports = new UniqueTypeArray<ProviderResolvable>();
-  public readonly imports = new UniqueTypeArray<Module>();
+  public readonly imports = new UniqueTypeArray<ModuleRef>();
   public readonly receivers = new UniqueTypeArray<ReceiverDef>();
   public readonly providers = new UniqueTypeArray<ProviderResolvable>();
 

@@ -5,6 +5,7 @@
  * to rename them to a more compact / efficient
  * one.
  */
+import { InjectorLifetime, ProvidedInScope } from '@decorators';
 import { Type } from '@interfaces';
 
 /**
@@ -28,11 +29,6 @@ import { Type } from '@interfaces';
  */
 export const WATSON_ELEMENT_ID = "ɵeid";
 
-export const defineElementId = (
-  type: Type,
-  elementId: InjectorElementId
-): void => defineField(type, WATSON_ELEMENT_ID, elementId);
-
 export enum InjectorElementId {
   Root = 0,
   Context = -1,
@@ -54,11 +50,23 @@ export const WATSON_INJ_IMPL = "ɵinj";
  */
 export const WATSON_BINDING_DEF = "ɵbind";
 
-export const WATSON_PROV_SCOPE = "ɵscope";
+/**
+ * Property on a {@link Type} that
+ * defines what lifetime a given provider
+ * has.
+ *
+ * {@link InjectorLifetime}
+ */
+export const WATSON_PROV_LIFETIME = "ɵlifetime";
 
-export function defineField<T>(type: Type, field: string, value: T): void {
-  type[field] = value;
-}
+/**
+ * Property on a {@link Type} that
+ * defines what injector scope the type
+ * is restricted to.
+ *
+ * {@link ProvidedInScope}
+ */
+export const WATSON_PROV_SCOPE = "ɵscope";
 
 export function getOwnDefinition<T>(
   type: Type | Object,
@@ -66,3 +74,7 @@ export function getOwnDefinition<T>(
 ): T | null {
   return (type as Object).hasOwnProperty(field) ? type[field] : null;
 }
+
+/** Jsdoc reference */
+const _: InjectorLifetime = InjectorLifetime.Singleton;
+const __: ProvidedInScope = "root";
