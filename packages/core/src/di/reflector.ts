@@ -88,18 +88,18 @@ export class Reflector {
     let scope: ProvidedInScope | undefined;
 
     if (isCustomProvider(typeOrProvider)) {
-      const { provide, lifetime: _lifetime, providedIn } = typeOrProvider;
+      const { provide } = typeOrProvider;
 
-      scope = providedIn ?? provide[WATSON_PROV_LIFETIME];
-      lifetime = _lifetime ?? provide[WATSON_PROV_SCOPE];
+      scope = provide[WATSON_PROV_LIFETIME];
+      lifetime = provide[WATSON_PROV_SCOPE];
     } else {
       const metadata = Reflector.reflectMetadata<InjectableOptions>(
         INJECTABLE_METADATA,
         typeOrProvider
       );
 
-      lifetime = typeOrProvider[WATSON_PROV_LIFETIME] ?? metadata.lifetime;
-      scope = typeOrProvider[WATSON_PROV_SCOPE] ?? metadata.providedIn;
+      lifetime = typeOrProvider[WATSON_PROV_LIFETIME] ?? metadata?.lifetime;
+      scope = typeOrProvider[WATSON_PROV_SCOPE] ?? metadata?.providedIn;
     }
 
     lifetime ??= DEFAULT_LIFETIME;
