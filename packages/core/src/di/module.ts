@@ -1,4 +1,4 @@
-import { Binding } from '@di';
+import { Binding, InjectorGetResult } from '@di';
 import { InjectorElementId, Providable, ReceiverDef, Type, UniqueTypeArray, WATSON_ELEMENT_ID } from '@watsonjs/common';
 
 import { ProviderResolvable } from '..';
@@ -7,7 +7,10 @@ import { Injector } from './injector';
 export abstract class ModuleRef implements Injector {
   public parent: Injector | null;
   public metatype: Type;
-  public abstract get<T>(typeOrToken: Providable<T>): T;
+
+  public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
+    typeOrToken: T
+  ): Promise<R>;
 
   public abstract get injector(): Injector;
 
@@ -15,10 +18,10 @@ export abstract class ModuleRef implements Injector {
 }
 
 export interface ModuleDef {
-  imports: Binding[];
+  imports: ProviderResolvable[];
   receivers: Type[];
-  providers: Binding[];
-  exports: Binding[];
+  providers: ProviderResolvable[];
+  exports: ProviderResolvable | ModuleDef[];
 }
 
 /**
@@ -40,7 +43,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
     return this._injector;
   }
 
-  constructor(metatype: Type, moduleDef: ModuleDef) {
+  constructor(metatype: Type, moduleDef: ModuleDef, parent: Injector) {
     super();
     this.metatype = metatype;
     const { exports, imports, providers, receivers } = moduleDef;
@@ -50,10 +53,17 @@ export class ModuleImpl extends ModuleRef implements Injector {
     this.receivers.add(...receivers);
     this.providers.add(...providers);
 
-    this._injector = Injector.create([], this);
+    this._injector = Injector.create([], parent, this);
   }
 
-  public get<T>(typeOrToken: Providable<T>): T {
+  /**
+   * We could implement the moduleRef
+   * as the injector itself
+   * but I'd like to keep their
+   * implementation separate to make
+   * it more manageable
+   */
+  public async get<T>(typeOrToken: Providable<T>): Promise<T> {
     return this.injector.get(typeOrToken);
   }
 }

@@ -31,25 +31,27 @@ export const ROOT_INJECTOR = new InjectionToken<Injector>(
   "The application root injector"
 );
 
+export type InjectorGetResult<T> = T extends InjectionToken<infer R>
+  ? R
+  : T extends new (...args: any[]) => infer R
+  ? R
+  : never;
+
 export abstract class Injector {
   public static NULL = new NullInjector();
 
   public parent: Injector | null = null;
 
-  public abstract get<
-    T extends InjectionToken | NewableFunction,
-    R extends T extends InjectionToken<infer R>
-      ? R
-      : T extends new (...args: any[]) => infer R
-      ? R
-      : never
-  >(typeOrToken: T): Promise<R>;
+  public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
+    typeOrToken: T
+  ): Promise<R>;
 
   static create(
     providers: ProviderResolvable[],
-    parent: Injector | null = null
+    parent: Injector | null = null,
+    scope: any | null = null
   ) {
-    return new DynamicInjector(providers, parent);
+    return new DynamicInjector(providers, parent, scope);
   }
 
   static [WATSON_ELEMENT_ID] = InjectorElementId.Injector;

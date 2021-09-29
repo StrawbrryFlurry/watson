@@ -1,4 +1,5 @@
-import { InjectionToken, Providable, ValueProvider } from '@watsonjs/common';
+import { InjectorGetResult } from '@di';
+import { isNil, Providable, ProvidedInScope, Type, ValueProvider, WATSON_PROV_SCOPE } from '@watsonjs/common';
 
 import { createBinding, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
 import { Binding } from './binding';
@@ -8,13 +9,18 @@ export class DynamicInjector implements Injector {
   public parent: Injector | null;
   protected _bloom: InjectorBloomFilter;
 
-  protected _parent: Injector | null;
-
   protected readonly _records: Map<Providable, Binding>;
 
-  constructor(providers: ProviderResolvable[], parent: Injector | null = null) {
+  protected _scope: Type | null;
+
+  constructor(
+    providers: ProviderResolvable[],
+    parent: Injector | null = null,
+    scope: Type | null = null
+  ) {
     this._records = new Map<Providable, Binding>();
     this.parent = parent;
+    this._scope = scope;
 
     this._records.set(
       Injector,
@@ -35,17 +41,29 @@ export class DynamicInjector implements Injector {
     this._bindProviders(providers);
   }
 
-  public async get<
-    T extends InjectionToken | NewableFunction,
-    R extends T extends InjectionToken<infer R>
-      ? R
-      : T extends new (...args: any[]) => infer R
-      ? R
-      : never
-  >(typeOrToken: T): Promise<R> {
+  public async get<T extends Providable, R extends InjectorGetResult<T>>(
+    typeOrToken: T
+  ): Promise<R> {
+    const bindingScope = typeOrToken[WATSON_PROV_SCOPE] as ProvidedInScope;
+    let parent = this.parent ?? Injector.NULL;
+
+    if (
+      !isNil(this._scope) &&
+      (bindingScope === "module" ||
+        this._scope instanceof (bindingScope as Type))
+    ) {
+      parent = Injector.NULL;
+    }
+
     const hasBinding = this._records.get(typeOrToken);
 
-    return "" as R;
+    if (isNil(hasBinding)) {
+      return parent.get(typeOrToken);
+    }
+
+    // Resolve logic
+    hasBinding.instance;
+    return "" as any;
   }
 
   private _bindProviders(providers: ProviderResolvable[]) {

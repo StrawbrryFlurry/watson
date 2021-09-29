@@ -52,6 +52,10 @@ export class Binding<
 
   public multi: boolean = false;
 
+  public optional: boolean = false;
+
+  public isDependencyTreeStatic() {}
+
   /**
    * If the provider is a singleton,
    * the instance type is stored in
