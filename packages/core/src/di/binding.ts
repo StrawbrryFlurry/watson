@@ -1,5 +1,5 @@
 import { Injector } from '@di';
-import { InjectorLifetime, Providable, ProvidedInScope, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
@@ -54,14 +54,24 @@ export class Binding<
 
   public optional: boolean = false;
 
-  public isDependencyTreeStatic() {}
+  public isDependencyTreeStatic(): boolean {
+    if (!this.hasDependencies()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public hasDependencies(): boolean {
+    return !isNil(this.ɵdeps) && !isEmpty(this.ɵdeps);
+  }
 
   /**
    * If the provider is a singleton,
    * the instance type is stored in
    * this property of the binding.
    */
-  public instance: ResolvedBinding | ResolvedBinding[] | null;
+  public instance: InstanceType | InstanceType[] | null;
 
   /** {@link  InjectorLifetime} */
   public readonly lifetime: InjectorLifetime;
@@ -89,37 +99,4 @@ export class Binding<
   public ɵfactory!: (
     ...deps: Deps
   ) => Observable<InstanceType> | Promise<InstanceType> | InstanceType;
-}
-
-/**
- * A resolved instance of a
- * {@link Binding}. Depending on
- * the scope of a provider there
- * can be multiple resolved bindings
- * for a given `Binding`.
- *
- * The resolved binding stores
- * the value for a binding.
- */
-export class ResolvedBinding<
-  MetaType extends NewableTo<InstanceType> | FactoryFn<InstanceType> = any,
-  Deps extends any[] = any,
-  InstanceType extends any = any
-> {
-  /** The host binding */
-  public readonly binding: Binding<MetaType, Deps, InstanceType>;
-
-  /** The value or instance of this binding */
-  public readonly instance: InstanceType;
-
-  /** The id of the module this binding was resolved in */
-  public readonly scope: string;
-
-  constructor(
-    binding: Binding<MetaType, Deps, InstanceType>,
-    instance: InstanceType
-  ) {
-    this.binding = binding;
-    this.instance = instance;
-  }
 }

@@ -10,11 +10,6 @@ export enum InjectorLifetime {
    */
   Singleton = 1 << 0,
   /**
-   * Creates a new instance for every
-   * module scope.
-   */
-  Scoped = 1 << 1,
-  /**
    * Creates a new instance
    * every time the provider is
    * requested

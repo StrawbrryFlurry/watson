@@ -1,5 +1,14 @@
 import { InjectorGetResult } from '@di';
-import { isNil, Providable, ProvidedInScope, Type, ValueProvider, WATSON_PROV_SCOPE } from '@watsonjs/common';
+import { resolveAsyncValue } from '@utils';
+import {
+  InjectorLifetime,
+  isNil,
+  Providable,
+  ProvidedInScope,
+  Type,
+  ValueProvider,
+  WATSON_PROV_SCOPE,
+} from '@watsonjs/common';
 
 import { createBinding, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
 import { Binding } from './binding';
@@ -55,15 +64,46 @@ export class DynamicInjector implements Injector {
       parent = Injector.NULL;
     }
 
-    const hasBinding = this._records.get(typeOrToken);
+    const binding = this._records.get(typeOrToken);
 
-    if (isNil(hasBinding)) {
+    if (isNil(binding)) {
       return parent.get(typeOrToken);
     }
 
-    // Resolve logic
-    hasBinding.instance;
-    return "" as any;
+    const { lifetime, instance, ɵdeps } = binding;
+
+    if (!isNil(instance) && binding.isDependencyTreeStatic()) {
+      return instance;
+    }
+
+    if (!binding.hasDependencies()) {
+      const instance = binding.ɵfactory();
+
+      if (lifetime & InjectorLifetime.Singleton) {
+        binding.instance = instance;
+      }
+
+      return instance;
+    }
+
+    const dependencies = [];
+
+    for (let i = 0; i < (ɵdeps as unknown[]).length; i++) {
+      const dep = ɵdeps[i];
+
+      const depInstance = this._resolveDependency(dep);
+      dependencies.push(depInstance);
+    }
+
+    const _instance = await resolveAsyncValue(
+      binding.ɵfactory(...dependencies)
+    );
+
+    if (lifetime & InjectorLifetime.Singleton) {
+      binding.instance = _instance;
+    }
+
+    return _instance;
   }
 
   private _bindProviders(providers: ProviderResolvable[]) {
@@ -73,6 +113,8 @@ export class DynamicInjector implements Injector {
       this._records.set(binding.token, binding);
     }
   }
+
+  private _resolveDependency() {}
 
   /**
    * Resolves dependencies for a given

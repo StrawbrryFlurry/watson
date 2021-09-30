@@ -2,6 +2,7 @@ import { Binding, InjectorGetResult } from '@di';
 import { InjectorElementId, Providable, ReceiverDef, Type, UniqueTypeArray, WATSON_ELEMENT_ID } from '@watsonjs/common';
 
 import { ProviderResolvable } from '..';
+import { ComponentFactory } from './component-factory';
 import { Injector } from './injector';
 
 export abstract class ModuleRef implements Injector {
@@ -37,6 +38,8 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
   private readonly __injectorProviders = new UniqueTypeArray<Binding>();
 
+  private _componentFactory: ComponentFactory;
+
   public _injector: Injector;
 
   public get injector(): Injector {
@@ -54,6 +57,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
     this.providers.add(...providers);
 
     this._injector = Injector.create([], parent, this);
+    this._componentFactory = new ComponentFactory(this);
   }
 
   /**
