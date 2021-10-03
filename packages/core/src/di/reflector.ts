@@ -1,19 +1,14 @@
-import { isCustomProvider, ProviderResolvable } from '@di';
 import { BootstrapException } from '@exceptions';
 import {
-  DEFAULT_LIFETIME,
-  DEFAULT_SCOPE,
   DESIGN_PARAMETERS,
   DESIGN_RETURN_TYPE,
   DESIGN_TYPE,
-  INJECTABLE_METADATA,
-  InjectableOptions,
-  InjectorLifetime,
+  INJECT_DEPENDENCY_METADATA,
+  InjectionToken,
+  InjectMetadata,
+  isEmpty,
   isNil,
-  ProvidedInScope,
   Type,
-  WATSON_PROV_LIFETIME,
-  WATSON_PROV_SCOPE,
 } from '@watsonjs/common';
 
 export interface MethodDescriptor {
@@ -81,36 +76,6 @@ export class Reflector {
     return methodDescriptors;
   }
 
-  public static reflectProviderScope(
-    typeOrProvider: ProviderResolvable
-  ): Required<InjectableOptions> {
-    let lifetime: InjectorLifetime | undefined;
-    let scope: ProvidedInScope | undefined;
-
-    if (isCustomProvider(typeOrProvider)) {
-      const { provide } = typeOrProvider;
-
-      scope = provide[WATSON_PROV_LIFETIME];
-      lifetime = provide[WATSON_PROV_SCOPE];
-    } else {
-      const metadata = Reflector.reflectMetadata<InjectableOptions>(
-        INJECTABLE_METADATA,
-        typeOrProvider
-      );
-
-      lifetime = typeOrProvider[WATSON_PROV_LIFETIME] ?? metadata?.lifetime;
-      scope = typeOrProvider[WATSON_PROV_SCOPE] ?? metadata?.providedIn;
-    }
-
-    lifetime ??= DEFAULT_LIFETIME;
-    scope ??= DEFAULT_SCOPE;
-
-    return {
-      lifetime,
-      providedIn: scope,
-    } as Required<InjectableOptions>;
-  }
-
   /**
    * Returns metadata defined
    * on `metatype` with key`key`.
@@ -123,5 +88,27 @@ export class Reflector {
     propertyKey?: string
   ): T {
     return Reflect.getMetadata(key, metatype, propertyKey!) as T;
+  }
+
+  public static reflectCtorArgs(type: Type): (Type | InjectionToken)[] {
+    const deps = this.reflectMethodParameters<(Type | InjectionToken)[]>(type);
+
+    if (isNil(deps) || isEmpty(deps)) {
+      return [];
+    }
+
+    const injectParameters =
+      this.reflectMetadata<InjectMetadata[]>(
+        INJECT_DEPENDENCY_METADATA,
+        type
+      ) ?? [];
+
+    for (const inject of injectParameters) {
+      const { parameterIndex, provide } = inject;
+
+      deps[parameterIndex] = provide;
+    }
+
+    return deps;
   }
 }

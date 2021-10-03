@@ -1,4 +1,4 @@
-import { InjectorGetResult } from '@di';
+import { InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@di';
 import { resolveAsyncValue } from '@utils';
 import {
   InjectorLifetime,
@@ -30,6 +30,16 @@ export class DynamicInjector implements Injector {
     this._records = new Map<Providable, Binding>();
     this.parent = parent;
     this._scope = scope;
+
+    if (scope) {
+      this._records.set(
+        ModuleRef,
+        createBinding({
+          provide: ModuleRef,
+          useValue: scope,
+        } as ValueProvider)
+      );
+    }
 
     this._records.set(
       Injector,
@@ -109,12 +119,20 @@ export class DynamicInjector implements Injector {
   private _bindProviders(providers: ProviderResolvable[]) {
     for (let i = 0; i < providers.length; i++) {
       const provider = providers[i];
+
+      if (isCustomProvider(provider)) {
+        if (isUseExistingProvider(provider)) {
+          const { provide, useExisting, multi } = provider;
+          // TODO: Bind UseExisting
+        }
+      }
+
       const binding = createBinding(provider);
       this._records.set(binding.token, binding);
     }
   }
 
-  private _resolveDependency() {}
+  private _resolveDependency(dep: Providable) {}
 
   /**
    * Resolves dependencies for a given

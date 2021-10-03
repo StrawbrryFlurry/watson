@@ -1,45 +1,41 @@
 import { isNil, Providable } from '@watsonjs/common';
 
 import { Injector } from '.';
-import { ResolvedBinding } from './binding';
+import { Binding, InjectorGetResult } from '..';
 
-export class ContextInjector extends Injector {
-  private readonly _contextBindings: Map<any, ResolvedBinding>;
-
+export class ContextInjector implements Injector {
+  private readonly records: Map<any, Binding>;
   public readonly parent: Injector;
 
-  public resolve<T extends unknown = any>(typeOrToken: Providable<T>): T {
-    const binding = this._contextBindings.get(typeOrToken);
+  constructor(parent: Injector, bindings: Map<any, Binding>) {
+    this.parent = parent;
+    this.records = bindings;
+  }
+
+  public static createWithContext<T extends Map<Providable, Binding>>(
+    parent: Injector,
+    bindingFactory: (bindings: T) => T
+  ) {
+    const bindings = bindingFactory(new Map<Providable, Binding>() as T);
+    return new ContextInjector(parent, bindings);
+  }
+
+  public async get<T extends Providable, R extends InjectorGetResult<T>>(
+    typeOrToken: T
+  ): Promise<R> {
+    const binding = this.records.get(typeOrToken);
 
     if (isNil(binding)) {
-      return this.parent.resolve(typeOrToken);
+      return this.parent.get(typeOrToken);
     }
 
     return binding.instance;
   }
 
-  public get(typeOrToken: Providable): ResolvedBinding | null {
-    const binding = this._contextBindings.get(typeOrToken);
-
-    if (!isNil(binding)) {
-      return binding;
-    }
-
-    return this.parent.get?.(typeOrToken) ?? null;
-  }
-
-  constructor(parent: Injector, bindings: Map<any, ResolvedBinding>) {
-    super(parent);
-    this._contextBindings = bindings;
-  }
-
-  public static createWithContext<T extends Map<Providable, ResolvedBinding>>(
-    parent: Injector,
-    bindingFactory: (bindings: T) => T
-  ) {
-    const bindings = bindingFactory(
-      new Map<Providable, ResolvedBinding>() as T
-    );
-    return new ContextInjector(parent, bindings);
+  public getWithin<T extends Providable, R extends InjectorGetResult<T>>(
+    typeOrToken: T
+  ): R | null {
+    const binding = this.records.get(typeOrToken);
+    return binding?.instance ?? null;
   }
 }
