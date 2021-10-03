@@ -2,7 +2,7 @@ import { DiscordAdapter } from '@interfaces';
 import { Base, Client } from 'discord.js';
 
 import { BaseRoute, CommandPipeline, ContextType, EventPipeline, InteractionPipeline, PipelineHost } from '..';
-import { WATSON_ELEMENT_ID } from '../../fields';
+import { DIProvided } from '../..';
 import { Type } from '../type.interface';
 
 /**
@@ -10,9 +10,10 @@ import { Type } from '../type.interface';
  * about the current command / event route invocation it
  * belongs to.
  */
-export abstract class ExecutionContext implements PipelineHost {
-  static [WATSON_ELEMENT_ID] = -1;
-
+export abstract class ExecutionContext
+  extends DIProvided({ providedIn: "ctx" })
+  implements PipelineHost
+{
   /**
    * Returns the receiver from which this
    * context originated

@@ -1,11 +1,14 @@
 import { Binding, InjectorGetResult } from '@di';
-import { InjectorElementId, Providable, ReceiverDef, Type, UniqueTypeArray, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { DIProvided, Providable, ReceiverDef, Type, UniqueTypeArray } from '@watsonjs/common';
 
 import { ProviderResolvable } from '..';
 import { ComponentFactory } from './component-factory';
 import { Injector } from './injector';
 
-export abstract class ModuleRef implements Injector {
+export abstract class ModuleRef
+  extends DIProvided({ providedIn: "module" })
+  implements Injector
+{
   public parent: Injector | null;
   public metatype: Type;
 
@@ -14,8 +17,6 @@ export abstract class ModuleRef implements Injector {
   ): Promise<R>;
 
   public abstract get injector(): Injector;
-
-  static [WATSON_ELEMENT_ID] = InjectorElementId.Injector;
 }
 
 export interface ModuleDef {

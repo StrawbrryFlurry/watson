@@ -1,7 +1,7 @@
 import { Module } from '@di';
-import { InjectorElementId, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { DIProvided, Type } from '@watsonjs/common';
 
-export class ModuleContainer {
+export class ModuleContainer extends DIProvided({ providedIn: "root" }) {
   public modules = new Map<Type, Module>();
 
   public apply(module: Module) {
@@ -9,6 +9,4 @@ export class ModuleContainer {
 
     this.modules.set(metatype, module);
   }
-
-  static [WATSON_ELEMENT_ID] = InjectorElementId.Root;
 }

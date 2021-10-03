@@ -1,5 +1,5 @@
-import { Binding, Injector } from '@di';
-import { Type } from '@watsonjs/common';
+import { Binding, ContextInjector, Injector } from '@di';
+import { DIProvided, Type } from '@watsonjs/common';
 
 /**
  * Helper class for creating instances
@@ -7,10 +7,11 @@ import { Type } from '@watsonjs/common';
  * `Injectables` or the Module type
  * itself.
  */
-export class ComponentFactory {
+export class ComponentFactory extends DIProvided({ providedIn: "module" }) {
   private _injector: Injector;
 
   constructor(/** The module injector */ injector: Injector) {
+    super();
     this._injector = injector;
   }
 
@@ -18,9 +19,9 @@ export class ComponentFactory {
    * Creates a new instance of `componentType`.
    *
    * @param componentType The Component to instanciate
-   * @param injector Optional injector for resolving component deps
+   * @param context Optional {@link ContextInjector} for resolving component deps
    */
-  public create(componentType: Type, injector?: Injector): Binding {
+  public create(componentType: Type, context?: ContextInjector): Binding {
     return 0 as any;
   }
 }

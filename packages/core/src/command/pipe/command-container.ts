@@ -1,12 +1,16 @@
-import { CommandRoute, InjectorElementId, isString, Prefix, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { CommandRoute, DIProvided, isString, Prefix } from '@watsonjs/common';
 import iterate from 'iterare';
 
 import { EventTokenFactory } from './event-token-factory';
 
-export class CommandContainer extends Map<
-  /* RouteToken */ string,
-  CommandRoute
-> {
+type CommandMapCtor = new (
+  entries?: readonly (readonly [string, CommandRoute])[] | null
+) => Map<string, CommandRoute>;
+
+export class CommandContainer extends DIProvided(
+  { providedIn: "root" },
+  Map as CommandMapCtor
+) {
   public readonly commands = new Map<
     /* Command alias */ string,
     /* Route Token */ string
@@ -79,6 +83,4 @@ export class CommandContainer extends Map<
 
     return prefixes;
   }
-
-  static [WATSON_ELEMENT_ID] = InjectorElementId.Root;
 }

@@ -1,4 +1,4 @@
-import { DiscordAdapter, IWSEvent, RuntimeException, WATSON_ELEMENT_ID, WatsonEvent } from '@watsonjs/common';
+import { DIProvided, DiscordAdapter, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
@@ -6,10 +6,9 @@ import { ApplicationConfig } from '../application-config';
 import { EventProxy } from '../lifecycle';
 
 export abstract class AdapterRef<Client = any, Options = any>
+  extends DIProvided({ providedIn: "root" })
   implements DiscordAdapter<Client>
 {
-  public static [WATSON_ELEMENT_ID] = 0;
-
   protected _activity: ActivityOptions | null;
   protected configuration: ApplicationConfig;
   protected eventSubscriptions = new Map<
@@ -20,6 +19,7 @@ export abstract class AdapterRef<Client = any, Options = any>
   public ready = new BehaviorSubject<boolean>(false);
 
   constructor(configuration: ApplicationConfig) {
+    super();
     this.configuration = configuration;
   }
 

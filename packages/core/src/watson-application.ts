@@ -1,5 +1,5 @@
 import { Injector } from '@di';
-import { CanActivate, InjectorElementId, PipeTransform, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { CanActivate, DIProvided, PipeTransform, Type } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { PassThrough } from 'stream';
 
@@ -13,7 +13,9 @@ import { APP_STARTED, APP_STARTING, Logger } from './logger';
 import { RouteExplorer } from './router';
 import { WatsonContainer } from './watson-container';
 
-export abstract class ApplicationRef {
+export abstract class ApplicationRef extends DIProvided({
+  providedIn: "root",
+}) {
   public get rootInjector(): Injector {
     return this._rootInjector;
   }
@@ -21,10 +23,9 @@ export abstract class ApplicationRef {
   protected _rootInjector: Injector;
 
   constructor(rootInjector: Injector) {
+    super();
     this._rootInjector = rootInjector;
   }
-
-  static [WATSON_ELEMENT_ID] = InjectorElementId.Root;
 }
 
 /**

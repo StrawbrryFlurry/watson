@@ -1,31 +1,33 @@
+import { DIProvided } from '@interfaces';
 import { Channel, Client, Guild, Message, VoiceChannel } from 'discord.js';
-
-import { WATSON_ELEMENT_ID } from '../../../';
 
 /**
  * Injects the channel that the
  * event was emitted from.
  */
-export abstract class ChannelCtx extends Channel {
-  static [WATSON_ELEMENT_ID] = -1;
-}
+export abstract class ChannelCtx extends DIProvided(
+  { providedIn: "ctx" },
+  Channel
+) {}
 
 /**
  * Injects the voice channel
  * that the user, who has used the command
  * is in.
  */
-export abstract class VoiceChannelCtx extends VoiceChannel {
-  static [WATSON_ELEMENT_ID] = -1;
-}
+export abstract class VoiceChannelCtx extends DIProvided(
+  { providedIn: "ctx" },
+  VoiceChannel
+) {}
 
 /**
  * Injects the message that emitted
  * the event
  */
-export abstract class MessageCtx extends Message {
-  static [WATSON_ELEMENT_ID] = -1;
-}
+export abstract class MessageCtx extends DIProvided(
+  { providedIn: "ctx" },
+  Message
+) {}
 
 /**
  * Injects the discord client from
@@ -34,14 +36,16 @@ export abstract class MessageCtx extends Message {
  * Will be `null` if the event wasn't
  * emitted from a guild.
  */
-export abstract class GuildCtx extends Guild {
-  static [WATSON_ELEMENT_ID] = -1;
-}
+export abstract class GuildCtx extends DIProvided(
+  { providedIn: "ctx" },
+  Guild
+) {}
 
 /**
  * Injects the discord client from
  * which the event was emitted.
  */
-export abstract class ClientCtx extends Client {
-  static [WATSON_ELEMENT_ID] = -1;
-}
+export abstract class ClientCtx extends DIProvided(
+  { providedIn: "ctx" },
+  Client
+) {}
