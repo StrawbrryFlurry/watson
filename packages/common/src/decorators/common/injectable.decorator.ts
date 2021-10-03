@@ -50,6 +50,11 @@ export enum InjectorLifetime {
  * defined in `providedIn` and modules that import
  * that module, given it is exported.
  *
+ * - `Context` Provides the injectable in the
+ * `ContextInjector`. Note that injectables with
+ * a lifespan of `Event` need to be provided in
+ * the `ContextInjector`.
+ *
  * @default `root`
  */
 export type ProvidedInScope =
@@ -57,6 +62,7 @@ export type ProvidedInScope =
   | "internal"
   | "external"
   | "module"
+  | "ctx"
   | Type;
 
 export interface InjectableOptions {
