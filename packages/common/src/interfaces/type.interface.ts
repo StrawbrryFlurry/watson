@@ -1,4 +1,7 @@
 /**
  * A Type is most likely a class definition provided by Reflect.
  */
-export type Type<T = any> = (new (...args: any[]) => T) | Function;
+export type Type<T = any> =
+  | (new (...args: any[]) => T)
+  | Function
+  | FunctionConstructor;

@@ -1,12 +1,12 @@
 import { applyStackableMetadata } from '@decorators';
 
 import { INJECT_DEPENDENCY_METADATA } from '../../constants';
-import { Type } from '../../interfaces';
+import { InjectionToken, Type } from '../../interfaces';
 
 export interface InjectMetadata {
   propertyKey: string | symbol;
   parameterIndex: number;
-  provide: Type | string;
+  provide: Type | InjectionToken;
 }
 
 /**
@@ -16,7 +16,7 @@ export interface InjectMetadata {
  * Note that this decorator cannot be used
  * in class methods.
  */
-export function Inject(token: Type | string): ParameterDecorator {
+export function Inject(token: Type | InjectionToken): ParameterDecorator {
   return (
     target: Object,
     propertyKey: string | symbol,

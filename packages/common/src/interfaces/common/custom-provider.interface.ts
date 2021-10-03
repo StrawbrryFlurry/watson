@@ -71,5 +71,5 @@ export interface UseExistingProvider extends CustomProviderBase {
   /**
    * A reference to the existing provider.
    */
-  useExisting: ClassProvider | FactoryProvider | ValueProvider;
+  useExisting: Type | InjectionToken;
 }
