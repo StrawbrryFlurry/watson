@@ -7,11 +7,11 @@ import {
   NewsChannel,
   ReactionCollector,
   TextChannel,
-} from 'discord.js';
-import { Observable, Subject } from 'rxjs';
+} from "discord.js";
+import { Observable, Subject } from "rxjs";
 
-import { CustomComponentException } from '../../exceptions/custom-component.exception';
-import { isNil } from '../../utils';
+import { CustomComponentException } from "../../exceptions/custom-component.exception";
+import { isNil } from "../../utils";
 
 export interface ReactiveOptions {
   /**
@@ -61,7 +61,7 @@ export abstract class WatsonComponent<O extends ReactiveOptions> {
 
     this.channel = channel;
 
-    this._messageRef = await this.channel.send(this.content);
+    this._messageRef = await this.channel.send(this.content as any);
     this.isSent = true;
     await this.attachReactionListener();
   }
@@ -69,9 +69,10 @@ export abstract class WatsonComponent<O extends ReactiveOptions> {
   private async attachReactionListener() {
     const filter = this.options.reactionsFilter ?? (() => true);
 
-    this._reactionCollector = this._messageRef.createReactionCollector(filter, {
+    this._reactionCollector = this._messageRef.createReactionCollector({
+      filter,
       time: this.options.timeReactive,
-    });
+    }) as any;
 
     this._reactionCollector.on("collect", (reaction) => {
       this._reactionListener.next(reaction);
@@ -116,7 +117,7 @@ export abstract class WatsonComponent<O extends ReactiveOptions> {
    * @returns The updated message
    */
   public update(updatedContent: string | MessageEmbed) {
-    return this._messageRef.edit(updatedContent);
+    return this._messageRef.edit(updatedContent as any);
   }
 
   public delete() {

@@ -1,4 +1,4 @@
-import { CollectorOptions, MessageEmbed } from 'discord.js';
+import { CollectorOptions, MessageEmbed } from "discord.js";
 
 /**
  * @param message The message that should be sent to the channel.
@@ -11,7 +11,7 @@ export type CollectFunction<T = any> = (
   message: string | MessageEmbed,
   filter: (...args: unknown[]) => boolean,
   type: "message" | "reaction",
-  options?: CollectorOptions
+  options?: CollectorOptions<T[]>
 ) => Promise<T>;
 
 /**

@@ -1,5 +1,5 @@
-import { mergeDefaults } from '../..';
-import { CustomProvider, DynamicModule, Type } from '../../interfaces';
+import { mergeDefaults } from "../..";
+import { CustomProvider, DynamicModule, Type } from "../../interfaces";
 
 export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
@@ -23,6 +23,8 @@ export function Module(options: ModuleOptions = {}): ClassDecorator {
   };
 }
 
-export function isDynamicModule(module: Type | DynamicModule) {
+export function isDynamicModule(
+  module: Type | DynamicModule
+): module is DynamicModule {
   return "module" in module;
 }
