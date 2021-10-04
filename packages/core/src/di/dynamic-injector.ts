@@ -1,5 +1,10 @@
-import { InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@di';
-import { resolveAsyncValue } from '@utils';
+import {
+  InjectorGetResult,
+  isCustomProvider,
+  isUseExistingProvider,
+  ModuleRef,
+} from "@di";
+import { resolveAsyncValue } from "@utils";
 import {
   InjectorLifetime,
   isNil,
@@ -8,11 +13,16 @@ import {
   Type,
   ValueProvider,
   WATSON_PROV_SCOPE,
-} from '@watsonjs/common';
+} from "@watsonjs/common";
 
-import { createBinding, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
-import { Binding } from './binding';
-import { Injector } from './injector';
+import {
+  createBinding,
+  INJECTOR,
+  InjectorBloomFilter,
+  ProviderResolvable,
+} from "..";
+import { Binding } from "./binding";
+import { Injector } from "./injector";
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
@@ -114,6 +124,10 @@ export class DynamicInjector implements Injector {
     }
 
     return _instance;
+  }
+
+  public bind<T extends ProviderResolvable[]>(...providers: T): void {
+    this._bindProviders(providers);
   }
 
   private _bindProviders(providers: ProviderResolvable[]) {

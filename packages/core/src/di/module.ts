@@ -1,9 +1,15 @@
-import { Binding, InjectorGetResult } from '@di';
-import { DIProvided, Providable, ReceiverDef, Type, UniqueTypeArray } from '@watsonjs/common';
+import { Binding, InjectorGetResult } from "@di";
+import {
+  DIProvided,
+  Providable,
+  ReceiverDef,
+  Type,
+  UniqueTypeArray,
+} from "@watsonjs/common";
 
-import { ProviderResolvable } from '..';
-import { ComponentFactory } from './component-factory';
-import { Injector } from './injector';
+import { ProviderResolvable } from "..";
+import { ComponentFactory } from "./component-factory";
+import { Injector } from "./injector";
 
 export abstract class ModuleRef
   extends DIProvided({ providedIn: "module" })
@@ -20,10 +26,11 @@ export abstract class ModuleRef
 }
 
 export interface ModuleDef {
-  imports: ProviderResolvable[];
+  metatype: Type;
+  imports: Type[];
   receivers: Type[];
   providers: ProviderResolvable[];
-  exports: ProviderResolvable | ModuleDef[];
+  exports: ProviderResolvable[];
 }
 
 /**
@@ -33,7 +40,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
   private readonly _parent: Injector;
 
   public readonly exports = new UniqueTypeArray<ProviderResolvable>();
-  public readonly imports = new UniqueTypeArray<ModuleRef>();
+  public readonly imports = new UniqueTypeArray<Type>();
   public readonly receivers = new UniqueTypeArray<ReceiverDef>();
   public readonly providers = new UniqueTypeArray<ProviderResolvable>();
 

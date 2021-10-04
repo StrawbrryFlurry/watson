@@ -1,15 +1,14 @@
-import { InstanceLoader, Module, NewableTo } from '@di';
-import { isNil, Type, ValueProvider } from '@watsonjs/common';
-import { Client } from 'discord.js';
+import { InstanceLoader, NewableTo } from "@di";
+import { isNil, Type, ValueProvider } from "@watsonjs/common";
+import { Client } from "discord.js";
 
-import { AdapterRef, Injector } from '.';
-import { ModuleLoader } from './di/module-loader';
-import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
-import { WatsonApplicationOptions } from './interfaces';
-import { LifecycleHost } from './lifecycle/hooks';
-import { CREATE_APP_CONTEXT, Logger } from './logger';
-import { WatsonApplication } from './watson-application';
-import { WatsonContainer } from './watson-container';
+import { AdapterRef, Injector } from ".";
+import { ModuleLoader } from "./di/module-loader";
+import { BootstrappingHandler } from "./exceptions/revisit/bootstrapping-handler";
+import { WatsonApplicationOptions } from "./interfaces";
+import { LifecycleHost } from "./lifecycle/hooks";
+import { CREATE_APP_CONTEXT, Logger } from "./logger";
+import { ApplicationRef, WatsonApplication } from "./watson-application";
 
 const DEFAULT_ADAPTER_PACKAGE = "@watsonjs/platform-discordjs";
 
@@ -46,19 +45,23 @@ export class WatsonFactory {
     const adapterRef = new AdapterCtor(options);
 
     const rootInjector = Injector.create(
-      this.GET_APPLICATION_PROVIDERS(config, adapterRef),
+      this.GET_APPLICATION_PROVIDERS(adapterRef),
       Injector.NULL
     );
 
-    const applicationRef = new WatsonApplication(config, container);
+    const applicationRef = new WatsonApplication(rootInjector);
 
-    const container = new WatsonContainer(config);
+    rootInjector.bind({
+      provide: ApplicationRef,
+      useValue: applicationRef,
+    } as ValueProvider);
 
-    await this.initialize(module, container);
+    await this.initialize(module, rootInjector);
+
+    return applicationRef as T;
   }
 
   private static GET_APPLICATION_PROVIDERS(
-    appModule: Module,
     adapter: AdapterRef
   ): ValueProvider[] {
     return [
@@ -73,8 +76,8 @@ export class WatsonFactory {
     ];
   }
 
-  private static async initialize(module: Type, container: WatsonContainer) {
-    const loader = new ModuleLoader();
+  private static async initialize(module: Type, injector: Injector) {
+    const loader = new ModuleLoader(injector);
     const instanceLoader = new InstanceLoader(container);
     const lifecycleHost = new LifecycleHost(container);
 

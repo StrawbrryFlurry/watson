@@ -1,4 +1,4 @@
-import { Binding, DynamicInjector, Reflector } from '@di';
+import { Binding, DynamicInjector, Reflector } from "@di";
 import {
   ClassProvider,
   CustomProvider,
@@ -20,10 +20,10 @@ import {
   WATSON_BINDING_DEF,
   WATSON_PROV_LIFETIME,
   WATSON_PROV_SCOPE,
-} from '@watsonjs/common';
+} from "@watsonjs/common";
 
-import { ApplicationRef } from '..';
-import { NullInjector } from './null-injector';
+import { ApplicationRef } from "..";
+import { NullInjector } from "./null-injector";
 
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
 

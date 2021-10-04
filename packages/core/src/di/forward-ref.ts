@@ -1,6 +1,6 @@
-import { isFunction, Type } from '@watsonjs/common';
+import { isFunction, Type } from "@watsonjs/common";
 
-const FORWARD_REF_KEY = "__forward_ref__";
+const FORWARD_REF_KEY = "ɵforwardRef";
 
 /**
  * Allows to refer to references which are not yet defined.
@@ -9,9 +9,9 @@ const FORWARD_REF_KEY = "__forward_ref__";
  * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
  * a query is not yet defined.
  *
- * Refer to the Angular usage notes of forward ref
+ * Refer to the {@link [Angular usage notes of forward ref](https://angular.io/api/core/forwardRef)}
  */
-export function forwardRef(forwardRefFn: () => Type) {
+export function forwardRef<T extends () => Type>(forwardRefFn: T): T {
   Object.defineProperty(forwardRefFn, FORWARD_REF_KEY, {
     value: forwardRef,
   });
@@ -21,7 +21,9 @@ export function forwardRef(forwardRefFn: () => Type) {
 export function resolveForwardRef<T, R extends T extends () => infer R ? R : T>(
   forwardRefFn: T
 ): R {
-  return isForwardRef(forwardRefFn) ? forwardRefFn() : (forwardRefFn as R);
+  return isForwardRef(forwardRefFn)
+    ? (forwardRefFn() as R)
+    : (forwardRefFn as R);
 }
 
 export function isForwardRef(forwardRefFn: any): forwardRefFn is () => Type {

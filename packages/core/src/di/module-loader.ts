@@ -1,5 +1,5 @@
-import { Injector, ModuleImpl, Reflector } from '@di';
-import { InvalidDynamicModuleException } from '@exceptions';
+import { Injector, ModuleDef, Reflector } from '@di';
+import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
 import { COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
 import { resolveAsyncValue } from '@utils';
 import {
@@ -39,13 +39,18 @@ export class ModuleLoader {
    */
   public async resolveRootModule(metatype: Type) {
     this._logger.logMessage(REFLECT_MODULE_IMPORTS());
-    await this.scanModuleRecursively(metatype);
+    const modules = await this.scanModuleRecursively(metatype);
+
     this._logger.logMessage(COMPLETED());
     this._logger.logMessage(REFLECT_MODULE_COMPONENTS());
     await this.resolveModuleProperties();
   }
 
-  private async scanModuleRecursively(metatype: Type | DynamicModule) {
+  private async scanModuleRecursively(
+    metatype: Type | DynamicModule,
+    resolved = new Map<Type, ModuleDef>(),
+    ctx: Type[] = []
+  ): Promise<Map<Type, ModuleDef>> {
     const {
       imports,
       metatype: type,
@@ -54,24 +59,45 @@ export class ModuleLoader {
       receivers,
     } = await this.reflectModuleMetadata(metatype);
 
-    const modules = this._injector.get(ModuleContainer);
+    ctx.push(type);
 
-    for (const module of imports) {
-      if (module instanceof Promise) {
-        await module;
-      }
+    const _imports = (await Promise.all(
+      imports.map(async (module) =>
+        isDynamicModule(await module)
+          ? (module as DynamicModule).module
+          : module
+      )
+    )) as Type[];
 
-      await this.scanModuleRecursively(module as Type);
-    }
-
-    const m = new ModuleImpl(A, {
+    const moduleDef: ModuleDef = {
+      metatype: type,
       exports,
-      imports,
+      imports: _imports,
       providers,
       receivers,
-    });
+    };
 
-    modules.apply;
+    resolved.set(type, moduleDef);
+
+    await Promise.all(
+      (imports as (Type | DynamicModule)[]).map((module) => {
+        const importType = isDynamicModule(module) ? module.module : module;
+
+        if (isNil(module) || ctx.includes(importType)) {
+          throw new CircularDependencyException("ModuleLoader", type, ctx);
+        }
+
+        if (resolved.has(importType)) {
+          return;
+        }
+
+        return this.scanModuleRecursively(module as Type, resolved);
+      })
+    );
+
+    ctx.pop();
+
+    return resolved;
   }
 
   private resolveModuleProviders(
@@ -86,6 +112,21 @@ export class ModuleLoader {
 
     for (const _import of imports) {
     }
+  }
+
+  private async resolveModuleMap(
+    injector: Injector,
+    modules: Map<Type, ModuleDef>
+  ) {
+    const container = await injector.get(ModuleContainer);
+
+    for(const [type, moduleDef] of modules) {
+      module.
+
+
+
+    }
+
   }
 
   public reflectModuleMetadata(target: Type | DynamicModule) {

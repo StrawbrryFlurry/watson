@@ -1,8 +1,8 @@
-import { COMPLETED, CREATING_COMPONENT_INSTANCES, Logger } from '../logger';
-import { WatsonContainer } from '../watson-container';
-import { Injector } from './injector';
-import { MetadataResolver } from './metadata-resolver';
-import { Module } from './module';
+import { COMPLETED, CREATING_COMPONENT_INSTANCES, Logger } from "../logger";
+import { WatsonContainer } from "../watson-container";
+import { Injector } from "./injector";
+import { MetadataResolver } from "./metadata-resolver";
+import { Module } from "./module";
 
 export class InstanceLoader {
   private resolver: MetadataResolver;
@@ -10,8 +10,7 @@ export class InstanceLoader {
   private logger = new Logger("InstanceLoader");
   private container: WatsonContainer;
 
-  constructor(container: WatsonContainer) {
-    this.container = container;
+  constructor() {
     this.resolver = new MetadataResolver(this.container);
     this.injector = new Injector(this.resolver);
   }
