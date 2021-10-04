@@ -1,10 +1,5 @@
-import {
-  InjectorGetResult,
-  isCustomProvider,
-  isUseExistingProvider,
-  ModuleRef,
-} from "@di";
-import { resolveAsyncValue } from "@utils";
+import { getProviderType, InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@di';
+import { resolveAsyncValue } from '@utils';
 import {
   InjectorLifetime,
   isNil,
@@ -13,22 +8,17 @@ import {
   Type,
   ValueProvider,
   WATSON_PROV_SCOPE,
-} from "@watsonjs/common";
+} from '@watsonjs/common';
 
-import {
-  createBinding,
-  INJECTOR,
-  InjectorBloomFilter,
-  ProviderResolvable,
-} from "..";
-import { Binding } from "./binding";
-import { Injector } from "./injector";
+import { createBinding, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
+import { Binding } from './binding';
+import { Injector } from './injector';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
   protected _bloom: InjectorBloomFilter;
 
-  protected readonly _records: Map<Providable, Binding>;
+  protected readonly _records: Map<Providable, Binding | Binding[]>;
 
   protected _scope: Type | null;
 
@@ -37,7 +27,7 @@ export class DynamicInjector implements Injector {
     parent: Injector | null = null,
     scope: Type | null = null
   ) {
-    this._records = new Map<Providable, Binding>();
+    this._records = new Map<Providable, Binding | Binding[]>();
     this.parent = parent;
     this._scope = scope;
 
@@ -49,6 +39,8 @@ export class DynamicInjector implements Injector {
           useValue: scope,
         } as ValueProvider)
       );
+
+      this._records.set(scope, createBinding(scope));
     }
 
     this._records.set(
@@ -70,6 +62,10 @@ export class DynamicInjector implements Injector {
     this._bindProviders(providers);
   }
 
+  public bind<T extends ProviderResolvable[]>(...providers: T): void {
+    this._bindProviders(providers);
+  }
+
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T
   ): Promise<R> {
@@ -78,8 +74,7 @@ export class DynamicInjector implements Injector {
 
     if (
       !isNil(this._scope) &&
-      (bindingScope === "module" ||
-        this._scope instanceof (bindingScope as Type))
+      (bindingScope === "module" || this._scope === (bindingScope as Type))
     ) {
       parent = Injector.NULL;
     }
@@ -90,14 +85,30 @@ export class DynamicInjector implements Injector {
       return parent.get(typeOrToken);
     }
 
-    const { lifetime, instance, ɵdeps } = binding;
+    if (Array.isArray(binding)) {
+      let instances = [];
+
+      for (let i = 0; i < binding.length; i++) {
+        const instance = await this._createInstanceWithDependencies(binding[i]);
+        instances.push(instance);
+      }
+
+      return instances as R;
+    }
+
+    const instance = await this._createInstanceWithDependencies(binding);
+    return instance;
+  }
+
+  private async _createInstanceWithDependencies(binding: Binding) {
+    const { lifetime, instance, deps: ɵdeps } = binding;
 
     if (!isNil(instance) && binding.isDependencyTreeStatic()) {
       return instance;
     }
 
     if (!binding.hasDependencies()) {
-      const instance = binding.ɵfactory();
+      const instance = binding.factory();
 
       if (lifetime & InjectorLifetime.Singleton) {
         binding.instance = instance;
@@ -111,23 +122,17 @@ export class DynamicInjector implements Injector {
     for (let i = 0; i < (ɵdeps as unknown[]).length; i++) {
       const dep = ɵdeps[i];
 
-      const depInstance = this._resolveDependency(dep);
+      const depInstance = await this.get(dep);
       dependencies.push(depInstance);
     }
 
-    const _instance = await resolveAsyncValue(
-      binding.ɵfactory(...dependencies)
-    );
+    const _instance = await resolveAsyncValue(binding.factory(...dependencies));
 
     if (lifetime & InjectorLifetime.Singleton) {
       binding.instance = _instance;
     }
 
     return _instance;
-  }
-
-  public bind<T extends ProviderResolvable[]>(...providers: T): void {
-    this._bindProviders(providers);
   }
 
   private _bindProviders(providers: ProviderResolvable[]) {
@@ -141,64 +146,12 @@ export class DynamicInjector implements Injector {
         }
       }
 
+      const token = getProviderType(provider);
+      const hasBinding = this._records.get(token) ?? [];
       const binding = createBinding(provider);
-      this._records.set(binding.token, binding);
+      const { multi } = binding;
+      const record = multi ? [...(hasBinding as Binding[]), binding] : binding;
+      this._records.set(binding.token, record);
     }
   }
-
-  private _resolveDependency(dep: Providable) {}
-
-  /**
-   * Resolves dependencies for a given
-   * provider.
-   */
-  // public resolveTypeDeps(binding: Binding): ResolvedBinding {
-  //   new Binding();
-  //
-  //   new ResolvedBinding();
-  // }
-
-  // private _recursivelyAddProviders(providers) {}
 }
-
-// public resolve<T extends any>(
-//   typeTokenOrProvider: ProviderResolvable | Providable
-// ): T {
-//  if (isInjectionToken(typeTokenOrProvider)) {
-//    const hash = this._bloom.getHash(typeTokenOrProvider);
-//
-//    if (isNil(hash) || this._bloom.has(hash)) {
-//      if (isNil(this._parent)) {
-//        throw new UnknownProviderException(
-//          "ReflectiveInjector",
-//          typeTokenOrProvider.name,
-//          this._moduleRef.name
-//        );
-//      }
-//
-//      return this._parent.resolve(typeTokenOrProvider);
-//    }
-//  }
-//
-//  const token = getTokenFromProvider(typeTokenOrProvider);
-//
-//  let binding = this._providers.get(token);
-//
-//  if (isNil(binding)) {
-//    createBindingFromProvider(typeTokenOrProvider, this._moduleRef);
-//
-//    binding = new Binding();
-//  }
-//
-//  const binding = new Binding();
-//
-//  return null as T;
-
-function createInstanceOfBinding<
-  T extends Binding,
-  R extends T extends Binding<infer T, infer F, infer I> ? I : never
->(binding: T): R {
-  return binding.instance as R;
-}
-
-function resolveProviderDependencies() {}

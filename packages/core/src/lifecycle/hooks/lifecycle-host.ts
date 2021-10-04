@@ -1,3 +1,4 @@
+import { Injector, ModuleRef } from '@di';
 import {
   isFunction,
   isNil,
@@ -10,13 +11,13 @@ import {
 } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { InstanceWrapper, Module } from '../../injector';
-import { WatsonContainer } from '../../watson-container';
+import { ModuleContainer } from '../../di/module-container';
+import { InstanceWrapper } from '../../injector';
 
 type ComponentWithLifecycleFunction = { [key: string]: Function };
 
 export class LifecycleHost {
-  constructor(private readonly container: WatsonContainer) {}
+  constructor(private readonly injector: Injector) {}
 
   public async callOnApplicationBootstrapHook() {
     return this.callLifecycleHook<OnApplicationBootstrap>(
@@ -72,7 +73,7 @@ export class LifecycleHost {
   }
 
   private getModuleComponents(
-    module: Module
+    module: ModuleRef
   ): InstanceWrapper<ReceiverDef | ProviderDef>[] {
     const { receivers, providers } = module;
 
@@ -87,21 +88,22 @@ export class LifecycleHost {
     return [...receiverWrappers, ...ProviderWrappers];
   }
 
-  private getModules(): Module[] {
-    const modulesMap = this.container.getModules();
-    const modules = iterate(modulesMap)
-      .map(([token, module]) => module)
+  private async getModules(): Promise<ModuleRef[]> {
+    const { modules } = await this.injector.get(ModuleContainer);
+
+    const moduleRefs = iterate(modules)
+      .map(([metatype, module]) => module)
       .toArray();
 
-    return modules;
+    return moduleRefs;
   }
 
   private async getModulesWithLifecycleHook<T>(
-    modules: Module[],
+    modules: ModuleRef[],
     hook: keyof T
   ): Promise<ComponentWithLifecycleFunction[]> {
     const moduleWrappers = await Promise.all(
-      modules.map((module) => module.getModuleInstance())
+      modules.map((module) => module.instance)
     );
 
     const modulesWithLifecycleHook = this.getInstancesWithLifecycleHook(

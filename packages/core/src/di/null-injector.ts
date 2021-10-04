@@ -1,6 +1,5 @@
 import { Binding, Injector } from '@di';
-import { isNil, Providable, RuntimeException, WATSON_BINDING_DEF } from '@watsonjs/common';
-import { stringify } from 'querystring';
+import { isNil, Providable, RuntimeException, stringify, WATSON_BINDING_DEF } from '@watsonjs/common';
 
 export class NullInjector implements Injector {
   public parent: null;

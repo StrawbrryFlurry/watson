@@ -1,4 +1,4 @@
-import { Binding, DynamicInjector, Reflector } from "@di";
+import { Binding, DynamicInjector, Reflector } from '@di';
 import {
   ClassProvider,
   CustomProvider,
@@ -20,10 +20,10 @@ import {
   WATSON_BINDING_DEF,
   WATSON_PROV_LIFETIME,
   WATSON_PROV_SCOPE,
-} from "@watsonjs/common";
+} from '@watsonjs/common';
 
-import { ApplicationRef } from "..";
-import { NullInjector } from "./null-injector";
+import { ApplicationRef } from '..';
+import { NullInjector } from './null-injector';
 
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
 
@@ -105,7 +105,7 @@ export function createResolvedBinding(provider: ValueProvider): Binding {
 
   const binding = new Binding(provide, lifetime, providedIn, () => useValue);
 
-  binding.ɵmetatype = provider;
+  binding.metatype = provider;
   binding.multi = multi ?? false;
 
   return binding;
@@ -173,9 +173,9 @@ export function createBinding(provider: ProviderResolvable): Binding {
     const deps = Reflector.reflectCtorArgs(provider);
 
     const binding = new Binding(provider, lifetime, providedIn);
-    binding.ɵmetatype = provider;
-    binding.ɵdeps = deps;
-    binding.ɵfactory = (...args) => Reflect.construct(provider as Type, args);
+    binding.metatype = provider;
+    binding.deps = deps;
+    binding.factory = (...args) => Reflect.construct(provider as Type, args);
     provider[WATSON_BINDING_DEF] = binding;
     return binding;
   }
@@ -191,18 +191,18 @@ export function createBinding(provider: ProviderResolvable): Binding {
    */
   if (isClassProvider(provider)) {
     const { useClass, deps } = provider;
-    binding.ɵmetatype = useClass;
-    binding.ɵdeps = deps;
-    binding.ɵfactory = (...args) => Reflect.construct(useClass, args);
+    binding.metatype = useClass;
+    binding.deps = deps;
+    binding.factory = (...args) => Reflect.construct(useClass, args);
   } else if (isFactoryProvider(provider)) {
     const { useFactory, deps } = provider;
-    binding.ɵmetatype = useFactory;
-    binding.ɵdeps = deps;
-    binding.ɵfactory = (...args) => useFactory(...args);
+    binding.metatype = useFactory;
+    binding.deps = deps;
+    binding.factory = (...args) => useFactory(...args);
   } else {
     const { useValue } = provider as ValueProvider;
-    binding.ɵmetatype = useValue;
-    binding.ɵfactory = () => useValue;
+    binding.metatype = useValue;
+    binding.factory = () => useValue;
   }
 
   return binding;

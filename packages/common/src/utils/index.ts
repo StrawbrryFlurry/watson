@@ -4,3 +4,5 @@ export * from "./is-method-decorator.utils";
 export * from "./merge-default.utils";
 export * from "./shared.utils";
 export * from "./type.utils";
+export * from "./optional-assign.utils";
+export * from "./stringify.utils";
