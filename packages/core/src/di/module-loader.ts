@@ -1,26 +1,33 @@
-import { Injector, ModuleDef, ProviderResolvable, Reflector } from '@di';
+import { Injector, ModuleDef, ModuleImpl, ModuleRef, ProviderResolvable, Reflector } from '@di';
 import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
-import { COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
+import { Logger } from '@logger';
 import { resolveAsyncValue } from '@utils';
 import {
-  CustomProvider,
   DynamicModule,
   EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
-  INJECT_DEPENDENCY_METADATA,
-  InjectMetadata,
+  InjectionToken,
   isDynamicModule,
-  isEmpty,
   isFunction,
   isNil,
   MODULE_METADATA,
+  optionalAssign,
   PIPE_METADATA,
   PREFIX_METADATA,
   Type,
+  UniqueTypeArray,
+  WATSON_MODULE_PROV,
 } from '@watsonjs/common';
 
 import { ModuleContainer } from './module-container';
+
+export const BOOTSTRAP_MODULE_PROVIDERS = new InjectionToken(
+  "Used to provide a set of metadata keys that should be considered by the `ModuleLoader` when scanning module providers",
+  {
+    providedIn: "root",
+  }
+);
 
 /**
  * Resolves module dependencies
@@ -39,12 +46,8 @@ export class ModuleLoader {
    * Resolves the root module to recursively add its imports to the container
    */
   public async resolveRootModule(metatype: Type) {
-    this._logger.logMessage(REFLECT_MODULE_IMPORTS());
     const modules = await this.scanModuleRecursively(metatype);
-
-    this._logger.logMessage(COMPLETED());
-    this._logger.logMessage(REFLECT_MODULE_COMPONENTS());
-    await this.resolveModuleProperties();
+    this.traverseModuleMap(metatype, modules);
   }
 
   private async scanModuleRecursively(
@@ -101,30 +104,126 @@ export class ModuleLoader {
     return resolved;
   }
 
-  private resolveModuleProviders(
-    module: ModuleDef,
-    _providers: ProviderResolvable[] = []
-  ) {
-    const { imports, providers } = module;
+  private async traverseModuleMap(
+    rootModule: Type,
+    modules: Map<Type, ModuleDef>
+  ): Promise<void> {
+    const container = await this._injector.get(ModuleContainer);
 
-    if (isEmpty(imports)) {
-      return [..._providers, ...providers];
-    }
+    const rootDef = modules.get(rootModule)!;
 
-    for (const _import of imports) {
-    }
+    // Calling this method on the root module
+    // should resolve injector providers for all
+    // other modules as well.
+    this.recursivelyResolveModuleProviders(rootDef, modules);
+
+    const rootRef = new ModuleImpl(
+      rootModule,
+      this._injector,
+      this._injector,
+      rootDef
+    );
+
+    const createModuleRecursively = (
+      parentDef: ModuleDef,
+      parentRef: ModuleRef
+    ) => {
+      const { imports } = parentDef;
+
+      for (const _import of imports) {
+        const childDef = modules.get(_import)!;
+
+        const childRef = new ModuleImpl(
+          childDef.metatype,
+          this._injector,
+          parentRef,
+          childDef
+        );
+
+        container.apply(childRef);
+        createModuleRecursively(childDef, childRef);
+      }
+    };
+
+    createModuleRecursively(rootDef, rootRef);
   }
 
-  private async resolveModuleMap(
-    injector: Injector,
+  private recursivelyResolveModuleProviders(
+    moduleDef: ModuleDef,
     modules: Map<Type, ModuleDef>
-  ) {
-    const container = await injector.get(ModuleContainer);
+  ): ProviderResolvable[] {
+    const { imports, providers, metatype } = moduleDef;
+    const moduleProviders: ProviderResolvable[] = [...providers];
 
-    for(const [type, moduleDef] of modules) {
-      module.
+    if (!isNil(metatype[WATSON_MODULE_PROV])) {
+      return metatype[WATSON_MODULE_PROV];
     }
 
+    const resolveExports = (module: ModuleDef): ProviderResolvable[] => {
+      const { imports, exports, providers, metatype } = module;
+      const __ctx = [];
+
+      if (!isNil(metatype[WATSON_MODULE_PROV])) {
+        moduleProviders.push(...metatype[WATSON_MODULE_PROV]);
+        return metatype[WATSON_MODULE_PROV];
+      }
+
+      const injectables = this.reflectModuleInjectables(moduleDef);
+      moduleProviders.push(...injectables);
+
+      // If the module exports itself,
+      // export all of it's providers
+      if (exports.includes(metatype)) {
+        moduleProviders.push(...providers);
+        __ctx.push(...providers);
+      }
+
+      // Check for module re-exporting
+      for (const _export of exports) {
+        const moduleDef = modules.get(_export as Type);
+
+        if (isNil(moduleDef)) {
+          moduleProviders.push(_export);
+          continue;
+        }
+
+        if (!imports.includes(moduleDef.metatype)) {
+          throw `ModuleLoader: Could not find an import for the exported module ${moduleDef.metatype.name}`;
+        }
+
+        const exportCtx = resolveExports(moduleDef);
+        __ctx.push(...exportCtx);
+      }
+
+      return optionalAssign(metatype, WATSON_MODULE_PROV, __ctx);
+    };
+
+    const injectables = this.reflectModuleInjectables(moduleDef);
+    moduleProviders.push(...injectables);
+
+    for (const _import of imports) {
+      const importDef = modules.get(_import);
+
+      if (isNil(importDef)) {
+        throw `ModuleLoader: COuld not find a corresponding module for import ${_import.name}`;
+      }
+
+      optionalAssign(_import, WATSON_MODULE_PROV, resolveExports(importDef));
+    }
+
+    optionalAssign(metatype, WATSON_MODULE_PROV, moduleProviders);
+    return moduleProviders;
+  }
+
+  private reflectModuleInjectables(moduleDef: ModuleDef) {
+    const { receivers } = moduleDef;
+    const providers = new UniqueTypeArray<ProviderResolvable>();
+
+    for (const receiver of receivers) {
+      providers.add(...this.reflectInjectables(receiver));
+    }
+
+    return providers;
   }
 
   public reflectModuleMetadata(target: Type | DynamicModule) {
@@ -187,117 +286,33 @@ export class ModuleLoader {
     };
   }
 
-  public reflectInjectedProvider(target: Type, ctorIndex: number) {
-    const injectValue =
-      Reflector.reflectMetadata<InjectMetadata[]>(
-        INJECT_DEPENDENCY_METADATA,
-        target
-      ) || [];
+  private reflectInjectables(
+    metatype: Type
+  ): UniqueTypeArray<ProviderResolvable> {
+    const injectables = new UniqueTypeArray<ProviderResolvable>();
 
-    for (const value of injectValue) {
-      if (value.parameterIndex === ctorIndex) {
-        return value.provide;
-      }
+    if (isNil(metatype) || isNil(metatype.prototype)) {
+      return injectables;
     }
 
-    return null;
-  }
-
-  private async resolveModuleProperties() {
-    const { modules } = this._container;
-
-    for (const [token, { metatype }] of modules) {
-      const { imports, exports, providers, receivers } =
-        await this.reflectModuleMetadata(metatype);
-
-      this.reflectProviders(token, providers);
-      this.reflectReceivers(token, receivers);
-      this.reflectImports(token, imports as Type[]);
-      this.reflectExports(token, exports);
-    }
-  }
-
-  private getDynamicModuleMetadataByKey<
-    K extends Exclude<keyof DynamicModule, "global" | "module">
-  >(token: string, key: K) {
-    return Promise.all(
-      this._container.getDynamicModuleMetadataByToken(token, key) as any[]
-    );
-  }
-
-  private async reflectImports(token: string, imports: Type[]) {
-    const dynamicModuleImports = await this.getDynamicModuleMetadataByKey(
-      token,
-      "imports"
-    );
-
-    [...imports, ...dynamicModuleImports].forEach((_import) =>
-      this._container.addImport(token, _import as Type)
-    );
-  }
-
-  private async reflectExports(
-    token: string,
-    exports: (Type | CustomProvider)[]
-  ) {
-    const dynamicModuleExports = await this.getDynamicModuleMetadataByKey(
-      token,
-      "exports"
-    );
-
-    [...exports, ...dynamicModuleExports].forEach((_export) =>
-      this._container.addExport(token, _export)
-    );
-  }
-
-  private async reflectProviders(
-    token: string,
-    providers: (Type | CustomProvider)[]
-  ) {
-    const dynamicModuleProviders = await this.getDynamicModuleMetadataByKey(
-      token,
-      "providers"
-    );
-
-    [...providers, ...dynamicModuleProviders].forEach((provider) => {
-      this.reflectDynamicMetadata(provider as any, token);
-      this._container.addProvider(token, provider);
-    });
-  }
-
-  private async reflectReceivers(token: string, receivers: Type[]) {
-    const dynamicModuleReceivers = await this.getDynamicModuleMetadataByKey(
-      token,
-      "receivers"
-    );
-
-    [...receivers, ...dynamicModuleReceivers].forEach((receiver) => {
-      this.reflectDynamicMetadata(receiver, token);
-      this._container.addReceiver(token, receiver);
-    });
-  }
-
-  private reflectDynamicMetadata(metatype: Type, token: string) {
-    if (!metatype || !metatype.prototype) {
-      return;
-    }
-
-    this.reflectComponentInjectables(metatype, token, GUARD_METADATA);
-    this.reflectComponentInjectables(metatype, token, PIPE_METADATA);
-    this.reflectComponentInjectables(metatype, token, FILTER_METADATA);
+    this.reflectComponentInjectables(metatype, injectables, GUARD_METADATA);
+    this.reflectComponentInjectables(metatype, injectables, PIPE_METADATA);
+    this.reflectComponentInjectables(metatype, injectables, FILTER_METADATA);
     this.reflectComponentInjectables(
       metatype,
-      token,
+      injectables,
       EXCEPTION_HANDLER_METADATA
     );
-    this.reflectComponentInjectables(metatype, token, PREFIX_METADATA);
+    this.reflectComponentInjectables(metatype, injectables, PREFIX_METADATA);
+
+    return injectables;
   }
 
   private reflectComponentInjectables(
     metatype: Type,
-    token: string,
+    resolved: UniqueTypeArray<ProviderResolvable>,
     metadataKey: string
-  ) {
+  ): void {
     const prototypeInjectables =
       Reflector.reflectMetadata<any[]>(metadataKey, metatype) ?? [];
 
@@ -306,20 +321,15 @@ export class ModuleLoader {
     const methodInjectables = prototypeMethods
       .map(
         (method) =>
-          Reflector.reflectMetadata<any[]>(
-            metadataKey,
-            method.descriptor as Type
-          ) ?? []
+          Reflector.reflectMetadata<any[]>(metadataKey, method.descriptor) ?? []
       )
-      .filter((e) => typeof e !== "undefined");
+      .filter((e) => !isNil(e));
 
     const injectables = [
       ...prototypeInjectables,
       ...methodInjectables.flat(),
     ].filter(isFunction);
 
-    injectables.forEach((injectable) => {
-      this._container.addInjectable(token, injectable);
-    });
+    resolved.add(...injectables);
   }
 }

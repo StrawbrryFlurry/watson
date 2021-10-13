@@ -73,7 +73,7 @@ export class Reflector {
       })
     );
 
-    return methodDescriptors;
+    return methodDescriptors ?? [];
   }
 
   /**

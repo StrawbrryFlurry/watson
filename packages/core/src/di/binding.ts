@@ -1,5 +1,14 @@
-import { Injector } from '@di';
-import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, W_ELEMENT_ID } from '@watsonjs/common';
+import {
+  HasProvLifetime,
+  HasProvScope,
+  InjectorLifetime,
+  isEmpty,
+  isNil,
+  Providable,
+  ProvidedInScope,
+  Type,
+  WATSON_PROV_LIFETIME,
+} from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
@@ -28,17 +37,14 @@ export class Binding<
     | NewableTo<InstanceType>
     | FactoryFn<InstanceType>
     | Type = any,
-  Deps extends any[] = any,
+  Deps extends (HasProvLifetime & HasProvScope)[] = any,
   InstanceType extends any = any
 > {
   /** The type this binding represents */
-  public ɵmetatype: MetaType;
+  public metatype: MetaType;
 
   /** The token with which the binding can be resolved */
   public readonly token: Providable;
-
-  /** The module this binding belongs to */
-  public readonly host: Injector | null;
 
   /**
    * If the binding has any dependencies,
@@ -48,22 +54,42 @@ export class Binding<
    *
    * [SomeService, SomeContextProperty]
    */
-  public ɵdeps: Deps | null;
+  public deps: Deps | null;
 
   public multi: boolean = false;
 
-  public optional: boolean = false;
+  private _isTreeStatic: boolean | null = null;
+
+  public isTransient() {
+    return this.lifetime & InjectorLifetime.Event;
+  }
 
   public isDependencyTreeStatic(): boolean {
+    if (!isNil(this._isTreeStatic)) {
+      return this._isTreeStatic;
+    }
+
     if (!this.hasDependencies()) {
+      this._isTreeStatic = true;
       return true;
     }
 
-    return false;
+    for (let i = 0; i < this.deps!.length; i++) {
+      const dep = this.deps![i];
+      const lifetime = dep[WATSON_PROV_LIFETIME];
+
+      if (lifetime & (InjectorLifetime.Event | InjectorLifetime.Transient)) {
+        this._isTreeStatic = false;
+        return false;
+      }
+    }
+
+    this._isTreeStatic = true;
+    return true;
   }
 
   public hasDependencies(): boolean {
-    return !isNil(this.ɵdeps) && !isEmpty(this.ɵdeps);
+    return !isNil(this.deps) && !isEmpty(this.deps);
   }
 
   /**
@@ -88,7 +114,7 @@ export class Binding<
     this.lifetime = lifetime;
     this.scope = scope;
 
-    this.ɵfactory = factory! ?? undefined;
+    this.factory = factory! ?? undefined;
   }
 
   /**
@@ -96,7 +122,7 @@ export class Binding<
    * be called by the injector to create a
    * new instance of the provider.
    */
-  public ɵfactory!: (
+  public factory!: (
     ...deps: Deps
   ) => Observable<InstanceType> | Promise<InstanceType> | InstanceType;
 }

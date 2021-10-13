@@ -1,6 +1,5 @@
 import { Binding, Injector } from '@di';
-import { isNil, Providable, RuntimeException, W_BINDING_DEF } from '@watsonjs/common';
-import { stringify } from 'querystring';
+import { isNil, Providable, RuntimeException, stringify, W_BINDING_DEF } from '@watsonjs/common';
 
 export class NullInjector implements Injector {
   public parent: null;
@@ -17,10 +16,6 @@ export class NullInjector implements Injector {
 
     if (isNil(bindingDef)) {
       return t();
-    }
-
-    if (bindingDef.optional) {
-      return null;
     }
 
     t();

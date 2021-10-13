@@ -1,5 +1,5 @@
-import { InjectorLifetime, ProvidedInScope } from '@decorators';
-import { Type } from '@interfaces';
+import { InjectorLifetime, InjectorLifetime, ProvidedInScope, ProvidedInScope } from '@decorators';
+import { CustomProvider, Type, Type } from '@interfaces';
 
 /**
  *  TODO: If we're going to use the closure compiler,
@@ -37,18 +37,15 @@ export enum InjectorElementId {
 
 /**
  * Any type (`Object`) that is resolved by
- * an injector will have this filed, referencing
- * the injector that has created it.
- */
-export const W_INJ_IMPL = "ɵinj";
-
-/**
- * Any type (`Object`) that is resolved by
  * an injector will have this field, referencing
  * the {@link Binding } type from which it was
  * created.
  */
-export const W_BINDING_DEF = "ɵbind";
+export const WATSON_BINDING_DEF = "ɵbidef";
+
+export interface HasBindingDef<T = any> {
+  [WATSON_BINDING_DEF]: T;
+}
 
 /**
  * Property on a {@link Type} that
@@ -57,7 +54,11 @@ export const W_BINDING_DEF = "ɵbind";
  *
  * {@link InjectorLifetime}
  */
-export const W_PROV_LIFETIME = "ɵlifetime";
+export const WATSON_PROV_LIFETIME = "ɵprovlife";
+
+export interface HasProvLifetime {
+  [WATSON_PROV_LIFETIME]: InjectorLifetime;
+}
 
 /**
  * Property on a {@link Type} that
@@ -66,7 +67,17 @@ export const W_PROV_LIFETIME = "ɵlifetime";
  *
  * {@link ProvidedInScope}
  */
-export const W_PROV_SCOPE = "ɵscope";
+export const WATSON_PROV_SCOPE = "ɵprovsc";
+
+export interface HasProvScope {
+  [WATSON_PROV_SCOPE]: ProvidedInScope;
+}
+
+export const WATSON_MODULE_PROV = "ɵmoprov";
+
+export interface HasModuleProv {
+  [WATSON_MODULE_PROV]: CustomProvider | Type;
+}
 
 export function getOwnDefinition<T>(
   type: Type | Object,
