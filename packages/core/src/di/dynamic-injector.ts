@@ -12,7 +12,7 @@ import {
   ProvidedInScope,
   Type,
   ValueProvider,
-  WATSON_PROV_SCOPE,
+  W_PROV_SCOPE,
 } from "@watsonjs/common";
 
 import {
@@ -73,7 +73,7 @@ export class DynamicInjector implements Injector {
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T
   ): Promise<R> {
-    const bindingScope = typeOrToken[WATSON_PROV_SCOPE] as ProvidedInScope;
+    const bindingScope = typeOrToken[W_PROV_SCOPE] as ProvidedInScope;
     let parent = this.parent ?? Injector.NULL;
 
     if (

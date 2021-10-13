@@ -1,3 +1,6 @@
+import { InjectorLifetime, ProvidedInScope } from '@decorators';
+import { Type } from '@interfaces';
+
 /**
  *  TODO: If we're going to use the closure compiler,
  * we need to make sure that these property names
@@ -5,9 +8,6 @@
  * to rename them to a more compact / efficient
  * one.
  */
-import { InjectorLifetime, ProvidedInScope } from '@decorators';
-import { Type } from '@interfaces';
-
 /**
  * The element ID is used by the DI
  * framework to determine wether a
@@ -27,7 +27,7 @@ import { Type } from '@interfaces';
  *   injector
  * - [-2] The current injector
  */
-export const WATSON_ELEMENT_ID = "ɵeid";
+export const W_ELEMENT_ID = "ɵeid";
 
 export enum InjectorElementId {
   Root = 0,
@@ -40,7 +40,7 @@ export enum InjectorElementId {
  * an injector will have this filed, referencing
  * the injector that has created it.
  */
-export const WATSON_INJ_IMPL = "ɵinj";
+export const W_INJ_IMPL = "ɵinj";
 
 /**
  * Any type (`Object`) that is resolved by
@@ -48,7 +48,7 @@ export const WATSON_INJ_IMPL = "ɵinj";
  * the {@link Binding } type from which it was
  * created.
  */
-export const WATSON_BINDING_DEF = "ɵbind";
+export const W_BINDING_DEF = "ɵbind";
 
 /**
  * Property on a {@link Type} that
@@ -57,7 +57,7 @@ export const WATSON_BINDING_DEF = "ɵbind";
  *
  * {@link InjectorLifetime}
  */
-export const WATSON_PROV_LIFETIME = "ɵlifetime";
+export const W_PROV_LIFETIME = "ɵlifetime";
 
 /**
  * Property on a {@link Type} that
@@ -66,7 +66,7 @@ export const WATSON_PROV_LIFETIME = "ɵlifetime";
  *
  * {@link ProvidedInScope}
  */
-export const WATSON_PROV_SCOPE = "ɵscope";
+export const W_PROV_SCOPE = "ɵscope";
 
 export function getOwnDefinition<T>(
   type: Type | Object,

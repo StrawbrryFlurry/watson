@@ -1,12 +1,12 @@
 import { Binding, Injector } from '@di';
-import { isNil, Providable, RuntimeException, WATSON_BINDING_DEF } from '@watsonjs/common';
+import { isNil, Providable, RuntimeException, W_BINDING_DEF } from '@watsonjs/common';
 import { stringify } from 'querystring';
 
 export class NullInjector implements Injector {
   public parent: null;
 
   public async get(typeTokenOrProvider: Providable): Promise<any> {
-    const bindingDef = typeTokenOrProvider[WATSON_BINDING_DEF] as
+    const bindingDef = typeTokenOrProvider[W_BINDING_DEF] as
       | Binding
       | undefined;
     const t = () => {

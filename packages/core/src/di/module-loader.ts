@@ -1,4 +1,4 @@
-import { Injector, ModuleDef, Reflector } from '@di';
+import { Injector, ModuleDef, ProviderResolvable, Reflector } from '@di';
 import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
 import { COMPLETED, Logger, REFLECT_MODULE_COMPONENTS, REFLECT_MODULE_IMPORTS } from '@logger';
 import { resolveAsyncValue } from '@utils';
@@ -11,6 +11,7 @@ import {
   INJECT_DEPENDENCY_METADATA,
   InjectMetadata,
   isDynamicModule,
+  isEmpty,
   isFunction,
   isNil,
   MODULE_METADATA,
@@ -122,9 +123,6 @@ export class ModuleLoader {
 
     for(const [type, moduleDef] of modules) {
       module.
-
-
-
     }
 
   }

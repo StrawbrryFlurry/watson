@@ -1,29 +1,29 @@
-import { Binding, DynamicInjector, Reflector } from "@di";
+import { Binding, DynamicInjector, Reflector } from '@di';
 import {
-  ClassProvider,
-  CustomProvider,
-  DEFAULT_LIFETIME,
-  DEFAULT_SCOPE,
-  DIProvided,
-  FactoryProvider,
-  getOwnDefinition,
-  INJECTABLE_METADATA,
-  InjectableOptions,
-  InjectionToken,
-  InjectorLifetime,
-  isNil,
-  Providable,
-  ProvidedInScope,
-  Type,
-  UseExistingProvider,
-  ValueProvider,
-  WATSON_BINDING_DEF,
-  WATSON_PROV_LIFETIME,
-  WATSON_PROV_SCOPE,
-} from "@watsonjs/common";
+    ClassProvider,
+    CustomProvider,
+    DEFAULT_LIFETIME,
+    DEFAULT_SCOPE,
+    DIProvided,
+    FactoryProvider,
+    getOwnDefinition,
+    INJECTABLE_METADATA,
+    InjectableOptions,
+    InjectionToken,
+    InjectorLifetime,
+    isNil,
+    Providable,
+    ProvidedInScope,
+    Type,
+    UseExistingProvider,
+    ValueProvider,
+    W_BINDING_DEF,
+    W_PROV_LIFETIME,
+    W_PROV_SCOPE,
+} from '@watsonjs/common';
 
-import { ApplicationRef } from "..";
-import { NullInjector } from "./null-injector";
+import { ApplicationRef } from '..';
+import { NullInjector } from './null-injector';
 
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
 
@@ -135,16 +135,16 @@ export function getProviderScope(
   if (isCustomProvider(typeOrProvider)) {
     const { provide } = typeOrProvider;
 
-    scope = provide[WATSON_PROV_LIFETIME];
-    lifetime = provide[WATSON_PROV_SCOPE];
+    scope = provide[W_PROV_LIFETIME];
+    lifetime = provide[W_PROV_SCOPE];
   } else {
     const metadata = Reflector.reflectMetadata<InjectableOptions>(
       INJECTABLE_METADATA,
       typeOrProvider
     );
 
-    lifetime = typeOrProvider[WATSON_PROV_LIFETIME] ?? metadata?.lifetime;
-    scope = typeOrProvider[WATSON_PROV_SCOPE] ?? metadata?.providedIn;
+    lifetime = typeOrProvider[W_PROV_LIFETIME] ?? metadata?.lifetime;
+    scope = typeOrProvider[W_PROV_SCOPE] ?? metadata?.providedIn;
   }
 
   lifetime ??= DEFAULT_LIFETIME;
@@ -160,7 +160,7 @@ export function createBinding(provider: ProviderResolvable): Binding {
   const providerType = getProviderType(provider);
   const existingBinding = getOwnDefinition<Binding>(
     providerType,
-    WATSON_BINDING_DEF
+    W_BINDING_DEF
   );
 
   if (!isNil(existingBinding)) {
@@ -176,13 +176,13 @@ export function createBinding(provider: ProviderResolvable): Binding {
     binding.ɵmetatype = provider;
     binding.ɵdeps = deps;
     binding.ɵfactory = (...args) => Reflect.construct(provider as Type, args);
-    provider[WATSON_BINDING_DEF] = binding;
+    provider[W_BINDING_DEF] = binding;
     return binding;
   }
 
   const { provide, multi } = provider;
   const binding = new Binding(provide, lifetime, providedIn);
-  provide[WATSON_BINDING_DEF] = binding;
+  provide[W_BINDING_DEF] = binding;
   binding.multi = multi ?? false;
   /**
    * UseExisting providers are handled

@@ -1,8 +1,8 @@
-import { COMPLETED, CREATING_COMPONENT_INSTANCES, Logger } from "../logger";
-import { WatsonContainer } from "../watson-container";
-import { Injector } from "./injector";
-import { MetadataResolver } from "./metadata-resolver";
-import { Module } from "./module";
+import { COMPLETED, CREATING_COMPONENT_INSTANCES, Logger } from '../logger';
+import { WatsonContainer } from '../watson-container';
+import { Injector } from './injector';
+import { MetadataResolver } from './metadata-resolver';
+import { Module } from './module';
 
 export class InstanceLoader {
   private resolver: MetadataResolver;

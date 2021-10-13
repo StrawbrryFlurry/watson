@@ -1,7 +1,7 @@
 import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions } from '@decorators';
 import { mergeDefaults } from '@utils';
 
-import { WATSON_PROV_LIFETIME, WATSON_PROV_SCOPE } from '../..';
+import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
 
 export function DIProvided<T extends new (...args: any[]) => any>(
   options: InjectableOptions = {},
@@ -17,7 +17,7 @@ export function DIProvided<T extends new (...args: any[]) => any>(
       super(...args);
     }
 
-    public static [WATSON_PROV_LIFETIME] = lifetime;
-    public static [WATSON_PROV_SCOPE] = providedIn;
+    public static [W_PROV_LIFETIME] = lifetime;
+    public static [W_PROV_SCOPE] = providedIn;
   };
 }

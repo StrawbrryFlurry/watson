@@ -14,7 +14,7 @@ const BLOOM_MASK = BLOOM_BUCKET_SIZE - 1;
  * defined on it's prototype
  * which makes it unrestricted.
  */
-let WATSON_ELEMENT_ID = 1;
+let W_ELEMENT_ID = 1;
 
 export class InjectorBloomFilter {
   /**
@@ -44,9 +44,9 @@ export class InjectorBloomFilter {
   }
 
   public add(type: WatsonDiProvidable | Type): void {
-    const id: number = isNil(type[WATSON_ELEMENT_ID])
-      ? (type[WATSON_ELEMENT_ID] = this._container.DI_TOKEN_ID)
-      : type[WATSON_ELEMENT_ID];
+    const id: number = isNil(type[W_ELEMENT_ID])
+      ? (type[W_ELEMENT_ID] = this._container.DI_TOKEN_ID)
+      : type[W_ELEMENT_ID];
 
     const bloomBit = id & BLOOM_MASK;
     const mask = 1 << bloomBit;
@@ -63,7 +63,7 @@ export class InjectorBloomFilter {
    * injector `null` is returned.
    */
   public getHash(type: WatsonDiProvidable | Type): number | null {
-    const id = type[WATSON_ELEMENT_ID];
+    const id = type[W_ELEMENT_ID];
 
     if (id === -1) {
       return null;

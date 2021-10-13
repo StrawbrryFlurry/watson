@@ -1,5 +1,5 @@
 import { Injector } from '@di';
-import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, WATSON_ELEMENT_ID } from '@watsonjs/common';
+import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, W_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
@@ -10,7 +10,7 @@ export type FactoryFn<T = any, D extends Array<any> = any[]> = (
 ) => T;
 
 export interface WatsonDiProvidable {
-  [WATSON_ELEMENT_ID]: number;
+  [W_ELEMENT_ID]: number;
 }
 
 /**
