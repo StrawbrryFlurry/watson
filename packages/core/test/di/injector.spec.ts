@@ -1,4 +1,4 @@
-import { Injector } from "@watsonjs/core";
+import { Injector } from '@watsonjs/core';
 
 describe("It can create dependencies", () => {
   test("A is A", async () => {
