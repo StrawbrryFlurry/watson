@@ -77,7 +77,8 @@ export class DynamicInjector implements Injector {
 
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
-    notFoundValue?: any
+    notFoundValue?: any,
+    ctx?: Injector
   ): Promise<R> {
     const bindingScope = typeOrToken[W_PROV_SCOPE] as ProvidedInScope;
     let parent = this.parent ?? Injector.NULL;

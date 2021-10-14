@@ -51,7 +51,8 @@ export abstract class Injector extends DIProvided({ providedIn: "module" }) {
 
   public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
-    notFoundValue?: any
+    notFoundValue?: any,
+    ctx?: Injector
   ): Promise<R>;
 
   static create(

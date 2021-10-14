@@ -112,8 +112,10 @@ export class ReceiverRef<T = any> implements Injector {
   }
 
   public get<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: T
+    typeOrToken: T,
+    notFoundValue?: any,
+    ctx?: Injector
   ): Promise<R> {
-    return this._injector.get(typeOrToken);
+    return this._injector.get(typeOrToken, notFoundValue, ctx);
   }
 }

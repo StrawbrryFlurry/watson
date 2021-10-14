@@ -21,12 +21,13 @@ export class ContextInjector implements Injector {
   }
 
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: T
+    typeOrToken: T,
+    notFoundValue?: any
   ): Promise<R> {
     const binding = this.records.get(typeOrToken);
 
     if (isNil(binding)) {
-      return this.parent.get(typeOrToken);
+      return this.parent.get(typeOrToken, notFoundValue, this);
     }
 
     return binding.instance;

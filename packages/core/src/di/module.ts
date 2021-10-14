@@ -224,8 +224,9 @@ export class ModuleImpl extends ModuleRef implements Injector {
    */
   public async get<T>(
     typeOrToken: Providable<T>,
-    notFoundValue?: any
+    notFoundValue?: any,
+    ctx?: Injector
   ): Promise<T> {
-    return this.injector.get(typeOrToken, notFoundValue);
+    return this.injector.get(typeOrToken, notFoundValue, ctx);
   }
 }
