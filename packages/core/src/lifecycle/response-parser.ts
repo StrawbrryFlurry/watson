@@ -2,7 +2,7 @@ import { isNil, isString } from '@watsonjs/common';
 import { MessageEmbed } from 'discord.js';
 
 import { NotParsableException } from '../exceptions/not-parsable.exception';
-import { ExecutionContextHost } from './execution-context-host';
+import { ExecutionContextHost } from './execution-context';
 
 export type ICommandResponse<T = any> = undefined | T[] | T;
 

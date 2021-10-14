@@ -1,5 +1,7 @@
+import { Injector, InjectorGetResult } from '@di';
 import {
   ContextType,
+  DIProvided,
   DiscordAdapter,
   EventPipeline,
   ExecutionContext,
@@ -14,19 +16,20 @@ import { AbstractDiscordAdapter } from '../adapters';
 import { CommandPipelineHost } from '../command';
 import { AbstractRoute } from '../router';
 
-export class ExecutionContextHost<
+export class ExecutionContextImpl<
   PipelineHost extends
     | CommandPipelineHost
     | EventPipeline
     | InteractionPipeline = PipelineBase,
   EventData extends DjsBaseClass[] = any
-> implements ExecutionContext
+> extends DIProvided({providedIn: 'ctx'})  implements ExecutionContext, Injector
 {
   public handler: Function;
   public next: Function;
   public route: AbstractRoute;
   public adapter: AbstractDiscordAdapter;
   public eventData: EventData;
+  public parent: Injector | null;
 
   private pipeline: PipelineHost;
 
@@ -37,11 +40,20 @@ export class ExecutionContextHost<
     adapter: AbstractDiscordAdapter,
     next?: Function
   ) {
+    super();
     this.pipeline = pipeline;
     this.adapter = adapter;
     this.eventData = eventData;
     this.route = route;
     this.next = next;
+  }
+
+  public async get<T extends unknown, R extends InjectorGetResult<T>>(typeOrToken: T): Promise<R> {
+    throw new Error('Method not implemented.');
+  }
+
+  public switchToInteraction(): InteractionPipeline {
+    throw new Error('Method not implemented.');
   }
 
   public setNext(nextFn: Function) {

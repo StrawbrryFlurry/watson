@@ -1,7 +1,7 @@
 import { isNil } from '@watsonjs/common';
 import { TextChannel } from 'discord.js';
 
-import { ExecutionContextHost } from './execution-context-host';
+import { ExecutionContextHost } from './execution-context';
 import { ResponseParser } from './response-parser';
 
 export class ResponseController {

@@ -8,7 +8,7 @@ import {
 
 import { CommandPipelineHost } from '../command';
 import { ErrorHost } from '../errors';
-import { ExecutionContextHost } from './execution-context-host';
+import { ExecutionContextHost } from './execution-context';
 
 export class CommonExceptionHandler extends EventExceptionHandler {
   private errorHost = new ErrorHost();
