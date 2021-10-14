@@ -1,10 +1,10 @@
 import { PIPE_METADATA } from '@constants';
-import { InterceptorMetadata } from '@decorators';
+import { InjectorLifetime, InterceptorMetadata } from '@decorators';
 import { CommandArgument, InjectionToken } from '@interfaces';
-import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
 
-import { applyStackableMetadata } from '../apply-stackable-metadata';
+import { W_INJ_TYPE } from '../..';
+import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 
 /**
  * Alters an argument passed to a route
@@ -22,12 +22,18 @@ export type PipeTransformFn = <T extends CommandArgument, R>(argument: T) => R;
 export type PipesMetadata = PipeTransform | WithPipeTransform | PipeTransformFn;
 
 export const GLOBAL_PIPE = new InjectionToken<InterceptorMetadata[]>(
-  "Pipe that are applied globally"
+  "Pipe that are applied globally",
+  { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
+GLOBAL_PIPE[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Pipe;
+
 export const PIPE = new InjectionToken<InterceptorMetadata[]>(
-  "Pipe for the current module"
+  "Pipe for the current module",
+  { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
+
+PIPE[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Pipe;
 
 /**
  * TODO:
@@ -42,10 +48,12 @@ export function UsePipes(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(PIPE_METADATA, descriptor!.value, pipes);
-    }
-
-    applyStackableMetadata(PIPE_METADATA, target.constructor, pipes);
+    return applyInjectableMetadata(
+      ɵINJECTABLE_TYPE.Pipe,
+      PIPE_METADATA,
+      pipes,
+      target,
+      descriptor
+    );
   };
 }

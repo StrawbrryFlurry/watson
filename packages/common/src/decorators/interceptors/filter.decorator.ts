@@ -1,9 +1,10 @@
 import { FILTER_METADATA } from '@constants';
+import { InjectorLifetime } from '@decorators';
 import { ExecutionContext, InjectionToken } from '@interfaces';
-import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
 
-import { applyStackableMetadata } from '../apply-stackable-metadata';
+import { W_INJ_TYPE } from '../..';
+import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 
 /**
  * Filters work in a similar way to guards. Their difference being that they will not throw an error if the command shouldn't be run.
@@ -26,12 +27,18 @@ export type FilterFn = (ctx: ExecutionContext) => boolean;
 export type FiltersMetadata = PassThrough | WithPassThrough | FilterFn;
 
 export const GLOBAL_FILTER = new InjectionToken<FiltersMetadata[]>(
-  "Filters that are applied globally"
+  "Filters that are applied globally",
+  { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
+GLOBAL_FILTER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Filter;
+
 export const FILTER = new InjectionToken<FiltersMetadata[]>(
-  "Filters for the current module"
+  "Filters for the current module",
+  { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
+
+FILTER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Filter;
 
 export function UseFilters(
   ...filters: FiltersMetadata[]
@@ -41,14 +48,12 @@ export function UseFilters(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(
-        FILTER_METADATA,
-        descriptor!.value,
-        filters
-      );
-    }
-
-    applyStackableMetadata(FILTER_METADATA, target.constructor, filters);
+    return applyInjectableMetadata(
+      ɵINJECTABLE_TYPE.Filter,
+      FILTER_METADATA,
+      filters,
+      target,
+      descriptor
+    );
   };
 }

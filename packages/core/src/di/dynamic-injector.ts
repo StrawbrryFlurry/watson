@@ -1,6 +1,15 @@
 import { getProviderType, InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@di';
 import { resolveAsyncValue } from '@utils';
-import { InjectorLifetime, isNil, Providable, ProvidedInScope, Type, ValueProvider } from '@watsonjs/common';
+import {
+  InjectorLifetime,
+  isFunction,
+  isNil,
+  Providable,
+  ProvidedInScope,
+  Type,
+  ValueProvider,
+  W_PROV_SCOPE,
+} from '@watsonjs/common';
 
 import { createBinding, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
 import { Binding } from './binding';
@@ -13,15 +22,23 @@ export class DynamicInjector implements Injector {
   protected readonly _records: Map<Providable, Binding | Binding[]>;
 
   protected _scope: Type | null;
+  protected _component: boolean;
 
   constructor(
     providers: ProviderResolvable[],
     parent: Injector | null = null,
-    scope: Type | null = null
+    scope: Type | null = null,
+    /**
+     * A component injector doesn't have it's own scoping
+     * so it always resolves unknown providers in the parent
+     * scope even if the binding scope is `module`.
+     */
+    component: boolean = false
   ) {
     this._records = new Map<Providable, Binding | Binding[]>();
     this.parent = parent;
     this._scope = scope;
+    this._component = component;
 
     if (scope) {
       this._records.set(
@@ -59,14 +76,23 @@ export class DynamicInjector implements Injector {
   }
 
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: T
+    typeOrToken: T,
+    notFoundValue?: any
   ): Promise<R> {
     const bindingScope = typeOrToken[W_PROV_SCOPE] as ProvidedInScope;
     let parent = this.parent ?? Injector.NULL;
 
+    if (bindingScope === "ctx") {
+      throw new Error(
+        "[DynamicInjector] Cannot resolve a context bound provider in the dynamic injector"
+      );
+    }
+
     if (
+      !this._component &&
       !isNil(this._scope) &&
-      (bindingScope === "module" || this._scope === (bindingScope as Type))
+      (bindingScope === "module" ||
+        (isFunction(bindingScope) && this._scope instanceof bindingScope))
     ) {
       parent = Injector.NULL;
     }
@@ -74,7 +100,7 @@ export class DynamicInjector implements Injector {
     const binding = this._records.get(typeOrToken);
 
     if (isNil(binding)) {
-      return parent.get(typeOrToken);
+      return parent.get(typeOrToken, notFoundValue);
     }
 
     if (Array.isArray(binding)) {

@@ -2,9 +2,9 @@ import { EXCEPTION_HANDLER_METADATA } from '@constants';
 import { InterceptorMetadata } from '@decorators';
 import { RuntimeException } from '@exceptions';
 import { ExceptionHandler, InjectionToken } from '@interfaces';
-import { isMethodDecorator } from '@utils';
 
-import { applyStackableMetadata } from '../apply-stackable-metadata';
+import { W_INJ_TYPE } from '../..';
+import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 
 interface WithCatch {
   prototype: ExceptionHandler;
@@ -14,11 +14,18 @@ export type ExceptionHandlerFn = (exception: RuntimeException) => void;
 
 export const GLOBAL_EXCEPTION_HANDLER = new InjectionToken<
   InterceptorMetadata[]
->("Exception handler that are applied globally");
+>("Exception handler that are applied globally", {
+  providedIn: "root",
+});
+
+GLOBAL_EXCEPTION_HANDLER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.ExceptionHandler;
 
 export const EXCEPTION_HANDLER = new InjectionToken<InterceptorMetadata[]>(
-  "Exception handler for the current module"
+  "Exception handler for the current module",
+  { providedIn: "module" }
 );
+
+EXCEPTION_HANDLER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.ExceptionHandler;
 
 export type ExceptionHandlerMetadata =
   | WithCatch
@@ -33,18 +40,12 @@ export function UseExceptionHandler(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(
-        EXCEPTION_HANDLER_METADATA,
-        descriptor!.value,
-        handlers
-      );
-    }
-
-    applyStackableMetadata(
+    return applyInjectableMetadata(
+      ɵINJECTABLE_TYPE.ExceptionHandler,
       EXCEPTION_HANDLER_METADATA,
-      target.constructor,
-      handlers
+      handlers,
+      target,
+      descriptor
     );
   };
 }

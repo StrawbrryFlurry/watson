@@ -5,7 +5,7 @@ import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
 
 export function DIProvided<T extends new (...args: any[]) => any>(
   options: InjectableOptions = {},
-  xtends: T = class {} as any
+  xtends: T = class {} as T
 ) {
   const { lifetime, providedIn } = mergeDefaults(options, {
     lifetime: DEFAULT_LIFETIME,

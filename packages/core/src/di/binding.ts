@@ -7,7 +7,8 @@ import {
   Providable,
   ProvidedInScope,
   Type,
-  WATSON_PROV_LIFETIME,
+  W_ELEMENT_ID,
+  W_PROV_LIFETIME,
 } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
@@ -76,7 +77,7 @@ export class Binding<
 
     for (let i = 0; i < this.deps!.length; i++) {
       const dep = this.deps![i];
-      const lifetime = dep[WATSON_PROV_LIFETIME];
+      const lifetime = dep[W_PROV_LIFETIME];
 
       if (lifetime & (InjectorLifetime.Event | InjectorLifetime.Transient)) {
         this._isTreeStatic = false;

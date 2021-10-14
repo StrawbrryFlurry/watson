@@ -1,8 +1,10 @@
 import { GUARD_METADATA } from '@constants';
-import { applyStackableMetadata } from '@decorators';
+import { InjectorLifetime } from '@decorators';
 import { ExecutionContext, InjectionToken } from '@interfaces';
-import { isMethodDecorator } from '@utils';
 import { Observable } from 'rxjs';
+
+import { W_INJ_TYPE } from '../..';
+import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 
 /**
  * Guards will check incoming commands for user permissions or other data you might
@@ -27,12 +29,18 @@ export type GuardFn = (ctx: ExecutionContext) => boolean;
 export type GuardsMetadata = CanActivate | WithCanActivate;
 
 export const GLOBAL_GUARD = new InjectionToken<GuardsMetadata[]>(
-  "Filter that are applied globally"
+  "Filter that are applied globally",
+  { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
+GLOBAL_GUARD[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Guard;
+
 export const GUARD = new InjectionToken<GuardsMetadata[]>(
-  "Filter for the current module"
+  "Filter for the current module",
+  { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
+
+GUARD[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Guard;
 
 export function UseGuards(
   ...guards: GuardsMetadata[]
@@ -42,10 +50,12 @@ export function UseGuards(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    if (isMethodDecorator(descriptor)) {
-      return applyStackableMetadata(GUARD_METADATA, descriptor!.value, guards);
-    }
-
-    applyStackableMetadata(GUARD_METADATA, target.constructor, guards);
+    return applyInjectableMetadata(
+      ɵINJECTABLE_TYPE.Guard,
+      GUARD_METADATA,
+      guards,
+      target,
+      descriptor
+    );
   };
 }

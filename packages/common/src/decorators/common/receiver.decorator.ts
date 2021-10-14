@@ -1,5 +1,5 @@
 import { RECEIVER_METADATA } from '@constants';
-import { Prefix } from '@interfaces';
+import { CustomProvider, Prefix, Type } from '@interfaces';
 import { isNil, isObject, isString } from '@utils';
 
 export interface ReceiverOptions {
@@ -18,6 +18,11 @@ export interface ReceiverOptions {
    * `Help`
    */
   groupName?: string;
+  /**
+   * Providers that are scoped to this
+   * receiver.
+   */
+  providers?: (CustomProvider | Type)[];
 }
 
 export function Receiver(): ClassDecorator;

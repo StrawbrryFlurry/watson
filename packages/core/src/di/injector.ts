@@ -17,7 +17,9 @@ import {
   Type,
   UseExistingProvider,
   ValueProvider,
-  WATSON_BINDING_DEF,
+  W_BINDING_DEF,
+  W_PROV_LIFETIME,
+  W_PROV_SCOPE,
 } from '@watsonjs/common';
 
 import { ApplicationRef } from '..';
@@ -48,15 +50,17 @@ export abstract class Injector extends DIProvided({ providedIn: "module" }) {
   public parent: Injector | null = null;
 
   public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: T
+    typeOrToken: T,
+    notFoundValue?: any
   ): Promise<R>;
 
   static create(
     providers: ProviderResolvable[],
     parent: Injector | null = null,
-    scope: any | null = null
+    scope: any | null = null,
+    component: boolean = false
   ) {
-    return new DynamicInjector(providers, parent, scope);
+    return new DynamicInjector(providers, parent, scope, component);
   }
 }
 
@@ -174,7 +178,7 @@ export function createBinding(provider: ProviderResolvable): Binding {
     binding.metatype = provider;
     binding.deps = deps;
     binding.factory = (...args) => Reflect.construct(provider as Type, args);
-    provider[WATSON_BINDING_DEF] = binding;
+    provider[W_BINDING_DEF] = binding;
     return binding;
   }
 
