@@ -60,9 +60,13 @@ export class ReceiverRef<T = any> implements Injector {
   ) {
     this.parent = moduleRef;
     const injectorProviders = this._bindProviders(providers);
+
     this._bindInjectables(injectables);
     this._injector = Injector.create(
-      injectorProviders,
+      [
+        ...injectorProviders,
+        /* We also want to be able to instantiate this receiver using its own injector */ metatype,
+      ],
       moduleRef,
       moduleRef,
       true
