@@ -1,12 +1,12 @@
-import { createBinding, DynamicInjector, getProviderScope, InjectorGetResult, Reflector } from '@di';
+import { DynamicInjector, getProviderScope, InjectorGetResult, Reflector } from '@di';
 import {
   CustomProvider,
   DIProvided,
   EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
-  InjectionToken,
   isNil,
+  MODULE_GLOBAL_METADATA,
   PIPE_METADATA,
   PREFIX_METADATA,
   Providable,
@@ -25,6 +25,12 @@ import { ComponentFactory } from './component-factory';
 import { Injector } from './injector';
 import { ReceiverRef } from './receiver-ref';
 
+/**
+ * `ModuleRef` is a wrapper for a Watson Module which
+ * contains that module's injector and the component
+ * factory used to create receivers and other parts
+ * of the module.
+ */
 export abstract class ModuleRef<T = any>
   extends DIProvided({ providedIn: "module" })
   implements Injector
@@ -63,9 +69,6 @@ export interface ModuleDef {
   exports: ProviderResolvable[];
 }
 
-/**
- * Wrapper for a class decorated with the @\Module decorator.
- */
 export class ModuleImpl extends ModuleRef implements Injector {
   public componentFactory: ComponentFactory;
 
@@ -74,7 +77,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
   }
   private _injector: Injector;
 
-  private _componentProviders = new Map<InjectionToken, ProviderResolvable[]>();
+  private _contextProviders = new UniqueTypeArray<ProviderResolvable>();
 
   constructor(
     metatype: Type,
@@ -107,13 +110,19 @@ export class ModuleImpl extends ModuleRef implements Injector {
     ];
 
     this._injector = Injector.create(injectorBindableProviders, parent, this);
-    this._componentFactory = new ComponentFactory(this);
+    this._componentFactory = new ComponentFactory();
   }
 
   private _bindProviders(
     providers: ProviderResolvable[],
     rootInjector: Injector
   ): ProviderResolvable[] {
+    const isGlobalModule =
+      Reflector.reflectMetadata<boolean>(
+        MODULE_GLOBAL_METADATA,
+        this.metatype
+      ) ?? false;
+
     return providers
       .map((provider) => {
         const { providedIn } = getProviderScope(provider);
@@ -121,12 +130,14 @@ export class ModuleImpl extends ModuleRef implements Injector {
         if (providedIn === "root") {
           (rootInjector as DynamicInjector).bind(provider);
         } else if (providedIn === "ctx") {
-          this._contextProviders.add(createBinding(provider));
+          this._contextProviders.add(provider);
         } else if (providedIn === "module") {
+          isGlobalModule && (rootInjector as DynamicInjector).bind(provider);
           return provider;
         }
         // TODO: Add internal / external
         else if (providedIn === this.metatype) {
+          isGlobalModule && (rootInjector as DynamicInjector).bind(provider);
           return provider;
         }
 
@@ -169,8 +180,6 @@ export class ModuleImpl extends ModuleRef implements Injector {
       return injectables;
     }
 
-    // TODO: Custom injectables const customInjectablesKeys = this.parent!.get(CUSTOM_INJECTABLE_METADATA);
-
     this._reflectComponentInjectable(metatype, injectables, GUARD_METADATA);
     this._reflectComponentInjectable(metatype, injectables, PIPE_METADATA);
     this._reflectComponentInjectable(metatype, injectables, FILTER_METADATA);
@@ -212,7 +221,9 @@ export class ModuleImpl extends ModuleRef implements Injector {
       metatype
     );
 
-    return providers ?? [];
+    const prov = providers ?? [];
+
+    return [...prov, ...this._contextProviders];
   }
 
   /**

@@ -4,19 +4,20 @@ import { Injector } from '.';
 import { Binding, InjectorGetResult } from '..';
 
 export class ContextInjector implements Injector {
-  private readonly records: Map<any, Binding>;
+  private readonly records: Map<Providable, Binding>;
   public readonly parent: Injector;
 
-  constructor(parent: Injector, bindings: Map<any, Binding>) {
+  constructor(parent: Injector, bindings: Map<Providable, Binding>) {
     this.parent = parent;
     this.records = bindings;
   }
 
   public static createWithContext<T extends Map<Providable, Binding>>(
     parent: Injector,
-    bindingFactory: (bindings: T) => T
+    bindingFactory: (bindings: T) => void
   ) {
-    const bindings = bindingFactory(new Map<Providable, Binding>() as T);
+    const bindings = new Map<Providable, Binding>() as T;
+    bindingFactory(bindings);
     return new ContextInjector(parent, bindings);
   }
 

@@ -44,6 +44,15 @@ export type InjectorGetResult<T> = T extends InjectionToken<infer R>
   ? R
   : never;
 
+/**
+ * If it's okay for the injector to
+ * not find a specific token, provide
+ * this constant as the default value.
+ * That way, if no provider is found,
+ * it is returned by the `NullInjector`
+ */
+export const NOT_FOUND = {};
+
 export abstract class Injector extends DIProvided({ providedIn: "module" }) {
   public static NULL = new NullInjector();
 

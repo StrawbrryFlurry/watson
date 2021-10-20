@@ -1,5 +1,7 @@
-import { Binding, ContextInjector, Injector } from '@di';
+import { ContextInjector, Injector, NOT_FOUND } from '@di';
 import { DIProvided, Type } from '@watsonjs/common';
+
+import { ReceiverRef } from './receiver-ref';
 
 /**
  * Helper class for creating instances
@@ -8,20 +10,34 @@ import { DIProvided, Type } from '@watsonjs/common';
  * itself.
  */
 export class ComponentFactory extends DIProvided({ providedIn: "module" }) {
-  private _injector: Injector;
-
-  constructor(/** The module injector */ injector: Injector) {
+  constructor() {
     super();
-    this._injector = injector;
   }
 
   /**
    * Creates a new instance of `componentType`.
    *
-   * @param componentType The Component to instanciate
+   * @param componentType The Component to instantiate
    * @param context Optional {@link ContextInjector} for resolving component deps
    */
-  public create(componentType: Type, context?: ContextInjector): Binding {
-    return 0 as any;
+  public async create(
+    componentType: Type,
+    moduleInjector: Injector,
+    ctx?: ContextInjector
+  ) {
+    const componentRef = (await moduleInjector.get(
+      componentType,
+      NOT_FOUND
+    )) as ReceiverRef;
+
+    if (componentRef === NOT_FOUND) {
+      return this._createInjectable();
+    }
+
+    return this._createReceiver();
   }
+
+  private async _createInjectable() {}
+
+  private async _createReceiver() {}
 }
