@@ -1,177 +1,169 @@
+import { MethodDescriptor, Reflector } from '@core/di';
 import {
-  CommandArgumentType,
   CommandConfiguration,
-  ICommandCooldown,
-  ICommandOptions,
-  ICommandParameterMetadata,
-  IPrefix,
-  IReceiverOptions,
+  CommandCooldownOptions,
+  CommandOptions,
+  CommandParameterMetadata,
+  CommandRoute,
+  COOLDOWN_METADATA,
+  getFunctionParameters,
+  HasCommandParameterType,
   isEmpty,
   isNil,
+  PARAM_METADATA,
+  ParameterConfiguration,
+  ReceiverOptions,
+  W_PARAM_TYPE,
 } from '@watsonjs/common';
-import { isString } from 'class-validator';
-import { PermissionResolvable } from 'discord.js';
-
-import { ApplicationConfig } from '../../application-config';
-import { CommandConfigurationException } from '../../exceptions';
-import { MethodValue } from '../../injector';
-import { CommandPrefixHost } from './command-prefix-host';
-import { CommandRoute } from './command-route-host';
 
 export class CommandConfigurationHost implements CommandConfiguration {
-  public prefix: IPrefix;
   public name: string;
   public alias: string[];
   public caseSensitive: boolean;
-  public params: ICommandParameterMetadata[] = [];
+  public params: ParameterConfiguration[] = [];
   public description: string;
   public tags: string[];
-  public guild: boolean;
-  public dm: boolean;
   public commandGroup: string;
-  public clientPermissions: PermissionResolvable[];
-  public cooldown?: ICommandCooldown;
-  public promt: boolean;
-  public maxPromts: number;
-  public promtTimeout: number;
+
+  public cooldown?: CommandCooldownOptions;
+
   public hidden: boolean;
+
+  public fullDescription: string;
+  public usage: string | string[] | null;
+  public deleteCommandMessage: boolean;
 
   constructor(
     public host: CommandRoute,
-    private commandOptions: ICommandOptions,
-    private receiverOptions: IReceiverOptions,
-    private config: ApplicationConfig,
-    private method: MethodValue
+    private commandOptions: CommandOptions,
+    private receiverOptions: ReceiverOptions,
+    private method: MethodDescriptor
   ) {
-    this.setName();
-    this.setPrefix();
-    this.setConfiguration();
-    this.setParams();
+    this._configure();
   }
 
-  private setName() {
-    if (this.commandOptions.name) {
-      return (this.name = this.commandOptions.name);
-    }
-
-    this.name = this.method.name;
+  private _configure() {
+    this._setName();
+    this._setConfiguration();
+    this._applyCommandParameters();
+    this._applyCooldown();
   }
 
-  private setPrefix() {
-    const { prefix, namedPrefix } = this.commandOptions;
+  private _setName(): void {
+    const { commandOptions, method } = this;
 
-    if (prefix && namedPrefix) {
-      this.applyPrefix(prefix);
-    } else if (prefix) {
-      return this.applyPrefix(prefix);
-    }
-
-    if (namedPrefix) {
-      return this.applyPrefix(namedPrefix, true);
-    }
-
-    const { prefix: receiverPrefix, namedPrefix: receiverNamedPrefix } =
-      this.receiverOptions;
-
-    if (receiverPrefix) {
-      return this.applyPrefix(receiverPrefix);
-    }
-
-    if (receiverNamedPrefix) {
-      return this.applyPrefix(receiverNamedPrefix, true);
-    }
-
-    const { globalCommandPrefix } = this.config;
-
-    if (globalCommandPrefix) {
-      return this.applyPrefix(globalCommandPrefix);
-    }
-
-    this.prefix = undefined;
-  }
-
-  private applyPrefix(prefix: string | IPrefix, named?: boolean) {
-    if (isString(prefix)) {
-      this.prefix = new CommandPrefixHost(prefix, named);
-    } else {
-      this.prefix = prefix;
-    }
-  }
-
-  private setParams() {
-    const { params } = this.commandOptions;
-
-    if (typeof params === "undefined") {
+    if (commandOptions.name) {
+      this.name = commandOptions.name!;
       return;
     }
 
-    params.forEach((param, idx) => {
-      if (param.type === CommandArgumentType.DATE) {
-        if (isNil(param.dateFormat)) {
-          throw new CommandConfigurationException(
-            "CommandLoader",
-            `Param ${param.name} is of type date but doesn't have a format set`
-          );
-        }
-      }
-
-      if (param.hungry && idx !== params.length - 1) {
-        throw new CommandConfigurationException(
-          "CommandLoader",
-          `A hungry parameter has to be the last parameter for a command.`
-        );
-      }
-
-      if (isNil(param.optional)) {
-        param.optional = false;
-      }
-
-      this.params.push(param);
-    });
+    this.name = method.propertyKey;
   }
 
-  private setConfiguration() {
+  private _applyCommandParameters(): void {
+    const { host, method } = this;
+
+    const parameters = Reflector.reflectMethodParameters(
+      host.metatype,
+      method.descriptor.name
+    );
+
+    const paramMetadata = Reflector.reflectMetadata<CommandParameterMetadata[]>(
+      PARAM_METADATA,
+      method.descriptor
+    );
+
+    const parameterNames = getFunctionParameters(method.descriptor);
+
+    for (let i = 0; i < parameters.length; i++) {
+      const parameter = parameters[i];
+      const metadata = paramMetadata.find((meta) => meta.parameterIndex === i);
+
+      const type = (parameter as any as HasCommandParameterType)[W_PARAM_TYPE];
+
+      if (isNil(metadata)) {
+        if (isNil(type)) {
+          continue;
+        }
+
+        const name = parameterNames[i];
+
+        this.params.push({
+          paramType: type,
+          default: null,
+          hungry: false,
+          label: name,
+          name: name,
+          optional: false,
+          type: undefined,
+          configuration: null as any,
+        });
+        continue;
+      }
+
+      this.params.push({
+        ...(metadata as Required<CommandParameterMetadata>),
+        paramType: type,
+      });
+    }
+  }
+
+  private _applyCooldown(): void {
+    const {
+      host,
+      method: { descriptor },
+    } = this;
+
+    const metadata = Reflector.reflectMetadata<CommandCooldownOptions>(
+      COOLDOWN_METADATA,
+      descriptor
+    );
+
+    if (!isNil(metadata)) {
+      this.cooldown = metadata;
+      return;
+    }
+
+    const receiverMetadata = Reflector.reflectMetadata<CommandCooldownOptions>(
+      COOLDOWN_METADATA,
+      host.metatype
+    );
+
+    if (!isNil(receiverMetadata)) {
+      this.cooldown = receiverMetadata;
+      return;
+    }
+  }
+
+  private _setConfiguration(): void {
     const {
       alias,
       caseSensitive,
-      clientPermissions,
-      cooldown,
       description,
-      dm,
-      guild,
       hidden,
       tags,
+      fullDescription,
+      deleteCommandMessage,
+      usage,
     } = this.commandOptions;
 
     const { groupName } = this.receiverOptions;
 
-    this.alias = alias || [];
-    this.clientPermissions = clientPermissions || [];
+    this.alias = alias ?? [];
 
-    if (!isNil(cooldown)) {
-      const { timeout, user } = cooldown;
+    this.description = description ?? fullDescription ?? "";
+    this.fullDescription = fullDescription ?? description ?? "";
+    this.tags = tags ?? [];
 
-      this.cooldown = {
-        timeout: timeout || 5,
-        user: isNil(user) ? true : user,
-      };
-    }
+    this.deleteCommandMessage = deleteCommandMessage ?? false;
+    this.usage = usage ?? null;
 
-    this.description = description || "";
-    this.dm = dm || false;
-    this.tags = tags || [];
-
-    this.guild = isNil(guild) ? true : guild;
     this.hidden = isNil(hidden) ? true : hidden;
     this.caseSensitive = isNil(caseSensitive) ? false : caseSensitive;
-    this.commandGroup = groupName;
+    this.commandGroup = groupName!;
   }
 
-  public hasParams() {
+  public hasParams(): boolean {
     return !isEmpty(this.params);
-  }
-
-  public hasPrefix() {
-    return !isNil(this.prefix);
   }
 }

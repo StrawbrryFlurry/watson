@@ -1,14 +1,12 @@
 import { CommandOptions } from '@common/decorators';
-import { Prefix } from '@common/interfaces';
 
 export interface CommandConfiguration extends CommandOptions {
   name: string;
   alias: string[];
-  prefix: Prefix;
 
   description: string;
   fullDescription: string;
-  usage: string;
+  usage: string | string[] | null;
 
   tags: string[];
   commandGroup: string;

@@ -19,7 +19,7 @@ export interface CommandParameterOptions<T = any> {
    */
   label?: string;
   /** The type this parameter will be parsed as */
-  type?: Type;
+  type?: Type | undefined;
   /**
    * Makes the parameter optional.
    * Optional parameters cannot be followed by mandatory ones.
@@ -98,15 +98,16 @@ export function Param(
     propertyKey: string | symbol,
     parameterIndex: number
   ) => {
-    const args = getFunctionParameters(
+    const params = getFunctionParameters(
       Object.getPrototypeOf(target)[propertyKey]
     );
 
     const metadata = mergeDefaults<CommandParameterMetadata>(options, {
-      name: args[parameterIndex] as string,
+      name: params[parameterIndex],
       parameterIndex: parameterIndex,
       hungry: false,
       optional: false,
+      label: params[parameterIndex],
     });
 
     applyStackableMetadata(

@@ -1,7 +1,5 @@
-import { BaseRoute, ContextType, ReceiverDef, Type, WatsonEvent } from '@watsonjs/common';
-
-import { InstanceWrapper } from '../injector';
-import { WatsonContainer } from '../watson-container';
+import { ReceiverRef } from '@core/di';
+import { BaseRoute, ContextType, Type, WatsonEvent } from '@watsonjs/common';
 
 /**
  * Represents a route of any type
@@ -33,12 +31,14 @@ export abstract class RouteRef<Event extends WatsonEvent = any>
   /**
    * The host receiver that this route was registered in
    */
-  public abstract readonly host: InstanceWrapper<ReceiverDef>;
-  public readonly container: WatsonContainer;
+  public abstract readonly host: ReceiverRef;
 
-  constructor(type: ContextType, event: Event, container: WatsonContainer) {
+  public get metatype() {
+    return this.host.metatype;
+  }
+
+  constructor(type: ContextType, event: Event) {
     this.type = type;
-    this.container = container;
     this.event = event;
   }
 
@@ -52,10 +52,6 @@ export abstract class RouteRef<Event extends WatsonEvent = any>
 
   public getHost<T extends Type<any>>(): T {
     return this.host.instance as T;
-  }
-
-  public getContainer<T = any>(): T {
-    return this.container as unknown as T;
   }
 
   public getEvent(): Event {

@@ -11,7 +11,7 @@ export class StaticMessageMatcher extends MessageMatcher<StaticPrefixCache> {
     );
   }
 
-  public async match(message: Message): Promise<MessageMatchResult> {
+  public async match(message: Message): Promise<MessageMatchResult | null> {
     const prefixes = this._cache.prefixes;
     const { content } = message;
 
@@ -22,7 +22,7 @@ export class StaticMessageMatcher extends MessageMatcher<StaticPrefixCache> {
         continue;
       }
 
-      const prefixRef = this._cache.get(prefix);
+      const prefixRef = this._cache.get(prefix)!;
 
       return {
         prefix: prefixRef,

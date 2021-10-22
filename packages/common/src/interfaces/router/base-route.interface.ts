@@ -1,6 +1,6 @@
+import { Type } from '..';
 import { WatsonEvent } from '../../enums';
 import { ContextType } from '../pipeline';
-import { Type } from '../type.interface';
 
 export interface BaseRoute {
   /**
@@ -12,7 +12,7 @@ export interface BaseRoute {
    * Returns the host receiver that
    * this route was registered in
    */
-  host: Type;
+  host: any;
   /**
    * The type of the execution context
    * Execution contexts be either `"slash"`, `event` or `"command"`
@@ -22,19 +22,12 @@ export interface BaseRoute {
    * Returns the event that this route is mapped to
    */
   event: WatsonEvent;
+  metatype: Type;
   /**
    * The type of the execution context
    * Execution contexts be either `"slash"`, `event` or `"command"`
    */
   getType<T extends string = ContextType>(): T;
-  /**
-   * Returns the internal DI container
-   * which holds metadata, configurations as well
-   * as instances for all components.
-   *
-   * @returns An instance of `WatsonContainer` which can be found in `@watsonjs/core`
-   */
-  getContainer<T = any>(): T;
   /**
    * Returns the event that this route is mapped to
    */

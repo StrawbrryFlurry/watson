@@ -1,16 +1,8 @@
 import { RECEIVER_METADATA } from '@common/constants';
-import { CustomProvider, Prefix, Type } from '@common/interfaces';
+import { CustomProvider, Type } from '@common/interfaces';
 import { isNil, isObject, isString } from '@common/utils';
 
 export interface ReceiverOptions {
-  /**
-   * The prefix for underlying commands if none is specified.
-   *
-   * @example
-   * !ban @username
-   * Where `!` is the prefix
-   */
-  prefix?: string | Prefix;
   /**
    * The command group underlying commands will be mapped to.
    *

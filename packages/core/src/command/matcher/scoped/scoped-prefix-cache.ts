@@ -1,5 +1,5 @@
 import { resolveAsyncValue } from '@core/utils';
-import { isNil, Prefix, PrefixCache } from '@watsonjs/common';
+import { isNil, isString, Prefix, PrefixCache } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
 export interface ScopedPrefixCacheData {
@@ -30,16 +30,17 @@ export class ScopedPrefixCache extends PrefixCache<
 
     for (let i = 0; i < prefixes.length; i++) {
       const prefixRef = prefixes[i];
-      const { prefix, resolve } = prefixRef;
 
-      if (!isNil(prefix)) {
-        this.set(key, { prefix: prefixRef, resolvedPrefix: prefix });
+      if (isString(prefixRef)) {
+        this.set(key, { prefix: prefixRef, resolvedPrefix: prefixRef });
         return;
       }
 
+      const { resolve } = prefixRef;
+
       const result = await resolveAsyncValue(resolve(message));
 
-      if (result) {
+      if (!isNil(result)) {
         this.set(key, {
           prefix: prefixRef,
           resolvedPrefix: result,
@@ -59,10 +60,10 @@ export class ScopedPrefixCache extends PrefixCache<
   public getCacheKey(message: Message): Symbol | string {
     const { guild } = message;
 
-    if (isNil(message.guild)) {
+    if (isNil(guild)) {
       return DEFAULT_SCOPED_CACHE_KEY;
     } else {
-      return guild.id;
+      return guild!.id;
     }
   }
 }

@@ -1,5 +1,4 @@
 import { COMMAND_METADATA } from '../../constants';
-import { Prefix } from '../../interfaces';
 import { isNil, isString } from '../../utils/shared.utils';
 
 export interface CommandOptions {
@@ -30,7 +29,7 @@ export interface CommandOptions {
    * be auto generated from the info
    * available.
    */
-  usage?: string | string[];
+  usage?: string | string[] | null;
   /**
    * Tags of the command
    * @example
@@ -41,15 +40,6 @@ export interface CommandOptions {
    * and is solely for cosmetic purposes
    */
   tags?: string[];
-  /**
-   * Sets the prefix for the command.
-   * If no prefix was set the receiver prefix is used.
-   * If no prefix was set in the receiver the global prefix will be used.
-   * @example
-   * !ban @username
-   * Where `!` is the prefix
-   */
-  prefix?: string | Prefix;
   /**
    * Requires the format of the command message to exactly match the command name
    * @example
@@ -86,13 +76,13 @@ export interface CommandOptions {
  * can either be a custom parsed class that implements the CommandArgumentType interface
  * or a builtin type.
  *
- * The parsed argument will automaticuall be injected to the parameter
+ * The parsed argument will automatically be injected to the parameter
  * that has registered it.
  * ```ts
  *  import { User } from 'discord.js';
  *  import { UserArgument } from '@watsonjs/common';
  *
- * `@core/command("ping")`
+ * `@command("ping")`
  *  public ping(user: UserArgument) {  }
  * ```
  * You might want to have a more fine grade control over your
@@ -102,7 +92,7 @@ export interface CommandOptions {
  *  import { User } from 'discord.js';
  *  import { UserArgument } from '@watsonjs/common';
  *
- * `@core/command("ping")`
+ * `@command("ping")`
  *  public ping(`@Param`({ label: "The target user who is being pinged" }) user: UserArgument) {  }
  * ```
  */

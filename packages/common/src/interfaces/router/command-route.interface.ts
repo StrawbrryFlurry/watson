@@ -1,5 +1,3 @@
-import { Prefix } from '@common/interfaces';
-
 import { CommandConfiguration } from '.';
 import { BaseRoute } from './base-route.interface';
 import { ParameterConfiguration } from './configuration/parameter-configuration.interface';
@@ -17,11 +15,6 @@ export interface CommandRoute extends BaseRoute {
    * The parameters registered for this command
    */
   params: ParameterConfiguration[];
-  /**
-   * The prefix declaration for this command
-   * that implements the `CommandPrefix` interface
-   */
-  commandPrefix: Prefix;
   /**
    * Alias for this command
    */
