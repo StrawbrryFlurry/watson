@@ -1,8 +1,8 @@
 import { PARAM_METADATA } from '@common/constants';
 import { applyStackableMetadata, ParameterMetadata } from '@common/decorators';
-import { ADate, DateParameterOptions, Type } from '@common/interfaces';
+import { ADate, CommandParameterType, DateParameterOptions, Type } from '@common/interfaces';
 
-import { getFunctionParameters, mergeDefaults } from '../..';
+import { getFunctionParameters, mergeDefaults, W_PARAM_TYPE } from '../..';
 
 type GetConfigurationsFromParameterType<T> = T extends ADate
   ? DateParameterOptions
@@ -117,3 +117,14 @@ export function Param(
     );
   };
 }
+const PATCH_VANILLA_JS_TYPES = () => {
+  if (PATCH_VANILLA_JS_TYPES["ɵhasrun"]) {
+    return;
+  }
+
+  PATCH_VANILLA_JS_TYPES["ɵhasrun"] = true;
+  String[W_PARAM_TYPE] = CommandParameterType.String;
+  Date[W_PARAM_TYPE] = CommandParameterType.Date;
+  Number[W_PARAM_TYPE] = CommandParameterType.Number;
+};
+PATCH_VANILLA_JS_TYPES();

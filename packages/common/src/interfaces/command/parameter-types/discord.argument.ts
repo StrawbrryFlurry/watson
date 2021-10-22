@@ -1,4 +1,6 @@
+import { CommandParameterType } from '@common/interfaces';
 import { Emoji, Role, TextChannel, User } from 'discord.js';
+import { W_PARAM_TYPE } from 'packages/common/src';
 
 /** Text channel mentioned by a member using'#'
  * ```
@@ -7,7 +9,9 @@ import { Emoji, Role, TextChannel, User } from 'discord.js';
  * #music
  * ```
  */
-export abstract class AChannel extends TextChannel {}
+export abstract class AChannel extends TextChannel {
+  static [W_PARAM_TYPE] = CommandParameterType.Channel;
+}
 
 /**
  * A role mentioned by a member using '@'
@@ -17,7 +21,9 @@ export abstract class AChannel extends TextChannel {}
  * !members @moderator
  * ```
  */
-export abstract class ARole extends Role {}
+export abstract class ARole extends Role {
+  static [W_PARAM_TYPE] = CommandParameterType.Role;
+}
 
 /**
  * A user mentioned by using '@'
@@ -26,7 +32,9 @@ export abstract class ARole extends Role {}
  * !ban @User
  * ```
  */
-export abstract class AUser extends User {}
+export abstract class AUser extends User {
+  static [W_PARAM_TYPE] = CommandParameterType.User;
+}
 
 /**
  * An emote
@@ -34,7 +42,9 @@ export abstract class AUser extends User {}
  * !add emote :pepega:
  * ```
  */
-export abstract class AEmote extends Emoji {}
+export abstract class AEmote extends Emoji {
+  static [W_PARAM_TYPE] = CommandParameterType.Emote;
+}
 
 export interface CodeBlock {
   code: string;
@@ -54,4 +64,6 @@ export abstract class ACodeBlock implements CodeBlock {
   code: string;
   raw: string;
   language: string;
+
+  static [W_PARAM_TYPE] = CommandParameterType.CodeBlock;
 }

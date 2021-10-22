@@ -1,5 +1,5 @@
 import { InjectorLifetime, ProvidedInScope } from '@common/decorators';
-import { CustomProvider, Type } from '@common/interfaces';
+import { CommandParameterType, CustomProvider, Type } from '@common/interfaces';
 
 /**
  *  TODO: If we're going to use the closure compiler,
@@ -7,6 +7,8 @@ import { CustomProvider, Type } from '@common/interfaces';
  * can still be resolved even if closure is going
  * to rename them to a more compact / efficient
  * one.
+ *
+ * Might want to use Symbol()?
  */
 
 /**
@@ -87,6 +89,16 @@ export interface HasProvScope {
 }
 
 export const W_MODULE_PROV = "ɵmoprov";
+
+export interface HasModuleProv {
+  [W_MODULE_PROV]: CustomProvider | Type;
+}
+
+export const W_PARAM_TYPE = "ɵcmdprmtype";
+
+export interface HasCommandParameterType {
+  [W_PARAM_TYPE]: CommandParameterType;
+}
 
 export interface HasModuleProv {
   [W_MODULE_PROV]: CustomProvider | Type;
