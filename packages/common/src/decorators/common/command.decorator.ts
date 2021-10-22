@@ -1,5 +1,5 @@
-import { COMMAND_METADATA } from '../../constants';
-import { isNil, isString } from '../../utils/shared.utils';
+import { COMMAND_METADATA } from '@common/constants';
+import { isNil, isString } from '@common/utils';
 
 export interface CommandOptions {
   /**

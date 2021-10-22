@@ -1,7 +1,6 @@
 import { InjectableOptions, InjectorLifetime, ProvidedInScope } from '@common/decorators';
+import { W_PROV_LIFETIME, W_PROV_SCOPE } from '@common/fields';
 import { Type } from '@common/interfaces';
-
-import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";
 

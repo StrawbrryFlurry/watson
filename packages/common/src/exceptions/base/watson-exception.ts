@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from '../../utils';
+import { isEmpty, isNil } from '@common/utils';
 
 export abstract class WatsonException extends Error {
   public readonly suggestions: string[] | undefined;

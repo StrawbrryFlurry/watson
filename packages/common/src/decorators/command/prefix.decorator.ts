@@ -1,7 +1,6 @@
+import { PREFIX_METADATA } from '@common/constants';
+import { Prefix } from '@common/interfaces';
 import { isMethodDecorator } from '@common/utils';
-
-import { PREFIX_METADATA } from '../../constants';
-import { Prefix } from '../../interfaces';
 
 /**
  * Assigns a prefix to the decorated

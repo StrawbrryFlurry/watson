@@ -1,7 +1,6 @@
+import { INJECT_DEPENDENCY_METADATA } from '@common/constants';
 import { applyStackableMetadata } from '@common/decorators';
-
-import { INJECT_DEPENDENCY_METADATA } from '../../constants';
-import { InjectionToken, Type } from '../../interfaces';
+import { InjectionToken, Type } from '@common/interfaces';
 
 export interface InjectMetadata {
   propertyKey: string | symbol;

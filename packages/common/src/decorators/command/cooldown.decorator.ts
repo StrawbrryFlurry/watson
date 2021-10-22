@@ -1,6 +1,5 @@
 import { COOLDOWN_METADATA } from '@common/constants';
-
-import { isMethodDecorator, mergeDefaults } from '../..';
+import { isMethodDecorator, mergeDefaults } from '@common/utils';
 
 /**
  * Defines how a command

@@ -1,4 +1,5 @@
-import { isNil } from '../..';
+import { isNil } from '@common/utils';
+
 import { TRIE_ROOT_NODE, TrieNode } from './trie-node';
 
 export class Trie {

@@ -1,7 +1,6 @@
+import { WatsonEvent } from '@common/enums';
 import { ActivityOptions } from 'discord.js';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-import { WatsonEvent } from '../../enums';
 
 export type IWSEvent<T extends {}> = [data: T, shardID: number];
 

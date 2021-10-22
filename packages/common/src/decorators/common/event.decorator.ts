@@ -1,5 +1,5 @@
-import { EVENT_METADATA } from '../../constants';
-import { WatsonEvent } from '../../enums/watson-event.enum';
+import { EVENT_METADATA } from '@common/constants';
+import { WatsonEvent } from '@common/enums';
 
 /**
  * Calls the decorated method whenever an event of

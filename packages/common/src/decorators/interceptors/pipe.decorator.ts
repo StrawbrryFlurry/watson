@@ -1,9 +1,9 @@
 import { PIPE_METADATA } from '@common/constants';
 import { InjectorLifetime, InterceptorMetadata } from '@common/decorators';
+import { W_INJ_TYPE } from '@common/fields';
 import { CommandArgument, InjectionToken } from '@common/interfaces';
 import { Observable } from 'rxjs';
 
-import { W_INJ_TYPE } from '../..';
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 
 /**

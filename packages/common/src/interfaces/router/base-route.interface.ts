@@ -1,6 +1,7 @@
-import { Type } from '..';
-import { WatsonEvent } from '../../enums';
+import { WatsonEvent } from '@common/enums';
+
 import { ContextType } from '../pipeline';
+import { Type } from '../type.interface';
 
 export interface BaseRoute {
   /**

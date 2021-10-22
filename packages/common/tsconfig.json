@@ -3,13 +3,15 @@
   "compilerOptions": {
     "sourceRoot": "src",
     "paths": {
+      "@common/fields": ["packages/common/src/fields.ts"],
+      "@common/constants": ["packages/common/src/constants.ts"],
       "@common/builtin": ["packages/common/src/builtin"],
       "@common/exceptions": ["packages/common/src/exceptions"],
       "@common/interfaces": ["packages/common/src/interfaces"],
+      "@common/enums": ["packages/common/src/enums"],
       "@common/decorators": ["packages/common/src/decorators"],
       "@common/command": ["packages/common/src/command"],
-      "@common/utils": ["packages/common/src/utils"],
-      "@common/constants": ["packages/common/src/constants.ts"]
+      "@common/utils": ["packages/common/src/utils"]
     }
   },
   "include": ["*.ts", "**/*.ts"]

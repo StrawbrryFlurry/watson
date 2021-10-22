@@ -1,4 +1,4 @@
-import { CHANNEL_MENTION_REGEXP, ROLE_MENTION_REGEXP, USER_MENTION_REGEXP } from '../constants';
+import { CHANNEL_MENTION_REGEXP, ROLE_MENTION_REGEXP, USER_MENTION_REGEXP } from '@common/constants';
 
 export type IGetIdTypes = "role" | "user" | "channel";
 

@@ -6,7 +6,6 @@ const REACTION_FILTER = (reaction: MessageReaction) =>
 
 @Receiver()
 export class CollectionInquirableReceiver {
-  @core/command("game")
   async handleGame(@InjectCollect() collectFn: CollectFunction) {
     const [participantReaction] = (await collectFn(
       "React to this message with 🎉 to take part in the game",

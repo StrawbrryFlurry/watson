@@ -1,7 +1,6 @@
+import { PARAM_METADATA } from '@common/constants';
 import { applyStackableMetadata } from '@common/decorators';
-
-import { PARAM_METADATA } from '../constants';
-import { ExecutionContext } from '../interfaces';
+import { ExecutionContext } from '@common/interfaces';
 
 export type ParamFactoryFn<T = any> = (ctx: ExecutionContext) => T;
 

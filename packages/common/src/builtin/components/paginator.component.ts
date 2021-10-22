@@ -1,7 +1,7 @@
+import { CustomComponentException } from '@common/exceptions';
+import { isEmpty } from '@common/utils';
 import { MessageEmbed, MessageReaction } from 'discord.js';
 
-import { CustomComponentException } from '../../exceptions/custom-component.exception';
-import { isEmpty } from '../../utils';
 import { ReactiveOptions, WatsonComponent } from './watson-component';
 
 export interface PaginatorOptions extends ReactiveOptions {

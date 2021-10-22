@@ -1,5 +1,6 @@
-import { CustomComponentException } from '../../exceptions';
-import { isNil, mergeDefaults } from '../../utils';
+import { CustomComponentException } from '@common/exceptions';
+import { isNil, mergeDefaults } from '@common/utils';
+
 import { ReactiveOptions, WatsonComponent } from './watson-component';
 
 export interface ListOptions<T extends object = any> extends ReactiveOptions {
