@@ -1,14 +1,9 @@
-import { Module } from "@decorators";
-import {
-  DynamicModule,
-  FactoryProvider,
-  InjectionToken,
-  ValueProvider,
-} from "@interfaces";
-import { AxiosRequestConfig } from "axios";
+import { Module } from '@common/decorators';
+import { DynamicModule, FactoryProvider, InjectionToken, ValueProvider } from '@common/interfaces';
+import { AxiosRequestConfig } from 'axios';
 
-import { httpClientFactory } from "./http-client.provider";
-import { HttpClient } from "./http.service";
+import { httpClientFactory } from './http-client.provider';
+import { HttpClient } from './http.service';
 
 const customProvider: FactoryProvider = {
   provide: HttpClient,

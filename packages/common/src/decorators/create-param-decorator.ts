@@ -1,4 +1,4 @@
-import { applyStackableMetadata, CommandParameterMetadata } from '@decorators';
+import { applyStackableMetadata } from '@common/decorators';
 
 import { PARAM_METADATA } from '../constants';
 import { ExecutionContext } from '../interfaces';
@@ -19,7 +19,7 @@ export function createCustomParamDecorator<T = any>(
       propertyKey: string | symbol,
       parameterIndex: number
     ) => {
-      const metadata: CommandParameterMetadata = {
+      const metadata: ParameterMetadata = {
         parameterIndex,
         factory: paramFactory,
       };

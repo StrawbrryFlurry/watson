@@ -1,4 +1,4 @@
-import { DiscordAdapter, InjectionToken } from '@interfaces';
+import { DiscordAdapter, InjectionToken } from '@common/interfaces';
 import { Base, Client } from 'discord.js';
 
 import { BaseRoute, CommandPipeline, ContextType, EventPipeline, InteractionPipeline, PipelineHost } from '..';
@@ -47,9 +47,14 @@ export abstract class ExecutionContext
    * Returns the Watson DiscordAdapter instance
    */
   public abstract getAdapter(): DiscordAdapter;
-  
+
   /** @Injector */
-  public abstract get<T extends Type | InjectionToken, R extends InjectorGetResult<T>>(typeOrToken: T): Promise<R>
+  public abstract get<
+    T extends Type | InjectionToken,
+    R extends InjectorGetResult<T>
+  >(typeOrToken: T): Promise<R>;
+
+  public abstract parent: any;
 
   /** @PipelineHost */
   public abstract switchToCommand(): CommandPipeline;

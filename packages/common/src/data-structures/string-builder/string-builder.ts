@@ -1,4 +1,4 @@
-import { ArgumentOutOfRangeException } from '@exceptions';
+import { ArgumentOutOfRangeException } from '@common/exceptions';
 import { EOL } from 'os';
 
 import { isNil, isString } from '../../utils';

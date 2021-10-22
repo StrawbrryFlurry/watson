@@ -1,4 +1,4 @@
-import { Binding, DynamicInjector, Reflector } from '@di';
+import { Binding, DynamicInjector, Reflector } from '@core/di';
 import {
   ClassProvider,
   CustomProvider,
@@ -42,6 +42,8 @@ export type InjectorGetResult<T> = T extends InjectionToken<infer R>
   ? R
   : T extends new (...args: any[]) => infer R
   ? R
+  : T extends abstract new (...args: any[]) => any
+  ? InstanceType<T>
   : never;
 
 /**

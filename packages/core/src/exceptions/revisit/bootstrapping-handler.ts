@@ -6,7 +6,10 @@ import { BootstrappingException } from './bootstrapping.exception';
 export type ZoneFunction<T extends (...args: unknown[]) => unknown> = T;
 
 /**
- * Executes the bootstrapping code in the  WatsonFactory class. On error this class formats the output.
+ * Executes the bootstrapping code in the  WatsonFactory class.
+ * On error this class formats the output.
+ *
+ * TODO:
  */
 export class BootstrappingHandler {
   public static async run(fn: ZoneFunction<any>) {
@@ -25,7 +28,7 @@ export class BootstrappingHandler {
           logger.logMessage(red(message));
 
           if (err.hasSuggestions()) {
-            err.suggestions.forEach((s) => logger.logMessage(SUGGESTION(s)));
+            err.suggestions!.forEach((s) => logger.logMessage(SUGGESTION(s)));
           }
 
           if (stack) {

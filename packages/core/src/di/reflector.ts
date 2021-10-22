@@ -1,4 +1,4 @@
-import { BootstrapException } from '@exceptions';
+import { BootstrapException } from '@core/exceptions';
 import {
   DESIGN_PARAMETERS,
   DESIGN_RETURN_TYPE,
@@ -18,7 +18,7 @@ export interface MethodDescriptor {
 
 export class Reflector {
   /** {@link DESIGN_PARAMETERS} */
-  public static reflectMethodParameters<T extends unknown[] = unknown[]>(
+  public static reflectMethodParameters<T extends unknown[] = Type[]>(
     metatype: Type,
     propertyKey?: string
   ): T {

@@ -1,4 +1,4 @@
-import { EmoteTokenImpl } from '@command';
+import { EmoteTokenImpl } from '@core/command';
 import {
   char,
   CommandAst,

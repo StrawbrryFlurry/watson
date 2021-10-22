@@ -33,6 +33,8 @@ export const OPTIONAL_DEPENDENCY_METADATA = "inject:optional";
 
 export const UNICODE_EMOJI_REGEX =
   /\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]/;
+export const JS_COMMENT_REGEX =
+  /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/gm;
 
 /**
  * The parameter types that the decorated descriptor value

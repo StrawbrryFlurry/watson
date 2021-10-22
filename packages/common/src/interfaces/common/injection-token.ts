@@ -1,5 +1,5 @@
-import { InjectableOptions, InjectorLifetime, ProvidedInScope } from '@decorators';
-import { Type } from '@interfaces';
+import { InjectableOptions, InjectorLifetime, ProvidedInScope } from '@common/decorators';
+import { Type } from '@common/interfaces';
 
 import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
 

@@ -1,4 +1,4 @@
-import { RuntimeException } from '@exceptions';
+import { RuntimeException } from '@common/exceptions';
 import { MessageEmbed } from 'discord.js';
 
 import { CommandArgument } from '../interfaces';

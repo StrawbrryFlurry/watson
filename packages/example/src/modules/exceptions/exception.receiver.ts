@@ -1,6 +1,5 @@
 import {
   BadArgumentException,
-  Command,
   CommandArgumentType,
   InjectParam,
   Receiver,
@@ -15,7 +14,7 @@ import { CustomExceptionHandler } from './custom.handler';
 @Receiver()
 @UseExceptionHandler(CustomExceptionHandler)
 export class ExceptionsReceiver {
-  @Command({
+  @core/command({
     name: "throw",
     params: [{ name: "type", type: CommandArgumentType.STRING }],
   })

@@ -1,7 +1,7 @@
-import { ConfigService } from '@builtin';
-import { Module } from '@decorators';
-import { DynamicModule, ValueProvider } from '@interfaces';
-import { isNil } from '@utils';
+import { ConfigService } from '@common/builtin';
+import { Module } from '@common/decorators';
+import { DynamicModule, ValueProvider } from '@common/interfaces';
+import { isNil } from '@common/utils';
 import { DotenvConfigOptions } from 'dotenv';
 
 export interface ConfigModuleOptions<T = any> {

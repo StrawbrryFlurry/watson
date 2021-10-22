@@ -1,7 +1,7 @@
-import { isNil, Providable } from '@watsonjs/common';
+import { ExecutionContext, isNil, Providable } from '@watsonjs/common';
 
 import { Injector } from '.';
-import { Binding, InjectorGetResult } from '..';
+import { Binding, createResolvedBinding, InjectorGetResult } from '..';
 
 export class ContextInjector implements Injector {
   private readonly records: Map<Providable, Binding>;
@@ -10,6 +10,15 @@ export class ContextInjector implements Injector {
   constructor(parent: Injector, bindings: Map<Providable, Binding>) {
     this.parent = parent;
     this.records = bindings;
+
+    this.records.set(
+      ExecutionContext,
+      createResolvedBinding({
+        provide: ExecutionContext,
+        useValue: this,
+        multi: false,
+      })
+    );
   }
 
   public static createWithContext<T extends Map<Providable, Binding>>(

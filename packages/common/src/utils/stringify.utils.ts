@@ -1,4 +1,4 @@
-import { isNil } from '@utils';
+import { isNil } from '@common/utils';
 
 export function stringify(token: any): string {
   if (typeof token === "string") {

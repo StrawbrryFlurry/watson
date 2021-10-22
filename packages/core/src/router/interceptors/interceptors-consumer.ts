@@ -6,7 +6,7 @@ import { BAD_INTERCEPTOR_IMPLEMENTATION, Interceptor, INTERCEPTOR_NOT_FOUND } fr
 import { WatsonContainer } from '../../watson-container';
 
 export abstract class InterceptorsConsumer {
-  abstract container: WatsonContainer;
+  abstract injector: WatsonContainer;
 
   protected getInstance<T = any, R = any>(
     type: Interceptor,
@@ -16,7 +16,7 @@ export abstract class InterceptorsConsumer {
     receiver: InstanceWrapper
   ): R {
     if (consumerFn in injectable) {
-      return (injectable as any) as R;
+      return injectable as any as R;
     }
 
     const moduleRef = this.container.getModuleByToken(moduleToken);

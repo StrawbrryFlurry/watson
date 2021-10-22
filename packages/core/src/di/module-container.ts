@@ -1,4 +1,4 @@
-import { ModuleRef } from '@di';
+import { ModuleRef } from '@core/di';
 import { DIProvided, Type } from '@watsonjs/common';
 
 export class ModuleContainer extends DIProvided({ providedIn: "root" }) {

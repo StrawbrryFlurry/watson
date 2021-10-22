@@ -1,12 +1,6 @@
-import {
-  Command,
-  OnApplicationShutdown,
-  OnModuleInit,
-  Receiver,
-  UserArgument,
-} from "@watsonjs/common";
+import { OnApplicationShutdown, OnModuleInit, Receiver, UserArgument } from '@watsonjs/common';
 
-import { AppService } from "./app.service";
+import { AppService } from './app.service';
 
 @Receiver()
 export class AppReceiver implements OnModuleInit, OnApplicationShutdown {
@@ -20,6 +14,6 @@ export class AppReceiver implements OnModuleInit, OnApplicationShutdown {
     console.log("Byee!");
   }
 
-  @Command("ping")
+  @core/command("ping")
   ping(user: UserArgument) {}
 }

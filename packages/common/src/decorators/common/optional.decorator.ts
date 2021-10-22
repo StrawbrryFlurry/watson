@@ -1,5 +1,5 @@
-import { OPTIONAL_DEPENDENCY_METADATA } from '@constants';
-import { applyStackableMetadata } from '@decorators';
+import { OPTIONAL_DEPENDENCY_METADATA } from '@common/constants';
+import { applyStackableMetadata } from '@common/decorators';
 
 export interface OptionalInjectMetadata {}
 

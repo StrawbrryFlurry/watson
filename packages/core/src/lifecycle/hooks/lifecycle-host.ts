@@ -1,4 +1,5 @@
-import { Injector, ModuleRef } from '@di';
+import { Injector, ModuleContainer, ModuleRef } from '@core/di';
+import { resolveAsyncValue } from '@core/utils';
 import {
   isFunction,
   isNil,
@@ -6,15 +7,13 @@ import {
   OnApplicationShutdown,
   OnModuleDestroy,
   OnModuleInit,
-  ProviderDef,
-  ReceiverDef,
+  Type,
 } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { ModuleContainer } from '../../di/module-container';
-import { InstanceWrapper } from '../../injector';
-
-type ComponentWithLifecycleFunction = { [key: string]: Function };
+type ComponentWithLifecycleFunction<T extends {}> = {
+  [key in keyof T]: Function;
+};
 
 export class LifecycleHost {
   constructor(private readonly injector: Injector) {}
@@ -40,8 +39,8 @@ export class LifecycleHost {
     return this.callLifecycleHook<OnModuleDestroy>("onModuleDestroy");
   }
 
-  private async callLifecycleHook<T>(hook: keyof T): Promise<void> {
-    const modules = this.getModules();
+  private async callLifecycleHook<T extends {}>(hook: keyof T): Promise<void> {
+    const modules = await this.getModules();
     const modulesWithLifecycleHook = await this.getModulesWithLifecycleHook<T>(
       modules,
       hook
@@ -49,43 +48,40 @@ export class LifecycleHost {
 
     for (const module of modules) {
       const components = this.getModuleComponents(module);
-      const instances = this.getInstancesWithLifecycleHook<T>(components, hook);
+      const componentInstances = [];
 
-      await Promise.all(
+      for (const component of components) {
+        const instance = await module.get(component);
+        componentInstances.push(instance);
+      }
+
+      const instances = this.getInstancesWithLifecycleHook<T>(
+        componentInstances,
+        hook
+      );
+
+      await resolveAsyncValue(
         instances.map((instance) => instance[hook as string]())
       );
     }
 
-    await Promise.all(
+    await resolveAsyncValue(
       modulesWithLifecycleHook.map((module) => module[hook as string]())
     );
   }
 
-  private getInstancesWithLifecycleHook<T>(
-    wrappers: InstanceWrapper[],
+  private getInstancesWithLifecycleHook<T extends {}>(
+    wrappers: ComponentWithLifecycleFunction<T>[],
     hook: keyof T
-  ): ComponentWithLifecycleFunction[] {
+  ): ComponentWithLifecycleFunction<T>[] {
     return wrappers
-      .filter((wrapper) => !isNil(wrapper))
-      .map((wrapper) => wrapper.instance)
       .filter((instance) => !isNil(instance))
       .filter((instance) => isFunction(instance[hook]));
   }
 
-  private getModuleComponents(
-    module: ModuleRef
-  ): InstanceWrapper<ReceiverDef | ProviderDef>[] {
+  private getModuleComponents(module: ModuleRef): Type[] {
     const { receivers, providers } = module;
-
-    const receiverWrappers = iterate(receivers).map(
-      ([key, receiver]) => receiver
-    );
-
-    const ProviderWrappers = iterate(providers).map(
-      ([key, provider]) => provider
-    );
-
-    return [...receiverWrappers, ...ProviderWrappers];
+    return [...receivers, ...providers] as Type[];
   }
 
   private async getModules(): Promise<ModuleRef[]> {
@@ -98,16 +94,16 @@ export class LifecycleHost {
     return moduleRefs;
   }
 
-  private async getModulesWithLifecycleHook<T>(
+  private async getModulesWithLifecycleHook<T extends {}>(
     modules: ModuleRef[],
     hook: keyof T
-  ): Promise<ComponentWithLifecycleFunction[]> {
-    const moduleWrappers = await Promise.all(
-      modules.map((module) => module.instance)
+  ): Promise<ComponentWithLifecycleFunction<T>[]> {
+    const moduleInstances = await Promise.all(
+      modules.map((module) => module.getInstance())
     );
 
     const modulesWithLifecycleHook = this.getInstancesWithLifecycleHook(
-      moduleWrappers,
+      moduleInstances,
       hook
     );
 

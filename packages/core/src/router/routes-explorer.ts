@@ -1,9 +1,7 @@
 import {
   COMMAND_METADATA,
   DESIGN_PARAMETERS,
-  EventExceptionHandler,
   EXCEPTION_HANDLER_METADATA,
-  IBaseRoute,
   isFunction,
   RECEIVER_METADATA,
   ReceiverDef,
@@ -11,16 +9,6 @@ import {
   WatsonEvent,
 } from '@watsonjs/common';
 import iterate from 'iterare';
-
-import { InstanceWrapper, MetadataResolver, Module } from '../injector';
-import { CommonExceptionHandler, EventProxy, ExceptionHandler } from '../lifecycle';
-import { CommandProxy } from '../lifecycle/proxies/command-proxy';
-import { COMPLETED, EXPLORE_RECEIVER, EXPLORE_START, Logger, MAP_COMMAND } from '../logger';
-import { WatsonContainer } from '../watson-container';
-import { CommandRoute } from './command';
-import { EventRouteHost } from './event';
-import { HandlerFactory, LifecycleFunction, RouteHandlerFactory } from './route-handler-factory';
-import { SlashRoute } from './slash';
 
 export class RouteExplorer {
   private container: WatsonContainer;

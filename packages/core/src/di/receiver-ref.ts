@@ -1,4 +1,4 @@
-import { Binding, createBinding, getProviderScope, Injector, ModuleRef, ProviderResolvable } from '@di';
+import { Binding, createBinding, getProviderScope, Injector, ModuleRef, ProviderResolvable } from '@core/di';
 import {
   ExecutionContext,
   isClassConstructor,
@@ -41,15 +41,16 @@ interface InjectableBinding {
    * static instance provider.
    */
   __?: any;
-  metatype: Function | Object | Type;
+  metatype: Function | Type;
 }
 
 export class ReceiverRef<T = any> implements Injector {
+  public readonly metatype: Type;
+
   public parent: Injector | null;
   public instance: T | null = null;
 
   private _injector: Injector;
-  private _metatype: Type;
 
   /**
    * Context providers are not bound to the injector of the
@@ -68,6 +69,7 @@ export class ReceiverRef<T = any> implements Injector {
     moduleRef: ModuleRef
   ) {
     this.parent = moduleRef;
+    this.metatype = metatype;
     const injectorProviders = this._bindProviders(providers);
 
     this._bindInjectables(injectables);
@@ -107,7 +109,7 @@ export class ReceiverRef<T = any> implements Injector {
       const isPlainFunction = isFunction(injectable);
 
       const injectableBinding: InjectableBinding = {
-        metatype: injectable,
+        metatype: injectable as unknown as Type,
         isCtxFunction: !isClassCtor && isPlainFunction,
         isInstance: !isClassCtor && !isPlainFunction,
       };
@@ -118,8 +120,9 @@ export class ReceiverRef<T = any> implements Injector {
 
   public async createInjectablesByKey(
     key: ɵINJECTABLE_TYPE,
+    injectableMethodKey: string,
     ctx: ExecutionContext
-  ): Promise<(Object | ((ctx: ExecutionContext) => any))[]> {
+  ): Promise<((...args: any[]) => any)[]> {
     const injectableBindings = this._injectables.get(key);
 
     if (isNil(injectableBindings)) {
@@ -137,15 +140,20 @@ export class ReceiverRef<T = any> implements Injector {
         continue;
       }
 
-      if (isInstance) {
-        injectables.push(metatype);
-        continue;
+      let instance: any = metatype;
+
+      if (!isInstance) {
+        instance = await this._injector.get(metatype, null, ctx);
       }
 
-      this._injector.get();
+      const injectableMethod = instance[injectableMethodKey];
+
+      if (isFunction(injectableMethod)) {
+        injectables.push(injectableMethod.bind(instance));
+      }
     }
 
-    return [];
+    return injectables;
   }
 
   public async getInstance(ctx?: Injector): Promise<T> {
@@ -153,7 +161,7 @@ export class ReceiverRef<T = any> implements Injector {
       return this.instance;
     }
 
-    return this._injector.get(this._metatype, null, ctx);
+    return this._injector.get(this.metatype, null, ctx);
   }
 
   public get<T extends Providable, R extends InjectorGetResult<T>>(

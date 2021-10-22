@@ -1,5 +1,5 @@
-import { CommandParameterOptions } from '@decorators';
-import { CommandParameterType } from '@interfaces';
+import { CommandParameterOptions } from '@common/decorators';
+import { CommandParameterType } from '@common/interfaces';
 
 export interface ParameterConfiguration
   extends Required<CommandParameterOptions> {

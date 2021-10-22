@@ -1,4 +1,4 @@
-import { RuntimeException } from '@exceptions';
+import { RuntimeException } from '@common/exceptions';
 import { Observable } from 'rxjs';
 
 export interface ExceptionHandler {

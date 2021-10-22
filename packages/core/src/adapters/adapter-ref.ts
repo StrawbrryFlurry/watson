@@ -40,9 +40,9 @@ export abstract class AdapterRef<Client = any, Options = any>
   ): Observable<IWSEvent<T>>;
 
   public registerEventProxy<E extends WatsonEvent>(eventProxy: EventProxy<E>) {
-    const observable = eventProxy.isWSEvent
-      ? this.registerWsListener(eventProxy.eventType)
-      : this.registerListener(eventProxy.eventType);
+    const observable = eventProxy.isWsEvent
+      ? this.registerWsListener(eventProxy.type)
+      : this.registerListener(eventProxy.type);
 
     const subscriber = observable.subscribe((value) => eventProxy.proxy(value));
 

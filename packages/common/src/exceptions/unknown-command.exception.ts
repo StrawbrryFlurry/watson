@@ -1,3 +1,3 @@
-import { RuntimeException } from '@exceptions';
+import { RuntimeException } from '@common/exceptions';
 
 export class UnknownCommandException extends RuntimeException {}

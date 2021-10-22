@@ -1,4 +1,4 @@
-import { applyStackableMetadata } from '@decorators';
+import { applyStackableMetadata } from '@common/decorators';
 
 import { INJECT_DEPENDENCY_METADATA } from '../../constants';
 import { InjectionToken, Type } from '../../interfaces';

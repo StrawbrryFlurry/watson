@@ -1,4 +1,4 @@
-import { Injector } from '@di';
+import { Injector } from '@core/di';
 import { CanActivate, DIProvided, PipeTransform, Type } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { PassThrough } from 'stream';

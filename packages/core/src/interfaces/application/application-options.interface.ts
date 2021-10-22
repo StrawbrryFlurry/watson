@@ -1,18 +1,23 @@
-import { Client, ClientOptions } from 'discord.js';
+export type WatsonClientBase = {
+  client: any;
+  options: any;
+};
 
-export type WatsonApplicationOptions =
-  | WatsonApplicationWithClient
-  | WatsonApplicationWithoutClient;
+export type WatsonApplicationOptions<Client extends WatsonClientBase> =
+  | WatsonApplicationWithClient<Client>
+  | WatsonApplicationWithoutClient<Client>;
 
 interface WatsonApplicationBase {
   description?: string;
 }
 
-interface WatsonApplicationWithClient extends WatsonApplicationBase {
-  client: Client;
+interface WatsonApplicationWithClient<Client extends WatsonClientBase>
+  extends WatsonApplicationBase {
+  client: Client["client"];
 }
 
-interface WatsonApplicationWithoutClient extends WatsonApplicationBase {
+interface WatsonApplicationWithoutClient<Client extends WatsonClientBase>
+  extends WatsonApplicationBase {
   authToken?: string;
-  clientOptions?: ClientOptions;
+  clientOptions?: Client["options"];
 }

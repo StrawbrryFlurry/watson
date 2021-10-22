@@ -1,4 +1,4 @@
-import { Prefix, PrefixCache } from '@interfaces';
+import { Prefix, PrefixCache } from '@common/interfaces';
 import { Message } from 'discord.js';
 
 export interface MessageMatchResult {

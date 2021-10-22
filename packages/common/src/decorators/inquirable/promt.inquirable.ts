@@ -1,4 +1,4 @@
-import { MessageSendable } from '@interfaces';
+import { DIProvided, MessageSendable } from '@common/interfaces';
 import { AwaitMessagesOptions, Message } from 'discord.js';
 
 /**
@@ -14,4 +14,6 @@ export declare interface PromptInq<T extends Message | Message[]> {
   ): Promise<T>;
 }
 
-export abstract class PromptInq<T extends Message | Message[] = Message> {}
+export abstract class PromptInq<
+  T extends Message | Message[] = Message
+> extends DIProvided({ providedIn: "ctx" }) {}

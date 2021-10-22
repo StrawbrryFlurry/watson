@@ -1,6 +1,6 @@
-import { FILTER_METADATA } from '@constants';
-import { InjectorLifetime } from '@decorators';
-import { ExecutionContext, InjectionToken } from '@interfaces';
+import { FILTER_METADATA } from '@common/constants';
+import { InjectorLifetime } from '@common/decorators';
+import { ExecutionContext, InjectionToken } from '@common/interfaces';
 import { Observable } from 'rxjs';
 
 import { W_INJ_TYPE } from '../..';

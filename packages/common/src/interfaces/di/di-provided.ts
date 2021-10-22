@@ -1,5 +1,5 @@
-import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions } from '@decorators';
-import { mergeDefaults } from '@utils';
+import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions } from '@common/decorators';
+import { mergeDefaults } from '@common/utils';
 
 import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
 

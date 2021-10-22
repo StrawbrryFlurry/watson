@@ -54,7 +54,7 @@ export interface CommandOptions {
    * Requires the format of the command message to exactly match the command name
    * @example
    * ```
-   * `@command('help')`
+   * `@core/command('help')`
    * // By default `!Help` will still work. If the option is set, it will require the command to be all lowercase.
    *```
    * @default false
@@ -92,7 +92,7 @@ export interface CommandOptions {
  *  import { User } from 'discord.js';
  *  import { UserArgument } from '@watsonjs/common';
  *
- * `@Command("ping")`
+ * `@core/command("ping")`
  *  public ping(user: UserArgument) {  }
  * ```
  * You might want to have a more fine grade control over your
@@ -102,7 +102,7 @@ export interface CommandOptions {
  *  import { User } from 'discord.js';
  *  import { UserArgument } from '@watsonjs/common';
  *
- * `@Command("ping")`
+ * `@core/command("ping")`
  *  public ping(`@Param`({ label: "The target user who is being pinged" }) user: UserArgument) {  }
  * ```
  */

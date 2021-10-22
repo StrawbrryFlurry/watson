@@ -1,4 +1,4 @@
-import { Command, InjectParam, Receiver, UseFilters, UseGuards, UsePipes } from '@watsonjs/common';
+import { InjectParam, Receiver, UseFilters, UseGuards, UsePipes } from '@watsonjs/common';
 import { GuildMember } from 'discord.js';
 
 import { CanKickGuard } from './can-kick.guard';
@@ -12,7 +12,7 @@ import { MentionPipe } from './mention.pipe';
 export class KickUserReceiver {
   @UseFilters(GuildMessageFilter)
   @UsePipes(MentionPipe)
-  @Command("kick")
+  @core/command("kick")
   kick(@InjectParam("user") user: GuildMember) {
     console.log(user);
   }

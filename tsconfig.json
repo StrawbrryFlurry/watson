@@ -23,8 +23,8 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@watsonjs/common": ["packages/common/src"],
-      "@watsonjs/core": ["packages/core/src"]
+      "@watsonjs/common": ["./packages/common/src"],
+      "@watsonjs/core": ["./packages/core/src"]
     }
   },
   "exclude": ["../node_modules", "./**/*.spec.ts"]

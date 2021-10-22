@@ -3,13 +3,13 @@
   "compilerOptions": {
     "sourceRoot": "src",
     "paths": {
-      "@builtin": ["packages/common/src/builtin"],
-      "@exceptions": ["packages/common/src/exceptions"],
-      "@interfaces": ["packages/common/src/interfaces"],
-      "@decorators": ["packages/common/src/decorators"],
-      "@command": ["packages/common/src/command"],
-      "@utils": ["packages/common/src/utils"],
-      "@constants": ["packages/common/src/constants.ts"]
+      "@common/builtin": ["packages/common/src/builtin"],
+      "@common/exceptions": ["packages/common/src/exceptions"],
+      "@common/interfaces": ["packages/common/src/interfaces"],
+      "@common/decorators": ["packages/common/src/decorators"],
+      "@common/command": ["packages/common/src/command"],
+      "@common/utils": ["packages/common/src/utils"],
+      "@common/constants": ["packages/common/src/constants.ts"]
     }
   },
   "include": ["*.ts", "**/*.ts"]

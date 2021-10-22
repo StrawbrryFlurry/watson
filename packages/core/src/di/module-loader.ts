@@ -1,10 +1,9 @@
-import { Injector, ModuleDef, ModuleImpl, ModuleRef, ProviderResolvable, Reflector } from '@di';
-import { CircularDependencyException, InvalidDynamicModuleException } from '@exceptions';
-import { Logger } from '@logger';
-import { resolveAsyncValue } from '@utils';
+import { Injector, ModuleDef, ModuleImpl, ModuleRef, ProviderResolvable, Reflector } from '@core/di';
+import { CircularDependencyException, InvalidDynamicModuleException } from '@core/exceptions';
+import { Logger } from '@core/logger';
+import { resolveAsyncValue } from '@core/utils';
 import {
   DynamicModule,
-  InjectionToken,
   isDynamicModule,
   isNil,
   MODULE_METADATA,
@@ -15,19 +14,11 @@ import {
 
 import { ModuleContainer } from './module-container';
 
-export const BOOTSTRAP_MODULE_PROVIDERS = new InjectionToken(
-  "Used to provide a set of metadata keys that should be considered by the `ModuleLoader` when scanning module providers",
-  {
-    providedIn: "root",
-  }
-);
-
 /**
  * Resolves module dependencies
  * and adds them to the di container.
  */
 export class ModuleLoader {
-  private _reflector = new Reflector();
   private _logger = new Logger("ModuleLoader");
   private _injector: Injector;
 
@@ -40,7 +31,7 @@ export class ModuleLoader {
    */
   public async resolveRootModule(metatype: Type) {
     const modules = await this.scanModuleRecursively(metatype);
-    this.traverseModuleMap(metatype, modules);
+    await this.bindModuleProvidersAndCreateModuleRef(metatype, modules);
   }
 
   private async scanModuleRecursively(
@@ -97,12 +88,11 @@ export class ModuleLoader {
     return resolved;
   }
 
-  private async traverseModuleMap(
+  private async bindModuleProvidersAndCreateModuleRef(
     rootModule: Type,
     modules: Map<Type, ModuleDef>
   ): Promise<void> {
     const container = await this._injector.get(ModuleContainer);
-
     const rootDef = modules.get(rootModule)!;
 
     // Calling this method on the root module

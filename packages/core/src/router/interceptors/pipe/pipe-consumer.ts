@@ -2,12 +2,11 @@ import { PipelineBase, PipeTransform, TPipesMetadata } from '@watsonjs/common';
 
 import { CommandArgumentsHost, CommandPipelineHost } from '../../../command';
 import { resolveAsyncValue } from '../../../util/resolve-async-value';
-import { WatsonContainer } from '../../../watson-container';
 import { ContextCreatorArguments } from '../context-creator-arguments.interface';
 import { InterceptorsConsumer } from '../interceptors-consumer';
 
 export class PipesConsumer extends InterceptorsConsumer {
-  constructor(public container: WatsonContainer) {
+  constructor() {
     super();
   }
 

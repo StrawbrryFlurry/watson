@@ -1,17 +1,13 @@
 import { PassThrough, PipelineBase, TFiltersMetadata } from '@watsonjs/common';
 import { Base } from 'discord.js';
 
-import { AbstractDiscordAdapter } from '../../../adapters';
 import { ExecutionContextHost } from '../../../lifecycle';
 import { resolveAsyncValue } from '../../../util/resolve-async-value';
-import { WatsonContainer } from '../../../watson-container';
 import { ContextCreatorArguments } from '../context-creator-arguments.interface';
 import { InterceptorsConsumer } from '../interceptors-consumer';
 
 export class FiltersConsumer extends InterceptorsConsumer {
-  public adapter: AbstractDiscordAdapter;
-
-  constructor(public container: WatsonContainer) {
+  constructor() {
     super();
 
     this.adapter = container.getClientAdapter();

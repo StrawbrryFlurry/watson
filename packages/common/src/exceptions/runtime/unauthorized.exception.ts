@@ -1,4 +1,4 @@
-import { RuntimeException } from '@exceptions';
+import { RuntimeException } from '@common/exceptions';
 
 export class UnauthorizedException extends RuntimeException {
   constructor(message?: string) {

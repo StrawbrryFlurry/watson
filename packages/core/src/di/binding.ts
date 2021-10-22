@@ -39,7 +39,7 @@ export class Binding<
     | FactoryFn<InstanceType>
     | Type = any,
   Deps extends (HasProvLifetime & HasProvScope)[] = any,
-  InstanceType extends any = any
+  InstanceType extends any = MetaType
 > {
   /** The type this binding represents */
   public metatype: MetaType;
@@ -87,6 +87,10 @@ export class Binding<
 
     this._isTreeStatic = true;
     return true;
+  }
+
+  public hasStaticInstance(): boolean {
+    return this.isDependencyTreeStatic() && !isNil(this.instance);
   }
 
   public hasDependencies(): boolean {

@@ -5,7 +5,7 @@ import { Type } from '../type.interface';
 export interface BaseRoute {
   /**
    * The handler method descriptor whose decorator registered this route:
-   * e.g @Command, @Event
+   * e.g @core/command, @Event
    */
   handler: Function;
   /**

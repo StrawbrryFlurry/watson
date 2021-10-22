@@ -27,7 +27,7 @@ export abstract class RouteRef<Event extends WatsonEvent = any>
   public readonly event: Event;
   /**
    * The handler method descriptor whose decorator registered this route:
-   * e.g @Command, @Event
+   * e.g @core/command, @Event
    */
   public abstract readonly handler: Function;
   /**

@@ -1,35 +1,39 @@
-import { IBaseRoute, WatsonEvent } from '@watsonjs/common';
+import { BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
 import iterate from 'iterare';
 
-import { ExceptionHandler } from '..';
 import { LifecycleFunction } from '../../router';
 
 export abstract class EventProxy<
   Event extends WatsonEvent = WatsonEvent,
-  Route extends IBaseRoute = IBaseRoute,
+  Route extends BaseRoute = BaseRoute,
   ProxyType = any
 > {
-  public readonly eventType: Event;
-  public readonly isWSEvent: boolean;
   public readonly handlers = new Map<
     Route,
     [LifecycleFunction, ExceptionHandler]
   >();
 
-  constructor(type: Event, isWSEvent: boolean = false) {
-    this.eventType = type;
-    this.isWSEvent = isWSEvent;
-  }
+  constructor(
+    /**
+     * The {@link WatsonEvent} this proxy is bound to
+     */
+    public readonly type: Event,
+    /**
+     * If the proxy is bound to the discord websocket
+     * connection or the client event emitter
+     */
+    public readonly isWsEvent: boolean = false
+  ) {}
 
   public abstract proxy(args: ProxyType): Promise<void>;
 
   public abstract bind(
-    route: IBaseRoute,
+    route: BaseRoute,
     eventHandler: LifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void;
 
-  public getHandlerFns() {
+  public getHandlerFns(): [Route, [LifecycleFunction, ExceptionHandler]][] {
     return iterate(this.handlers).toArray();
   }
 }

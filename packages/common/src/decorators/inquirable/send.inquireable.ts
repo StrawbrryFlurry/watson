@@ -1,4 +1,4 @@
-import { MessageSendable } from '@interfaces';
+import { DIProvided, MessageSendable } from '@common/interfaces';
 import { ChannelResolvable, GuildResolvable } from 'discord.js';
 
 /**
@@ -21,4 +21,4 @@ export declare interface SendInq {
   ): Promise<void>;
 }
 
-export abstract class SendInq {}
+export abstract class SendInq extends DIProvided({ providedIn: "ctx" }) {}

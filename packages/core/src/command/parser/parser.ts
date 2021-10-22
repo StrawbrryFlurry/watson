@@ -10,8 +10,8 @@ import {
   ParsingException,
   TokenImpl,
   TokenPositionImpl,
-} from '@command';
-import { ContextInjector } from '@di';
+} from '@core/command';
+import { ContextInjector } from '@core/di';
 import {
   AstArgument,
   AstCommand,
@@ -46,7 +46,7 @@ import {
   TokenWithValue,
   UserMentionToken,
 } from '@watsonjs/common';
-import { Channel, Client, Emoji, Guild, Message, Role, User } from 'discord.js';
+import { Channel, Emoji, Message, Role, User } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
 import { URL } from 'url';
 
@@ -312,7 +312,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<ParsedAstArguments> {
     const { params } = route;
-    const { peekTokenFn, nextTokenFn } = ctx;
+    const { peekTokenFn } = ctx;
 
     const astArguments = new Map<string, AstArgument | null>();
     const parsedArguments: ParameterConfiguration[] = [];
@@ -345,7 +345,7 @@ export class CommandParser implements Parser<CommandAst> {
     parsedParams: ParameterConfiguration[],
     ctx: ClosureCtx
   ): Promise<AstArgument<T>> {
-    const { nextTokenFn, peekTokenFn, ungetTokenFn } = ctx;
+    const { nextTokenFn } = ctx;
     const token = nextTokenFn();
     const param = this.getNextParameter(route, parsedParams)!;
 
@@ -365,8 +365,8 @@ export class CommandParser implements Parser<CommandAst> {
      *            ^
      */
 
-    const { configuration, optional, default: defaultValue, paramType } = param;
-    const parseFn = this.getParseFn(param, ctx);
+    const { configuration, optional, default: defaultValue } = param;
+    const parseFn = await this.getParseFn(param, ctx);
     let parsed: T;
 
     this.validateArgumentToken(token, param);
@@ -438,7 +438,7 @@ export class CommandParser implements Parser<CommandAst> {
       return this.parseEmptyNextToken(param, parsedParams);
     }
 
-    const parseFn = this.getParseFn<T>(param, ctx);
+    const parseFn = await this.getParseFn<T>(param, ctx);
     const { hungry, configuration } = param;
 
     if (hungry) {
@@ -632,10 +632,10 @@ export class CommandParser implements Parser<CommandAst> {
     return null;
   }
 
-  public getParseFn<T>(
+  public async getParseFn<T>(
     param: ParameterConfiguration,
     ctx: ClosureCtx
-  ): ParseFn<T> {
+  ): Promise<ParseFn<T>> {
     let fn: Function;
     const { paramType } = param;
 
@@ -681,7 +681,7 @@ export class CommandParser implements Parser<CommandAst> {
         break;
       case CommandParameterType.Custom:
         const { injector, nextTokenFn, peekTokenFn, ungetTokenFn } = ctx;
-        const parsableRef = injector.create<Parsable>(param.type as Parsable);
+        const parsableRef = await injector.get(param.type as typeof Parsable);
         parsableRef.parser = this;
         parsableRef.nextToken = nextTokenFn;
         parsableRef.peekToken = peekTokenFn;
@@ -689,7 +689,7 @@ export class CommandParser implements Parser<CommandAst> {
         // In this case we don't want
         // to bind the function to the
         // `this` context of the parser.
-        return parsableRef.parse.bind(parsableRef);
+        return parsableRef.parse.bind(parsableRef) as ParseFn<T>;
     }
 
     return fn!.bind(this);
@@ -760,7 +760,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<AstArgument<User>> {
     const { injector } = ctx;
-    const client = injector.get<Client>(ClientCtx);
+    const client = await injector.get(ClientCtx);
     let userId: string;
 
     if (token.kind !== CommandTokenKind.UserMention) {
@@ -779,7 +779,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<AstArgument<Role>> {
     const { injector } = ctx;
-    const guild = injector.get<Guild>(GuildCtx);
+    const guild = await injector.get(GuildCtx);
     let roleId: string;
 
     if (token.kind !== CommandTokenKind.RoleMention) {
@@ -798,7 +798,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<AstArgument<Channel>> {
     const { injector } = ctx;
-    const guild = injector.get<Guild>(GuildCtx);
+    const guild = await injector.get(GuildCtx);
     let channelId: string;
 
     if (token.kind !== CommandTokenKind.ChannelMention) {
@@ -817,7 +817,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<AstArgument<Emoji>> {
     const { injector } = ctx;
-    const client = injector.get<Client>(ClientCtx);
+    const client = await injector.get(ClientCtx);
     const argument = new AstArgumentImpl(token, param);
     let emojiId: string;
 

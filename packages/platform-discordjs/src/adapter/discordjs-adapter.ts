@@ -1,7 +1,12 @@
 import { IWSEvent, WatsonEvent } from '@watsonjs/common';
-import { AdapterRef, ApplicationConfig } from '@watsonjs/core';
-import { ClientOptions } from 'discord.js';
+import { AdapterRef, ApplicationConfig, WatsonClientBase } from '@watsonjs/core';
+import { Client, ClientOptions } from 'discord.js';
 import { Observable } from 'rxjs';
+
+export interface WatsonDiscordJSAdapter extends WatsonClientBase {
+  client: Client;
+  options: ClientOptions;
+}
 
 export class DiscordJsAdapter extends AdapterRef {
   public initialize(): Promise<void> {

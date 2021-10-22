@@ -1,4 +1,4 @@
-import { hash } from '@utils';
+import { hash } from '@core/utils';
 import { BaseRoute, isNil } from '@watsonjs/common';
 
 export class EventTokenFactory<T extends BaseRoute = BaseRoute> extends WeakMap<

@@ -4,7 +4,7 @@ import { EventPipeline } from './event-pipeline.interface';
 import { InteractionPipeline } from './interaction-pipeline.interface';
 
 /** The type of a pipeline context */
-export type ContextType = "command" | "event" | "slash";
+export type ContextType = "command" | "event" | "interaction";
 
 /**
  * A `IPipelineHost` is a type that contains a

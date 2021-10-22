@@ -1,7 +1,7 @@
-import { HTTP_CONFIG } from "@builtin";
-import { Inject, Injectable } from "@decorators";
-import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { from, Observable } from "rxjs";
+import { HTTP_CONFIG } from '@common/builtin';
+import { Inject, Injectable } from '@common/decorators';
+import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { from, Observable } from 'rxjs';
 
 export type HTTPBody = { [key: string]: any };
 

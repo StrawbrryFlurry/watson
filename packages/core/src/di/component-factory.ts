@@ -1,4 +1,4 @@
-import { ContextInjector, Injector, NOT_FOUND } from '@di';
+import { ContextInjector, Injector, NOT_FOUND } from '@core/di';
 import { DIProvided, Type } from '@watsonjs/common';
 
 import { ReceiverRef } from './receiver-ref';

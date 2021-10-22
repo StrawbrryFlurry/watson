@@ -1,4 +1,4 @@
-import { Injector, InjectorGetResult } from '@di';
+import { Injector, InjectorGetResult } from '@core/di';
 import {
   ContextType,
   DIProvided,
@@ -17,12 +17,14 @@ import { CommandPipelineHost } from '../command';
 import { AbstractRoute } from '../router';
 
 export class ExecutionContextImpl<
-  PipelineHost extends
-    | CommandPipelineHost
-    | EventPipeline
-    | InteractionPipeline = PipelineBase,
-  EventData extends DjsBaseClass[] = any
-> extends DIProvided({providedIn: 'ctx'})  implements ExecutionContext, Injector
+    PipelineHost extends
+      | CommandPipelineHost
+      | EventPipeline
+      | InteractionPipeline = PipelineBase,
+    EventData extends DjsBaseClass[] = any
+  >
+  extends DIProvided({ providedIn: "ctx" })
+  implements ExecutionContext, Injector
 {
   public handler: Function;
   public next: Function;
@@ -48,12 +50,14 @@ export class ExecutionContextImpl<
     this.next = next;
   }
 
-  public async get<T extends unknown, R extends InjectorGetResult<T>>(typeOrToken: T): Promise<R> {
-    throw new Error('Method not implemented.');
+  public async get<T extends unknown, R extends InjectorGetResult<T>>(
+    typeOrToken: T
+  ): Promise<R> {
+    throw new Error("Method not implemented.");
   }
 
   public switchToInteraction(): InteractionPipeline {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   public setNext(nextFn: Function) {

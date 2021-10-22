@@ -1,6 +1,6 @@
-import { RECEIVER_METADATA } from '@constants';
-import { CustomProvider, Prefix, Type } from '@interfaces';
-import { isNil, isObject, isString } from '@utils';
+import { RECEIVER_METADATA } from '@common/constants';
+import { CustomProvider, Prefix, Type } from '@common/interfaces';
+import { isNil, isObject, isString } from '@common/utils';
 
 export interface ReceiverOptions {
   /**

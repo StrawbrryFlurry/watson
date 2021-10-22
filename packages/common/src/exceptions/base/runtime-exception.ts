@@ -1,6 +1,6 @@
-import { ExecutionContext } from "@interfaces";
+import { ExecutionContext } from '@common/interfaces';
 
-import { WatsonException } from "./watson-exception";
+import { WatsonException } from './watson-exception';
 
 export class RuntimeException extends WatsonException {
   public get context(): ExecutionContext {

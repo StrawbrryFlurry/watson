@@ -1,6 +1,6 @@
-import { SUB_COMMAND_METADATA } from '@constants';
-import { CommandOptions } from '@decorators';
-import { isNil } from '@utils';
+import { SUB_COMMAND_METADATA } from '@common/constants';
+import { CommandOptions } from '@common/decorators';
+import { isNil } from '@common/utils';
 import { isString } from 'class-validator';
 
 export interface SubCommandOptions extends CommandOptions {}

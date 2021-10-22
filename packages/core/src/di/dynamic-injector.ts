@@ -1,5 +1,5 @@
-import { getProviderType, InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@di';
-import { resolveAsyncValue } from '@utils';
+import { getProviderType, InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@core/di';
+import { resolveAsyncValue } from '@core/utils';
 import {
   InjectorLifetime,
   isFunction,

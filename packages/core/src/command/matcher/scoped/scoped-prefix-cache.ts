@@ -1,4 +1,4 @@
-import { resolveAsyncValue } from '@utils';
+import { resolveAsyncValue } from '@core/utils';
 import { isNil, Prefix, PrefixCache } from '@watsonjs/common';
 import { Message } from 'discord.js';
 

@@ -1,11 +1,10 @@
-import { InstanceLoader, NewableTo } from '@di';
+import { NewableTo } from '@core/di';
 import { isNil, Type, ValueProvider } from '@watsonjs/common';
-import { Client } from 'discord.js';
 
 import { AdapterRef, Injector } from '.';
 import { ModuleLoader } from './di/module-loader';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
-import { WatsonApplicationOptions } from './interfaces';
+import { WatsonClientBase } from './interfaces';
 import { LifecycleHost } from './lifecycle/hooks';
 import { CREATE_APP_CONTEXT, Logger } from './logger';
 import { ApplicationRef, WatsonApplication } from './watson-application';
@@ -35,11 +34,11 @@ export class WatsonFactory {
     }
   }
 
-  public static async create<T extends WatsonApplication = WatsonApplication>(
+  public static async create<T extends WatsonClientBase>(
     module: Type,
-    options?: WatsonApplicationOptions,
+    options?: WatsonClientBase,
     adapter?: NewableTo<AdapterRef>
-  ): Promise<T> {
+  ): Promise<WatsonApplication> {
     this.logger.logMessage(CREATE_APP_CONTEXT());
     const AdapterCtor = await this.getAdapterOrDefault(adapter);
     const adapterRef = new AdapterCtor(options);
@@ -49,6 +48,8 @@ export class WatsonFactory {
       Injector.NULL
     );
 
+    await this.initialize(module, rootInjector);
+
     const applicationRef = new WatsonApplication(rootInjector);
 
     rootInjector.bind({
@@ -56,9 +57,7 @@ export class WatsonFactory {
       useValue: applicationRef,
     } as ValueProvider);
 
-    await this.initialize(module, rootInjector);
-
-    return applicationRef as T;
+    return applicationRef;
   }
 
   private static GET_APPLICATION_PROVIDERS(
@@ -69,21 +68,15 @@ export class WatsonFactory {
         provide: AdapterRef,
         useValue: adapter,
       },
-      {
-        provide: Client,
-        useValue: adapter.client,
-      },
     ];
   }
 
   private static async initialize(module: Type, injector: Injector) {
     const loader = new ModuleLoader(injector);
-    const instanceLoader = new InstanceLoader();
     const lifecycleHost = new LifecycleHost(injector);
 
     await BootstrappingHandler.run(async () => {
       await loader.resolveRootModule(module);
-      await instanceLoader.createInstances();
       await lifecycleHost.callOnModuleInitHook();
     });
   }

@@ -1,12 +1,12 @@
-import { Command, InjectChannel, InjectReact, InjectUser, ReactFunction, Receiver } from '@watsonjs/common';
-import { MessageReaction, TextChannel, User } from 'discord.js';
+import { InjectChannel, InjectReact, InjectUser, ReactFunction, Receiver } from '@watsonjs/common';
+import { MessageReaction, User } from 'discord.js';
 
 const checkReactionFilter = (reaction: MessageReaction) =>
   reaction.emoji.name === "✅";
 
 @Receiver()
 export class ReactInquirableReceiver {
-  @Command("verify")
+  @core/command("verify")
   async verifyCommand(
     @InjectReact() reactFn: ReactFunction<MessageReaction[]>,
     @InjectChannel() channel: TextChannel,

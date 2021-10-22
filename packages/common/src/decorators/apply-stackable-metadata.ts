@@ -1,4 +1,4 @@
-import { Type } from '@interfaces';
+import { Type } from '@common/interfaces';
 
 export function applyStackableMetadata<T>(
   key: string,

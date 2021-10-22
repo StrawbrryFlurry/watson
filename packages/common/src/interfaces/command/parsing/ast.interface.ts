@@ -1,4 +1,4 @@
-import { GenericToken } from '@interfaces';
+import { GenericToken } from '@common/interfaces';
 
 import { TokenPosition } from './token.interface';
 
@@ -49,7 +49,7 @@ export interface AstArgument<T = any> extends AstElement<T> {
 export type ParsedAstArguments<
   A extends Object = any,
   K extends keyof A = keyof A
-> = Map<K, A[K]>;
+> = Map<K, AstArgument<A[K]> | null>;
 
 /**
  *

@@ -1,5 +1,5 @@
-import { InjectorLifetime, ProvidedInScope } from '@decorators';
-import { CustomProvider, Type } from '@interfaces';
+import { InjectorLifetime, ProvidedInScope } from '@common/decorators';
+import { CustomProvider, Type } from '@common/interfaces';
 
 /**
  *  TODO: If we're going to use the closure compiler,

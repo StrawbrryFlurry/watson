@@ -1,4 +1,4 @@
-import { Module } from '@di';
+import { Module } from '@core/di';
 import { isConstructor, isUndefined, Type } from '@watsonjs/common';
 
 import { BootstrappingException } from './bootstrapping.exception';

@@ -1,6 +1,6 @@
-import { INJECTABLE_METADATA } from '@constants';
-import { InjectionToken, Type } from '@interfaces';
-import { mergeDefaults } from '@utils';
+import { INJECTABLE_METADATA } from '@common/constants';
+import { InjectionToken, Type } from '@common/interfaces';
+import { mergeDefaults } from '@common/utils';
 
 export enum InjectorLifetime {
   /**

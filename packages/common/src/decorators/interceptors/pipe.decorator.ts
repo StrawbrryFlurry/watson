@@ -1,6 +1,6 @@
-import { PIPE_METADATA } from '@constants';
-import { InjectorLifetime, InterceptorMetadata } from '@decorators';
-import { CommandArgument, InjectionToken } from '@interfaces';
+import { PIPE_METADATA } from '@common/constants';
+import { InjectorLifetime, InterceptorMetadata } from '@common/decorators';
+import { CommandArgument, InjectionToken } from '@common/interfaces';
 import { Observable } from 'rxjs';
 
 import { W_INJ_TYPE } from '../..';

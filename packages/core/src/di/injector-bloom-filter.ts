@@ -1,4 +1,4 @@
-import { WatsonDiProvidable } from '@di';
+import { WatsonDiProvidable } from '@core/di';
 import { isNil, Type } from '@watsonjs/common';
 
 import { WatsonContainer } from '..';

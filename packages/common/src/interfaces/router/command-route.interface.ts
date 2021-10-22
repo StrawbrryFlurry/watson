@@ -1,4 +1,4 @@
-import { Prefix } from '@interfaces';
+import { Prefix } from '@common/interfaces';
 
 import { CommandConfiguration } from '.';
 import { BaseRoute } from './base-route.interface';
@@ -28,7 +28,7 @@ export interface CommandRoute extends BaseRoute {
   alias: string[];
   /**
    * The command configuration set in the
-   * `@Command()` decorator
+   * `@core/command()` decorator
    */
   configuration: CommandConfiguration;
   /**

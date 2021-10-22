@@ -1,20 +1,14 @@
+import { AdapterRef } from '@core/adapters';
+import { EventProxy } from '@core/lifecycle';
+import { RouteExplorer } from '@router';
 import { WatsonEvent } from '@watsonjs/common';
-import { Snowflake } from 'discord.js';
-
-import { AbstractDiscordAdapter } from './adapters';
-import { EventProxy } from './lifecycle/proxies';
-import { RouteExplorer } from './router';
-
-export interface ApplicationProxyOptions {
-  acknowledgementEmote?: Snowflake | string;
-}
 
 export class ApplicationProxy {
   private eventProxies = new Map<WatsonEvent, EventProxy<any>>();
 
   constructor() {}
 
-  public async initAdapter(adapter: AbstractDiscordAdapter) {
+  public async initAdapter(adapter: AdapterRef) {
     this.applyProxiesToAdapter(adapter);
   }
 
@@ -44,7 +38,7 @@ export class ApplicationProxy {
     }
   }
 
-  public applyProxiesToAdapter(adapter: AbstractDiscordAdapter) {
+  public applyProxiesToAdapter(adapter: AdapterRef) {
     for (const [, proxy] of this.eventProxies) {
       adapter.registerEventProxy(proxy);
     }

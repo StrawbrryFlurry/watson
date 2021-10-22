@@ -1,9 +1,9 @@
-import { AskFunction, Command, InjectAsk, InjectChannel, Receiver } from '@watsonjs/common';
+import { InjectAsk, InjectChannel, Receiver } from '@watsonjs/common';
 import { Message, TextChannel } from 'discord.js';
 
 @Receiver()
 export class AskInquirableReceiver {
-  @Command("askping")
+  @core/command("askping")
   async askCommand(
     @InjectAsk() ask: AskFunction<Message>,
     @InjectChannel() channel: TextChannel

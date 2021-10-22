@@ -1,4 +1,4 @@
-import { isMethodDecorator } from '@utils';
+import { isMethodDecorator } from '@common/utils';
 
 import { applyStackableMetadata, W_INJ_TYPE } from '../..';
 

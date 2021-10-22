@@ -1,8 +1,8 @@
-import { PARAM_METADATA } from '@constants';
-import { applyStackableMetadata, ParameterMetadata } from '@decorators';
-import { ADate, DateParameterOptions, Type } from '@interfaces';
+import { PARAM_METADATA } from '@common/constants';
+import { applyStackableMetadata, ParameterMetadata } from '@common/decorators';
+import { ADate, DateParameterOptions, Type } from '@common/interfaces';
 
-import { mergeDefaults } from '../../utils';
+import { getFunctionParameters, mergeDefaults } from '../..';
 
 type GetConfigurationsFromParameterType<T> = T extends ADate
   ? DateParameterOptions
@@ -98,8 +98,12 @@ export function Param(
     propertyKey: string | symbol,
     parameterIndex: number
   ) => {
+    const args = getFunctionParameters(
+      Object.getPrototypeOf(target)[propertyKey]
+    );
+
     const metadata = mergeDefaults<CommandParameterMetadata>(options, {
-      name: propertyKey as string,
+      name: args[parameterIndex] as string,
       parameterIndex: parameterIndex,
       hungry: false,
       optional: false,

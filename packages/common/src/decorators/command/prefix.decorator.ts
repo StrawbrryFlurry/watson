@@ -1,4 +1,4 @@
-import { isMethodDecorator } from '@utils';
+import { isMethodDecorator } from '@common/utils';
 
 import { PREFIX_METADATA } from '../../constants';
 import { Prefix } from '../../interfaces';

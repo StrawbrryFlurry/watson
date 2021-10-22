@@ -1,4 +1,4 @@
-import { COOLDOWN_METADATA } from '@constants';
+import { COOLDOWN_METADATA } from '@common/constants';
 
 import { isMethodDecorator, mergeDefaults } from '../..';
 

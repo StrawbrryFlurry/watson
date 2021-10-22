@@ -1,4 +1,4 @@
-import { DynamicInjector, getProviderScope, InjectorGetResult, Reflector } from '@di';
+import { DynamicInjector, getProviderScope, InjectorGetResult, Reflector } from '@core/di';
 import {
   CustomProvider,
   DIProvided,

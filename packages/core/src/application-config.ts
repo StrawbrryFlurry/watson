@@ -1,5 +1,5 @@
-import { AdapterRef } from '@adapters';
-import { ExceptionHandler } from '@lifecycle';
+import { AdapterRef } from '@core/adapters';
+import { ExceptionHandler } from '@core/lifecycle';
 import { CanActivate, PassThrough, PipeTransform, UniqueTypeArray, WatsonInterceptor } from '@watsonjs/common';
 
 import { WatsonApplicationOptions } from './interfaces';
