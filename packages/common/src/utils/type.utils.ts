@@ -10,3 +10,7 @@ export type OmitFirstElement<T extends Array<any>> = T extends [
 ]
   ? R
   : never;
+
+export type FunctionPropertiesOfType<T extends {}> = {
+  [P in keyof T]: T[P] extends Function ? P : never;
+}[keyof T];

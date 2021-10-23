@@ -1,9 +1,11 @@
 import { SUB_COMMAND_METADATA } from '@common/constants';
 import { CommandOptions } from '@common/decorators';
-import { isNil } from '@common/utils';
+import { FunctionPropertiesOfType, isNil } from '@common/utils';
 import { isString } from 'class-validator';
 
-export interface SubCommandOptions extends CommandOptions {}
+export interface SubCommandOptions extends CommandOptions {
+  parent?: string | number | symbol;
+}
 
 /**
  * Marks a command in a receiver as a sub command.
@@ -16,17 +18,28 @@ export interface SubCommandOptions extends CommandOptions {}
  * !help      -> Will run the help command
  * !help user -> Will run the user help sub command
  *
- * A sub command will require ONE and only one
- * command to be registered in the same receiver.
+ *
+ * ```
+ * ```
  */
-export function SubCommand(): MethodDecorator;
-export function SubCommand(name: string): MethodDecorator;
-export function SubCommand(
-  name: string,
-  options: SubCommandOptions
-): MethodDecorator;
-export function SubCommand(options: SubCommandOptions): MethodDecorator;
-export function SubCommand(
+
+export function SubCommand<
+  T extends Object,
+  K extends keyof T = FunctionPropertiesOfType<T>
+>(parent: K): MethodDecorator;
+export function SubCommand<
+  T extends Object,
+  K extends keyof T = FunctionPropertiesOfType<T>
+>(parent: K, name: string, options: SubCommandOptions): MethodDecorator;
+export function SubCommand<
+  T extends Object,
+  K extends keyof T = FunctionPropertiesOfType<T>
+>(parent: K, options: SubCommandOptions): MethodDecorator;
+export function SubCommand<
+  T extends Object,
+  K extends keyof T = FunctionPropertiesOfType<T>
+>(
+  parentNameOrOptions: string | SubCommandOptions | K,
   nameOrOptions?: string | SubCommandOptions,
   commandOptions?: SubCommandOptions
 ): MethodDecorator {
@@ -41,16 +54,24 @@ export function SubCommand(
     if (!isNil(commandOptions)) {
       const options: SubCommandOptions = {
         ...commandOptions,
-        name: nameOrOptions as string,
+        parent: parentNameOrOptions as K,
+        name: (nameOrOptions as string) ?? commandOptions.name ?? null,
       };
 
       return apply(options);
     }
 
     if (isString(nameOrOptions)) {
-      return apply({ name: nameOrOptions });
+      return apply({
+        parent: parentNameOrOptions as string,
+        name: nameOrOptions,
+      });
     }
 
-    apply(nameOrOptions!);
+    if (isString(parentNameOrOptions)) {
+      apply({ parent: parentNameOrOptions as string, ...nameOrOptions }!);
+    }
+
+    apply({ ...(parentNameOrOptions as SubCommandOptions) });
   };
 }
