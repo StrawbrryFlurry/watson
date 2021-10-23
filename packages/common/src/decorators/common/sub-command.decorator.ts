@@ -1,10 +1,10 @@
 import { SUB_COMMAND_METADATA } from '@common/constants';
-import { CommandOptions } from '@common/decorators';
-import { FunctionPropertiesOfType, isNil } from '@common/utils';
-import { isString } from 'class-validator';
+import { FunctionPropertiesOfType, isNil, isString } from '@common/utils';
+
+import { CommandOptions } from '.';
 
 export interface SubCommandOptions extends CommandOptions {
-  parent?: string | number | symbol;
+  parent: Function;
 }
 
 /**
@@ -37,7 +37,10 @@ export function SubCommand<
 >(parent: K, options: SubCommandOptions): MethodDecorator;
 export function SubCommand<
   T extends Object,
-  K extends keyof T = FunctionPropertiesOfType<T>
+  K extends Extract<keyof T, string> = Extract<
+    FunctionPropertiesOfType<T>,
+    string
+  >
 >(
   parentNameOrOptions: string | SubCommandOptions | K,
   nameOrOptions?: string | SubCommandOptions,
@@ -51,10 +54,12 @@ export function SubCommand<
     const apply = (metadata: SubCommandOptions) =>
       Reflect.defineMetadata(SUB_COMMAND_METADATA, metadata, descriptor.value);
 
+    const getParent = (name: string) => Object.getPrototypeOf(target)[name];
+
     if (!isNil(commandOptions)) {
       const options: SubCommandOptions = {
         ...commandOptions,
-        parent: parentNameOrOptions as K,
+        parent: getParent(parentNameOrOptions as K),
         name: (nameOrOptions as string) ?? commandOptions.name ?? null,
       };
 
@@ -63,13 +68,15 @@ export function SubCommand<
 
     if (isString(nameOrOptions)) {
       return apply({
-        parent: parentNameOrOptions as string,
+        parent: getParent(parentNameOrOptions as string),
         name: nameOrOptions,
       });
     }
 
     if (isString(parentNameOrOptions)) {
-      apply({ parent: parentNameOrOptions as string, ...nameOrOptions }!);
+      apply(
+        { parent: getParent(parentNameOrOptions as string), ...nameOrOptions }!
+      );
     }
 
     apply({ ...(parentNameOrOptions as SubCommandOptions) });

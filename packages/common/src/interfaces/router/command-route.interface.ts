@@ -1,6 +1,4 @@
-import { CommandConfiguration } from '.';
-import { BaseRoute } from './base-route.interface';
-import { ParameterConfiguration } from './configuration/parameter-configuration.interface';
+import { BaseRoute, CommandConfiguration, ParameterConfiguration } from '.';
 
 /**
  * Represents a command *route* which is mapped
@@ -39,7 +37,7 @@ export interface CommandRoute extends BaseRoute {
    * this route. - `null` if there
    * are no sub commands.
    */
-  children: Map<string, string> | null;
+  children: Map<string, CommandRoute> | null;
   /**
    * Checks if this route supports a given
    * command name

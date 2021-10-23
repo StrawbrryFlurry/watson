@@ -9,7 +9,6 @@ export enum WatsonEvent {
   GUILD_MEMBER_REMOVE = "event:guild.member.remove",
   GUILD_MEMBER_UPDATE = "event:guild.member.update",
   GUILD_MEMBER_AVAILABLE = "event:guild.member.available",
-  GUILD_MEMBER_SPEAKING = "event:guild.member.speaking",
   GUILD_MEMBERS_CHUNK = "event:guild.members.chunk",
   GUILD_INTEGRATIONS_UPDATE = "event:guild.integrations.update",
   GUILD_ROLE_CREATE = "event:role.create",
@@ -43,4 +42,5 @@ export enum WatsonEvent {
   TYPING_START = "event:typing.start",
   RAW = "event:raw",
   INTERACTION_CREATE = "event:interaction.create",
+  COMMAND = "event:command",
 }

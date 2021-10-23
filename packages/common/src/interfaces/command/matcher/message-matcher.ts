@@ -1,5 +1,8 @@
-import { Prefix, PrefixCache } from '@common/interfaces';
 import { Message } from 'discord.js';
+
+import { MatchingStrategy, PrefixCache } from '.';
+import { Prefix } from '..';
+import { DIProvided } from '../../di';
 
 export interface MessageMatchResult {
   prefix: Prefix;
@@ -16,7 +19,9 @@ export interface MessageMatchResult {
  * (May vary on the implementation.
  * This is how we do it by default)
  */
-export abstract class MessageMatcher<Cache extends PrefixCache> {
+export abstract class MessageMatcher<
+  Cache extends PrefixCache
+> extends DIProvided({ providedIn: "root" }) {
   protected _cache: Cache;
 
   /**
@@ -26,8 +31,9 @@ export abstract class MessageMatcher<Cache extends PrefixCache> {
    * - TransientDynamicMessageMatcher (1)
    * - CachedDynamicMessageMatcher (2)
    * - GuildScopedMessageMatcher (3)
+   * - Custom (4)
    */
-  public get type(): number {
+  public get type(): MatchingStrategy {
     return this._type;
   }
   private _type: number;
@@ -37,6 +43,7 @@ export abstract class MessageMatcher<Cache extends PrefixCache> {
    * with an array of prefixes for the cache.
    */
   constructor(type: number, cache: Cache) {
+    super();
     this._type = type;
     this._cache = cache;
   }

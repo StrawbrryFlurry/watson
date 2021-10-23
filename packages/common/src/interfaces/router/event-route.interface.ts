@@ -1,1 +1,3 @@
-export interface EventRoute {}
+import { BaseRoute } from '.';
+
+export interface EventRoute extends BaseRoute {}

@@ -45,4 +45,12 @@ export enum MatchingStrategy {
    * have one dynamic prefix or a static one.
    */
   Scoped,
+  /**
+   * Provide a custom command matcher
+   * to fit your needs and optimize it
+   * for your app. A command matcher
+   * extends the `MessageMatcher` class.
+   * See the docs for more info.
+   */
+  Custom,
 }
