@@ -1,8 +1,7 @@
+import { DIProvided, Prefix, PrefixCache } from '@common/interfaces';
 import { Message } from 'discord.js';
 
-import { MatchingStrategy, PrefixCache } from '.';
-import { Prefix } from '..';
-import { DIProvided } from '../../di';
+import { MatchingStrategy } from './matching-strategy.enum';
 
 export interface MessageMatchResult {
   prefix: Prefix;
