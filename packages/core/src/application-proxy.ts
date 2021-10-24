@@ -1,7 +1,8 @@
 import { AdapterRef } from '@core/adapters';
 import { EventProxy } from '@core/lifecycle';
-import { RouteExplorer } from '@router';
 import { WatsonEvent } from '@watsonjs/common';
+
+import { RouteExplorer } from '.';
 
 export class ApplicationProxy {
   private eventProxies = new Map<WatsonEvent, EventProxy<any>>();
@@ -13,7 +14,7 @@ export class ApplicationProxy {
   }
 
   public initFromRouteExplorer(routeExplorer: RouteExplorer) {
-    const proxies = routeExplorer.getEventProxiesArray();
+    const proxies = (routeExplorer as any).getEventProxiesArray();
 
     for (const [event, proxy] of proxies) {
       this.bindProxy(event, proxy);
@@ -22,13 +23,13 @@ export class ApplicationProxy {
 
   public bindProxy(event: WatsonEvent, proxy: EventProxy<any>) {
     if (this.eventProxies.has(event)) {
-      const proxyRef = this.eventProxies.get(event);
+      const proxyRef = this.eventProxies.get(event)!;
 
       /**
        * Makes sure that command / slash proxies get
        * their own event proxy
        */
-      if (proxy.eventType === proxyRef.eventType) {
+      if (proxy.type === proxyRef.type) {
         this.bindToExistingProxy(event, proxy);
       } else {
         this.eventProxies.set(event, proxy);
@@ -46,7 +47,7 @@ export class ApplicationProxy {
 
   private bindToExistingProxy(event: WatsonEvent, proxy: EventProxy<any>) {
     const handlerFns = proxy.getHandlerFns();
-    const proxyRef = this.eventProxies.get(event);
+    const proxyRef = this.eventProxies.get(event)!;
 
     for (const [routeRef, [eventHandler, exceptionHandler]] of handlerFns) {
       proxyRef.bind(routeRef, eventHandler, exceptionHandler);

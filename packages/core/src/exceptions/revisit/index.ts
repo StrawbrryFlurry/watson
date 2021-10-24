@@ -1,5 +1,4 @@
 export * from "./bootstrapping-handler";
-export * from "./bootstrapping.exception";
 export * from "./circular-dependency.exception";
 export * from "./command-configuration.exception";
 export * from "./invalid-dynamic-module.exception";

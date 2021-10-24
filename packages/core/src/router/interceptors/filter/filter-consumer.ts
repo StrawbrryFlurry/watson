@@ -1,16 +1,11 @@
-import { PassThrough, PipelineBase, TFiltersMetadata } from '@watsonjs/common';
+import { ContextCreatorArguments, InterceptorsConsumer } from '@core/router/interceptors';
+import { resolveAsyncValue } from '@core/utils';
+import { ExecutionContext, FiltersMetadata, PassThrough, PipelineBase } from '@watsonjs/common';
 import { Base } from 'discord.js';
-
-import { ExecutionContextHost } from '../../../lifecycle';
-import { resolveAsyncValue } from '../../../util/resolve-async-value';
-import { ContextCreatorArguments } from '../context-creator-arguments.interface';
-import { InterceptorsConsumer } from '../interceptors-consumer';
 
 export class FiltersConsumer extends InterceptorsConsumer {
   constructor() {
     super();
-
-    this.adapter = container.getClientAdapter();
   }
 
   public create({
@@ -18,9 +13,9 @@ export class FiltersConsumer extends InterceptorsConsumer {
     receiver,
     metadata,
     moduleKey,
-  }: ContextCreatorArguments<TFiltersMetadata>) {
+  }: ContextCreatorArguments<FiltersMetadata>) {
     const filters = metadata.map((filter) =>
-      this.getInstance<TFiltersMetadata, PassThrough>(
+      this.getInstance<FiltersMetadata, PassThrough>(
         "filter",
         filter,
         "pass",
@@ -33,11 +28,11 @@ export class FiltersConsumer extends InterceptorsConsumer {
       for (const filter of filters) {
         const data = pipeline.getEvent<Base[]>();
 
-        const ctx = new ExecutionContextHost(
+        const ctx = new (ExecutionContext as any)(
           pipeline,
           data,
           route,
-          this.adapter
+          (this as any).adapter
         );
 
         const res = await this.tryPass(ctx, filter);
@@ -51,7 +46,7 @@ export class FiltersConsumer extends InterceptorsConsumer {
     };
   }
 
-  public tryPass(ctx: ExecutionContextHost, filter: PassThrough) {
+  public tryPass(ctx: ExecutionContext, filter: PassThrough) {
     const { pass } = filter;
     ctx.setNext(pass);
     return resolveAsyncValue(pass(ctx));

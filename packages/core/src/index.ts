@@ -14,5 +14,4 @@ export * from "./application-config";
 export * from "./application-proxy";
 export * from "./constants";
 export * from "./watson-application";
-export * from "./watson-container";
 export * from "./watson-factory";

@@ -1,6 +1,5 @@
 import { EmbedFieldData } from 'discord.js';
-
-import { CommandRoute } from '../router';
+import { CommandRoute } from 'packages/common/src/interfaces';
 
 /**
  * Generates an example of a command by using the
@@ -10,8 +9,7 @@ export const commandExampleUtil = (
   routeRef: CommandRoute
 ): EmbedFieldData[] => {
   const { name, configuration } = routeRef;
-  const { params, prefix } = configuration;
-  const isNamed = prefix.isNamedPrefix;
+  const { params } = configuration;
   const paramNames = params.map((param) => param.name);
 
   const messageEmbedFields: EmbedFieldData[] = [
@@ -36,9 +34,7 @@ export const commandExampleUtil = (
 
   messageEmbedFields.push({
     name: "Example",
-    value: `${prefix.prefix}${isNamed ? " " : ""}${name} ${paramNames.join(
-      " "
-    )}`,
+    value: `<prefix>${name} ${paramNames.join(" ")}`,
   });
 
   return messageEmbedFields;

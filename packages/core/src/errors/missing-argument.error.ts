@@ -1,11 +1,11 @@
-import { ICommandParam } from '@watsonjs/common';
+import { CommandParameterOptions } from 'packages/common/src/decorators';
 
 import { commandExampleUtil, ReadableArgumentTypeHelper } from '../util';
 import { createBaseError } from './create-error';
 import { ErrorOptions } from './error-host';
 
 export interface MissingArgumentErrorOptions extends ErrorOptions {
-  parameters: ICommandParam | ICommandParam[];
+  parameters: CommandParameterOptions | CommandParameterOptions[];
 }
 
 export const MISSING_ARGUMENT_ERROR = (

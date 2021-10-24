@@ -1,5 +1,4 @@
 import { green, red, white, yellow } from 'cli-color';
-import * as dayjs from 'dayjs';
 
 /**
  * @status Status type is logged as green
@@ -62,6 +61,6 @@ export class Logger {
   }
 
   private getDateString() {
-    return dayjs().format("DD/MM/YYYY, HH:mm:ss").toString();
+    // return dayjs().format("DD/MM/YYYY, HH:mm:ss").toString();
   }
 }

@@ -1,7 +1,6 @@
+import { LifecycleFunction } from '@core/router/route-handler-factory';
 import { BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
 import iterate from 'iterare';
-
-import { LifecycleFunction } from '../../router';
 
 export abstract class EventProxy<
   Event extends WatsonEvent = WatsonEvent,

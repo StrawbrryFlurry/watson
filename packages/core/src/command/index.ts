@@ -1,4 +1,3 @@
-export * from "./exceptions";
 export * from "./matcher";
 export * from "./parser";
 export * from "./pipe";

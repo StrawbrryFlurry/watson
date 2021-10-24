@@ -10,7 +10,7 @@ export interface BadArgumentErrorOptions extends ErrorOptions {
 
 export const BAD_ARGUMENT_ERROR = (options: BadArgumentErrorOptions) => {
   const title = "Bad argument exception";
-  const { argument, route } = options;
+  const { argument, route } = options as any;
   const description = `The argument ${
     argument.name
   } of type ${ReadableArgumentTypeHelper(

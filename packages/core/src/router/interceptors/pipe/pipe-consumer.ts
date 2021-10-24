@@ -1,22 +1,15 @@
-import { PipelineBase, PipeTransform, TPipesMetadata } from '@watsonjs/common';
-
-import { CommandArgumentsHost, CommandPipelineHost } from '../../../command';
-import { resolveAsyncValue } from '../../../util/resolve-async-value';
-import { ContextCreatorArguments } from '../context-creator-arguments.interface';
-import { InterceptorsConsumer } from '../interceptors-consumer';
+import { InterceptorsConsumer } from '@core/router/interceptors/interceptors-consumer';
+import { resolveAsyncValue } from '@core/utils';
+import { PipelineBase, PipeTransform } from '@watsonjs/common';
 
 export class PipesConsumer extends InterceptorsConsumer {
   constructor() {
     super();
   }
 
-  public create({
-    receiver,
-    metadata,
-    moduleKey,
-  }: ContextCreatorArguments<TPipesMetadata>) {
-    const pipes = metadata.map((pipe) =>
-      this.getInstance<TPipesMetadata, PipeTransform>(
+  public create({ receiver, metadata, moduleKey }: any) {
+    const pipes = metadata.map((pipe: any) =>
+      this.getInstance<PipesConsumer, PipeTransform>(
         "pipe",
         pipe,
         "transform",
@@ -26,7 +19,7 @@ export class PipesConsumer extends InterceptorsConsumer {
     );
 
     return (pipeline: PipelineBase) => {
-      const { argumentHost } = pipeline as CommandPipelineHost;
+      const { argumentHost } = pipeline as any;
       return this.transform(argumentHost, pipes);
     };
   }
@@ -37,10 +30,7 @@ export class PipesConsumer extends InterceptorsConsumer {
    * pipe or the argument wrapper as its
    * source
    */
-  private async transform(
-    argumentHost: CommandArgumentsHost,
-    pipes: PipeTransform[]
-  ) {
+  private async transform(argumentHost: any, pipes: PipeTransform[]) {
     const { arguments: args } = argumentHost;
 
     for (const argument of args) {

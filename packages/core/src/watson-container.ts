@@ -1,25 +1,7 @@
-import { Module } from '@core/di';
-import {
-  CommandRoute,
-  CustomProvider,
-  DynamicModule,
-  isEmpty,
-  isNil,
-  isString,
-  MODULE_GLOBAL_METADATA,
-  Type,
-} from '@watsonjs/common';
-import iterate from 'iterare';
-
-import { ApplicationConfig } from './application-config';
-import { CommandContainer } from './command';
-import { StaticInjector } from './di/static-injector';
-import { UnknownModuleException } from './exceptions';
-import { ModuleTokenFactory } from './util';
-
-/**
- * Injection Container for the application
- */
+/*
+// /**
+//  * Injection Container for the application
+//  
 export class WatsonContainer {
   private readonly _modules = new Map<string, Module>();
   private readonly commands: CommandContainer;
@@ -29,24 +11,24 @@ export class WatsonContainer {
 
   private rootInjector: StaticInjector;
 
-  /**
-   * DI tokens are static
-   * properties on a provider
-   * element which is used
-   * to resolve that given
-   * provider.
-   *
-   * - 1..n: Any provider registered by the user.
-   * - 0: Internal watson providers.
-   * - -1: Context providers that can only be found
-   * in the context injector.
-   */
-  private _watsonDiTokenId = 1;
+  // /**
+  //  * DI tokens are static
+  //  * properties on a provider
+  //  * element which is used
+  //  * to resolve that given
+  //  * provider.
+  //  *
+  //  * - 1..n: Any provider registered by the user.
+  //  * - 0: Internal watson providers.
+  //  * - -1: Context providers that can only be found
+  //  * in the context injector.
+  //  
+  // private _watsonDiTokenId = 1;
 
-  /**
-   * Returns the next DI token
-   * id and increments it by 1
-   */
+  // /**
+  //  * Returns the next DI token
+  //  * id and increments it by 1
+  //  
   public get DI_TOKEN_ID() {
     const nextId = this._watsonDiTokenId;
     this._watsonDiTokenId += 1;
@@ -261,3 +243,5 @@ export class WatsonContainer {
     return this.config.clientAdapter;
   }
 }
+
+*/

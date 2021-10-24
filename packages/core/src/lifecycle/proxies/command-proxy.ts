@@ -1,21 +1,18 @@
-import { isNil, WatsonEvent } from '@watsonjs/common';
+import { LifecycleFunction } from '@core/router/route-handler-factory';
+import { CommandRoute, ExceptionHandler, isNil, MessageMatcher, WatsonEvent } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
-import { CommandContainer, CommandMatcher, ParsedCommandData } from '../../command';
-import { CommandRoute, LifecycleFunction } from '../../router';
-import { ExceptionHandler } from '../exception-handler';
 import { EventProxy } from './event-proxy';
 
 export class CommandProxy extends EventProxy<
-  WatsonEvent.MESSAGE_CREATE,
+  WatsonEvent.COMMAND,
   CommandRoute
 > {
-  private readonly matcher: CommandMatcher;
+  private readonly matcher: MessageMatcher<any>;
 
-  constructor(commands: CommandContainer) {
-    super(WatsonEvent.MESSAGE_CREATE);
-
-    this.matcher = new CommandMatcher(commands);
+  constructor(matcher: MessageMatcher<any>) {
+    super(WatsonEvent.COMMAND);
+    this.matcher = matcher;
   }
 
   public async proxy<ProxyData extends [Message] = [Message]>(
@@ -23,7 +20,7 @@ export class CommandProxy extends EventProxy<
   ) {
     const [message] = event;
     let routeRef: CommandRoute;
-    let parsed: ParsedCommandData;
+    let parsed: any;
 
     /**
      * Matches the message against all mapped
@@ -36,22 +33,22 @@ export class CommandProxy extends EventProxy<
      * catch the `UnknownCommandException`.
      */
     try {
-      const { route, command, prefix } = await this.matcher.match(message);
+      const a = await this.matcher.match(message);
 
-      if (isNil(route)) {
+      if (isNil(a)) {
         return;
       }
 
-      routeRef = route;
+      routeRef = a as any;
       parsed = {
-        command,
-        prefix,
+        command: a as any,
+        prefix: a as any,
       };
     } catch (err) {
       return;
     }
 
-    const [eventHandler, excpetionHandler] = this.handlers.get(routeRef);
+    const [eventHandler, excpetionHandler] = this.handlers.get(routeRef) as any;
 
     try {
       await eventHandler(routeRef, event, parsed);

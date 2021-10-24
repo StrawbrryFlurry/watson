@@ -1,7 +1,6 @@
 import { red } from 'cli-color';
 
 import { BOOTSTRAPPING_ERROR_MESSAGE, EXCEPTION_STACK, Logger, SUGGESTION } from '../../logger';
-import { BootstrappingException } from './bootstrapping.exception';
 
 export type ZoneFunction<T extends (...args: unknown[]) => unknown> = T;
 
@@ -18,17 +17,19 @@ export class BootstrappingHandler {
         const result = await fn();
         resolve(result);
       } catch (err: unknown) {
-        if (err instanceof BootstrappingException) {
-          const context = err.getContext();
+        if (err instanceof Error) {
+          const context = (err as any).getContext();
           const logger = new Logger(context);
-          const message = err.getMessage();
-          const stack = err.getStack();
+          const message = (err as any).getMessage();
+          const stack = (err as any).getStack();
 
           logger.logMessage(BOOTSTRAPPING_ERROR_MESSAGE());
           logger.logMessage(red(message));
 
-          if (err.hasSuggestions()) {
-            err.suggestions!.forEach((s) => logger.logMessage(SUGGESTION(s)));
+          if ((err as any).hasSuggestions()) {
+            (err as any).suggestions!.forEach((s: any) =>
+              logger.logMessage(SUGGESTION(s))
+            );
           }
 
           if (stack) {

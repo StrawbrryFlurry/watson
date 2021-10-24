@@ -1,32 +1,28 @@
+import { Interceptor } from '@core/logger';
 import { isFunction, isNil, Type } from '@watsonjs/common';
 
-import { ModuleInitException } from '../../exceptions';
-import { InstanceWrapper } from '../../injector';
-import { BAD_INTERCEPTOR_IMPLEMENTATION, Interceptor, INTERCEPTOR_NOT_FOUND } from '../../logger';
-import { WatsonContainer } from '../../watson-container';
+import { ModuleInitException } from '../../exceptions/revisit';
 
 export abstract class InterceptorsConsumer {
-  abstract injector: WatsonContainer;
-
   protected getInstance<T = any, R = any>(
     type: Interceptor,
     injectable: Type | T,
     consumerFn: string,
     moduleToken: string,
-    receiver: InstanceWrapper
+    receiver: any
   ): R {
     if (consumerFn in injectable) {
       return injectable as any as R;
     }
 
-    const moduleRef = this.container.getModuleByToken(moduleToken);
+    const moduleRef = ("" as any).getModuleByToken(moduleToken);
 
     if (!isFunction(injectable)) {
       throw new ModuleInitException(
-        INTERCEPTOR_NOT_FOUND(
+        /*INTERCEPTOR_NOT_FOUND */ ("A" as any)(
           type,
-          (injectable as Type).name,
-          injectable as Type,
+          (injectable as any).name,
+          injectable as any,
           receiver,
           moduleRef
         )
@@ -37,7 +33,7 @@ export abstract class InterceptorsConsumer {
 
     if (isNil(injectableRef)) {
       throw new ModuleInitException(
-        INTERCEPTOR_NOT_FOUND(
+        /*INTERCEPTOR_NOT_FOUND */ ("A" as any)(
           type,
           (injectable as Type).name,
           injectable as Type,
@@ -51,7 +47,7 @@ export abstract class InterceptorsConsumer {
 
     if (!(consumerFn in (instance as Type))) {
       throw new ModuleInitException(
-        BAD_INTERCEPTOR_IMPLEMENTATION(
+        /* BAD_INTERCEPTOR_IMPLEMENTATION */ ("A" as any)(
           type,
           (injectable as Type).name,
           injectable as Type,

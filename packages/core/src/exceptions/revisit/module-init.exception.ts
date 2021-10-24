@@ -1,7 +1,5 @@
-import { BootstrappingException } from './bootstrapping.exception';
-
-export class ModuleInitException extends BootstrappingException {
+export class ModuleInitException extends Error {
   constructor(message: string) {
-    super("ModuleInit", message);
+    super("ModuleInit" + message);
   }
 }

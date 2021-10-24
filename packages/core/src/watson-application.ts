@@ -1,9 +1,10 @@
 import { Injector } from '@core/di';
-import { CanActivate, DIProvided, PipeTransform, Type } from '@watsonjs/common';
+import { CanActivate, DIProvided, ExceptionHandler, MatchingStrategy, PipeTransform, Type } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
+import { config } from 'process';
 import { PassThrough } from 'stream';
 
-import { AdapterRef, ExceptionHandler } from '.';
+import { AdapterRef, WatsonClientBase } from '.';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';
@@ -11,7 +12,6 @@ import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler
 import { LifecycleHost } from './lifecycle/hooks';
 import { APP_STARTED, APP_STARTING, Logger } from './logger';
 import { RouteExplorer } from './router';
-import { WatsonContainer } from './watson-container';
 
 export abstract class ApplicationRef extends DIProvided({
   providedIn: "root",
@@ -31,27 +31,26 @@ export abstract class ApplicationRef extends DIProvided({
 /**
  * Main Application class
  */
-export class WatsonApplication extends ApplicationRef {
+export class WatsonApplication<
+  T extends WatsonClientBase
+> extends ApplicationRef {
   private readonly _logger = new Logger("WatsonApplication");
-  private readonly _container: WatsonContainer;
   private readonly _config: ApplicationConfig;
   private readonly _routeExplorer: RouteExplorer;
   private readonly _applicationProxy: ApplicationProxy;
   private readonly _lifecycleHost: LifecycleHost;
-  private readonly _adapter: AdapterRef;
+  private readonly _adapter: AdapterRef<T["client"], T["options"]>;
 
   private _isStarted: boolean = false;
   private _isInitialized: boolean = false;
 
   constructor(rootInjector: Injector) {
     super(rootInjector);
-
-    this._config = config;
-    this._container = container;
-    this._routeExplorer = new RouteExplorer(container);
+    MatchingStrategy;
+    this._routeExplorer = new RouteExplorer();
     this._applicationProxy = new ApplicationProxy();
-    this._lifecycleHost = new LifecycleHost(container);
-    this._adapter = config.clientAdapter;
+    this._lifecycleHost = new LifecycleHost(rootInjector);
+    this._adapter = (config as any).clientAdapter;
   }
 
   /**
@@ -80,7 +79,7 @@ export class WatsonApplication extends ApplicationRef {
   private async _init() {
     await BootstrappingHandler.run(async () => {
       await this._lifecycleHost.callOnApplicationBootstrapHook();
-      await this._routeExplorer.explore();
+      await (this._routeExplorer as any).explore(); //TODO:
       await this._adapter.initialize();
       this._applicationProxy.initFromRouteExplorer(this._routeExplorer);
       await this._applicationProxy.initAdapter(this._adapter);
@@ -95,7 +94,8 @@ export class WatsonApplication extends ApplicationRef {
    * https://watsonjs.io/pages/providers
    */
   public getProviderInstance<T>(token: Type<T> | string): T {
-    return this._container.getInstanceOfProvider<T>(token);
+    // return this._container.getInstanceOfProvider<T>(token);
+    return " " as any;
   }
 
   /**
@@ -103,35 +103,35 @@ export class WatsonApplication extends ApplicationRef {
    * It it will only be applied if none is specified for either a receiver or a command.
    */
   public setGlobalPrefix(prefix: string) {
-    this._config.globalCommandPrefix = prefix;
+    //  this._config.globalCommandPrefix = prefix;
   }
 
   /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
   public addGlobalInterceptor(handler: ExceptionHandler) {
-    this._config.globalExceptionHandlers.add(handler);
+    //   this._config.globalExceptionHandlers.add(handler);
   }
 
   /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
   public addGlobalGuard(handler: CanActivate) {
-    this._config.globalExceptionHandlers.add(handler);
+    //  this._config.globalExceptionHandlers.add(handler);
   }
 
   /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
   public addGlobalFilter(handler: PassThrough) {
-    this._config.globalExceptionHandlers.add(handler);
+    //  this._config.globalExceptionHandlers.add(handler);
   }
 
   /**
    * Adds a global exceptions handler that will be added to every event handler.
    */
   public addGlobalPipe(handler: PipeTransform) {
-    this._config.globalExceptionHandlers.add(handler);
+    // this._config.globalExceptionHandlers.add(handler);
   }
 
   /**

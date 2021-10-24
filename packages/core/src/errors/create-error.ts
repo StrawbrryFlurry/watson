@@ -8,9 +8,12 @@ export const createBaseError = (
   description: string
 ) => {
   return new MessageEmbed()
-    .setColor(options.color)
+    .setColor(options.color as any)
     .setTitle(title)
-    .setAuthor(options.clientUser.username, options.clientUser.avatarURL())
+    .setAuthor(
+      options.clientUser.username,
+      options.clientUser.avatarURL() as any
+    )
     .setDescription(description)
     .setTimestamp();
 };

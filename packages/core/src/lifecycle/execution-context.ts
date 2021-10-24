@@ -1,35 +1,33 @@
+import { AdapterRef } from '@core/adapters';
 import { Injector, InjectorGetResult } from '@core/di';
 import {
+  BaseRoute,
+  CommandPipeline,
   ContextType,
   DIProvided,
   DiscordAdapter,
   EventPipeline,
   ExecutionContext,
-  IBaseRoute,
   InteractionPipeline,
   PipelineBase,
   Type,
 } from '@watsonjs/common';
-import { Base as DjsBaseClass, Client } from 'discord.js';
-
-import { AbstractDiscordAdapter } from '../adapters';
-import { CommandPipelineHost } from '../command';
-import { AbstractRoute } from '../router';
+import { Client } from 'discord.js';
 
 export class ExecutionContextImpl<
     PipelineHost extends
-      | CommandPipelineHost
+      | CommandPipeline
       | EventPipeline
       | InteractionPipeline = PipelineBase,
-    EventData extends DjsBaseClass[] = any
+    EventData extends unknown[] = any
   >
   extends DIProvided({ providedIn: "ctx" })
   implements ExecutionContext, Injector
 {
   public handler: Function;
   public next: Function;
-  public route: AbstractRoute;
-  public adapter: AbstractDiscordAdapter;
+  public route: BaseRoute;
+  public adapter: AdapterRef;
   public eventData: EventData;
   public parent: Injector | null;
 
@@ -38,8 +36,8 @@ export class ExecutionContextImpl<
   constructor(
     pipeline: PipelineHost,
     eventData: EventData,
-    route: AbstractRoute,
-    adapter: AbstractDiscordAdapter,
+    route: BaseRoute,
+    adapter: AdapterRef,
     next?: Function
   ) {
     super();
@@ -47,12 +45,11 @@ export class ExecutionContextImpl<
     this.adapter = adapter;
     this.eventData = eventData;
     this.route = route;
-    this.next = next;
+    this.next = next!;
   }
-
-  public async get<T extends unknown, R extends InjectorGetResult<T>>(
+  public get<T extends unknown, R extends InjectorGetResult<T>>(
     typeOrToken: T
-  ): Promise<R> {
+  ): any {
     throw new Error("Method not implemented.");
   }
 
@@ -84,8 +81,8 @@ export class ExecutionContextImpl<
     return this.adapter as DiscordAdapter;
   }
 
-  public switchToCommand(): CommandPipelineHost {
-    return this.pipeline as CommandPipelineHost;
+  public switchToCommand(): CommandPipeline {
+    return this.pipeline as CommandPipeline;
   }
 
   public switchToSlash(): InteractionPipeline {
@@ -104,7 +101,7 @@ export class ExecutionContextImpl<
     return this.eventData as any as R;
   }
 
-  public getRoute(): IBaseRoute {
+  public getRoute(): BaseRoute {
     return this.route;
   }
 

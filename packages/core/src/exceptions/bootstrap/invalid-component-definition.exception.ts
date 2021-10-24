@@ -1,13 +1,12 @@
-import { TComponent } from '@watsonjs/common';
+import { Type } from '@watsonjs/common';
 
-import { INVALID_COMPONENT_DEF_MESSAGE } from '../../logger';
 import { BootstrapException } from '../bootstrap.exception';
 
 export class InvalidComponentDefException extends BootstrapException {
-  constructor(type: TComponent, componentName: string, message: string) {
+  constructor(type: Type, componentName: string, message: string) {
     super(
       "ComponentParsing",
-      INVALID_COMPONENT_DEF_MESSAGE(type, componentName, message)
+      (console.log as any)(type, componentName, message)
     );
   }
 }

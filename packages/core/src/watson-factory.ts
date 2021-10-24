@@ -1,7 +1,7 @@
-import { NewableTo } from '@core/di';
-import { isNil, Type, ValueProvider } from '@watsonjs/common';
+import { ModuleContainer, NewableTo } from '@core/di';
+import { ClassProvider, isNil, Type, ValueProvider } from '@watsonjs/common';
 
-import { AdapterRef, Injector } from '.';
+import { AdapterRef, CommandContainer, Injector } from '.';
 import { ModuleLoader } from './di/module-loader';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
 import { WatsonClientBase } from './interfaces';
@@ -38,7 +38,7 @@ export class WatsonFactory {
     module: Type,
     options?: WatsonClientBase,
     adapter?: NewableTo<AdapterRef>
-  ): Promise<WatsonApplication> {
+  ): Promise<WatsonApplication<T>> {
     this.logger.logMessage(CREATE_APP_CONTEXT());
     const AdapterCtor = await this.getAdapterOrDefault(adapter);
     const adapterRef = new AdapterCtor(options);
@@ -50,7 +50,7 @@ export class WatsonFactory {
 
     await this.initialize(module, rootInjector);
 
-    const applicationRef = new WatsonApplication(rootInjector);
+    const applicationRef = new WatsonApplication<T>(rootInjector);
 
     rootInjector.bind({
       provide: ApplicationRef,
@@ -62,11 +62,19 @@ export class WatsonFactory {
 
   private static GET_APPLICATION_PROVIDERS(
     adapter: AdapterRef
-  ): ValueProvider[] {
+  ): (ValueProvider | ClassProvider)[] {
     return [
       {
         provide: AdapterRef,
         useValue: adapter,
+      },
+      {
+        provide: CommandContainer,
+        useValue: new CommandContainer(),
+      },
+      {
+        provide: ModuleContainer,
+        useValue: new ModuleContainer(),
       },
     ];
   }

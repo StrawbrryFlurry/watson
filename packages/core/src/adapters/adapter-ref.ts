@@ -27,6 +27,9 @@ export abstract class AdapterRef<Client = any, Options = any>
 
   protected abstract parseEvent(event: WatsonEvent): string;
 
+  public abstract client: Client;
+  public abstract clientOptions: Options;
+
   protected abstract setUserActivity(): Promise<void>;
   protected abstract login(): Promise<void>;
   protected abstract destroy(): void;
@@ -52,14 +55,6 @@ export abstract class AdapterRef<Client = any, Options = any>
     });
 
     return subscriber;
-  }
-
-  public get client(): Client {
-    return this.configuration.client;
-  }
-
-  public set client(instance: Client) {
-    this.configuration.client = instance;
   }
 
   public async start() {
@@ -91,10 +86,6 @@ export abstract class AdapterRef<Client = any, Options = any>
 
   public get token() {
     return this.configuration.discordToken;
-  }
-
-  protected get clientOptions(): Options {
-    return this.configuration.clientOptions as Options;
   }
 
   public setActivity(options: ActivityOptions) {

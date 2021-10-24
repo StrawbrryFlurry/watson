@@ -1,8 +1,6 @@
 import { WatsonDiProvidable } from '@core/di';
 import { isNil, Type } from '@watsonjs/common';
 
-import { WatsonContainer } from '..';
-
 const BLOOM_BUCKET_SIZE = 256;
 const BLOOM_MASK = BLOOM_BUCKET_SIZE - 1;
 
@@ -33,7 +31,7 @@ export class InjectorBloomFilter {
    */
   private _buckets: number[];
 
-  constructor(private _container: WatsonContainer) {}
+  constructor() {}
 
   public has(hash: number): boolean {
     const mask = 1 << hash;
@@ -45,7 +43,7 @@ export class InjectorBloomFilter {
 
   public add(type: WatsonDiProvidable | Type): void {
     const id: number = isNil(type[W_ELEMENT_ID])
-      ? (type[W_ELEMENT_ID] = this._container.DI_TOKEN_ID)
+      ? (type[W_ELEMENT_ID] = 1) // TODO: )
       : type[W_ELEMENT_ID];
 
     const bloomBit = id & BLOOM_MASK;
