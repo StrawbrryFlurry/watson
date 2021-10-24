@@ -62,7 +62,7 @@ export const JS_COMMENT_REGEX =
  * // [ String, SomeClass, Object ]
  *```
  */
-export const DESIGN_PARAMETERS = "design:param-types";
+export const DESIGN_PARAMETERS = "design:paramtypes";
 /**
  * The return type of the decorated descriptor
  * is `void` e.g `undefined` if not explicitly
@@ -78,7 +78,7 @@ export const DESIGN_PARAMETERS = "design:param-types";
  * // String
  * ```
  */
-export const DESIGN_RETURN_TYPE = "design:return-type";
+export const DESIGN_RETURN_TYPE = "design:returntype";
 /**
  * The type of the decorated
  * ```ts

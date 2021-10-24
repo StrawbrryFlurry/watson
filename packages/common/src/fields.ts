@@ -64,6 +64,10 @@ export const W_BINDING_DEF = "ɵbidef";
  */
 export const W_PROV_LIFETIME = "ɵprovlife";
 
+export interface HasProvLifetime {
+  [W_PROV_LIFETIME]: any;
+}
+
 /**
  * Property on a {@link Type} that
  * defines what injector scope the type
@@ -72,6 +76,10 @@ export const W_PROV_LIFETIME = "ɵprovlife";
  * {@link ProvidedInScope}
  */
 export const W_PROV_SCOPE = "ɵprovsc";
+
+export interface HasProvScope {
+  [W_PROV_SCOPE]: any;
+}
 
 export const W_MODULE_PROV = "ɵmoprov";
 

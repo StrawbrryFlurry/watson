@@ -19,7 +19,7 @@ export interface CommandParameterOptions<T = any> {
    */
   label?: string;
   /** The type this parameter will be parsed as */
-  type?: Type | undefined;
+  type?: Type | null;
   /**
    * Makes the parameter optional.
    * Optional parameters cannot be followed by mandatory ones.

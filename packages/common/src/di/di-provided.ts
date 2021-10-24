@@ -1,6 +1,8 @@
-import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions } from '@common/decorators/common/injectable.decorator';
+import { DEFAULT_LIFETIME, DEFAULT_SCOPE } from '@common/decorators/common/injectable.decorator';
 import { W_PROV_LIFETIME, W_PROV_SCOPE } from '@common/fields';
 import { mergeDefaults } from '@common/utils';
+
+import { InjectableOptions } from '.';
 
 export function DIProvided<T extends new (...args: any[]) => any>(
   options: InjectableOptions = {},
