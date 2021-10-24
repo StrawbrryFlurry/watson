@@ -6,7 +6,6 @@ import {
   DEFAULT_SCOPE,
   DIProvided,
   FactoryProvider,
-  getOwnDefinition,
   INJECTABLE_METADATA,
   InjectableOptions,
   InjectionToken,
@@ -22,7 +21,6 @@ import {
   W_PROV_SCOPE,
 } from '@watsonjs/common';
 
-import { ApplicationRef } from '..';
 import { NullInjector } from './null-injector';
 
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
@@ -135,10 +133,10 @@ export function getProviderType(
   return provider;
 }
 
-export async function getRootInjector(injector: Injector) {
-  const { rootInjector } = await injector.get(ApplicationRef);
-  return rootInjector;
-}
+// export async function getRootInjector(injector: Injector) {
+//   const { rootInjector } = await injector.get(ApplicationRef);
+//   return rootInjector;
+// }
 
 export function getProviderScope(
   typeOrProvider: ProviderResolvable
@@ -172,10 +170,7 @@ export function getProviderScope(
 
 export function createBinding(provider: ProviderResolvable): Binding {
   const providerType = getProviderType(provider);
-  const existingBinding = getOwnDefinition<Binding>(
-    providerType,
-    W_BINDING_DEF
-  );
+  const existingBinding = providerType[W_BINDING_DEF] as Binding;
 
   if (!isNil(existingBinding)) {
     return existingBinding;

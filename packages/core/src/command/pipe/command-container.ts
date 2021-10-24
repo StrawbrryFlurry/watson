@@ -1,7 +1,5 @@
-import { CommandRoute, DIProvided, isString, Prefix } from '@watsonjs/common';
+import { CommandRoute, DIProvided, isString } from '@watsonjs/common';
 import iterate from 'iterare';
-
-import { EventTokenFactory } from './event-token-factory';
 
 type CommandMapCtor = new (
   entries?: readonly (readonly [string, CommandRoute])[] | null
@@ -11,30 +9,19 @@ export class CommandContainer extends DIProvided(
   { providedIn: "root" },
   Map as CommandMapCtor
 ) {
-  public readonly commands = new Map<
-    /* Command alias */ string,
-    /* Route Token */ string
-  >();
-
-  constructor(private _tokenFactory = new EventTokenFactory()) {
-    super();
-  }
-
-  public apply(route: CommandRoute): void {
-    const { name, alias, isSubCommand } = route;
+  public apply(routeRef: CommandRoute): void {
+    const { name, alias, isSubCommand } = routeRef;
 
     /**
      * Don't process sub commands
-     * as they will be mapped by their parent
+     * as they will be mapped
+     * in the {@link RouteExplorer}
      */
     if (isSubCommand) {
       return;
     }
 
-    const token = this._tokenFactory.create(route);
-    this.set(token, route);
-
-    this.commands.set(name, token);
+    this.commands.set(name, routeRef);
 
     if (alias.length === 0) {
       return;
@@ -42,7 +29,7 @@ export class CommandContainer extends DIProvided(
 
     for (let i = 0; i < alias.length; i++) {
       const name = alias[i];
-      this.commands.set(name, token);
+      this.commands.set(name, routeRef);
     }
   }
 
@@ -72,15 +59,5 @@ export class CommandContainer extends DIProvided(
 
   public getAll() {
     return iterate(this.entries()).toArray();
-  }
-
-  public getPrefixes(): Prefix[] {
-    const prefixes: Prefix[] = [];
-    for (const [name, token] of this.commands.entries()) {
-      const { commandPrefix } = this.get(token)!;
-      prefixes.push(commandPrefix);
-    }
-
-    return prefixes;
   }
 }

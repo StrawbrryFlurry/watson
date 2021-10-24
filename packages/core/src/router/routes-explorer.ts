@@ -1,49 +1,78 @@
+import { CommandContainer } from '@core/command';
+import { Injector, MethodDescriptor, ModuleContainer, ReceiverRef, Reflector } from '@core/di';
+import { CommonExceptionHandler, EventProxy, ExceptionHandlerImpl } from '@core/lifecycle';
 import {
+  BaseRoute,
   COMMAND_METADATA,
-  DESIGN_PARAMETERS,
+  CommandOptions,
+  CommandRoute,
+  EVENT_METADATA,
+  EventRoute,
+  EXCEPTION_HANDLER,
   EXCEPTION_HANDLER_METADATA,
-  isFunction,
+  ExceptionHandler,
+  ExceptionHandlerMetadata,
+  GLOBAL_EXCEPTION_HANDLER,
+  INTERACTION_COMMAND_METADATA,
+  isEmpty,
+  isNil,
   RECEIVER_METADATA,
-  ReceiverDef,
+  ReceiverOptions,
+  SUB_COMMAND_METADATA,
+  SubCommandOptions,
   Type,
+  UniqueTypeArray,
   WatsonEvent,
 } from '@watsonjs/common';
-import iterate from 'iterare';
+
+import { CommandRouteImpl, LifecycleFunction, RouteHandlerFactory } from '.';
+
+const ROUTE_METADATA = [
+  COMMAND_METADATA,
+  SUB_COMMAND_METADATA,
+  EVENT_METADATA,
+  INTERACTION_COMMAND_METADATA,
+];
+
+interface RouteMethodMetadata<T = any> {
+  metadata: T;
+  key: string;
+  method: MethodDescriptor;
+}
 
 export class RouteExplorer {
-  private container: WatsonContainer;
-  private scanner: MetadataResolver;
-
-  private logger = new Logger("RouteExplorer");
-
-  private eventRoutes = new Set<EventRouteHost<any>>();
-  private commandRoutes = new Set<CommandRoute>();
-  private slashRoutes = new Set<SlashRoute>();
+  private eventRoutes = new WeakMap<
+    /* Route descriptor */ Function,
+    EventRoute
+  >();
+  private commandRoutes = new WeakMap<Function, CommandRoute>();
+  private interactionRoutes = new WeakMap<Function, any>();
 
   private eventProxies = new Map<WatsonEvent, EventProxy>();
-  private routeHanlderFactory: RouteHandlerFactory;
+  private routeHandlerFactory = new RouteHandlerFactory();
 
-  constructor(container: WatsonContainer) {
-    this.container = container;
-    this.scanner = new MetadataResolver(container);
-    this.routeHanlderFactory = new RouteHandlerFactory(container);
+  public async explore(injector: Injector) {
+    const { modules } = await injector.get(ModuleContainer);
+    const commandContainer = await injector.get(CommandContainer);
+    const receiverRefs: ReceiverRef[] = new UniqueTypeArray();
+
+    for (const [metatype, { injector, receivers }] of modules) {
+      const refs = await Promise.all(
+        receivers.map((receiver) => injector.get(receiver))
+      );
+      receiverRefs.push(...refs);
+    }
+
+    for (const receiver of receiverRefs) {
+      await this._mapRoutesOfReceiver(receiver, commandContainer);
+    }
   }
-
-  public async explore() {
-    this.logger.logMessage(EXPLORE_START());
-    const receivers =
-      this.container.globalInstanceHost.getAllInstancesOfType("receiver");
-
-    for (const receiver of receivers) {
-      const { wrapper } = receiver;
-
-      this.logger.logMessage(EXPLORE_RECEIVER(receiver.wrapper));
-
+  /*
       const {
         createCommandHandler,
         //  createEventHandler,
         //  createSlashHandler,
-      } = this.routeHanlderFactory;
+      } = this.routeHandlerFactory;
 
       // await this.reflectRoute(
       //   wrapper,
@@ -80,7 +109,203 @@ export class RouteExplorer {
     }
     this.logger.logMessage(COMPLETED());
   }
+*/
+  private async _mapRoutesOfReceiver(
+    receiverRef: ReceiverRef,
+    commandContainer: CommandContainer
+  ) {
+    const { metatype } = receiverRef;
+    const methods = Reflector.reflectMethodsOfType(metatype);
+    const receiverMetadata = Reflector.reflectMetadata<ReceiverOptions>(
+      RECEIVER_METADATA,
+      metatype
+    );
 
+    const methodsMetadata = methods.reduce((metadata, method) => {
+      ROUTE_METADATA.map((key) => ({
+        metadata: Reflector.reflectMetadata(key, method.descriptor),
+        method,
+        key,
+      }))
+        .filter(({ metadata }) => !isNil(metadata))
+        .forEach((meta) =>
+          !isNil(metadata[meta.key])
+            ? metadata[meta.key].push(meta)
+            : (metadata[meta.key] = [meta])
+        );
+
+      return metadata;
+    }, {}) as { [K: string]: RouteMethodMetadata[] };
+
+    const commandMetadata = methodsMetadata[COMMAND_METADATA] ?? [];
+    const subCommandMetadata = methodsMetadata[SUB_COMMAND_METADATA] ?? [];
+    const eventMetadata = methodsMetadata[EVENT_METADATA] ?? [];
+    const interactionMetadata =
+      methodsMetadata[INTERACTION_COMMAND_METADATA] ?? [];
+
+    // We need to map regular commands without parents first
+    for (const { method, metadata } of commandMetadata) {
+      const route = await this._bindCommandRoute(
+        receiverRef,
+        method,
+        metadata,
+        receiverMetadata
+      );
+
+      commandContainer.apply(route);
+    }
+
+    while (!isEmpty(subCommandMetadata)) {
+      const nextMetadata = subCommandMetadata.shift()!;
+      const { metadata, method } = nextMetadata;
+      const { parent } = metadata as SubCommandOptions;
+      const parentRef = this.commandRoutes.get(parent);
+
+      if (isNil(parentRef)) {
+        subCommandMetadata.push(nextMetadata);
+        continue;
+      }
+
+      const routeRef = await this._bindCommandRoute(
+        receiverRef,
+        method,
+        metadata,
+        receiverMetadata,
+        parentRef
+      );
+
+      if (isNil(parentRef.children)) {
+        parentRef.children = new Map();
+      }
+
+      const commandNames = [routeRef.name, ...routeRef.alias];
+
+      for (const name of commandNames) {
+        const existing = parentRef.children.get(name);
+
+        if (!isNil(existing)) {
+          throw `Sub command with name "${name}" already exists as an alias of command "${existing.name}" in "${receiverRef.name}"`;
+        }
+
+        parentRef.children.set(name, routeRef);
+      }
+    }
+
+    for (const { method, metadata } of eventMetadata) {
+      // TODO:
+      this._bindEventRoute();
+    }
+
+    for (const { method, metadata } of interactionMetadata) {
+      // TODO:
+      this._bindInteractionRoute();
+    }
+  }
+
+  private async _bindCommandRoute(
+    receiverRef: ReceiverRef,
+    method: MethodDescriptor,
+    metadata: CommandOptions | SubCommandOptions,
+    receiverMetadata: ReceiverOptions,
+    parent?: CommandRoute
+  ): Promise<CommandRoute> {
+    const { descriptor } = method;
+
+    const routeRef = new CommandRouteImpl(
+      metadata as CommandOptions,
+      receiverMetadata,
+      receiverRef,
+      method,
+      parent
+    );
+
+    this.commandRoutes.set(descriptor, routeRef);
+
+    const handlerFn = await this.routeHandlerFactory.createCommandHandler(
+      routeRef,
+      descriptor,
+      receiverRef
+    );
+
+    let proxyRef = this.eventProxies.get(WatsonEvent.COMMAND);
+
+    if (isNil(proxyRef)) {
+      proxyRef = new (EventProxy as any)();
+      this.eventProxies.set(WatsonEvent.COMMAND, proxyRef!);
+    }
+
+    const exceptionHandler = await this._createExceptionHandler(
+      receiverRef,
+      method
+    );
+
+    proxyRef!.bind(routeRef, handlerFn, exceptionHandler);
+
+    return routeRef;
+  }
+
+  private async _bindEventRoute() {}
+
+  private async _bindInteractionRoute() {}
+
+  private _bindHandler(
+    event: WatsonEvent,
+    route: BaseRoute,
+    proxyType: Type,
+    handler: LifecycleFunction,
+    exceptionHandler: ExceptionHandler,
+    proxyArgs: unknown[]
+  ) {
+    // if (!this.eventProxies.has(event)) {
+    //   this.eventProxies.set(event, new proxyType(...proxyArgs));
+    // }
+    //
+    // const proxyRef = this.eventProxies.get(event);
+    // proxyRef.bind(route, handler, exceptionHandler);
+  }
+
+  private async _createExceptionHandler(
+    receiverRef: ReceiverRef,
+    method: MethodDescriptor
+  ) {
+    const { metatype } = receiverRef;
+    const { descriptor } = method;
+
+    const defaultHandlers = [new CommonExceptionHandler()];
+    const moduleExceptionHandlers = await receiverRef.get(
+      EXCEPTION_HANDLER,
+      []
+    );
+    const globalExceptionHandlers = await receiverRef.get(
+      GLOBAL_EXCEPTION_HANDLER,
+      []
+    );
+
+    const receiverExceptionHandlers =
+      Reflector.reflectMetadata<ExceptionHandlerMetadata[]>(
+        EXCEPTION_HANDLER_METADATA,
+        metatype
+      ) ?? [];
+
+    const routeExceptionHandlers =
+      Reflector.reflectMetadata<ExceptionHandlerMetadata[]>(
+        EXCEPTION_HANDLER_METADATA,
+        descriptor
+      ) ?? [];
+
+    const customHandlers = [
+      ...moduleExceptionHandlers,
+      ...globalExceptionHandlers,
+      ...receiverExceptionHandlers,
+      ...routeExceptionHandlers,
+    ];
+
+    const handlers = [...defaultHandlers, ...customHandlers];
+    const handler = new ExceptionHandlerImpl(handlers as any);
+
+    return handler;
+  }
+  /*
   private async reflectCommands(receiver: InstanceWrapper<ReceiverDef>) {
     const { metatype } = receiver;
     const receiverMethods = this.reflecReceiverDefMehtods(metatype);
@@ -132,7 +357,7 @@ export class RouteExplorer {
       const moduleId = this.container.generateTokenFromModule(receiver.host);
 
       const handler = await handlerFactory.call(
-        this.routeHanlderFactory,
+        this.routeHandlerFactory,
         routeRef,
         method.descriptor,
         receiver,
@@ -157,10 +382,6 @@ export class RouteExplorer {
         proxyArgs
       );
     }
-  }
-
-  private reflecReceiverDefMehtods(receiver: Type) {
-    return this.scanner.reflectMethodsFromMetatype(receiver);
   }
 
   private reflectExceptionHandlers(
@@ -197,50 +418,5 @@ export class RouteExplorer {
   public getEventProxy(event: WatsonEvent) {
     return this.eventProxies.get(event);
   }
-
-  private bindHandler(
-    event: WatsonEvent,
-    route: IBaseRoute,
-    proxyType: Type,
-    handler: LifecycleFunction,
-    exceptionHandler: ExceptionHandler,
-    proxyArgs: unknown[]
-  ) {
-    if (!this.eventProxies.has(event)) {
-      this.eventProxies.set(event, new proxyType(...proxyArgs));
-    }
-
-    const proxyRef = this.eventProxies.get(event);
-    proxyRef.bind(route, handler, exceptionHandler);
-  }
-
-  private createExceptionHandler(
-    receiver: Type,
-    method: Function,
-    module: Module
-  ) {
-    const defaultHandlers = [new CommonExceptionHandler()];
-    const customGlobalHandlers = this.container.getGlobalExceptionHandlers();
-    const customReceiverHandlers = this.reflectExceptionHandlers(
-      EXCEPTION_HANDLER_METADATA,
-      receiver,
-      module
-    );
-    const customCommandHandlers = this.reflectExceptionHandlers(
-      EXCEPTION_HANDLER_METADATA,
-      method,
-      module
-    );
-
-    const customHandlers = [
-      ...customGlobalHandlers,
-      ...customReceiverHandlers,
-      ...customCommandHandlers,
-    ];
-
-    const handlers = [...defaultHandlers, ...customHandlers];
-    const handler = new ExceptionHandler(handlers);
-
-    return handler;
-  }
+*/
 }

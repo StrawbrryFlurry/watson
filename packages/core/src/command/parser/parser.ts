@@ -7,7 +7,6 @@ import {
   isParameterToken,
   isPrefixToken,
   NullToken,
-  ParsingException,
   TokenImpl,
   TokenPositionImpl,
 } from '@core/command';
@@ -50,6 +49,7 @@ import { Channel, Emoji, Message, Role, User } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
 import { URL } from 'url';
 
+import { ParsingException } from '../exceptions/parsing.exception';
 import { AstCommandImpl, AstPrefixImpl } from './ast';
 import { CommandTokenizer } from './tokenizer';
 
@@ -122,11 +122,7 @@ export type PeekTokenFn = () => Token | null;
 export type UngetTokenFn = (token: Token) => void;
 
 export class CommandParser implements Parser<CommandAst> {
-  private _commands: Map<string, string>;
-
-  constructor(private _commandContainer: CommandContainer) {
-    this._commands = this._commandContainer.commands;
-  }
+  constructor(private _commandContainer: CommandContainer) {}
 
   public parseMessageTokens(message: Message, prefixLength: number) {
     const { content } = message;
@@ -219,15 +215,13 @@ export class CommandParser implements Parser<CommandAst> {
       throw new Error("No command specified");
     }
 
-    const commandId = this._commands.get(commandText!.toLowerCase());
+    const routeRef = this._commandContainer.get(commandText!.toLowerCase());
 
-    if (isNil(commandId)) {
+    if (isNil(routeRef)) {
       throw new Error("No matching command found");
     }
 
     const astCommand = new AstCommandImpl(commandToken);
-    // If we have an Id, we'll always get route
-    const routeRef = this._commandContainer.get(commandId)!;
     const resolvedRouteRef = this.resolveSubCommand(routeRef, astCommand, ctx);
 
     return {
@@ -263,15 +257,13 @@ export class CommandParser implements Parser<CommandAst> {
       }
 
       const { text } = nextToken;
-      const childToken = children.get(text!.toLowerCase());
+      const childRef = children.get(text!.toLowerCase());
 
-      if (isNil(childToken)) {
+      if (isNil(childRef)) {
         ungetTokenFn(nextToken);
-
         break;
       }
 
-      const childRef = this._commandContainer.get(childToken)!;
       const { caseSensitive } = childRef.configuration;
 
       if (caseSensitive) {

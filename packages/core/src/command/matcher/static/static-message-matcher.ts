@@ -1,14 +1,12 @@
-import { MessageMatcher, MessageMatcherType, MessageMatchResult, Prefix } from '@watsonjs/common';
+import { MessageMatcher, MessageMatchResult, Prefix } from '@watsonjs/common';
 import { Message } from 'discord.js';
+import { MatchingStrategy } from 'packages/common/src/interfaces/command/matcher/matching-strategy.enum';
 
 import { StaticPrefixCache } from './static-prefix-cache';
 
 export class StaticMessageMatcher extends MessageMatcher<StaticPrefixCache> {
   constructor(prefixes: Prefix[]) {
-    super(
-      MessageMatcherType.StaticMessageMatcher,
-      new StaticPrefixCache(prefixes)
-    );
+    super(MatchingStrategy.Static, new StaticPrefixCache(prefixes));
   }
 
   public async match(message: Message): Promise<MessageMatchResult | null> {
