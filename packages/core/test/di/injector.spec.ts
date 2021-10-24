@@ -1,18 +1,20 @@
-import * as a from '@common/interfaces';
+import { Injectable } from '@watsonjs/common';
+import { Injector } from '@watsonjs/core';
 
-describe("A", () => {
-  test("Do the thing", () => {
-    console.log(a);
+describe("Basic injector test", () => {
+  @Injectable()
+  class Foo {}
+
+  @Injectable()
+  class DependsOnFoo {
+    constructor(public foo: Foo) {}
+  }
+
+  test("Create instance with static dependency", async () => {
+    const inj = Injector.create([Foo, DependsOnFoo]);
+    const instance = await inj.get(DependsOnFoo);
+
+    expect(instance).toBeInstanceOf(DependsOnFoo);
+    expect(instance.foo).toBeInstanceOf(Foo);
   });
 });
-
-// import { Injector } from '@watsonjs/core';
-
-// describe("It can create dependencies", () => {
-//   test("A is A", async () => {
-//     class A {}
-//     const injector = Injector.create([A]);
-//     const a = injector.get(A);
-//     expect(a).toBeInstanceOf(A);
-//   });
-// });
