@@ -1,7 +1,5 @@
 export * from "./adapter";
 export * from "./command";
-export * from "./common";
-export * from "./di";
 export * from "./discord";
 export * from "./event";
 export * from "./exceptions";

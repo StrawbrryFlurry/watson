@@ -26,6 +26,21 @@
       "@watsonjs/common": ["./packages/common/src"],
       "@watsonjs/core": ["./packages/core/src"],
       "@watsonjs/platform-discordjs": ["./packages/platform-discordjs/src"],
+
+      "@common/builtin": ["./packages/common/src/builtin"],
+      "@common/fields": ["packages/common/src/fields.ts"],
+      "@common/exceptions": ["./packages/common/src/exceptions"],
+      "@common/interfaces": ["./packages/common/src/interfaces"],
+      "@common/interfaces/*": ["./packages/common/src/interfaces/*"],
+      "@common/enums": ["packages/common/src/enums"],
+      "@common/decorators": ["./packages/common/src/decorators"],
+      "@common/decorators/*": ["packages/common/src/decorators/*"],
+      "@common/command": ["./packages/common/src/command"],
+      "@common/utils": ["./packages/common/src/utils"],
+      "@common/di": ["packages/common/src/di"],
+      "@common/di/*": ["packages/common/src/di/*"],
+      "@common/constants": ["./packages/common/src/constants.ts"],
+
       "@core/adapters": ["./packages/core/src/adapters"],
       "@core/command": ["./packages/core/src/command"],
       "@core/di": ["./packages/core/src/di"],
@@ -33,18 +48,10 @@
       "@core/errors": ["./packages/core/src/errors"],
       "@core/logger": ["./packages/core/src/logger"],
       "@core/interfaces": ["./packages/core/src/interfaces"],
+      "@core/interfaces/*": ["./packages/core/src/interfaces/*"],
       "@core/lifecycle": ["./packages/core/src/lifecycle"],
       "@core/exceptions": ["./packages/core/src/exceptions"],
-      "@core/utils": ["./packages/core/src/util"],
-      "@common/builtin": ["./packages/common/src/builtin"],
-      "@common/fields": ["packages/common/src/fields.ts"],
-      "@common/exceptions": ["./packages/common/src/exceptions"],
-      "@common/interfaces": ["./packages/common/src/interfaces"],
-      "@common/enums": ["packages/common/src/enums"],
-      "@common/decorators": ["./packages/common/src/decorators"],
-      "@common/command": ["./packages/common/src/command"],
-      "@common/utils": ["./packages/common/src/utils"],
-      "@common/constants": ["./packages/common/src/constants.ts"]
+      "@core/utils": ["./packages/core/src/util"]
     }
   },
   "exclude": ["../node_modules", "./**/*.spec.ts"]

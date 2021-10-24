@@ -1,4 +1,4 @@
-import { DIProvided } from '@common/interfaces';
+import { DIProvided } from '@common/di';
 import { Channel, Client, Guild, Message, VoiceChannel } from 'discord.js';
 
 /**

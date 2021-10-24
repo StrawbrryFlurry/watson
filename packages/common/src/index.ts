@@ -9,3 +9,4 @@ export * from "./utils";
 export * from "./constants";
 export * from "./data-structures";
 export * from "./fields";
+export * from "./di";

@@ -1,7 +1,7 @@
 import { FILTER_METADATA } from '@common/constants';
-import { InjectorLifetime } from '@common/decorators';
+import { InjectionToken, InjectorLifetime } from '@common/di';
 import { W_INJ_TYPE } from '@common/fields';
-import { ExecutionContext, InjectionToken } from '@common/interfaces';
+import { ExecutionContext } from '@common/interfaces';
 import { Observable } from 'rxjs';
 
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';

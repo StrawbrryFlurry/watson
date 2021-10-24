@@ -1,6 +1,6 @@
-import { CommandParameterType } from '@common/interfaces';
+import { W_PARAM_TYPE } from '@common/fields';
+import { CommandParameterType } from '@common/interfaces/command/parameter-types/parameter-type.enum';
 import { Emoji, Role, TextChannel, User } from 'discord.js';
-import { W_PARAM_TYPE } from 'packages/common/src';
 
 /** Text channel mentioned by a member using'#'
  * ```

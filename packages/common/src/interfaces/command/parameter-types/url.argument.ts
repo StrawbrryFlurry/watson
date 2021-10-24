@@ -1,4 +1,4 @@
-import { CommandParameterType } from '@common/interfaces';
+import { CommandParameterType } from '@common/interfaces/command/parameter-types';
 import { W_PARAM_TYPE } from 'packages/common/src';
 
 /**

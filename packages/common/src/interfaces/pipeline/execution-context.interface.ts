@@ -1,8 +1,8 @@
-import { DiscordAdapter, InjectionToken } from '@common/interfaces';
+import { DIProvided, InjectionToken } from '@common/di';
+import { DiscordAdapter } from '@common/interfaces';
 import { Base, Client } from 'discord.js';
 
 import { BaseRoute, CommandPipeline, ContextType, EventPipeline, InteractionPipeline, PipelineHost } from '..';
-import { DIProvided } from '../di';
 import { Type } from '../type.interface';
 
 type InjectorGetResult<T> = T extends InjectionToken<infer R>

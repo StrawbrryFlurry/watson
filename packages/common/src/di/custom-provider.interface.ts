@@ -1,4 +1,5 @@
-import { Type } from '../type.interface';
+import { Type } from '@common/interfaces/type.interface';
+
 import { InjectionToken } from './injection-token';
 
 export type FactoryProviderFn<T = any, I extends any[] = any[]> = (

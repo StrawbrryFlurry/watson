@@ -1,4 +1,5 @@
-import { DIProvided, Prefix, PrefixCache } from '@common/interfaces';
+import { DIProvided } from '@common/di';
+import { Prefix, PrefixCache } from '@common/interfaces';
 import { Message } from 'discord.js';
 
 import { MatchingStrategy } from './matching-strategy.enum';

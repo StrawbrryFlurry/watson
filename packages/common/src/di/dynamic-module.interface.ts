@@ -1,4 +1,5 @@
-import { Type } from '../type.interface';
+import { Type } from '@common/interfaces/type.interface';
+
 import { CustomProvider } from './custom-provider.interface';
 
 export interface DynamicModule {

@@ -1,6 +1,6 @@
 import { ConfigService } from '@common/builtin';
-import { Module } from '@common/decorators';
-import { DynamicModule, ValueProvider } from '@common/interfaces';
+import { Module } from '@common/decorators/common/module.decorator';
+import { DynamicModule, ValueProvider } from '@common/di';
 import { isNil } from '@common/utils';
 import { DotenvConfigOptions } from 'dotenv';
 

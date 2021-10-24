@@ -1,6 +1,3 @@
-import { InjectorLifetime, ProvidedInScope } from '@common/decorators';
-import { CommandParameterType, CustomProvider, Type } from '@common/interfaces';
-
 /**
  *  TODO: If we're going to use the closure compiler,
  * we need to make sure that these property names
@@ -58,10 +55,6 @@ export enum InjectorElementId {
  */
 export const W_BINDING_DEF = "ɵbidef";
 
-export interface HasBindingDef<T = any> {
-  [W_BINDING_DEF]: T;
-}
-
 /**
  * Property on a {@link Type} that
  * defines what lifetime a given provider
@@ -70,10 +63,6 @@ export interface HasBindingDef<T = any> {
  * {@link InjectorLifetime}
  */
 export const W_PROV_LIFETIME = "ɵprovlife";
-
-export interface HasProvLifetime {
-  [W_PROV_LIFETIME]: InjectorLifetime;
-}
 
 /**
  * Property on a {@link Type} that
@@ -84,33 +73,6 @@ export interface HasProvLifetime {
  */
 export const W_PROV_SCOPE = "ɵprovsc";
 
-export interface HasProvScope {
-  [W_PROV_SCOPE]: ProvidedInScope;
-}
-
 export const W_MODULE_PROV = "ɵmoprov";
 
-export interface HasModuleProv {
-  [W_MODULE_PROV]: CustomProvider | Type;
-}
-
 export const W_PARAM_TYPE = "ɵcmdprmtype";
-
-export interface HasCommandParameterType {
-  [W_PARAM_TYPE]: CommandParameterType;
-}
-
-export interface HasModuleProv {
-  [W_MODULE_PROV]: CustomProvider | Type;
-}
-
-export function getOwnDefinition<T>(
-  type: Type | Object,
-  field: string
-): T | null {
-  return (type as Object).hasOwnProperty(field) ? type[field] : null;
-}
-
-/** Jsdoc reference */
-const _: InjectorLifetime = InjectorLifetime.Singleton;
-const __: ProvidedInScope = "root";

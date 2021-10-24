@@ -1,8 +1,9 @@
 import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
 import { InterceptorMetadata } from '@common/decorators';
+import { InjectionToken } from '@common/di/injection-token';
 import { RuntimeException } from '@common/exceptions';
 import { W_INJ_TYPE } from '@common/fields';
-import { ExceptionHandler, InjectionToken } from '@common/interfaces';
+import { ExceptionHandler } from '@common/interfaces';
 
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 

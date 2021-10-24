@@ -1,5 +1,5 @@
 import { W_PARAM_TYPE } from '@common/fields';
-import { CommandParameterType } from '@common/interfaces';
+import { CommandParameterType } from '@common/interfaces/command/parameter-types';
 
 /**
  * Double quoted string literal - `"`
