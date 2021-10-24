@@ -1,3 +1,5 @@
+import { MatchingStrategy } from '@watsonjs/common';
+
 export type WatsonClientBase = {
   client: any;
   options: any;
@@ -9,6 +11,8 @@ export type WatsonApplicationOptions<Client extends WatsonClientBase> =
 
 interface WatsonApplicationBase {
   description?: string;
+  commandMatchingStrategy?: MatchingStrategy;
+  globalCommandPrefix?: string;
 }
 
 interface WatsonApplicationWithClient<Client extends WatsonClientBase>
@@ -18,6 +22,6 @@ interface WatsonApplicationWithClient<Client extends WatsonClientBase>
 
 interface WatsonApplicationWithoutClient<Client extends WatsonClientBase>
   extends WatsonApplicationBase {
-  authToken?: string;
+  discordToken?: string;
   clientOptions?: Client["options"];
 }

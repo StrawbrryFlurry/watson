@@ -7,7 +7,11 @@ export class ContextInjector implements Injector {
   private readonly records: Map<Providable, Binding>;
   public readonly parent: Injector;
 
-  constructor(parent: Injector, bindings: Map<Providable, Binding>) {
+  constructor(
+    parent: Injector,
+    ctx: ExecutionContext,
+    bindings: Map<Providable, Binding>
+  ) {
     this.parent = parent;
     this.records = bindings;
 
@@ -15,7 +19,7 @@ export class ContextInjector implements Injector {
       ExecutionContext,
       createResolvedBinding({
         provide: ExecutionContext,
-        useValue: this,
+        useValue: ctx,
         multi: false,
       })
     );
@@ -23,11 +27,12 @@ export class ContextInjector implements Injector {
 
   public static createWithContext<T extends Map<Providable, Binding>>(
     parent: Injector,
+    ctx: ExecutionContext,
     bindingFactory: (bindings: T) => void
   ) {
     const bindings = new Map<Providable, Binding>() as T;
     bindingFactory(bindings);
-    return new ContextInjector(parent, bindings);
+    return new ContextInjector(parent, ctx, bindings);
   }
 
   public async get<T extends Providable, R extends InjectorGetResult<T>>(

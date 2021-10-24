@@ -1,17 +1,19 @@
 import { MethodDescriptor, ReceiverRef } from '@core/di';
 import { CommandConfiguration, CommandOptions, CommandRoute, isNil, ReceiverOptions, WatsonEvent } from '@watsonjs/common';
 
-import { RouteRef } from '..';
+import { RouteRef } from '../route-ref';
 import { CommandConfigurationHost } from './command-configuration-host';
 
 export class CommandRouteImpl
-  extends RouteRef<WatsonEvent.MESSAGE_CREATE>
+  extends RouteRef<WatsonEvent.COMMAND>
   implements CommandRoute
 {
   public readonly configuration: CommandConfigurationHost;
   public readonly handler: Function;
   public readonly host: ReceiverRef;
-  public readonly parent: CommandRoute | null;
+  public readonly parent: CommandRoute | null = null;
+
+  public children: Map<string, CommandRoute> | null = null;
 
   constructor(
     commandOptions: CommandOptions,
@@ -20,7 +22,7 @@ export class CommandRouteImpl
     handler: MethodDescriptor,
     parent?: CommandRoute
   ) {
-    super("command", WatsonEvent.MESSAGE_CREATE);
+    super("command", WatsonEvent.COMMAND);
 
     this.configuration = new CommandConfigurationHost(
       this,
@@ -31,15 +33,12 @@ export class CommandRouteImpl
 
     this.handler = handler.descriptor;
     this.host = receiver;
-
     this.parent = parent ?? null;
   }
 
   public get isSubCommand(): boolean {
     return !isNil(this.parent);
   }
-
-  public children: Map<string, string> | null = null;
 
   public getConfiguration(): CommandConfiguration {
     return this.configuration;

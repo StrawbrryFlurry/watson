@@ -6,7 +6,6 @@ import {
   FILTER_METADATA,
   GUARD_METADATA,
   isNil,
-  MODULE_GLOBAL_METADATA,
   PIPE_METADATA,
   PREFIX_METADATA,
   Providable,
@@ -16,6 +15,7 @@ import {
   Type,
   UniqueTypeArray,
   ValueProvider,
+  W_INJ_TYPE,
   W_MODULE_PROV,
 } from '@watsonjs/common';
 import { IsInjectable } from 'packages/common/src/decorators/interceptors/is-injectable';
@@ -39,6 +39,10 @@ export abstract class ModuleRef<T = any>
   public metatype: Type;
 
   public instance: T | null = null;
+
+  public get name() {
+    return this.metatype.name;
+  }
 
   public readonly exports = new UniqueTypeArray<ProviderResolvable>();
   public readonly imports = new UniqueTypeArray<Type>();
@@ -97,11 +101,16 @@ export class ModuleImpl extends ModuleRef implements Injector {
     this.providers.add(...providers);
 
     const injectorProviders = metatype[W_MODULE_PROV] as ProviderResolvable[];
-    const receiverBindableProviders = this._bindReceivers(receivers);
-
+    const moduleScopedInjectables = new UniqueTypeArray<IsInjectable>();
     const moduleInjectorProviders = this._bindProviders(
       injectorProviders,
+      moduleScopedInjectables,
       rootInjector
+    );
+
+    const receiverBindableProviders = this._bindReceivers(
+      receivers,
+      moduleScopedInjectables
     );
 
     const injectorBindableProviders = [
@@ -115,29 +124,27 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
   private _bindProviders(
     providers: ProviderResolvable[],
+    receiverInjectables: IsInjectable[],
     rootInjector: Injector
   ): ProviderResolvable[] {
-    const isGlobalModule =
-      Reflector.reflectMetadata<boolean>(
-        MODULE_GLOBAL_METADATA,
-        this.metatype
-      ) ?? false;
-
     return providers
       .map((provider) => {
         const { providedIn } = getProviderScope(provider);
+
+        if (!isNil(provider[W_INJ_TYPE])) {
+          receiverInjectables.push(provider as any as IsInjectable);
+          return false;
+        }
 
         if (providedIn === "root") {
           (rootInjector as DynamicInjector).bind(provider);
         } else if (providedIn === "ctx") {
           this._contextProviders.add(provider);
         } else if (providedIn === "module") {
-          isGlobalModule && (rootInjector as DynamicInjector).bind(provider);
           return provider;
         }
         // TODO: Add internal / external
         else if (providedIn === this.metatype) {
-          isGlobalModule && (rootInjector as DynamicInjector).bind(provider);
           return provider;
         }
 
@@ -151,12 +158,20 @@ export class ModuleImpl extends ModuleRef implements Injector {
    * that resolve to the {@link ReceiverRef} of
    * all the receivers in the module.
    */
-  private _bindReceivers(receivers: Type[]): CustomProvider[] {
+  private _bindReceivers(
+    receivers: Type[],
+    moduleScopedComponentInjectables: IsInjectable[]
+  ): CustomProvider[] {
     return receivers.map((receiver) => {
-      const componentInjectables =
+      const componentScopedInjectables =
         this._reflectAllComponentInjectables(receiver);
 
       const componentProviders = this._reflectComponentProviders(receiver);
+
+      const componentInjectables: IsInjectable[] = [
+        ...moduleScopedComponentInjectables,
+        ...componentScopedInjectables,
+      ];
 
       const receiverRef = new ReceiverRef(
         receiver,

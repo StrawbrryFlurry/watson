@@ -1,25 +1,22 @@
-import { AdapterRef } from '@core/adapters';
-import { ExceptionHandler } from '@core/lifecycle';
-import { CanActivate, PassThrough, PipeTransform, UniqueTypeArray, WatsonInterceptor } from '@watsonjs/common';
+import { WatsonApplicationOptions } from '@core/interfaces';
+import { MatchingStrategy } from 'packages/common/src/interfaces';
+import { mergeDefaults } from 'packages/common/src/utils';
 
-import { WatsonApplicationOptions } from './interfaces';
+const DEFAULT_WATSON_OPTIONS: Partial<WatsonApplicationOptions<any>> = {
+  commandMatchingStrategy: MatchingStrategy.Static,
+};
 
-export class ApplicationConfig<DiscordClient = any, ClientOptions = any> {
-  public clientOptions: ClientOptions;
-  public clientAdapter: AdapterRef;
-  public client: DiscordClient;
+export class ApplicationConfig {
+  public discordToken?: string;
+  public description?: string;
+  public globalCommandPrefix?: string;
 
-  public discordToken: string;
-  public description: string;
-  public globalCommandPrefix: string;
+  public commandMatchingStrategy: MatchingStrategy;
 
-  public globalGuards = new UniqueTypeArray<CanActivate>();
-  public globalPipes = new UniqueTypeArray<PipeTransform>();
-  public globalFilters = new UniqueTypeArray<PassThrough>();
-  public globalInterceptors = new UniqueTypeArray<WatsonInterceptor>();
-  public globalExceptionHandlers = new UniqueTypeArray<ExceptionHandler>();
-
-  public assignOptions(options: Partial<WatsonApplicationOptions> | undefined) {
-    Object.assign(this, options);
+  public assignOptions(
+    options: Partial<WatsonApplicationOptions<any>> | undefined
+  ) {
+    const withDefault = mergeDefaults(options ?? {}, DEFAULT_WATSON_OPTIONS);
+    Object.assign(this, withDefault);
   }
 }

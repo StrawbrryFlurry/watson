@@ -1,37 +1,41 @@
-import { CommandPipeline, CommandPrefix, ContextType, TextBasedChannel } from '@watsonjs/common';
-import { Guild, GuildMember, Message, User, VoiceChannel } from 'discord.js';
-
-import { CommandRoute } from '../../router';
-import { CommandArgumentsHost } from './command-argument-host';
+import { CommandAst, CommandPipeline, CommandRoute, ContextType, Prefix } from '@watsonjs/common';
+import { Guild, GuildMember, Message, StageChannel, TextBasedChannels, User, VoiceChannel } from 'discord.js';
 
 export interface ParsedCommandData {
   command: string;
-  prefix: CommandPrefix;
+  prefix: Prefix;
 }
 
-export class CommandPipelineHost implements CommandPipeline {
-  public argumentHost: CommandArgumentsHost;
+export class CommandPipelineImpl implements CommandPipeline {
   public route: CommandRoute;
   public message: Message;
   public command: string;
-  public prefix: CommandPrefix;
+  public prefix: Prefix;
   public isFromGuild: boolean;
   public guildMember: GuildMember;
   public user: User;
-  public channel: TextBasedChannel;
+  public channel: TextBasedChannels;
   public readonly contextType: ContextType = "command";
 
-  constructor(command: string, prefix: CommandPrefix, route: CommandRoute) {
+  public ast?: CommandAst;
+
+  constructor(command: string, prefix: Prefix, route: CommandRoute) {
     this.route = route;
     this.command = command;
     this.prefix = prefix;
-    this.argumentHost = new CommandArgumentsHost(route);
+  }
+
+  getVoiceChannel(): VoiceChannel | StageChannel | null {
+    throw new Error("Method not implemented.");
+  }
+
+  getInjector<T = any>(): T {
+    throw new Error("Method not implemented.");
   }
 
   public async invokeFromMessage(message: Message) {
     this.message = message;
     await this.assingSelf();
-    await this.argumentHost.parseMessage(message);
   }
 
   private async assingSelf() {
@@ -41,7 +45,7 @@ export class CommandPipelineHost implements CommandPipeline {
     this.channel = channel;
 
     if (this.isFromGuild) {
-      this.guildMember = await guild.members.fetch(this.message);
+      this.guildMember = await guild!.members.fetch(this.message);
     }
   }
 
@@ -49,12 +53,8 @@ export class CommandPipelineHost implements CommandPipeline {
     return this.message;
   }
 
-  getChannel(): TextBasedChannel {
+  getChannel(): TextBasedChannels {
     return this.message.channel;
-  }
-
-  getVoiceChannel(): VoiceChannel | null {
-    return this.guildMember.voice.channel;
   }
 
   getGuild(): Guild | null {
@@ -67,10 +67,6 @@ export class CommandPipelineHost implements CommandPipeline {
 
   getUser(): User {
     return this.message.author;
-  }
-
-  getArguments(): CommandArgumentsHost {
-    return this.argumentHost;
   }
 
   getCommand(): CommandRoute {

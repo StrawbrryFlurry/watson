@@ -47,8 +47,12 @@ interface InjectableBinding {
 export class ReceiverRef<T = any> implements Injector {
   public readonly metatype: Type;
 
-  public parent: Injector | null;
+  public parent: ModuleRef | null;
   public instance: T | null = null;
+
+  public get name() {
+    return this.metatype.name;
+  }
 
   private _injector: Injector;
 
@@ -121,7 +125,7 @@ export class ReceiverRef<T = any> implements Injector {
   public async createInjectablesByKey(
     key: ɵINJECTABLE_TYPE,
     injectableMethodKey: string,
-    ctx: ExecutionContext
+    ctx?: ExecutionContext
   ): Promise<((...args: any[]) => any)[]> {
     const injectableBindings = this._injectables.get(key);
 
@@ -143,7 +147,7 @@ export class ReceiverRef<T = any> implements Injector {
       let instance: any = metatype;
 
       if (!isInstance) {
-        instance = await this._injector.get(metatype, null, ctx);
+        instance = await this._injector.get(metatype, null, ctx as Injector);
       }
 
       const injectableMethod = instance[injectableMethodKey];

@@ -166,10 +166,17 @@ export class DynamicInjector implements Injector {
       }
 
       const token = getProviderType(provider);
-      const hasBinding = this._records.get(token) ?? [];
+      const hasBinding = this._records.get(token);
       const binding = createBinding(provider);
       const { multi } = binding;
-      const record = multi ? [...(hasBinding as Binding[]), binding] : binding;
+
+      if (!isNil(hasBinding) && !multi) {
+        throw "Found multiple providers with the same token that are not `multi`";
+      }
+
+      const record = multi
+        ? [...((hasBinding as Binding[]) ?? []), binding]
+        : binding;
       this._records.set(binding.token, record);
     }
   }

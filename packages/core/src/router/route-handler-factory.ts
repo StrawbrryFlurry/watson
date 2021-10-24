@@ -1,7 +1,8 @@
 import { ReceiverRef, Reflector } from '@core/di';
 import { ResponseController } from '@core/lifecycle';
-import { FiltersConsumer, GuardsConsumer, PipesConsumer, RouteParamsFactory } from '@router';
-import { BaseRoute, ExecutionContext, PARAM_METADATA, ParameterMetadata, ReceiverDef } from '@watsonjs/common';
+import { BaseRoute, CommandRoute, ExecutionContext, PARAM_METADATA, ParameterMetadata } from '@watsonjs/common';
+
+import { FiltersConsumer, GuardsConsumer, PipesConsumer, RouteParamsFactory } from '.';
 
 /**
  * The handler function will be called by
@@ -25,8 +26,9 @@ export class RouteHandlerFactory {
   public async createCommandHandler<RouteResult = any>(
     route: CommandRoute,
     handler: Function,
-    receiver: InstanceWrapper<ReceiverDef>
+    receiver: ReceiverRef
   ): Promise<LifecycleFunction> {
+    /*
     const { filters, guards, pipes, paramsFactory } = this.getMetadata(
       handler,
       receiver
@@ -67,12 +69,15 @@ export class RouteHandlerFactory {
         route,
         this.adapterRef
       );
+*/
 
-      try {
-        /**
-         * Initialize the pipeline and parse
-         * the message content
-         */
+    try {
+      /**
+       * Initialize the pipeline and parse
+       * the message content
+       */
+      /*
+
         await pipeline.invokeFromMessage(message);
 
         const didPass = await applyFilters(pipeline);
@@ -97,8 +102,10 @@ export class RouteHandlerFactory {
         }
       }
     };
+*/
+    } catch {}
 
-    return lifeCycle;
+    return "lifeCycle" as any;
   }
 
   public createInteractionHandler() {}

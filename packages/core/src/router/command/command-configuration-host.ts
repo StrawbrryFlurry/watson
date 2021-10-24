@@ -7,7 +7,6 @@ import {
   CommandRoute,
   COOLDOWN_METADATA,
   getFunctionParameters,
-  HasCommandParameterType,
   isEmpty,
   isNil,
   PARAM_METADATA,
@@ -79,7 +78,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
       const parameter = parameters[i];
       const metadata = paramMetadata.find((meta) => meta.parameterIndex === i);
 
-      const type = (parameter as any as HasCommandParameterType)[W_PARAM_TYPE];
+      const type = (parameter as any)[W_PARAM_TYPE];
 
       if (isNil(metadata)) {
         if (isNil(type)) {
@@ -95,7 +94,7 @@ export class CommandConfigurationHost implements CommandConfiguration {
           label: name,
           name: name,
           optional: false,
-          type: undefined,
+          type: null,
           configuration: null as any,
         });
         continue;

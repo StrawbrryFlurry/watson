@@ -1,5 +1,4 @@
 import { Injector, ModuleDef, ModuleImpl, ModuleRef, ProviderResolvable, Reflector } from '@core/di';
-import { CircularDependencyException, InvalidDynamicModuleException } from '@core/exceptions';
 import { Logger } from '@core/logger';
 import { resolveAsyncValue } from '@core/utils';
 import {
@@ -12,6 +11,7 @@ import {
   W_MODULE_PROV,
 } from '@watsonjs/common';
 
+import { CircularDependencyException, InvalidDynamicModuleException } from '../exceptions/revisit';
 import { ModuleContainer } from './module-container';
 
 /**

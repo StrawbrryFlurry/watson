@@ -1,4 +1,15 @@
-import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User, VoiceChannel } from 'discord.js';
+import {
+  DMChannel,
+  Guild,
+  GuildMember,
+  Message,
+  NewsChannel,
+  StageChannel,
+  TextBasedChannels,
+  TextChannel,
+  User,
+  VoiceChannel,
+} from 'discord.js';
 
 import { CommandAst, Prefix } from '../command';
 import { CommandRoute } from '../router';
@@ -31,11 +42,12 @@ export interface CommandPipeline extends PipelineBase {
   /**
    * The channel from which the message was sent
    */
-  channel: TextBasedChannel;
+  channel: TextBasedChannels;
   /**
    * The parsed AST of this command
    */
   ast?: CommandAst;
+  route: CommandRoute;
   /**
    * Returns the message which used the command
    */
@@ -47,12 +59,12 @@ export interface CommandPipeline extends PipelineBase {
   /**
    * Returns the text channel in which this command was used
    */
-  getChannel(): TextBasedChannel;
+  getChannel(): TextBasedChannels;
   /**
    * Returns the voice cannel the user is currently in
    * Returns `null` if the user is not in a voice channel
    */
-  getVoiceChannel(): VoiceChannel | null;
+  getVoiceChannel(): VoiceChannel | StageChannel | null;
   /**
    * Returns the guild in which the message was sent
    * Returns `null` if the message was sent in a dm

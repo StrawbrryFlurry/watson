@@ -39,8 +39,6 @@ export function parseToDiscordJsEvent(
       return "guildMemberAvailable";
     case WatsonEvent.GUILD_MEMBER_REMOVE:
       return "guildMemberRemove";
-    case WatsonEvent.GUILD_MEMBER_SPEAKING:
-      return "guildMemberSpeaking";
     case WatsonEvent.GUILD_MEMBER_UPDATE:
       return "guildMemberUpdate";
     case WatsonEvent.GUILD_ROLE_CREATE:
@@ -91,6 +89,8 @@ export function parseToDiscordJsEvent(
       return "unsubscribe" as any;
     case WatsonEvent.VOICE_STATE_UPDATE:
       return "voiceStateUpdate";
+    case WatsonEvent.COMMAND:
+      return "messageCreate";
   }
 
   return "raw";
