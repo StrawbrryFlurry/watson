@@ -84,9 +84,13 @@ export class DynamicInjector implements Injector {
     let parent = this.parent ?? Injector.NULL;
 
     if (bindingScope === "ctx") {
-      throw new Error(
-        "[DynamicInjector] Cannot resolve a context bound provider in the dynamic injector"
-      );
+      if (isNil(ctx)) {
+        throw new Error(
+          "[DynamicInjector] Cannot resolve a context bound provider in the dynamic injector"
+        );
+      }
+
+      return ctx.get(typeOrToken);
     }
 
     if (
@@ -116,11 +120,12 @@ export class DynamicInjector implements Injector {
     }
 
     const instance = await this._createInstanceWithDependencies(binding);
+
     return instance;
   }
 
   private async _createInstanceWithDependencies(binding: Binding) {
-    const { lifetime, instance, deps: ɵdeps } = binding;
+    const { lifetime, instance, deps } = binding;
 
     if (!isNil(instance) && binding.isDependencyTreeStatic()) {
       return instance;
@@ -138,8 +143,8 @@ export class DynamicInjector implements Injector {
 
     const dependencies = [];
 
-    for (let i = 0; i < (ɵdeps as unknown[]).length; i++) {
-      const dep = ɵdeps[i];
+    for (let i = 0; i < (deps as unknown[]).length; i++) {
+      const dep = deps[i];
 
       const depInstance = await this.get(dep);
       dependencies.push(depInstance);

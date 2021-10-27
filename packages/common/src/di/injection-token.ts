@@ -89,7 +89,7 @@ export class InjectionToken<T /* The value that this token provides */ = any> {
     private readonly _description: string,
     options: InjectableOptions = {}
   ) {
-    this.name = `${INJECTION_TOKE_PREFIX} ${this._description}`;
+    this.name = `[${INJECTION_TOKE_PREFIX}] ${this._description}`;
     const { lifetime, providedIn } = options;
 
     this[W_PROV_LIFETIME] = lifetime ?? InjectorLifetime.Singleton;

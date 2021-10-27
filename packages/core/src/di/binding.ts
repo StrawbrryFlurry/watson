@@ -122,6 +122,10 @@ export class Binding<
     this.factory = factory! ?? undefined;
   }
 
+  public clone(): Binding<MetaType, Deps, InstanceType> {
+    return new Binding(this.token, this.lifetime, this.scope);
+  }
+
   /**
    * Internal factory function that will
    * be called by the injector to create a

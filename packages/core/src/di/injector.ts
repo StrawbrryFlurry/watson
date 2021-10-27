@@ -10,7 +10,6 @@ import {
   InjectableOptions,
   InjectionToken,
   InjectorLifetime,
-  isNil,
   Providable,
   ProvidedInScope,
   Type,
@@ -169,13 +168,6 @@ export function getProviderScope(
 }
 
 export function createBinding(provider: ProviderResolvable): Binding {
-  const providerType = getProviderType(provider);
-  const existingBinding = providerType[W_BINDING_DEF] as Binding;
-
-  if (!isNil(existingBinding)) {
-    return existingBinding;
-  }
-
   const { lifetime, providedIn } = getProviderScope(provider);
 
   if (!isCustomProvider(provider)) {
