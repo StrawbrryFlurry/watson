@@ -1,4 +1,5 @@
-import { DIProvided, MessageSendable } from '@common/interfaces';
+import { DIProvided } from '@common/di';
+import { MessageSendable } from '@common/interfaces';
 import { ChannelResolvable, GuildResolvable } from 'discord.js';
 
 /**

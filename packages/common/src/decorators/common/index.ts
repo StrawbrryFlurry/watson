@@ -7,4 +7,5 @@ export * from "./module.decorator";
 export * from "./optional.decorator";
 export * from "./param.decorator";
 export * from "./receiver.decorator";
+export * from "./router.decorator";
 export * from "./sub-command.decorator";

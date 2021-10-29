@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@discordjs/builders': ^0.8.1
   '@nrwl/cli': 12.5.8
   '@nrwl/jest': ^12.9.0
   '@nrwl/node': ^12.5.8
@@ -24,7 +25,7 @@ specifiers:
   class-validator: ^0.12.2
   cli-color: ^2.0.0
   delete-empty: ^3.0.0
-  discord.js: '13'
+  discord.js: ^13.1.0
   dotenv: ^8.2.0
   fast-json-stringify: ^2.7.9
   gulp: ^4.0.2
@@ -45,6 +46,7 @@ specifiers:
   xxhashjs: ^0.2.2
 
 dependencies:
+  '@discordjs/builders': 0.8.1
   '@nrwl/jest': 12.9.0_ts-node@9.1.1
   axios: 0.21.4
   bullmq: 1.48.2
@@ -411,6 +413,17 @@ packages:
       '@sindresorhus/is': 4.2.0
       discord-api-types: 0.22.0
       ow: 0.27.0
+      ts-mixer: 6.0.0
+      tslib: 2.3.1
+    dev: false
+
+  /@discordjs/builders/0.8.1:
+    resolution: {integrity: sha512-kYJMvZ/BjRD1/6G2t1pQop2yoJNUmYvvKeG4mOBUCHFmfb7WIeBFmN/eSiP3cVSfRx3lbNiyxkdd5JzhjQnGbg==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dependencies:
+      '@sindresorhus/is': 4.2.0
+      discord-api-types: 0.24.0
+      ow: 0.28.1
       ts-mixer: 6.0.0
       tslib: 2.3.1
     dev: false
@@ -2860,6 +2873,11 @@ packages:
 
   /discord-api-types/0.22.0:
     resolution: {integrity: sha512-l8yD/2zRbZItUQpy7ZxBJwaLX/Bs2TGaCthRppk8Sw24LOIWg12t9JEreezPoYD0SQcC2htNNo27kYEpYW/Srg==}
+    engines: {node: '>=12'}
+    dev: false
+
+  /discord-api-types/0.24.0:
+    resolution: {integrity: sha512-X0uA2a92cRjowUEXpLZIHWl4jiX1NsUpDhcEOpa1/hpO1vkaokgZ8kkPtPih9hHth5UVQ3mHBu/PpB4qjyfJ4A==}
     engines: {node: '>=12'}
     dev: false
 
@@ -6199,6 +6217,18 @@ packages:
       vali-date: 1.0.0
     dev: false
 
+  /ow/0.28.1:
+    resolution: {integrity: sha512-1EZTywPZeUKac9gD7q8np3Aj+V54kvfIcjNEVNDSbG2Ys5xA5foW2HquvMMqgyWGLqIFMlc0Iq/HmyMHqN48sA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@sindresorhus/is': 4.2.0
+      callsites: 3.1.0
+      dot-prop: 6.0.1
+      lodash.isequal: 4.5.0
+      type-fest: 2.5.2
+      vali-date: 1.0.0
+    dev: false
+
   /p-each-series/2.2.0:
     resolution: {integrity: sha512-ycIL2+1V32th+8scbpTvyHNaHe02z0sjgh91XXjAk+ZeXoPN4Z46DVUnzdso0aX4KckKw0FNNFHdjZ2UsZvxiA==}
     engines: {node: '>=8'}
@@ -7748,6 +7778,11 @@ packages:
   /type-fest/1.4.0:
     resolution: {integrity: sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==}
     engines: {node: '>=10'}
+    dev: false
+
+  /type-fest/2.5.2:
+    resolution: {integrity: sha512-WMbytmAs5PUTqwGJRE+WoRrD2S0bYFtHX8k4Y/1l18CG5kqA3keJud9pPQ/r30FE9n8XRFCXF9BbccHIZzRYJw==}
+    engines: {node: '>=12.20'}
     dev: false
 
   /type/1.2.0:

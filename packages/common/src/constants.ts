@@ -14,7 +14,9 @@ export const INJECTABLE_METADATA = "injectable:meta";
 export const RECEIVER_METADATA = "receiver:meta";
 
 export const EVENT_METADATA = "event:meta";
-export const INTERACTION_COMMAND_METADATA = "interaction-command:meta";
+export const SLASH_COMMAND_METADATA = "slash-command:meta";
+export const SLASH_COMMAND_GROUP_METADATA = "slash-command-group:meta";
+export const APPLICATION_COMMAND_METADATA = "application-command:meta";
 export const COMMAND_METADATA = "command:meta";
 export const SUB_COMMAND_METADATA = "sub-command:meta";
 export const PARAM_METADATA = "param:meta";
