@@ -1,4 +1,4 @@
-import { DIProvided } from '@common/interfaces';
+import { DIProvided } from '@common/di';
 import { Channel, GuildMember, Role } from 'discord.js';
 
 interface FindInq<T> {

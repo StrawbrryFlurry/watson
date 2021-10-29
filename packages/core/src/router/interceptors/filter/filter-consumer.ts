@@ -1,4 +1,4 @@
-import { ContextCreatorArguments, InterceptorsConsumer } from '@core/router/interceptors';
+import { InterceptorsConsumer } from '@core/router/interceptors';
 import { resolveAsyncValue } from '@core/utils';
 import { ExecutionContext, FiltersMetadata, PassThrough, PipelineBase } from '@watsonjs/common';
 import { Base } from 'discord.js';
@@ -8,13 +8,8 @@ export class FiltersConsumer extends InterceptorsConsumer {
     super();
   }
 
-  public create({
-    route,
-    receiver,
-    metadata,
-    moduleKey,
-  }: ContextCreatorArguments<FiltersMetadata>) {
-    const filters = metadata.map((filter) =>
+  public create({ route, receiver, metadata, moduleKey }: any) {
+    const filters = metadata.map((filter: any) =>
       this.getInstance<FiltersMetadata, PassThrough>(
         "filter",
         filter,

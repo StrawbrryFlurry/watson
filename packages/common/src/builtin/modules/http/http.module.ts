@@ -1,5 +1,5 @@
 import { Module } from '@common/decorators';
-import { DynamicModule, FactoryProvider, InjectionToken, ValueProvider } from '@common/interfaces';
+import { DynamicModule, FactoryProvider, InjectionToken, ValueProvider } from '@common/di';
 import { AxiosRequestConfig } from 'axios';
 
 import { httpClientFactory } from './http-client.provider';

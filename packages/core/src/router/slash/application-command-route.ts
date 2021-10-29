@@ -1,3 +1,9 @@
+import { WatsonEvent } from 'packages/common/src/enums';
+
+import { RouterRef } from '../router';
+
+export class ApplicationCommandRoute extends RouterRef<WatsonEvent.INTERACTION_CREATE> {}
+
 // TODO
 // export class SlashRoute extends RouteRef<WatsonEvent.INTERACTION_CREATE> {
 //   public handler: Function;
