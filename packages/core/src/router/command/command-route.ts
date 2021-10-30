@@ -1,14 +1,14 @@
 import { MethodDescriptor, ReceiverRef } from '@core/di';
 import { CommandConfiguration, CommandOptions, CommandRoute, isNil, ReceiverOptions, WatsonEvent } from '@watsonjs/common';
 
+import { CommandConfigurationImpl } from '.';
 import { RouteRef } from '../route-ref';
-import { CommandConfigurationHost } from './command-configuration-host';
 
 export class CommandRouteImpl
   extends RouteRef<WatsonEvent.COMMAND>
   implements CommandRoute
 {
-  public readonly configuration: CommandConfigurationHost;
+  public readonly configuration: CommandConfigurationImpl;
   public readonly handler: Function;
   public readonly host: ReceiverRef;
   public readonly parent: CommandRoute | null = null;
@@ -24,7 +24,7 @@ export class CommandRouteImpl
   ) {
     super("command", WatsonEvent.COMMAND);
 
-    this.configuration = new CommandConfigurationHost(
+    this.configuration = new CommandConfigurationImpl(
       this,
       commandOptions,
       receiverOptions,

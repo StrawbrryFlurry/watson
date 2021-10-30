@@ -1,8 +1,15 @@
 import { WatsonEvent } from 'packages/common/src/enums';
 
+import { ApplicationCommandConfig } from '.';
 import { RouterRef } from '../router';
 
-export class ApplicationCommandRoute extends RouterRef<WatsonEvent.INTERACTION_CREATE> {}
+export class ApplicationCommandRouteImpl extends RouterRef<WatsonEvent.INTERACTION_CREATE> {
+  public readonly configuration: ApplicationCommandConfig;
+
+  public get name() {
+    return this.config.name;
+  }
+}
 
 // TODO
 // export class SlashRoute extends RouteRef<WatsonEvent.INTERACTION_CREATE> {

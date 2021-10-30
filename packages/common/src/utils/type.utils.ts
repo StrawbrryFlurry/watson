@@ -31,15 +31,12 @@ export type StringHasLength<
   L extends number
 > = ToCharArray<T>[L] extends undefined | never ? true : false;
 
-export type AllTrue<
-  R extends boolean[],
-  T extends boolean = true
-> = T extends false
+export type And<R extends boolean[], T extends boolean = true> = T extends false
   ? false
   : R extends [infer I, ...infer NR]
   ? I extends boolean
     ? NR extends boolean[]
-      ? AllTrue<NR, I>
+      ? And<NR, I>
       : true
     : true
   : true;

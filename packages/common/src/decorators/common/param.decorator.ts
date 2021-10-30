@@ -56,6 +56,8 @@ export interface CommandParameterOptions<T = any> {
   configuration?: GetConfigurationsFromParameterType<T>;
 }
 
+export interface ApplicationCommandParameterOptions {}
+
 export interface CommandParameterMetadata<T = any>
   extends CommandParameterOptions<T>,
     ParameterMetadata {}
@@ -89,6 +91,7 @@ export interface CommandParameterMetadata<T = any>
  * - `ACodeBlock`
  */
 export function Param(): ParameterDecorator;
+export function Param(options?: CommandParameterOptions): ParameterDecorator;
 export function Param(options?: CommandParameterOptions): ParameterDecorator;
 export function Param(
   options: CommandParameterOptions = {}

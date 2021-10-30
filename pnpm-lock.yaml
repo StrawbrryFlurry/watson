@@ -7,17 +7,10 @@ specifiers:
   '@nrwl/node': ^12.5.8
   '@nrwl/tao': 12.5.8
   '@nrwl/workspace': 12.5.8
-  '@types/axios': ^0.14.0
   '@types/cli-color': ^2.0.0
-  '@types/date-fns': ^2.6.0
-  '@types/dotenv': ^8.2.0
-  '@types/gulp': ^4.0.7
-  '@types/gulp-sourcemaps': ^0.0.34
-  '@types/gulp-typescript': ^2.13.0
   '@types/jest': ^26.0.24
   '@types/luxon': ^2.0.2
   '@types/node': 14.14.33
-  '@types/reflect-metadata': ^0.1.0
   '@types/xxhashjs': ^0.2.2
   axios: ^0.21.0
   bullmq: ^1.46.4
@@ -69,17 +62,10 @@ devDependencies:
   '@nrwl/node': 12.9.0_52d4013d406e5c1079b604defdc6c5e4
   '@nrwl/tao': 12.5.8
   '@nrwl/workspace': 12.5.8_prettier@2.4.1
-  '@types/axios': 0.14.0
   '@types/cli-color': 2.0.1
-  '@types/date-fns': 2.6.0
-  '@types/dotenv': 8.2.0
-  '@types/gulp': 4.0.9
-  '@types/gulp-sourcemaps': 0.0.34
-  '@types/gulp-typescript': 2.13.0_typescript@4.4.3
   '@types/jest': 26.0.24
   '@types/luxon': 2.0.4
   '@types/node': 14.14.33
-  '@types/reflect-metadata': 0.1.0
   '@types/xxhashjs': 0.2.2
   delete-empty: 3.0.0
   gulp: 4.0.2
@@ -1111,15 +1097,6 @@ packages:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
     engines: {node: '>= 6'}
 
-  /@types/axios/0.14.0:
-    resolution: {integrity: sha1-7CMA++fX3d1+udOr+HmZlkyvzkY=}
-    deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
-    dependencies:
-      axios: 0.21.4
-    transitivePeerDependencies:
-      - debug
-    dev: true
-
   /@types/babel__core/7.1.16:
     resolution: {integrity: sha512-EAEHtisTMM+KaKwfWdC3oyllIqswlznXCIVCt7/oRNrh+DhgT4UEBNC/jlADNjvw7UnfbcdkGQcPVZ1xYiLcrQ==}
     dependencies:
@@ -1149,66 +1126,10 @@ packages:
     resolution: {integrity: sha512-BZTu+obe1b0aBwUPx7f51PjYDL570gKTeQItjJj6sQdCTNmmey+uLUb+WWJP2mtVYcEWSILwvv0/cyE1rsHgVQ==}
     dev: true
 
-  /@types/date-fns/2.6.0:
-    resolution: {integrity: sha1-sGLKRlYgApCb4MY6ZGftFzE2rME=}
-    deprecated: This is a stub types definition for date-fns (https://github.com/date-fns/date-fns). date-fns provides its own type definitions, so you don't need @types/date-fns installed!
-    dependencies:
-      date-fns: 2.24.0
-    dev: true
-
-  /@types/dotenv/8.2.0:
-    resolution: {integrity: sha512-ylSC9GhfRH7m1EUXBXofhgx4lUWmFeQDINW5oLuS+gxWdfUeW4zJdeVTYVkexEW+e2VUvlZR2kGnGGipAWR7kw==}
-    deprecated: This is a stub types definition. dotenv provides its own type definitions, so you do not need this installed.
-    dependencies:
-      dotenv: 8.6.0
-    dev: true
-
-  /@types/expect/1.20.4:
-    resolution: {integrity: sha512-Q5Vn3yjTDyCMV50TB6VRIbQNxSE4OmZR86VSbGaNpfUolm0iePBB4KdEEHmxoY5sT2+2DIvXW0rvMDP2nHZ4Mg==}
-    dev: true
-
-  /@types/glob-stream/6.1.1:
-    resolution: {integrity: sha512-AGOUTsTdbPkRS0qDeyeS+6KypmfVpbT5j23SN8UPG63qjKXNKjXn6V9wZUr8Fin0m9l8oGYaPK8b2WUMF8xI1A==}
-    dependencies:
-      '@types/glob': 7.1.4
-      '@types/node': 14.14.33
-    dev: true
-
-  /@types/glob/7.1.4:
-    resolution: {integrity: sha512-w+LsMxKyYQm347Otw+IfBXOv9UWVjpHpCDdbBMt8Kz/xbvCYNjP+0qPh91Km3iKfSRLBB0P7fAMf0KHrPu+MyA==}
-    dependencies:
-      '@types/minimatch': 3.0.5
-      '@types/node': 14.14.33
-    dev: true
-
   /@types/graceful-fs/4.1.5:
     resolution: {integrity: sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==}
     dependencies:
       '@types/node': 14.14.33
-
-  /@types/gulp-sourcemaps/0.0.34:
-    resolution: {integrity: sha512-FOn9QOQpiH27Ay6Gy7bEl465+TzJ/QmIXgXD/oYptyX5W8wy8DZ7ZacIBAIOUylC68RT8qIYo+5KJG4OUfiFQQ==}
-    dependencies:
-      '@types/node': 14.14.33
-      '@types/vinyl': 2.0.6
-    dev: true
-
-  /@types/gulp-typescript/2.13.0_typescript@4.4.3:
-    resolution: {integrity: sha1-cW7ibOc01i7FVEuHKsBzM3oHIC0=}
-    deprecated: This is a stub types definition for gulp-typescript (https://github.com/ivogabe/gulp-typescript). gulp-typescript provides its own type definitions, so you don't need @types/gulp-typescript installed!
-    dependencies:
-      gulp-typescript: 6.0.0-alpha.1_typescript@4.4.3
-    transitivePeerDependencies:
-      - typescript
-    dev: true
-
-  /@types/gulp/4.0.9:
-    resolution: {integrity: sha512-zzT+wfQ8uwoXjDhRK9Zkmmk09/fbLLmN/yDHFizJiEKIve85qutOnXcP/TM2sKPBTU+Jc16vfPbOMkORMUBN7Q==}
-    dependencies:
-      '@types/undertaker': 1.2.7
-      '@types/vinyl-fs': 2.4.12
-      chokidar: 3.5.2
-    dev: true
 
   /@types/ioredis/4.27.4:
     resolution: {integrity: sha512-uTAA/woL//GxXQI1e9FuUoDZCpP8yn5LXQdea1IEFyLtb8GP2w3HfOE+SqglF6QSAp/3cZLWzrMhHqWSYI3bfg==}
@@ -1248,10 +1169,6 @@ packages:
     resolution: {integrity: sha512-l3xuhmyF2kBldy15SeY6d6HbK2BacEcSK1qTF1ISPtPHr29JH0C1fndz9ExXLKpGl0J6pZi+dGp1i5xesMt60Q==}
     dev: true
 
-  /@types/minimatch/3.0.5:
-    resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
-    dev: true
-
   /@types/node/14.14.33:
     resolution: {integrity: sha512-oJqcTrgPUF29oUP8AsUqbXGJNuPutsetaa9kTQAQce5Lx5dTYWV02ScBiT/k1BX/Z7pKeqedmvp39Wu4zR7N7g==}
 
@@ -1266,13 +1183,6 @@ packages:
   /@types/prettier/2.4.1:
     resolution: {integrity: sha512-Fo79ojj3vdEZOHg3wR9ksAMRz4P3S5fDB5e/YWZiFnyFQI1WY2Vftu9XoXVVtJfxB7Bpce/QTqWSSntkz2Znrw==}
 
-  /@types/reflect-metadata/0.1.0:
-    resolution: {integrity: sha512-bXltFLY3qhzCnVYP5iUpeSICagQ8rc9K2liS+8M0lBcz54BHs3O6W5UvqespVSuebo1BXLi+/y9ioELAW9SC2A==}
-    deprecated: This is a stub types definition for reflect-metadata (https://github.com/rbuckton/ReflectDecorators). reflect-metadata provides its own type definitions, so you don't need @types/reflect-metadata installed!
-    dependencies:
-      reflect-metadata: 0.1.13
-    dev: true
-
   /@types/source-list-map/0.1.2:
     resolution: {integrity: sha512-K5K+yml8LTo9bWJI/rECfIPrGgxdpeNbj+d53lwN4QjW1MCwlkhUms+gtdzigTeUyBr09+u8BwOIY3MXvHdcsA==}
     dev: true
@@ -1280,36 +1190,9 @@ packages:
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
 
-  /@types/undertaker-registry/1.0.1:
-    resolution: {integrity: sha512-Z4TYuEKn9+RbNVk1Ll2SS4x1JeLHecolIbM/a8gveaHsW0Hr+RQMraZACwTO2VD7JvepgA6UO1A1VrbktQrIbQ==}
-    dev: true
-
-  /@types/undertaker/1.2.7:
-    resolution: {integrity: sha512-xuY7nBwo1zSRoY2aitp/HArHfTulFAKql2Fr4b4mWbBBP+F50n7Jm6nwISTTMaDk2xvl92O10TTejVF0Q9mInw==}
-    dependencies:
-      '@types/node': 14.14.33
-      '@types/undertaker-registry': 1.0.1
-      async-done: 1.3.2
-    dev: true
-
   /@types/validator/13.0.0:
     resolution: {integrity: sha512-WAy5txG7aFX8Vw3sloEKp5p/t/Xt8jD3GRD9DacnFv6Vo8ubudAsRTXgxpQwU0mpzY/H8U4db3roDuCMjShBmw==}
     dev: false
-
-  /@types/vinyl-fs/2.4.12:
-    resolution: {integrity: sha512-LgBpYIWuuGsihnlF+OOWWz4ovwCYlT03gd3DuLwex50cYZLmX3yrW+sFF9ndtmh7zcZpS6Ri47PrIu+fV+sbXw==}
-    dependencies:
-      '@types/glob-stream': 6.1.1
-      '@types/node': 14.14.33
-      '@types/vinyl': 2.0.6
-    dev: true
-
-  /@types/vinyl/2.0.6:
-    resolution: {integrity: sha512-ayJ0iOCDNHnKpKTgBG6Q6JOnHTj9zFta+3j2b8Ejza0e4cvRyMn0ZoLEmbPrTHe5YYRlDYPvPWVdV4cTaRyH7g==}
-    dependencies:
-      '@types/expect': 1.20.4
-      '@types/node': 14.14.33
-    dev: true
 
   /@types/webpack-sources/0.1.9:
     resolution: {integrity: sha512-bvzMnzqoK16PQIC8AYHNdW45eREJQMd6WG/msQWX5V2+vZmODCOPb4TJcbgRljTZZTwTM4wUMcsI8FftNA7new==}
@@ -1809,6 +1692,7 @@ packages:
       follow-redirects: 1.14.4
     transitivePeerDependencies:
       - debug
+    dev: false
 
   /babel-jest/26.6.3_@babel+core@7.15.5:
     resolution: {integrity: sha512-pl4Q+GAVOHwvjrck6jKjvmGhnO3jHX/xuB9d27f+EJZ/6k+6nMuPjorrYp7s++bKKdANwzElBWnLWaObvTnaZA==}
@@ -2703,11 +2587,6 @@ packages:
       whatwg-mimetype: 2.3.0
       whatwg-url: 8.7.0
 
-  /date-fns/2.24.0:
-    resolution: {integrity: sha512-6ujwvwgPID6zbI0o7UbURi2vlLDR9uP26+tW6Lg+Ji3w7dd0i3DOcjcClLjLPranT60SSEFBwdSyYwn/ZkPIuw==}
-    engines: {node: '>=0.11'}
-    dev: true
-
   /debug-fabulous/1.1.0:
     resolution: {integrity: sha512-GZqvGIgKNlUnHUPQhepnUZFIMoi3dgZKQBzKDeL2g7oJF9SNAji/AAu36dusFUas0O+pae74lNeoIPHqXWDkLg==}
     dependencies:
@@ -2929,6 +2808,7 @@ packages:
   /dotenv/8.6.0:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
     engines: {node: '>=10'}
+    dev: false
 
   /duplexify/3.7.1:
     resolution: {integrity: sha512-07z8uv2wMyS51kKhD1KsdXJg5WQ6t93RneqRxUHnskXVtlYYkLqM0gqStQZ3pj073g687jPCHrqNfCzawLYh5g==}
@@ -3483,6 +3363,7 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+    dev: false
 
   /for-in/1.0.2:
     resolution: {integrity: sha1-gQaNKVqBQuwKxybG4iAMMPttXoA=}
@@ -6787,6 +6668,7 @@ packages:
 
   /reflect-metadata/0.1.13:
     resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    dev: false
 
   /regex-not/1.0.2:
     resolution: {integrity: sha512-J6SDjUgDxQj5NusnOtdFxDwN/+HWykR8GELwctJ7mdqhcyy1xEc4SRFHUXvxTp661YaVKAjfRLZ9cCqS6tn32A==}

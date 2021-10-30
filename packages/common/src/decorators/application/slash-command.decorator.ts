@@ -1,6 +1,7 @@
 import { SLASH_COMMAND_GROUP_METADATA, SLASH_COMMAND_METADATA } from '@common/constants';
-import { AllTrue, IsLowerCase, StringHasLength, ValueOrNever } from '@common/utils';
+import { And, IsLowerCase, StringHasLength, ValueOrNever } from '@common/utils';
 
+import { ApplicationCommandType } from '.';
 import { Router } from '..';
 
 export interface SlashCommandOptions<N extends string, D extends string> {
@@ -29,6 +30,13 @@ export interface SlashCommandOptions<N extends string, D extends string> {
   description: D;
 }
 
+export interface SlashCommandMetadata<
+  N extends string = string,
+  D extends string = string
+> extends SlashCommandOptions<N, D> {
+  type: ApplicationCommandType;
+}
+
 /**
  * Marks the {@link Router} as a slash command group.
  * Every slash command registered in this
@@ -40,7 +48,7 @@ export function SlashCommandGroup<
   N extends string,
   D extends string,
   R extends ValueOrNever<
-    AllTrue<[IsLowerCase<N>, StringHasLength<N, 32>]>,
+    And<[IsLowerCase<N>, StringHasLength<N, 32>]>,
     ClassDecorator
   >
 >(options: SlashCommandOptions<N, D>): R {
@@ -63,7 +71,7 @@ export function SlashCommand<
   N extends string,
   D extends string,
   R extends ValueOrNever<
-    AllTrue<[IsLowerCase<N>, StringHasLength<N, 32>]>,
+    And<[IsLowerCase<N>, StringHasLength<N, 32>]>,
     MethodDecorator
   >
 >(options: SlashCommandOptions<N, D>): R {
@@ -84,6 +92,14 @@ export function SlashCommand<
 
     Reflect.defineMetadata(SLASH_COMMAND_METADATA, options, descriptor.value);
   }) as R;
+}
+
+class A {
+  @SlashCommand({
+    name: "",
+    description: "",
+  })
+  public do() {}
 }
 
 /** @jsdoc-ref */

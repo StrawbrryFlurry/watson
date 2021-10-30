@@ -15,7 +15,7 @@ import {
   W_PARAM_TYPE,
 } from '@watsonjs/common';
 
-export class CommandConfigurationHost implements CommandConfiguration {
+export class CommandConfigurationImpl implements CommandConfiguration {
   public name: string;
   public alias: string[];
   public caseSensitive: boolean;

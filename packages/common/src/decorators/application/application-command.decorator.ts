@@ -2,6 +2,7 @@ import { APPLICATION_COMMAND_METADATA } from '@common/constants';
 import { StringHasLength, ValueOrNever } from '@common/utils';
 
 export enum ApplicationCommandType {
+  Command,
   User,
   Message,
 }
