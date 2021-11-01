@@ -2,7 +2,7 @@ import { CommandArgument, CommandToken, CommandTokenKind } from '@watsonjs/commo
 
 export class CommandArgumentWrapper<T = any> implements CommandArgument<T> {
   public name: string;
-  public label: string;
+  public description: string;
 
   public value: T;
   public defaultValue?: any;

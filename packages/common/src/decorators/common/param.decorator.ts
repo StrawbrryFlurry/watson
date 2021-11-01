@@ -15,9 +15,9 @@ export interface CommandParameterOptions<T = any> {
    */
   name?: string;
   /**
-   * Label that describes the parameter
+   * Description that describes the parameter
    */
-  label?: string;
+  description?: string;
   /** The type this parameter will be parsed as */
   type?: Type | null;
   /**
@@ -56,14 +56,50 @@ export interface CommandParameterOptions<T = any> {
   configuration?: GetConfigurationsFromParameterType<T>;
 }
 
-export interface ApplicationCommandParameterOptions {}
+export interface ApplicationCommandParameterOptions<T = any> {
+  /**
+   * Internal name the parameter should be referred as.
+   * It can then also be used to get the pram data using the @\param() decorator
+   */
+  name?: string;
+  /**
+   * Description that describes the parameter
+   */
+  description?: string;
+  /** The type this parameter will be parsed as */
+  type?: Type | null;
+  /**
+   * Makes the parameter optional.
+   * If default is set this option will automatically be set
+   * @default false
+   */
+  optional?: boolean;
+  /**
+   * The default value if none was provided
+   */
+  default?: T;
+  /**
+   * Supply some additional configuration
+   * for the parameter. You can get suggestions
+   * about what configurations can be applied
+   * by specifying the parameter type as a generic
+   * to this decorator.
+   */
+  configuration?: GetConfigurationsFromParameterType<T>;
+}
+
+export interface ApplicationCommandParameterMetadata<T = any>
+  extends ApplicationCommandParameterOptions,
+    ParameterMetadata {}
 
 export interface CommandParameterMetadata<T = any>
   extends CommandParameterOptions<T>,
     ParameterMetadata {}
 
 /**
- * Injects the parameters of a command to the argument in the command handler method.
+ * Injects the parameters of a command or interaction to the argument in
+ * the command handler method.
+ *
  * @param options Options to configure the parameter.
  *
  * Valid Parameter types include:
@@ -92,9 +128,11 @@ export interface CommandParameterMetadata<T = any>
  */
 export function Param(): ParameterDecorator;
 export function Param(options?: CommandParameterOptions): ParameterDecorator;
-export function Param(options?: CommandParameterOptions): ParameterDecorator;
 export function Param(
-  options: CommandParameterOptions = {}
+  options?: ApplicationCommandParameterOptions
+): ParameterDecorator;
+export function Param(
+  options: CommandParameterOptions | ApplicationCommandParameterOptions = {}
 ): ParameterDecorator {
   return (
     target: object,
@@ -110,7 +148,7 @@ export function Param(
       parameterIndex: parameterIndex,
       hungry: false,
       optional: false,
-      label: params[parameterIndex],
+      description: params[parameterIndex],
     });
 
     applyStackableMetadata(
@@ -121,12 +159,24 @@ export function Param(
     );
   };
 }
+
+/**
+ * Watson uses the `W_PARAM_TYPE` property
+ * on an object to check whether it should
+ * be used as a parameter that is added
+ * to the command | interaction route.
+ *
+ * This method adds that property to
+ * the builtin JavaScript types
+ * that are also supported as valid
+ * parameter types.
+ */
 const PATCH_VANILLA_JS_TYPES = () => {
-  if (PATCH_VANILLA_JS_TYPES["ɵhasrun"]) {
+  if (PATCH_VANILLA_JS_TYPES["ɵdidrun"]) {
     return;
   }
 
-  PATCH_VANILLA_JS_TYPES["ɵhasrun"] = true;
+  PATCH_VANILLA_JS_TYPES["ɵdidrun"] = true;
   String[W_PARAM_TYPE] = CommandParameterType.String;
   Date[W_PARAM_TYPE] = CommandParameterType.Date;
   Number[W_PARAM_TYPE] = CommandParameterType.Number;

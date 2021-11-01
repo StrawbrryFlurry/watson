@@ -79,9 +79,6 @@ export interface CommandOptions {
  * The parsed argument will automatically be injected to the parameter
  * that has registered it.
  * ```ts
- *
- *
- *
  * `@command("ping")`
  *  public ping(user: UserArgument) {  }
  * ```
@@ -89,11 +86,8 @@ export interface CommandOptions {
  * parameters. For that you can use the `@Param` decorator.
  *
  * ```ts
- *
- *
- *
  * `@command("ping")`
- *  public ping(`@Param`({ label: "The target user who is being pinged" }) user: UserArgument) {  }
+ *  public ping(`@Param`({ description: "The target user who is being pinged" }) user: UserArgument) {  }
  * ```
  */
 export function Command(): MethodDecorator;

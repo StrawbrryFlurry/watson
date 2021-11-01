@@ -91,7 +91,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
           paramType: type,
           default: null,
           hungry: false,
-          label: name,
+          description: name,
           name: name,
           optional: false,
           type: null,

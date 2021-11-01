@@ -2,7 +2,7 @@ import { CommandToken, Token } from '.';
 
 export interface CommandArgument<T = any, K extends Token = CommandToken> {
   name: string;
-  label: string;
+  description: string;
 
   value: T;
   defaultValue?: T;

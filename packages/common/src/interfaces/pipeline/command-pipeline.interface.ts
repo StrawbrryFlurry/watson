@@ -34,7 +34,7 @@ export interface CommandPipeline extends PipelineBase {
    * The resolved guild member object if
    * the message originated form a guild
    */
-  guildMember: GuildMember;
+  guildMember: GuildMember | null;
   /**
    * The user from whom the message was sent
    */

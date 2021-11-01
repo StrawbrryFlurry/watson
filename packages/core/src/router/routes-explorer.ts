@@ -2,6 +2,7 @@ import { CommandContainer } from '@core/command';
 import { Injector, MethodDescriptor, ModuleContainer, ReceiverRef, Reflector } from '@core/di';
 import { CommonExceptionHandler, EventProxy, ExceptionHandlerImpl } from '@core/lifecycle';
 import {
+  APPLICATION_COMMAND_METADATA,
   BaseRoute,
   COMMAND_METADATA,
   CommandOptions,
@@ -13,7 +14,6 @@ import {
   ExceptionHandler,
   ExceptionHandlerMetadata,
   GLOBAL_EXCEPTION_HANDLER,
-  INTERACTION_COMMAND_METADATA,
   isEmpty,
   isNil,
   RECEIVER_METADATA,
@@ -31,7 +31,7 @@ const ROUTE_METADATA = [
   COMMAND_METADATA,
   SUB_COMMAND_METADATA,
   EVENT_METADATA,
-  INTERACTION_COMMAND_METADATA,
+  APPLICATION_COMMAND_METADATA,
 ];
 
 interface RouteMethodMetadata<T = any> {
@@ -141,7 +141,7 @@ export class RouteExplorer {
     const subCommandMetadata = methodsMetadata[SUB_COMMAND_METADATA] ?? [];
     const eventMetadata = methodsMetadata[EVENT_METADATA] ?? [];
     const interactionMetadata =
-      methodsMetadata[INTERACTION_COMMAND_METADATA] ?? [];
+      methodsMetadata[APPLICATION_COMMAND_METADATA] ?? [];
 
     // We need to map regular commands without parents first
     for (const { method, metadata } of commandMetadata) {

@@ -94,13 +94,5 @@ export function SlashCommand<
   }) as R;
 }
 
-class A {
-  @SlashCommand({
-    name: "",
-    description: "",
-  })
-  public do() {}
-}
-
 /** @jsdoc-ref */
 declare const _: typeof Router;

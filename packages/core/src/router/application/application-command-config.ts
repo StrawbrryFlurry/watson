@@ -1,6 +1,7 @@
 import { MethodDescriptor } from '@core/di';
 import {
   ApplicationCommandMetadata,
+  ApplicationCommandParameter,
   ApplicationCommandRoute,
   ApplicationCommandType,
   ReceiverOptions,
@@ -10,6 +11,8 @@ import {
 export class ApplicationCommandConfig {
   public name: string;
   public type: ApplicationCommandType;
+
+  public params: ApplicationCommandParameter[];
 
   constructor(
     public host: ApplicationCommandRoute,
