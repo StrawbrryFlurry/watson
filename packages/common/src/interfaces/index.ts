@@ -4,6 +4,7 @@ export * from "./discord";
 export * from "./event";
 export * from "./exceptions";
 export * from "./hooks";
+export * from "./inquirable";
 export * from "./pipeline";
 export * from "./router";
 export * from "./type.interface";

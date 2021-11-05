@@ -13,4 +13,5 @@ export enum CommandParameterType {
   Emote,
   CodeBlock,
   Custom,
+  Group,
 }
