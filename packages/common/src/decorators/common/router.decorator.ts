@@ -1,10 +1,67 @@
-import { MatchingStrategy, Prefix } from '@common/interfaces';
+import { ROUTER_METADATA } from '@common/constants';
+import { CustomProvider } from '@common/di';
+import { MatchingStrategy, Prefix, Type } from '@common/interfaces';
+import { isNil, isObject, isString } from '@common/utils';
 
 export interface RouterDecoratorOptions {
-  prefixes?: Prefix[];
+  /**
+   * The command group underlying commands will be mapped to.
+   *
+   * @example
+   * `Help`
+   */
   group?: string;
+  /**
+   * Providers that are scoped to this
+   * router.
+   */
+  providers?: (CustomProvider | Type)[];
+  /** Prefixes that will be mapped within this router */
+  prefixes?: Prefix[];
+  /** The matching strategy used for commands in this router */
   matchingStrategy?: MatchingStrategy;
 }
 
-// TODO: Receiver -> Router
-export function Router(options: RouterDecoratorOptions) {}
+export function Router(): ClassDecorator;
+/**
+ * @param commandGroup The group all underlying commands will be mapped to.
+ * @default commandGroup the name of the router without the `Router` suffix.
+ */
+export function Router(group?: string): ClassDecorator;
+/**
+ * Router options can be used to apply configuration to the underlying
+ * event handlers.
+ */
+export function Router(routerOptions: RouterDecoratorOptions): ClassDecorator;
+export function Router(
+  options?: string | RouterDecoratorOptions
+): ClassDecorator {
+  return (target: Function) => {
+    const groupAlternativeName = target.name.replace("Router", "");
+
+    const apply = (metadata: RouterDecoratorOptions) =>
+      Reflect.defineMetadata(ROUTER_METADATA, metadata, target);
+
+    if (isString(options)) {
+      const metadata: Partial<RouterDecoratorOptions> = {
+        group: options,
+      };
+
+      return apply(metadata);
+    }
+
+    if (isObject(options)) {
+      const { group } = options;
+      const metadata: Partial<RouterDecoratorOptions> = {
+        ...options,
+        group: isNil(group) ? groupAlternativeName : group,
+      };
+
+      return apply(metadata);
+    }
+
+    apply({
+      group: groupAlternativeName,
+    });
+  };
+}

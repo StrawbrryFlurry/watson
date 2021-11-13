@@ -1,1 +1,1 @@
-export type BindingType = "module" | "injectable" | "receiver" | "provider";
+export type BindingType = "module" | "injectable" | "router" | "provider";

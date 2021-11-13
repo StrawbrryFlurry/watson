@@ -8,7 +8,7 @@ export interface SubCommandOptions extends CommandOptions {
 }
 
 /**
- * Marks a command in a receiver as a sub command.
+ * Marks a command in a router as a sub command.
  *
  * A sub command works exactly the same as a regular
  * command but is only run if both the command name

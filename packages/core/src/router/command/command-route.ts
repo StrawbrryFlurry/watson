@@ -1,5 +1,12 @@
-import { MethodDescriptor, ReceiverRef } from '@core/di';
-import { CommandConfiguration, CommandOptions, CommandRoute, isNil, ReceiverOptions, WatsonEvent } from '@watsonjs/common';
+import { MethodDescriptor, RouterRef } from '@core/di';
+import {
+  CommandConfiguration,
+  CommandOptions,
+  CommandRoute,
+  isNil,
+  RouterDecoratorOptions,
+  WatsonEvent,
+} from '@watsonjs/common';
 
 import { CommandConfigurationImpl } from '.';
 import { RouteRef } from '../route-ref';
@@ -10,15 +17,15 @@ export class CommandRouteImpl
 {
   public readonly configuration: CommandConfigurationImpl;
   public readonly handler: Function;
-  public readonly host: ReceiverRef;
+  public readonly host: RouterRef;
   public readonly parent: CommandRoute | null = null;
 
   public children: Map<string, CommandRoute> | null = null;
 
   constructor(
     commandOptions: CommandOptions,
-    receiverOptions: ReceiverOptions,
-    receiver: ReceiverRef,
+    routerOptions: RouterDecoratorOptions,
+    router: RouterRef,
     handler: MethodDescriptor,
     parent?: CommandRoute
   ) {
@@ -27,12 +34,12 @@ export class CommandRouteImpl
     this.configuration = new CommandConfigurationImpl(
       this,
       commandOptions,
-      receiverOptions,
+      routerOptions,
       handler
     );
 
     this.handler = handler.descriptor;
-    this.host = receiver;
+    this.host = router;
     this.parent = parent ?? null;
   }
 

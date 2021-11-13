@@ -1,5 +1,5 @@
 import { CommandContainer } from '@core/command';
-import { Injector, MethodDescriptor, ModuleContainer, ReceiverRef, Reflector } from '@core/di';
+import { Injector, MethodDescriptor, ModuleContainer, Reflector, RouterRef } from '@core/di';
 import { CommonExceptionHandler, EventProxy, ExceptionHandlerImpl } from '@core/lifecycle';
 import {
   APPLICATION_COMMAND_METADATA,
@@ -16,8 +16,8 @@ import {
   GLOBAL_EXCEPTION_HANDLER,
   isEmpty,
   isNil,
-  RECEIVER_METADATA,
-  ReceiverOptions,
+  ROUTER_METADATA,
+  RouterDecoratorOptions,
   SUB_COMMAND_METADATA,
   SubCommandOptions,
   Type,
@@ -54,17 +54,17 @@ export class RouteExplorer {
   public async explore(injector: Injector) {
     const { modules } = await injector.get(ModuleContainer);
     const commandContainer = await injector.get(CommandContainer);
-    const receiverRefs: ReceiverRef[] = new UniqueTypeArray();
+    const routerRefs: RouterRef[] = new UniqueTypeArray();
 
-    for (const [metatype, { injector, receivers }] of modules) {
+    for (const [metatype, { injector, routers }] of modules) {
       const refs = await Promise.all(
-        receivers.map((receiver) => injector.get(receiver))
+        routers.map((router) => injector.get(router))
       );
-      receiverRefs.push(...refs);
+      routerRefs.push(...refs);
     }
 
-    for (const receiver of receiverRefs) {
-      await this._mapRoutesOfReceiver(receiver, commandContainer);
+    for (const router of routerRefs) {
+      await this._mapRoutesOfRouter(router, commandContainer);
     }
   }
   /*
@@ -110,14 +110,14 @@ export class RouteExplorer {
     this.logger.logMessage(COMPLETED());
   }
 */
-  private async _mapRoutesOfReceiver(
-    receiverRef: ReceiverRef,
+  private async _mapRoutesOfRouter(
+    routerRef: RouterRef,
     commandContainer: CommandContainer
   ) {
-    const { metatype } = receiverRef;
+    const { metatype } = routerRef;
     const methods = Reflector.reflectMethodsOfType(metatype);
-    const receiverMetadata = Reflector.reflectMetadata<ReceiverOptions>(
-      RECEIVER_METADATA,
+    const routerMetadata = Reflector.reflectMetadata<RouterDecoratorOptions>(
+      ROUTER_METADATA,
       metatype
     );
 
@@ -146,10 +146,10 @@ export class RouteExplorer {
     // We need to map regular commands without parents first
     for (const { method, metadata } of commandMetadata) {
       const route = await this._bindCommandRoute(
-        receiverRef,
+        routerRef,
         method,
         metadata,
-        receiverMetadata
+        routerMetadata
       );
 
       commandContainer.apply(route);
@@ -167,10 +167,10 @@ export class RouteExplorer {
       }
 
       const routeRef = await this._bindCommandRoute(
-        receiverRef,
+        routerRef,
         method,
         metadata,
-        receiverMetadata,
+        routerMetadata,
         parentRef
       );
 
@@ -184,7 +184,7 @@ export class RouteExplorer {
         const existing = parentRef.children.get(name);
 
         if (!isNil(existing)) {
-          throw `Sub command with name "${name}" already exists as an alias of command "${existing.name}" in "${receiverRef.name}"`;
+          throw `Sub command with name "${name}" already exists as an alias of command "${existing.name}" in "${routerRef.name}"`;
         }
 
         parentRef.children.set(name, routeRef);
@@ -203,18 +203,18 @@ export class RouteExplorer {
   }
 
   private async _bindCommandRoute(
-    receiverRef: ReceiverRef,
+    routerRef: RouterRef,
     method: MethodDescriptor,
     metadata: CommandOptions | SubCommandOptions,
-    receiverMetadata: ReceiverOptions,
+    routerMetadata: RouterDecoratorOptions,
     parent?: CommandRoute
   ): Promise<CommandRoute> {
     const { descriptor } = method;
 
     const routeRef = new CommandRouteImpl(
       metadata as CommandOptions,
-      receiverMetadata,
-      receiverRef,
+      routerMetadata,
+      routerRef,
       method,
       parent
     );
@@ -224,7 +224,7 @@ export class RouteExplorer {
     const handlerFn = await this.routeHandlerFactory.createCommandHandler(
       routeRef,
       descriptor,
-      receiverRef
+      routerRef
     );
 
     let proxyRef = this.eventProxies.get(WatsonEvent.COMMAND);
@@ -235,7 +235,7 @@ export class RouteExplorer {
     }
 
     const exceptionHandler = await this._createExceptionHandler(
-      receiverRef,
+      routerRef,
       method
     );
 
@@ -265,23 +265,20 @@ export class RouteExplorer {
   }
 
   private async _createExceptionHandler(
-    receiverRef: ReceiverRef,
+    routerRef: RouterRef,
     method: MethodDescriptor
   ) {
-    const { metatype } = receiverRef;
+    const { metatype } = routerRef;
     const { descriptor } = method;
 
     const defaultHandlers = [new CommonExceptionHandler()];
-    const moduleExceptionHandlers = await receiverRef.get(
-      EXCEPTION_HANDLER,
-      []
-    );
-    const globalExceptionHandlers = await receiverRef.get(
+    const moduleExceptionHandlers = await routerRef.get(EXCEPTION_HANDLER, []);
+    const globalExceptionHandlers = await routerRef.get(
       GLOBAL_EXCEPTION_HANDLER,
       []
     );
 
-    const receiverExceptionHandlers =
+    const routerExceptionHandlers =
       Reflector.reflectMetadata<ExceptionHandlerMetadata[]>(
         EXCEPTION_HANDLER_METADATA,
         metatype
@@ -296,7 +293,7 @@ export class RouteExplorer {
     const customHandlers = [
       ...moduleExceptionHandlers,
       ...globalExceptionHandlers,
-      ...receiverExceptionHandlers,
+      ...routerExceptionHandlers,
       ...routeExceptionHandlers,
     ];
 
@@ -306,17 +303,17 @@ export class RouteExplorer {
     return handler;
   }
   /*
-  private async reflectCommands(receiver: InstanceWrapper<ReceiverDef>) {
-    const { metatype } = receiver;
-    const receiverMethods = this.reflecReceiverDefMehtods(metatype);
-    for (const method of receiverMethods) {
+  private async reflectCommands(router: InstanceWrapper<RouterDef>) {
+    const { metatype } = router;
+    const routerMethods = this.reflecRouterDefMehtods(metatype);
+    for (const method of routerMethods) {
       const { descriptor, name } = method;
       this.scanner.getMetadata<unknown[]>(DESIGN_PARAMETERS, metatype, name);
     }
   }
 
   private async reflectRoute<T extends string>(
-    receiver: InstanceWrapper<ReceiverDef>,
+    router: InstanceWrapper<RouterDef>,
     metadataKey: string,
     routeType: Type,
     eventProxyType: Type<EventProxy>,
@@ -327,15 +324,15 @@ export class RouteExplorer {
     logMessage: Function,
     isWsEvent?: boolean
   ) {
-    const { metatype } = receiver;
-    const receiverMethods = this.reflecReceiverDefMehtods(metatype);
+    const { metatype } = router;
+    const routerMethods = this.reflecRouterDefMehtods(metatype);
 
-    for (const method of receiverMethods) {
+    for (const method of routerMethods) {
       const { descriptor } = method;
       const metadata = this.scanner.getMetadata<T>(metadataKey, descriptor);
-      const receiverMetadata = this.scanner.getMetadata<T>(
-        RECEIVER_METADATA,
-        receiver.metatype
+      const routerMetadata = this.scanner.getMetadata<T>(
+        ROUTER_METADATA,
+        router.metatype
       );
 
       if (!metadata) {
@@ -344,8 +341,8 @@ export class RouteExplorer {
 
       const routeRef = new routeType(
         metadata,
-        receiverMetadata,
-        receiver,
+        routerMetadata,
+        router,
         descriptor,
         this.container
       );
@@ -354,13 +351,13 @@ export class RouteExplorer {
         this.container.addCommand(routeRef);
       }
 
-      const moduleId = this.container.generateTokenFromModule(receiver.host);
+      const moduleId = this.container.generateTokenFromModule(router.host);
 
       const handler = await handlerFactory.call(
         this.routeHandlerFactory,
         routeRef,
         method.descriptor,
-        receiver,
+        router,
         moduleId
       );
 
@@ -368,9 +365,9 @@ export class RouteExplorer {
       this.logger.logMessage(logMessage(routeRef));
 
       const exceptionHandler = this.createExceptionHandler(
-        receiver.metatype,
+        router.metatype,
         method.descriptor,
-        receiver.host
+        router.host
       );
 
       this.bindHandler(

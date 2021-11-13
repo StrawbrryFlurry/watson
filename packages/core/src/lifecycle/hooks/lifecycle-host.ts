@@ -80,8 +80,8 @@ export class LifecycleHost {
   }
 
   private getModuleComponents(module: ModuleRef): Type[] {
-    const { receivers, providers } = module;
-    return [...receivers, ...providers] as Type[];
+    const { routers, providers } = module;
+    return [...routers, ...providers] as Type[];
   }
 
   private async getModules(): Promise<ModuleRef[]> {

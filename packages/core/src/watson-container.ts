@@ -103,12 +103,12 @@ export class WatsonContainer {
   }
 
   public addDynamicModule(token: string, module: DynamicModule) {
-    const { module: metatype, exports, imports, receivers, providers } = module;
+    const { module: metatype, exports, imports, routers, providers } = module;
 
     this.dynamicModuleMetadata.set(token, {
       exports,
       imports,
-      receivers,
+      routers,
       providers,
     });
 
@@ -149,13 +149,13 @@ export class WatsonContainer {
     }
   }
 
-  public addReceiver(token: string, metatype: Type) {
+  public addRouter(token: string, metatype: Type) {
     if (!this.modules.has(token)) {
       throw new UnknownModuleException("WatsonContainer");
     }
 
     const moduleRef = this.getModuleByToken(token);
-    moduleRef.addReceiver(metatype);
+    moduleRef.addRouter(metatype);
   }
 
   public addInjectable(token: string, metatype: Type) {

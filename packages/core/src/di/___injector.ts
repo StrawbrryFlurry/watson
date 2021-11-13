@@ -173,11 +173,8 @@ export class Injector {
     await this.createInstance(injectable, module);
   }
 
-  public async loadReceiver(
-    receiver: InstanceWrapper<TReceiver>,
-    module: Module
-  ) {
-    await this.createInstance(receiver, module);
+  public async loadRouter(router: InstanceWrapper<TRouter>, module: Module) {
+    await this.createInstance(router, module);
   }
 
   public createFromModuleContext<T>(module: Module) {

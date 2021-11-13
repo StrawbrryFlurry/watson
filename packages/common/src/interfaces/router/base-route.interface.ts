@@ -10,7 +10,7 @@ export interface BaseRoute {
    */
   handler: Function;
   /**
-   * Returns the host receiver that
+   * Returns the host router that
    * this route was registered in
    */
   host: any;

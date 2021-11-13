@@ -1,4 +1,4 @@
-import { ReceiverRef, Reflector } from '@core/di';
+import { Reflector, RouterRef } from '@core/di';
 import { ResponseController } from '@core/lifecycle';
 import { BaseRoute, CommandRoute, ExecutionContext, PARAM_METADATA, ParameterMetadata } from '@watsonjs/common';
 
@@ -26,31 +26,31 @@ export class RouteHandlerFactory {
   public async createCommandHandler<RouteResult = any>(
     route: CommandRoute,
     handler: Function,
-    receiver: ReceiverRef
+    router: RouterRef
   ): Promise<LifecycleFunction> {
     /*
     const { filters, guards, pipes, paramsFactory } = this.getMetadata(
       handler,
-      receiver
+      router
     );
 
     const applyGuards = this.guardsConsumer.create({
       route: route,
-      receiver: receiver,
+      router: router,
       metadata: guards,
       moduleKey: moduleKey,
     });
 
     const applyPipes = this.pipesConsumer.create({
       route: route,
-      receiver: receiver,
+      router: router,
       metadata: pipes,
       moduleKey: moduleKey,
     });
 
     const applyFilters = this.filtersConsumer.create({
       route: route,
-      receiver: receiver,
+      router: router,
       metadata: filters,
       moduleKey: moduleKey,
     });
@@ -90,7 +90,7 @@ export class RouteHandlerFactory {
         await applyPipes(pipeline);
 
         const params = await paramsFactory(context);
-        const resolvable = handler.apply(receiver.instance, params);
+        const resolvable = handler.apply(router.instance, params);
         const result = (await resolveAsyncValue(resolvable)) as RouteResult;
 
         await this.responseController.apply(context, result);
@@ -112,35 +112,35 @@ export class RouteHandlerFactory {
 
   /**
    * Reflects the metadata key for both
-   * the receiver type and the handler function
+   * the router type and the handler function
    */
   private reflectKey<T>(
     metadataKey: string,
     handler: Function,
-    receiver: ReceiverRef
+    router: RouterRef
   ): T[] {
-    const { metatype } = receiver;
+    const { metatype } = router;
 
     const handlerMetadata: T[] =
       Reflect.getMetadata(metadataKey, handler) || [];
 
-    const receiverMetadata: T[] =
+    const routerMetadata: T[] =
       Reflect.getMetadata(metadataKey, metatype) || [];
 
-    const allMetadata = [...receiverMetadata, ...handlerMetadata];
+    const allMetadata = [...routerMetadata, ...handlerMetadata];
     const metadata = [...new Set(allMetadata)];
 
     return metadata;
   }
 
-  private async getParamFactory(receiver: ReceiverRef, handler: Function) {
-    const { paramMetadata, params } = this.reflectParams(receiver, handler);
+  private async getParamFactory(router: RouterRef, handler: Function) {
+    const { paramMetadata, params } = this.reflectParams(router, handler);
     const paramsFactory = (ctx: ExecutionContext) =>
       this.paramsFactory.createFromContext(params, paramMetadata, ctx);
   }
 
-  private reflectParams(receiver: ReceiverRef, handler: Function) {
-    const { metatype } = receiver;
+  private reflectParams(router: RouterRef, handler: Function) {
+    const { metatype } = router;
     const { name } = handler;
 
     const paramMetadata =

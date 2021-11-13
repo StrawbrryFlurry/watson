@@ -66,7 +66,7 @@ export interface CommandOptions {
 }
 
 /**
- * Marks a method in an receiver as a usable bot command
+ * Marks a method in an router as a usable bot command
  * @param command The name of the command
  * @param commandOptions Options to configure the command
  *

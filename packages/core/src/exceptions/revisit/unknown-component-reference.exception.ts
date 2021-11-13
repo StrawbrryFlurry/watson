@@ -1,5 +1,5 @@
 const UNKNOWN_COMPONENT_REFERENCE_SUGGESTIONS = [
-  "Make sure the referenced type is imported in the module or set as a provider / receiver",
+  "Make sure the referenced type is imported in the module or set as a provider / router",
 ];
 
 export class UnknownComponentReferenceException extends Error {

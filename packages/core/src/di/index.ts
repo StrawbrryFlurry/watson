@@ -9,5 +9,5 @@ export * from "./module-container";
 export * from "./module-loader";
 export * from "./module";
 export * from "./null-injector";
-export * from "./receiver-ref";
+export * from "./router-ref";
 export * from "./reflector";

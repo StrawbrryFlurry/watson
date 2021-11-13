@@ -11,7 +11,7 @@ import {
   isNil,
   PARAM_METADATA,
   ParameterConfiguration,
-  ReceiverOptions,
+  RouterOptions,
   W_PARAM_TYPE,
 } from '@watsonjs/common';
 
@@ -35,7 +35,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
   constructor(
     public host: CommandRoute,
     private commandOptions: CommandOptions,
-    private receiverOptions: ReceiverOptions,
+    private routerOptions: RouterOptions,
     private method: MethodDescriptor
   ) {
     this._configure();
@@ -123,13 +123,13 @@ export class CommandConfigurationImpl implements CommandConfiguration {
       return;
     }
 
-    const receiverMetadata = Reflector.reflectMetadata<CommandCooldownOptions>(
+    const routerMetadata = Reflector.reflectMetadata<CommandCooldownOptions>(
       COOLDOWN_METADATA,
       host.metatype
     );
 
-    if (!isNil(receiverMetadata)) {
-      this.cooldown = receiverMetadata;
+    if (!isNil(routerMetadata)) {
+      this.cooldown = routerMetadata;
       return;
     }
   }
@@ -146,7 +146,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
       usage,
     } = this.commandOptions;
 
-    const { groupName } = this.receiverOptions;
+    const { groupName } = this.routerOptions;
 
     this.alias = alias ?? [];
 

@@ -21,7 +21,7 @@ export abstract class ExecutionContext
   implements PipelineHost
 {
   /**
-   * Returns the receiver from which this
+   * Returns the router from which this
    * context originated
    */
   public abstract getClass<T extends Type<any>>(): T;
@@ -30,7 +30,7 @@ export abstract class ExecutionContext
    */
   public abstract getNext(): Function;
   /**
-   * Returns the handler function in the receiver whose
+   * Returns the handler function in the router whose
    * whose decorator registered the route this context
    * originated from.
    */

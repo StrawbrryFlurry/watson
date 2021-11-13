@@ -1,4 +1,4 @@
-import { ReceiverRef } from '@core/di';
+import { RouterRef } from '@core/di';
 import { blue, cyan, green, red } from 'cli-color';
 
 export const BOOTSTRAPPING_ERROR_MESSAGE = () =>
@@ -11,11 +11,11 @@ export const EXCEPTION_STACK = (s: string) => red(s);
 export const DUPLICATE_COMMAND_NAME = (
   conflict: string,
   prefix: string,
-  existing: ReceiverRef,
-  duplicate: ReceiverRef
+  existing: RouterRef,
+  duplicate: RouterRef
 ) =>
-  `The command with name ${cyan(`${prefix}${conflict}`)} in receiver ${blue(
+  `The command with name ${cyan(`${prefix}${conflict}`)} in router ${blue(
     duplicate.name
-  )} cannot be added to the application as it already exists in receiver ${blue(
+  )} cannot be added to the application as it already exists in router ${blue(
     existing.name
   )}`;

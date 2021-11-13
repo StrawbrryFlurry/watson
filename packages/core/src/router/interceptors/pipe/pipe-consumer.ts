@@ -7,14 +7,14 @@ export class PipesConsumer extends InterceptorsConsumer {
     super();
   }
 
-  public create({ receiver, metadata, moduleKey }: any) {
+  public create({ router, metadata, moduleKey }: any) {
     const pipes = metadata.map((pipe: any) =>
       this.getInstance<PipesConsumer, PipeTransform>(
         "pipe",
         pipe,
         "transform",
         moduleKey,
-        receiver
+        router
       )
     );
 

@@ -4,7 +4,7 @@ import { isMethodDecorator } from '@common/utils';
 
 /**
  * Assigns a prefix to the decorated
- * command or receiver.
+ * command or router.
  */
 export function UsePrefix(prefix: Prefix): ClassDecorator | MethodDecorator {
   return (

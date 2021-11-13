@@ -9,7 +9,7 @@ export abstract class InterceptorsConsumer {
     injectable: Type | T,
     consumerFn: string,
     moduleToken: string,
-    receiver: any
+    router: any
   ): R {
     if (consumerFn in injectable) {
       return injectable as any as R;
@@ -23,7 +23,7 @@ export abstract class InterceptorsConsumer {
           type,
           (injectable as any).name,
           injectable as any,
-          receiver,
+          router,
           moduleRef
         )
       );
@@ -37,7 +37,7 @@ export abstract class InterceptorsConsumer {
           type,
           (injectable as Type).name,
           injectable as Type,
-          receiver,
+          router,
           moduleRef
         )
       );
@@ -51,7 +51,7 @@ export abstract class InterceptorsConsumer {
           type,
           (injectable as Type).name,
           injectable as Type,
-          receiver,
+          router,
           moduleRef
         )
       );

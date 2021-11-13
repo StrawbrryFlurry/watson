@@ -8,14 +8,14 @@ export class FiltersConsumer extends InterceptorsConsumer {
     super();
   }
 
-  public create({ route, receiver, metadata, moduleKey }: any) {
+  public create({ route, router, metadata, moduleKey }: any) {
     const filters = metadata.map((filter: any) =>
       this.getInstance<FiltersMetadata, PassThrough>(
         "filter",
         filter,
         "pass",
         moduleKey,
-        receiver
+        router
       )
     );
 

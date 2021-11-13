@@ -44,7 +44,7 @@ interface InjectableBinding {
   metatype: Function | Type;
 }
 
-export class ReceiverRef<T = any> implements Injector {
+export class RouterRef<T = any> implements Injector {
   public readonly metatype: Type;
 
   public parent: ModuleRef | null;
@@ -60,7 +60,7 @@ export class ReceiverRef<T = any> implements Injector {
    * Context providers are not bound to the injector of the
    * component or the module but instead are bound to
    * every context injector created for an event bound in this
-   * receiver.
+   * router.
    */
   private _contextProviders = new UniqueTypeArray<Binding>();
 
@@ -80,7 +80,7 @@ export class ReceiverRef<T = any> implements Injector {
     this._injector = Injector.create(
       [
         ...injectorProviders,
-        /* We also want to be able to instantiate this receiver using its own injector */ metatype,
+        /* We also want to be able to instantiate this router using its own injector */ metatype,
       ],
       moduleRef,
       moduleRef,

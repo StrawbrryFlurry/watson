@@ -94,7 +94,7 @@ export class WatsonApplication<
 
   /**
    * Sets a global prefix for all commands.
-   * It it will only be applied if none is specified for either a receiver or a command.
+   * It it will only be applied if none is specified for either a router or a command.
    */
   public setGlobalPrefix(prefix: string) {}
 

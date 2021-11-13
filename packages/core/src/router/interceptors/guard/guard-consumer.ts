@@ -8,9 +8,9 @@ export class GuardsConsumer extends InterceptorsConsumer {
     super();
   }
 
-  public create({ route, receiver, metadata, moduleKey }: any) {
+  public create({ route, router, metadata, moduleKey }: any) {
     const guards = metadata.map((guard: any) =>
-      this.getInstance("guard", guard, "canActivate", moduleKey, receiver)
+      this.getInstance("guard", guard, "canActivate", moduleKey, router)
     );
 
     return async (pipeline: PipelineBase) => {

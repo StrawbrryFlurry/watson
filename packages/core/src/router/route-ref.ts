@@ -1,4 +1,4 @@
-import { ReceiverRef } from '@core/di';
+import { RouterRef } from '@core/di';
 import { BaseRoute, ContextType, Type, WatsonEvent } from '@watsonjs/common';
 
 /**
@@ -29,9 +29,9 @@ export abstract class RouteRef<Event extends WatsonEvent = any>
    */
   public abstract readonly handler: Function;
   /**
-   * The host receiver that this route was registered in
+   * The host router that this route was registered in
    */
-  public abstract readonly host: ReceiverRef;
+  public abstract readonly host: RouterRef;
 
   public get metatype() {
     return this.host.metatype;

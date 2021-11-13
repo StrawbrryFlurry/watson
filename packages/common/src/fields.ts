@@ -30,7 +30,7 @@ export const W_INJ_TYPE = "ɵinjt";
  *
  * - [1 .. n] User defined providers and or
  *            elements created by watson for
- *            receivers / guards / pipes etc.
+ *            routers / guards / pipes etc.
  *            other internal types.
  * - [0] Internal elements from the root
  *     injector

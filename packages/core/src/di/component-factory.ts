@@ -1,11 +1,11 @@
 import { ContextInjector, Injector, NOT_FOUND } from '@core/di';
 import { DIProvided, Type } from '@watsonjs/common';
 
-import { ReceiverRef } from './receiver-ref';
+import { RouterRef } from './router-ref';
 
 /**
  * Helper class for creating instances
- * of module components like `Receivers`,
+ * of module components like `Routers`,
  * `Injectables` or the Module type
  * itself.
  */
@@ -28,16 +28,16 @@ export class ComponentFactory extends DIProvided({ providedIn: "module" }) {
     const componentRef = (await moduleInjector.get(
       componentType,
       NOT_FOUND
-    )) as ReceiverRef;
+    )) as RouterRef;
 
     if (componentRef === NOT_FOUND) {
       return this._createInjectable();
     }
 
-    return this._createReceiver();
+    return this._createRouter();
   }
 
   private async _createInjectable() {}
 
-  private async _createReceiver() {}
+  private async _createRouter() {}
 }

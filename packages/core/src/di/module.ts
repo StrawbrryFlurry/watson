@@ -9,9 +9,8 @@ import {
   PIPE_METADATA,
   PREFIX_METADATA,
   Providable,
-  RECEIVER_METADATA,
-  ReceiverDef,
-  ReceiverOptions,
+  ROUTER_METADATA,
+  RouterDecoratorOptions,
   Type,
   UniqueTypeArray,
   ValueProvider,
@@ -23,12 +22,12 @@ import { IsInjectable } from 'packages/common/src/decorators/interceptors/is-inj
 import { ProviderResolvable } from '..';
 import { ComponentFactory } from './component-factory';
 import { Injector } from './injector';
-import { ReceiverRef } from './receiver-ref';
+import { RouterRef } from './router-ref';
 
 /**
  * `ModuleRef` is a wrapper for a Watson Module which
  * contains that module's injector and the component
- * factory used to create receivers and other parts
+ * factory used to create routers and other parts
  * of the module.
  */
 export abstract class ModuleRef<T = any>
@@ -46,7 +45,7 @@ export abstract class ModuleRef<T = any>
 
   public readonly exports = new UniqueTypeArray<ProviderResolvable>();
   public readonly imports = new UniqueTypeArray<Type>();
-  public readonly receivers = new UniqueTypeArray<ReceiverDef>();
+  public readonly routers = new UniqueTypeArray<Type>();
   public readonly providers = new UniqueTypeArray<ProviderResolvable>();
 
   public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
@@ -68,7 +67,7 @@ export abstract class ModuleRef<T = any>
 export interface ModuleDef {
   metatype: Type;
   imports: Type[];
-  receivers: Type[];
+  routers: Type[];
   providers: ProviderResolvable[];
   exports: ProviderResolvable[];
 }
@@ -93,11 +92,11 @@ export class ModuleImpl extends ModuleRef implements Injector {
     this.metatype = metatype;
     this.parent = parent;
 
-    const { exports, imports, providers, receivers } = moduleDef;
+    const { exports, imports, providers, routers } = moduleDef;
 
     this.exports.add(...exports);
     this.imports.add(...imports);
-    this.receivers.add(...receivers);
+    this.routers.add(...routers);
     this.providers.add(...providers);
 
     const injectorProviders = metatype[W_MODULE_PROV] as ProviderResolvable[];
@@ -108,14 +107,14 @@ export class ModuleImpl extends ModuleRef implements Injector {
       rootInjector
     );
 
-    const receiverBindableProviders = this._bindReceivers(
-      receivers,
+    const routerBindableProviders = this._bindRouters(
+      routers,
       moduleScopedInjectables
     );
 
     const injectorBindableProviders = [
       ...moduleInjectorProviders,
-      ...receiverBindableProviders,
+      ...routerBindableProviders,
     ];
 
     this._injector = Injector.create(injectorBindableProviders, parent, this);
@@ -124,7 +123,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
   private _bindProviders(
     providers: ProviderResolvable[],
-    receiverInjectables: IsInjectable[],
+    routerInjectables: IsInjectable[],
     rootInjector: Injector
   ): ProviderResolvable[] {
     return providers
@@ -132,7 +131,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
         const { providedIn } = getProviderScope(provider);
 
         if (!isNil(provider[W_INJ_TYPE])) {
-          receiverInjectables.push(provider as any as IsInjectable);
+          routerInjectables.push(provider as any as IsInjectable);
           return false;
         }
 
@@ -155,34 +154,34 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
   /**
    * Returns an array of custom providers
-   * that resolve to the {@link ReceiverRef} of
-   * all the receivers in the module.
+   * that resolve to the {@link RouterRef} of
+   * all the routers in the module.
    */
-  private _bindReceivers(
-    receivers: Type[],
+  private _bindRouters(
+    routers: Type[],
     moduleScopedComponentInjectables: IsInjectable[]
   ): CustomProvider[] {
-    return receivers.map((receiver) => {
+    return routers.map((router) => {
       const componentScopedInjectables =
-        this._reflectAllComponentInjectables(receiver);
+        this._reflectAllComponentInjectables(router);
 
-      const componentProviders = this._reflectComponentProviders(receiver);
+      const componentProviders = this._reflectComponentProviders(router);
 
       const componentInjectables: IsInjectable[] = [
         ...moduleScopedComponentInjectables,
         ...componentScopedInjectables,
       ];
 
-      const receiverRef = new ReceiverRef(
-        receiver,
+      const routerRef = new RouterRef(
+        router,
         componentProviders,
         componentInjectables,
         this
       );
 
       return {
-        provide: receiver,
-        useValue: receiverRef,
+        provide: router,
+        useValue: routerRef,
         multi: false,
       } as ValueProvider;
     });
@@ -231,8 +230,8 @@ export class ModuleImpl extends ModuleRef implements Injector {
   }
 
   private _reflectComponentProviders(metatype: Type): ProviderResolvable[] {
-    const { providers } = Reflector.reflectMetadata<ReceiverOptions>(
-      RECEIVER_METADATA,
+    const { providers } = Reflector.reflectMetadata<RouterDecoratorOptions>(
+      ROUTER_METADATA,
       metatype
     );
 

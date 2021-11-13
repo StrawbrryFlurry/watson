@@ -44,7 +44,7 @@ export class ModuleLoader {
       metatype: type,
       exports,
       providers,
-      receivers,
+      routers,
     } = await this.reflectModuleMetadata(metatype);
 
     ctx.push(type);
@@ -62,7 +62,7 @@ export class ModuleLoader {
       exports,
       imports: _imports,
       providers,
-      receivers,
+      routers,
     };
 
     resolved.set(type, moduleDef);
@@ -216,9 +216,9 @@ export class ModuleLoader {
         MODULE_METADATA.PROVIDERS,
         target as Type
       ) ?? [];
-    const receivers =
+    const routers =
       Reflector.reflectMetadata<Type[]>(
-        MODULE_METADATA.RECEIVER,
+        MODULE_METADATA.ROUTER,
         target as Type
       ) ?? [];
     const exports =
@@ -230,7 +230,7 @@ export class ModuleLoader {
     return {
       imports,
       providers,
-      receivers,
+      routers,
       exports,
       metatype: target as Type,
     };
@@ -250,14 +250,14 @@ export class ModuleLoader {
     const imports = moduleData.imports || [];
     const exports = moduleData.exports || [];
     const providers = moduleData.providers || [];
-    const receivers = moduleData.receivers || [];
+    const routers = moduleData.routers || [];
 
     return {
       metatype,
       imports,
       exports,
       providers,
-      receivers,
+      routers,
     };
   }
 }

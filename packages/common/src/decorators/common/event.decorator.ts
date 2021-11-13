@@ -20,7 +20,7 @@ import { WatsonEvent } from '@common/enums';
  * Example:
  * VoiceChannelChange => [PreviousChannel: VoiceChannel, CurrentChannel: VoiceChannel]
  * ```ts
- * class EventReceiver {
+ * class EventRouter {
  *
  *  @Event(WatsonEvent.VoiceChannelChange)
  *  onVoiceChannelChange(

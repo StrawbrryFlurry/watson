@@ -1,4 +1,4 @@
-import { ReceiverRef } from '@core/di';
+import { RouterRef } from '@core/di';
 import { CommandRoute, EventRoute, Type } from '@watsonjs/common';
 import { blue, cyan, yellow } from 'cli-color';
 
@@ -17,8 +17,8 @@ export const APP_STARTED = () => `Watson application successfully started`;
 // ROUTES EXPLORER
 export const EXPLORE_START = () => `Exploring application event handlers`;
 
-export const EXPLORE_RECEIVER = (receiver: ReceiverRef) =>
-  `From ${blue(receiver.name)} in ${yellow(receiver.parent!.name)}`;
+export const EXPLORE_ROUTER = (router: RouterRef) =>
+  `From ${blue(router.name)} in ${yellow(router.parent!.name)}`;
 
 export const MAP_COMMAND = (route: CommandRoute) =>
   `Mapped command } in ${blue(route.host.name)}`;
@@ -59,10 +59,10 @@ export const INTERCEPTOR_NOT_FOUND = (
   type: Interceptor,
   name: string,
   method: Function,
-  receiver: InstanceWrapper<ReceiverDef>,
+  router: InstanceWrapper<RouterDef>,
   module: Module
 ) =>
-  `The ${type} ${name} used to decorate the handler ${method.name} in receiver ${receiver.name} was not found in the module ${module.name}`;
+  `The ${type} ${name} used to decorate the handler ${method.name} in router ${router.name} was not found in the module ${module.name}`;
 
 export const INVALID_COMPONENT_DEF_MESSAGE = (
   type: TComponent,
@@ -74,8 +74,8 @@ export const BAD_INTERCEPTOR_IMPLEMENTATION = (
   type: Interceptor,
   name: string,
   method: Function,
-  receiver: InstanceWrapper<ReceiverDef>,
+  router: InstanceWrapper<RouterDef>,
   module: Module
 ) =>
-  `The ${type} ${name} used to decorate the handler ${method.name} in receiver ${receiver.name} does not implement it's interface correctly.`;
+  `The ${type} ${name} used to decorate the handler ${method.name} in router ${router.name} does not implement it's interface correctly.`;
 */

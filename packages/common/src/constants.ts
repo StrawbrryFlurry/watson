@@ -3,7 +3,7 @@
 export const MODULE_METADATA = {
   PROVIDERS: "module-providers:meta",
   IMPORTS: "module-imports:meta",
-  RECEIVER: "module-receivers:meta",
+  ROUTER: "module-routers:meta",
   EXPORTS: "module-exports:meta",
 };
 
@@ -11,7 +11,7 @@ export const MODULE_GLOBAL_METADATA = "module-global:meta";
 
 export const INJECTABLE_METADATA = "injectable:meta";
 
-export const RECEIVER_METADATA = "receiver:meta";
+export const ROUTER_METADATA = "router:meta";
 
 export const EVENT_METADATA = "event:meta";
 export const SLASH_COMMAND_METADATA = "slash-command:meta";
@@ -44,7 +44,7 @@ export const JS_COMMENT_REGEX =
  *
  * Class prototype parameters
  *```ts
- * `@Receiver()`
+ * `@Router()`
  * class Foo {
  *  constructor(private appService: AppService) {  }
  * }
@@ -56,7 +56,7 @@ export const JS_COMMENT_REGEX =
  *
  * Class method parameters
  *```ts
- * `@Receiver()`
+ * `@Router()`
  * class Foo {
  *  public bar(str: string, klass: SomeClass, inter: SomeInterface) {  }
  * }
@@ -71,7 +71,7 @@ export const DESIGN_PARAMETERS = "design:paramtypes";
  * defined.
  *
  * ```ts
- * @Receiver()
+ * @Router()
  * class Foo {
  *  public bar(): string { /*  *\/ }
  * }
@@ -84,7 +84,7 @@ export const DESIGN_RETURN_TYPE = "design:returntype";
 /**
  * The type of the decorated
  * ```ts
- * `@Receiver()`
+ * `@Router()`
  * class Foo {}
  *
  * // Reflect.getMetadata(DESIGN_TYPE, Foo);

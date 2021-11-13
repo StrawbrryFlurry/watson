@@ -2,7 +2,7 @@ import { CustomProvider, DynamicModule, mergeDefaults, Type } from '../..';
 
 export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
-  receivers?: Type[];
+  routers?: Type[];
   providers?: (Type | CustomProvider)[];
   exports?: (Type | CustomProvider)[];
 }
@@ -12,7 +12,7 @@ export function Module(options: ModuleOptions = {}): ClassDecorator {
     exports: undefined,
     imports: undefined,
     providers: undefined,
-    receivers: undefined,
+    routers: undefined,
   });
 
   return (target: Object) => {

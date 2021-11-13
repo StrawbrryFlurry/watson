@@ -7,5 +7,5 @@ export interface CoreModuleRegister {
   imports: Type[];
   exports: Type[];
   providers: (Type | CustomProvider)[];
-  receivers: Type[];
+  routers: Type[];
 }
