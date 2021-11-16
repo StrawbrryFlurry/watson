@@ -1,31 +1,52 @@
-import { WatsonEvent } from 'packages/common/src/enums';
+import { MethodDescriptor, RouterRef } from '@core/di';
+import { ApplicationCommandParameter, ApplicationCommandRoute, RouterDecoratorOptions, WatsonEvent } from '@watsonjs/common';
 
 import { ApplicationCommandConfig } from '.';
-import { RouterRef } from '../router';
+import { RouteRef } from '..';
 
-export class ApplicationCommandRouteImpl extends RouterRef<WatsonEvent.INTERACTION_CREATE> {
+export class ApplicationCommandRouteImpl
+  extends RouteRef<WatsonEvent.INTERACTION_CREATE>
+  implements ApplicationCommandRoute
+{
+  public commandType: any;
+  public handler: Function;
+  public host: any;
+  public parent: ApplicationCommandRoute | null;
+
   public readonly configuration: ApplicationCommandConfig;
 
   public get name() {
-    return this.config.name;
+    return this.configuration.name;
+  }
+
+  public params?: ApplicationCommandParameter[];
+
+  constructor(
+    commandOptions: ApplicationCommandConfig,
+    routerOptions: RouterDecoratorOptions,
+    router: RouterRef,
+    handler: MethodDescriptor,
+    parent?: ApplicationCommandRoute
+  ) {
+    super("interaction", WatsonEvent.INTERACTION_CREATE);
   }
 }
 
 // TODO
 // export class SlashRoute extends RouteRef<WatsonEvent.INTERACTION_CREATE> {
 //   public handler: Function;
-//   public host: InstanceWrapper<ReceiverDef>;
+//   public host: InstanceWrapper<RouterDef>;
 //   public config: SlashConfiguration;
 //
 //   constructor(
 //     config: any,
-//     receiver: InstanceWrapper<ReceiverDef>,
+//     router: InstanceWrapper<RouterDef>,
 //     handler: Function,
 //     container: WatsonContainer
 //   ) {
 //     super("slash", WatsonEvent.INTERACTION_CREATE, container);
 //
-//     this.host = receiver;
+//     this.host = router;
 //     this.handler = handler;
 //     this.config = new SlashConfiguration(config);
 //   }

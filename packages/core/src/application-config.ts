@@ -1,6 +1,5 @@
 import { WatsonApplicationOptions } from '@core/interfaces';
-import { MatchingStrategy } from 'packages/common/src/interfaces';
-import { mergeDefaults } from 'packages/common/src/utils';
+import { MatchingStrategy, mergeDefaults } from '@watsonjs/common';
 
 const DEFAULT_WATSON_OPTIONS: Partial<WatsonApplicationOptions<any>> = {
   commandMatchingStrategy: MatchingStrategy.Static,

@@ -1,5 +1,7 @@
 import { resolveAsyncValue } from '@core/utils';
 import {
+  ApplicationCommandParameterMetadata,
+  BaseRoute,
   CommandParameterMetadata,
   ExecutionContext,
   getFunctionParameters,
@@ -7,6 +9,7 @@ import {
   isFunction,
   isNil,
   ParameterMetadata,
+  PipelineBase,
   Type,
   W_PROV_SCOPE,
 } from '@watsonjs/common';
@@ -60,7 +63,7 @@ export class RouteParamsFactory {
           parameterValue = this._resolveEventParameter();
           break;
         case "interaction":
-          parameterValue = this._resolveInteractionParameter();
+          parameterValue = this._resolveInteractionParameter(ctx, i, metadata);
           break;
       }
 
@@ -81,10 +84,7 @@ export class RouteParamsFactory {
     let { name } = commandMetadata;
 
     if (isNil(name)) {
-      const { handler } = pipeline.getCommand();
-      const parameterNames = getFunctionParameters(handler);
-
-      name = parameterNames[idx];
+      name = this._getParameterNameFromPipeline(pipeline, idx);
     }
 
     const { ast } = pipeline;
@@ -97,8 +97,32 @@ export class RouteParamsFactory {
     // TODO: I don't think there are any event parameters?
   }
 
-  private async _resolveInteractionParameter() {
-    // TODO:
+  private async _resolveInteractionParameter(
+    ctx: ExecutionContext,
+    idx: number,
+    metadata?: ParameterMetadata
+  ) {
+    const pipeline = ctx.switchToInteraction();
+    const interactionMetadata =
+      metadata ?? ({} as ApplicationCommandParameterMetadata);
+
+    let { name } = interactionMetadata as ApplicationCommandParameterMetadata;
+
+    if (isNil(name)) {
+      name = this._getParameterNameFromPipeline(pipeline, idx);
+    }
+
+    pipeline;
+  }
+
+  private _getParameterNameFromPipeline<T extends BaseRoute>(
+    pipeline: PipelineBase<T>,
+    parameterIdx: number
+  ) {
+    const { handler } = pipeline.route;
+    const parameterNames = getFunctionParameters(handler);
+
+    return parameterNames[parameterIdx];
   }
 }
 

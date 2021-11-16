@@ -22,11 +22,6 @@ export interface InteractionPipeline extends PipelineBase {
    */
   isFromGuild: boolean;
   /**
-   * The resolved guild member object if
-   * the message originated form a guild
-   */
-  guildMember: GuildMember | null;
-  /**
    * The user from whom the message was sent
    */
   user: User;
@@ -38,12 +33,7 @@ export interface InteractionPipeline extends PipelineBase {
   /**
    * The channel from which the message was sent
    */
-  channel: TextBasedChannels;
-  /**
-   * The voice cannel the user is currently in
-   * - `null` if the user is not currently in a voice channel.
-   */
-  voiceChanel: VoiceChannel | StageChannel | null;
+  channel: TextBasedChannels | null;
   /**
    * The parsed AST of this command
    */
@@ -52,4 +42,14 @@ export interface InteractionPipeline extends PipelineBase {
    * The raw interaction.
    */
   interaction: CommandInteraction | ContextMenuInteraction;
+  /**
+   * The resolved guild member object if
+   * the message originated form a guild
+   */
+  getGuildMember(): Promise<GuildMember | null>;
+  /**
+   * The voice cannel the user is currently in
+   * - `null` if the user is not currently in a voice channel.
+   */
+  getVoiceChanel(): Promise<VoiceChannel | StageChannel | null>;
 }

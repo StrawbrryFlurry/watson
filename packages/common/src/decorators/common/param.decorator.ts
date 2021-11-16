@@ -43,6 +43,15 @@ export interface CommandParameterOptions<T = any> {
    */
   hungry?: boolean;
   /**
+   * The parameter group the parameter will be added
+   * to. Using parameter groups you can give users
+   * the option to use a given command with a set of
+   * pre-defined overloads whose arguments will be
+   * checked. You can inject the group name via
+   * the token `ParameterGroup`
+   */
+  group?: string;
+  /**
    * The default value if none was provided
    */
   default?: T;

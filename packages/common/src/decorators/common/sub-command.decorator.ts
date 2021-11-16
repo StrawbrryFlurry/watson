@@ -2,10 +2,11 @@ import { SUB_COMMAND_METADATA } from '@common/constants';
 import { FunctionPropertiesOfType, isNil, isString } from '@common/utils';
 
 import { CommandOptions } from '.';
+import { SlashCommandOptions } from '../application';
 
-export interface SubCommandOptions extends CommandOptions {
+export type SubCommandOptions = (CommandOptions | SlashCommandOptions) & {
   parent: Function;
-}
+};
 
 /**
  * Marks a command in a router as a sub command.

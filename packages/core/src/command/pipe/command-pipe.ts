@@ -73,7 +73,7 @@ export class CommandPipelineImpl implements CommandPipeline {
     return this.route;
   }
 
-  getEvent<T extends unknown[] = unknown[]>(): T {
+  getEvent<T extends unknown = unknown[]>(): T {
     return [this.message] as T;
   }
 }

@@ -1,5 +1,5 @@
 import { CommandContainer } from '@core/command';
-import { Injector, MethodDescriptor, ModuleContainer, Reflector, RouterRef } from '@core/di';
+import { Injector, MethodDescriptor, ModuleContainer, Reflector } from '@core/di';
 import { CommonExceptionHandler, EventProxy, ExceptionHandlerImpl } from '@core/lifecycle';
 import {
   APPLICATION_COMMAND_METADATA,
@@ -26,6 +26,7 @@ import {
 } from '@watsonjs/common';
 
 import { CommandRouteImpl, LifecycleFunction, RouteHandlerFactory } from '.';
+import { RouterRef } from '..';
 
 const ROUTE_METADATA = [
   COMMAND_METADATA,

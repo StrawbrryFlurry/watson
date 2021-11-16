@@ -1,10 +1,12 @@
 import { Binding, createBinding, getProviderScope, Injector, ModuleRef, ProviderResolvable } from '@core/di';
 import {
+  BaseRoute,
   ExecutionContext,
   isClassConstructor,
   isFunction,
   IsInjectable,
   isNil,
+  MessageSendable,
   Providable,
   Type,
   UniqueTypeArray,
@@ -12,6 +14,7 @@ import {
   ɵINJECTABLE_TYPE,
 } from '@watsonjs/common';
 
+import { RouterRef } from '..';
 import { InjectorGetResult } from './injector';
 
 interface InjectableBinding {
@@ -44,7 +47,8 @@ interface InjectableBinding {
   metatype: Function | Type;
 }
 
-export class RouterRef<T = any> implements Injector {
+export class RouterRefImpl<T = any> extends RouterRef {
+  public root: RouterRef<any>;
   public readonly metatype: Type;
 
   public parent: ModuleRef | null;
@@ -72,6 +76,7 @@ export class RouterRef<T = any> implements Injector {
     injectables: IsInjectable[],
     moduleRef: ModuleRef
   ) {
+    super();
     this.parent = moduleRef;
     this.metatype = metatype;
     const injectorProviders = this._bindProviders(providers);
@@ -158,6 +163,14 @@ export class RouterRef<T = any> implements Injector {
     }
 
     return injectables;
+  }
+
+  public getRoutes(): BaseRoute[] {
+    return null as any;
+  }
+
+  public dispatch(route: BaseRoute): Promise<void | MessageSendable> {
+    throw new Error("Method not implemented.");
   }
 
   public async getInstance(ctx?: Injector): Promise<T> {
