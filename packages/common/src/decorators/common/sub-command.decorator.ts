@@ -1,10 +1,13 @@
 import { SUB_COMMAND_METADATA } from '@common/constants';
-import { FunctionPropertiesOfType, isNil, isString } from '@common/utils';
+import { And, FunctionPropertiesOfType, IsLowerCase, isNil, isString, StringHasLength, ValueOrNever } from '@common/utils';
 
 import { CommandOptions } from '.';
 import { SlashCommandOptions } from '../application';
 
-export type SubCommandOptions = (CommandOptions | SlashCommandOptions) & {
+export type SubCommandOptions<N extends string, D extends string> = (
+  | CommandOptions
+  | SlashCommandOptions<N, D>
+) & {
   parent: Function;
 };
 
@@ -30,37 +33,55 @@ export function SubCommand<
 >(parent: K): MethodDecorator;
 export function SubCommand<
   T extends Object,
+  N extends string,
+  D extends string,
+  R extends ValueOrNever<
+    And<[IsLowerCase<N>, StringHasLength<N, 32>]>,
+    MethodDecorator
+  >,
   K extends keyof T = FunctionPropertiesOfType<T>
->(parent: K, name: string, options: SubCommandOptions): MethodDecorator;
+>(parent: K, name: string, options: SubCommandOptions<N, D>): R;
 export function SubCommand<
   T extends Object,
+  N extends string,
+  D extends string,
+  R extends ValueOrNever<
+    And<[IsLowerCase<N>, StringHasLength<N, 32>]>,
+    MethodDecorator
+  >,
   K extends keyof T = FunctionPropertiesOfType<T>
->(parent: K, options: SubCommandOptions): MethodDecorator;
+>(parent: K, options: SubCommandOptions<N, D>): R;
 export function SubCommand<
   T extends Object,
+  N extends string,
+  D extends string,
+  R extends ValueOrNever<
+    And<[IsLowerCase<N>, StringHasLength<N, 32>]>,
+    MethodDecorator
+  >,
   K extends Extract<keyof T, string> = Extract<
     FunctionPropertiesOfType<T>,
     string
   >
 >(
-  parentNameOrOptions: string | SubCommandOptions | K,
-  nameOrOptions?: string | SubCommandOptions,
-  commandOptions?: SubCommandOptions
-): MethodDecorator {
-  return (
+  parent: K,
+  nameOrOptions?: string | SubCommandOptions<N, D>,
+  commandOptions?: SubCommandOptions<N, D>
+): R {
+  return ((
     target: Object,
     propertyKey: string | Symbol,
     descriptor: PropertyDescriptor
   ) => {
-    const apply = (metadata: SubCommandOptions) =>
+    const apply = (metadata: SubCommandOptions<N, D>) =>
       Reflect.defineMetadata(SUB_COMMAND_METADATA, metadata, descriptor.value);
 
     const getParent = (name: string) => Object.getPrototypeOf(target)[name];
 
     if (!isNil(commandOptions)) {
-      const options: SubCommandOptions = {
+      const options: SubCommandOptions<N, D> = {
         ...commandOptions,
-        parent: getParent(parentNameOrOptions as K),
+        parent: getParent(parent),
         name: (nameOrOptions as string) ?? commandOptions.name ?? null,
       };
 
@@ -69,17 +90,11 @@ export function SubCommand<
 
     if (isString(nameOrOptions)) {
       return apply({
-        parent: getParent(parentNameOrOptions as string),
+        parent: getParent(parent),
         name: nameOrOptions,
       });
     }
 
-    if (isString(parentNameOrOptions)) {
-      apply(
-        { parent: getParent(parentNameOrOptions as string), ...nameOrOptions }!
-      );
-    }
-
-    apply({ ...(parentNameOrOptions as SubCommandOptions) });
-  };
+    apply({ parent: getParent(parent), ...nameOrOptions }!);
+  }) as R;
 }

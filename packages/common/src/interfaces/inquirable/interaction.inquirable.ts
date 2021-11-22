@@ -19,7 +19,7 @@ export declare interface ReplyInq {
   (message: MessageSendable): Promise<Message>;
 }
 
-export abstract class Reply extends DIProvided({
+export abstract class ReplyInq extends DIProvided({
   providedIn: "ctx",
 }) {}
 
@@ -31,7 +31,7 @@ export declare interface FollowUpInq {
   (message: MessageSendable): Promise<Message>;
 }
 
-export abstract class FollowUp extends DIProvided({
+export abstract class FollowUpInq extends DIProvided({
   providedIn: "ctx",
 }) {}
 
@@ -46,6 +46,6 @@ export declare interface DeferReplyInq {
   (ephemeral: boolean): Promise<void>;
 }
 
-export abstract class DeferReply extends DIProvided({
+export abstract class DeferReplyInq extends DIProvided({
   providedIn: "ctx",
 }) {}
