@@ -1,6 +1,9 @@
 import { BaseRoute, ContextType } from '..';
 
-export interface PipelineBase<T extends BaseRoute = any> {
+export interface PipelineBase<
+  D extends unknown = any,
+  T extends BaseRoute = any
+> {
   /** The Watson pipeline type */
   contextType: ContextType;
   /**
@@ -8,6 +11,8 @@ export interface PipelineBase<T extends BaseRoute = any> {
    * the event emitted.
    */
   route: T;
+  /** The raw event data emitted by the client */
+  eventData: D;
   /**
    * Returns the raw data emitted by the
    * client.
@@ -16,7 +21,7 @@ export interface PipelineBase<T extends BaseRoute = any> {
    * client.on("message", (\/* "Event Data" *\/) => {})
    * ```
    */
-  getEvent<T extends unknown = unknown[]>(): T;
+  getEvent(): D;
   /**
    * Returns the context injector of
    * this pipeline context.

@@ -16,7 +16,7 @@ export interface BaseRoute {
   host: any;
   /**
    * The type of the execution context
-   * Execution contexts be either `"slash"`, `event` or `"command"`
+   * Execution contexts be either `"interaction"`, `event` or `"command"`
    */
   type: string;
   /**
@@ -26,7 +26,7 @@ export interface BaseRoute {
   metatype: Type;
   /**
    * The type of the execution context
-   * Execution contexts be either `"slash"`, `event` or `"command"`
+   * Execution contexts be either `"interaction"`, `event` or `"command"`
    */
   getType<T extends string = ContextType>(): T;
   /**

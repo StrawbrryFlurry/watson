@@ -1,31 +1,36 @@
-import { BaseRoute, ContextType, PipelineBase } from '@watsonjs/common';
+import { BaseRoute, ContextType, ExecutionContext, PipelineBase } from '@watsonjs/common';
 import { Injector } from '@watsonjs/core';
 
 export abstract class PipelineBaseImpl<
-  T extends PipelineBase,
+  D extends unknown,
   R extends BaseRoute = any
 > implements PipelineBase
 {
   public contextType: ContextType;
   public route: R;
-  protected _injector: Injector;
+  protected abstract _injector: Injector;
 
-  constructor(
-    route: R,
-    injector: Injector,
-    type: ContextType,
-    private eventData: unknown
-  ) {
-    this.route = route;
-    this._injector = injector;
-    this.contextType = type;
+  public get eventData(): D {
+    return this._eventData;
   }
 
-  public getEvent<T extends unknown = unknown[]>(): T {
-    return this.eventData as T;
+  private _eventData: D;
+
+  constructor(route: R, type: ContextType, eventData: D) {
+    this.route = route;
+    this.contextType = type;
+    this._eventData = eventData;
+  }
+
+  public getEvent(): D {
+    return this._eventData;
   }
 
   public getInjector<T = Injector>(): T {
     return this._injector as any as T;
   }
+
+  protected abstract createExecutionContext(
+    moduleInj: Injector
+  ): Promise<ExecutionContext>;
 }

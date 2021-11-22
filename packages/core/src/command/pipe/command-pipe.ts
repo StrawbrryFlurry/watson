@@ -19,7 +19,7 @@ export class CommandPipelineImpl implements CommandPipeline {
 
   public ast?: CommandAst;
 
-  constructor(command: string, prefix: Prefix, route: CommandRoute) {
+  constructor(route: CommandRoute, command: string, prefix: Prefix) {
     this.route = route;
     this.command = command;
     this.prefix = prefix;

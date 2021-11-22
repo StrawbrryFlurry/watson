@@ -1,4 +1,4 @@
-import { MethodDescriptor, RouterRef } from '@core/di';
+import { MethodDescriptor } from '@core/di';
 import {
   CommandConfiguration,
   CommandOptions,
@@ -7,6 +7,7 @@ import {
   RouterDecoratorOptions,
   WatsonEvent,
 } from '@watsonjs/common';
+import { RouterRef } from '@watsonjs/core';
 
 import { CommandConfigurationImpl } from '.';
 import { RouteRef } from '../route-ref';

@@ -40,3 +40,9 @@ export type And<R extends boolean[], T extends boolean = true> = T extends false
       : true
     : true
   : true;
+
+export type CtorParameters<T extends Object> = T extends new (
+  ...args: infer A
+) => any
+  ? A
+  : never;

@@ -1,5 +1,14 @@
-import { ApplicationCommandRoute, ContextType, ExecutionContext, InteractionPipeline, isNil } from '@watsonjs/common';
-import { Injector } from '@watsonjs/core';
+import {
+  ApplicationCommandRoute,
+  ChannelCtx,
+  ClientCtx,
+  ContextType,
+  ExecutionContext,
+  FindMemberInq,
+  InteractionPipeline,
+  isNil,
+} from '@watsonjs/common';
+import { ContextBindingFactory, ContextInjector, Injector } from '@watsonjs/core';
 import {
   CommandInteraction,
   ContextMenuInteraction,
@@ -14,7 +23,10 @@ import {
 import { PipelineBaseImpl } from './pipeline-base';
 
 export class InteractionPipelineImpl
-  extends PipelineBaseImpl<InteractionPipeline, ApplicationCommandRoute>
+  extends PipelineBaseImpl<
+    CommandInteraction | ContextMenuInteraction,
+    ApplicationCommandRoute
+  >
   implements InteractionPipeline
 {
   public command: string;
@@ -29,6 +41,8 @@ export class InteractionPipelineImpl
   public interaction: CommandInteraction | ContextMenuInteraction;
 
   public readonly contextType: ContextType = "interaction";
+
+  protected _injector: Injector;
 
   public async getGuildMember(): Promise<GuildMember | null> {
     if (!this.isFromGuild) {
@@ -50,26 +64,42 @@ export class InteractionPipelineImpl
 
   constructor(
     route: ApplicationCommandRoute,
-    injector: Injector,
     eventData: CommandInteraction | ContextMenuInteraction
   ) {
-    super(route, injector, "interaction", eventData);
+    super(route, "interaction", eventData);
     this.interaction = eventData;
   }
 
   public static async create(
     route: ApplicationCommandRoute,
-    ctx: ExecutionContext,
+    injector: Injector,
     interaction: CommandInteraction | ContextMenuInteraction
   ): Promise<InteractionPipeline> {
     const { guildId, channel, guild, user } = interaction;
-    const interactionRef = new InteractionPipelineImpl(route, ctx, interaction);
+    const interactionRef = new InteractionPipelineImpl(route, interaction);
+    const ctx = await interactionRef.createExecutionContext(injector);
 
     interactionRef.user = user;
     interactionRef.channel = channel;
     interactionRef.guild = guild;
     interactionRef.isFromGuild = !!guildId;
+    interactionRef._injector = ctx;
 
     return interactionRef;
+  }
+
+  protected createExecutionContext(
+    moduleInj: Injector
+  ): Promise<ExecutionContext> {
+    const bindFactory: ContextBindingFactory = (bind) => {
+      bind(ClientCtx, this.interaction.client);
+      bind(ChannelCtx, this.channel);
+      bind(FindMemberInq, (name: string, fuzzy = false) => {
+        return this.guild?.members.cache;
+      });
+    };
+
+    const inj = new ContextInjector(moduleInj, this, bindFactory);
+    return inj.get(ExecutionContext);
   }
 }

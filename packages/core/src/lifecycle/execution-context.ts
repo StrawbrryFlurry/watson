@@ -4,53 +4,39 @@ import {
   BaseRoute,
   CommandPipeline,
   ContextType,
-  DIProvided,
   DiscordAdapter,
   EventPipeline,
   ExecutionContext,
   InteractionPipeline,
   PipelineBase,
+  Providable,
   Type,
 } from '@watsonjs/common';
 import { Client } from 'discord.js';
 
 export class ExecutionContextImpl<
-    PipelineHost extends
-      | CommandPipeline
-      | EventPipeline
-      | InteractionPipeline = PipelineBase,
-    EventData extends unknown[] = any
-  >
-  extends DIProvided({ providedIn: "ctx" })
-  implements ExecutionContext, Injector
+  PipelineHost extends
+    | CommandPipeline
+    | EventPipeline
+    | InteractionPipeline = PipelineBase
+> implements ExecutionContext, Injector
 {
   public handler: Function;
   public next: Function;
   public route: BaseRoute;
   public adapter: AdapterRef;
-  public eventData: EventData;
-  public parent: Injector | null;
+  public parent: Injector;
 
   private pipeline: PipelineHost;
 
-  constructor(
-    pipeline: PipelineHost,
-    eventData: EventData,
-    route: BaseRoute,
-    adapter: AdapterRef,
-    next?: Function
-  ) {
-    super();
+  constructor(pipeline: PipelineHost) {
     this.pipeline = pipeline;
-    this.adapter = adapter;
-    this.eventData = eventData;
-    this.route = route;
-    this.next = next!;
   }
-  public get<T extends unknown, R extends InjectorGetResult<T>>(
+
+  public get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T
-  ): any {
-    throw new Error("Method not implemented.");
+  ): Promise<R> {
+    return this.parent.get(typeOrToken);
   }
 
   public switchToInteraction(): InteractionPipeline {
@@ -85,10 +71,6 @@ export class ExecutionContextImpl<
     return this.pipeline as CommandPipeline;
   }
 
-  public switchToSlash(): InteractionPipeline {
-    throw new Error("Method not implemented.");
-  }
-
   public switchToEvent(): EventPipeline {
     throw new Error("Method not implemented.");
   }
@@ -97,24 +79,11 @@ export class ExecutionContextImpl<
     return this.pipeline.contextType as T;
   }
 
-  public getEvent<T, R = T extends Array<any> ? T : [T]>(): R {
-    return this.eventData as any as R;
+  public getEvent(): PipelineHost["eventData"] {
+    return this.pipeline.getEvent();
   }
 
   public getRoute(): BaseRoute {
     return this.route;
-  }
-
-  /**
-   * Removes all properties from the context
-   * so that it cannot be used any further
-   *
-   * @warn
-   * This method should only be called by the
-   * `ResponseController` and only after the
-   * event life cycle has finished!
-   */
-  public _destroy() {
-    Object.keys(this).forEach((k) => delete this[k]);
   }
 }
