@@ -18,7 +18,7 @@ specifiers:
   class-validator: ^0.12.2
   cli-color: ^2.0.0
   delete-empty: ^3.0.0
-  discord.js: ^13.1.0
+  discord.js: 13.3.1
   dotenv: ^8.2.0
   fast-json-stringify: ^2.7.9
   gulp: ^4.0.2
@@ -46,7 +46,7 @@ dependencies:
   class-transformer: 0.3.1
   class-validator: 0.12.2
   cli-color: 2.0.0
-  discord.js: 13.1.0
+  discord.js: 13.3.1
   dotenv: 8.6.0
   fast-json-stringify: 2.7.10
   iterare: 1.2.1
@@ -392,17 +392,6 @@ packages:
       minimist: 1.2.5
     dev: true
 
-  /@discordjs/builders/0.5.0:
-    resolution: {integrity: sha512-HP5y4Rqw68o61Qv4qM5tVmDbWi4mdTFftqIOGRo33SNPpLJ1Ga3KEIR2ibKofkmsoQhEpLmopD1AZDs3cKpHuw==}
-    engines: {node: '>=14.0.0', npm: '>=7.0.0'}
-    dependencies:
-      '@sindresorhus/is': 4.2.0
-      discord-api-types: 0.22.0
-      ow: 0.27.0
-      ts-mixer: 6.0.0
-      tslib: 2.3.1
-    dev: false
-
   /@discordjs/builders/0.8.1:
     resolution: {integrity: sha512-kYJMvZ/BjRD1/6G2t1pQop2yoJNUmYvvKeG4mOBUCHFmfb7WIeBFmN/eSiP3cVSfRx3lbNiyxkdd5JzhjQnGbg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
@@ -414,9 +403,9 @@ packages:
       tslib: 2.3.1
     dev: false
 
-  /@discordjs/collection/0.2.1:
-    resolution: {integrity: sha512-vhxqzzM8gkomw0TYRF3tgx7SwElzUlXT/Aa41O7mOcyN6wIJfj5JmDWaO5XGKsGSsNx7F3i5oIlrucCCWV1Nog==}
-    engines: {node: '>=14.0.0'}
+  /@discordjs/collection/0.3.2:
+    resolution: {integrity: sha512-dMjLl60b2DMqObbH1MQZKePgWhsNe49XkKBZ0W5Acl5uVV43SN414i2QfZwRI7dXAqIn8pEWD2+XXQFn9KWxqg==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dev: false
 
   /@discordjs/form-data/3.0.1:
@@ -1067,9 +1056,9 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@sapphire/async-queue/1.1.4:
-    resolution: {integrity: sha512-fFrlF/uWpGOX5djw5Mu2Hnnrunao75WGey0sP0J3jnhmrJ5TAPzHYOmytD5iN/+pMxS+f+u/gezqHa9tPhRHEA==}
-    engines: {node: '>=14', npm: '>=6'}
+  /@sapphire/async-queue/1.1.9:
+    resolution: {integrity: sha512-CbXaGwwlEMq+l1TRu01FJCvySJ1CEFKFclHT48nIfNeZXaAAmmwwy7scUKmYHPUa3GhoMp6Qr1B3eAJux6XgOQ==}
+    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
     dev: false
 
   /@sindresorhus/is/4.2.0:
@@ -1169,6 +1158,13 @@ packages:
     resolution: {integrity: sha512-l3xuhmyF2kBldy15SeY6d6HbK2BacEcSK1qTF1ISPtPHr29JH0C1fndz9ExXLKpGl0J6pZi+dGp1i5xesMt60Q==}
     dev: true
 
+  /@types/node-fetch/2.5.12:
+    resolution: {integrity: sha512-MKgC4dlq4kKNa/mYrwpKfzQMB5X3ee5U6fSprkKpToBqBmX4nFZL9cW5jl6sWn+xpRJ7ypWh2yyqqr8UUCstSw==}
+    dependencies:
+      '@types/node': 14.14.33
+      form-data: 3.0.1
+    dev: false
+
   /@types/node/14.14.33:
     resolution: {integrity: sha512-oJqcTrgPUF29oUP8AsUqbXGJNuPutsetaa9kTQAQce5Lx5dTYWV02ScBiT/k1BX/Z7pKeqedmvp39Wu4zR7N7g==}
 
@@ -1202,8 +1198,8 @@ packages:
       source-map: 0.6.1
     dev: true
 
-  /@types/ws/7.4.7:
-    resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
+  /@types/ws/8.2.0:
+    resolution: {integrity: sha512-cyeefcUCgJlEk+hk2h3N+MqKKsPViQgF5boi9TTHSK+PoR9KWBb/C5ccPcDyAqgsbAYHTwulch725DV84+pSpg==}
     dependencies:
       '@types/node': 14.14.33
     dev: false
@@ -2750,28 +2746,24 @@ packages:
       path-type: 4.0.0
     dev: true
 
-  /discord-api-types/0.22.0:
-    resolution: {integrity: sha512-l8yD/2zRbZItUQpy7ZxBJwaLX/Bs2TGaCthRppk8Sw24LOIWg12t9JEreezPoYD0SQcC2htNNo27kYEpYW/Srg==}
-    engines: {node: '>=12'}
-    dev: false
-
   /discord-api-types/0.24.0:
     resolution: {integrity: sha512-X0uA2a92cRjowUEXpLZIHWl4jiX1NsUpDhcEOpa1/hpO1vkaokgZ8kkPtPih9hHth5UVQ3mHBu/PpB4qjyfJ4A==}
     engines: {node: '>=12'}
     dev: false
 
-  /discord.js/13.1.0:
-    resolution: {integrity: sha512-gxO4CXKdHpqA+WKG+f5RNnd3srTDj5uFJHgOathksDE90YNq/Qijkd2WlMgTTMS6AJoEnHxI7G9eDQHCuZ+xDA==}
+  /discord.js/13.3.1:
+    resolution: {integrity: sha512-zn4G8tL5+tMV00+0aSsVYNYcIfMSdT2g0nudKny+Ikd+XKv7m6bqI7n3Vji0GIRqXDr5ArPaw+iYFM2I1Iw3vg==}
     engines: {node: '>=16.6.0', npm: '>=7.0.0'}
     dependencies:
-      '@discordjs/builders': 0.5.0
-      '@discordjs/collection': 0.2.1
+      '@discordjs/builders': 0.8.1
+      '@discordjs/collection': 0.3.2
       '@discordjs/form-data': 3.0.1
-      '@sapphire/async-queue': 1.1.4
-      '@types/ws': 7.4.7
-      discord-api-types: 0.22.0
+      '@sapphire/async-queue': 1.1.9
+      '@types/node-fetch': 2.5.12
+      '@types/ws': 8.2.0
+      discord-api-types: 0.24.0
       node-fetch: 2.6.5
-      ws: 7.5.5
+      ws: 8.2.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -6086,18 +6078,6 @@ packages:
       lcid: 1.0.0
     dev: true
 
-  /ow/0.27.0:
-    resolution: {integrity: sha512-SGnrGUbhn4VaUGdU0EJLMwZWSupPmF46hnTRII7aCLCrqixTAC5eKo8kI4/XXf1eaaI8YEVT+3FeGNJI9himAQ==}
-    engines: {node: '>=12'}
-    dependencies:
-      '@sindresorhus/is': 4.2.0
-      callsites: 3.1.0
-      dot-prop: 6.0.1
-      lodash.isequal: 4.5.0
-      type-fest: 1.4.0
-      vali-date: 1.0.0
-    dev: false
-
   /ow/0.28.1:
     resolution: {integrity: sha512-1EZTywPZeUKac9gD7q8np3Aj+V54kvfIcjNEVNDSbG2Ys5xA5foW2HquvMMqgyWGLqIFMlc0Iq/HmyMHqN48sA==}
     engines: {node: '>=12'}
@@ -7657,11 +7637,6 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /type-fest/1.4.0:
-    resolution: {integrity: sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==}
-    engines: {node: '>=10'}
-    dev: false
-
   /type-fest/2.5.2:
     resolution: {integrity: sha512-WMbytmAs5PUTqwGJRE+WoRrD2S0bYFtHX8k4Y/1l18CG5kqA3keJud9pPQ/r30FE9n8XRFCXF9BbccHIZzRYJw==}
     engines: {node: '>=12.20'}
@@ -8131,6 +8106,19 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  /ws/8.2.3:
+    resolution: {integrity: sha512-wBuoj1BDpC6ZQ1B7DWQBYVLphPWkm8i9Y0/3YdHjHKHiohOJ1ws+3OccDWtH+PoC9DZD5WOTrJvNbWvjS6JWaA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: false
 
   /xml-name-validator/3.0.0:
     resolution: {integrity: sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==}

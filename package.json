@@ -47,7 +47,7 @@
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "cli-color": "^2.0.0",
-    "discord.js": "^13.1.0",
+    "discord.js": "13.3.1",
     "dotenv": "^8.2.0",
     "fast-json-stringify": "^2.7.9",
     "iterare": "^1.2.1",
