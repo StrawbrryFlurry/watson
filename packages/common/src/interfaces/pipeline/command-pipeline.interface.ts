@@ -27,10 +27,6 @@ export interface CommandPipeline extends PipelineBase {
    */
   prefix: Prefix;
   /**
-   * Whether the message is from a guild or not
-   */
-  isFromGuild: boolean;
-  /**
    * The resolved guild member object if
    * the message originated form a guild
    */

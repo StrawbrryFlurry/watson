@@ -1,4 +1,11 @@
+import { Guild, GuildChannel, TextChannel } from 'discord.js';
+
 import { BaseRoute, ContextType } from '..';
+
+export interface PipelineWithGuildCtx {
+  guild: Guild;
+  channel: GuildChannel & TextChannel;
+}
 
 export interface PipelineBase<
   D extends unknown = any,
@@ -22,6 +29,10 @@ export interface PipelineBase<
    * ```
    */
   getEvent(): D;
+  /**
+   * Whether the message is from a guild or not
+   */
+  isFromGuild(): this is PipelineBase & PipelineWithGuildCtx;
   /**
    * Returns the context injector of
    * this pipeline context.

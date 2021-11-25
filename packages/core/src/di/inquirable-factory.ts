@@ -5,15 +5,19 @@ import {
   FindRoleInq,
   InteractionPipeline,
   isNil,
+  MessageSendable,
   PipelineBase,
+  PromptInq,
   Providable,
-  Type,
+  UnauthorizedException,
 } from '@watsonjs/common';
 import { CachedManager, Channel, GuildMember, Role, TextChannel } from 'discord.js';
 
 import { Injector } from '..';
+import { ParseMessageSendable } from '../lifecycle/parse-messagesendable';
 
-type UserBasedPipeline = InteractionPipeline | CommandPipeline
+type UserBasedPipeline = InteractionPipeline | CommandPipeline;
+type InquirableBundle = [Providable, Function] | [Providable, Function][];
 
 export class InquirableFactory {
   constructor(private _injector: Injector) {}
@@ -23,21 +27,54 @@ export class InquirableFactory {
    * available through DI in router methods
    * and their constructors.
    */
-  public createGlobals(pipeline: PipelineBase): [Type, Function][] {
+  public createGlobals(pipeline: PipelineBase): InquirableBundle {
     const inquirables = [];
 
     inquirables.push(...this._createFindInq(pipeline as UserBasedPipeline));
+    inquirables.push(this._createPromptInq(pipeline as UserBasedPipeline));
 
     return [];
   }
 
-  private _createPromptInq(pipeline: UserBasedPipeline): [Type, Function] {
-    const user = pipeline.
+  private _createPromptInq(pipeline: UserBasedPipeline): InquirableBundle {
+    const PROMPT_INQ: PromptInq = async (message: MessageSendable) => {
+      const { user, channel } = pipeline;
+
+      if (isNil(channel)) {
+        throw "Can't use `PromptInquirable` for commands that were not run in a text based channel. Use `SendInq` instead.";
+      }
+
+      if (pipeline.isFromGuild()) {
+        const canSend = pipeline.channel
+          .permissionsFor(user)
+          ?.has("SEND_MESSAGES");
+
+        if (isNil(canSend) || !canSend) {
+          throw new UnauthorizedException(
+            `The user who has run this command doesn't have permission to send messages in this channel`
+          );
+        }
+      }
+
+      await channel.send(ParseMessageSendable(message));
+      const response = await channel.awaitMessages({
+        filter: (message) => message.author.id === user.id,
+        max: 1,
+      });
+
+      return response.first() ?? null;
+    };
+
+    return [PromptInq, PROMPT_INQ];
   }
 
-  private _createFindInq(pipeline: UserBasedPipeline) {
-    if(!pipeline.isFromGuild) {
-      return this._createNullInquirable(FindChannelInq, FindRoleInq, FindMemberInq)
+  private _createFindInq(pipeline: UserBasedPipeline): InquirableBundle {
+    if (!pipeline.isFromGuild()) {
+      return this._createNullInquirable(
+        FindChannelInq,
+        FindRoleInq,
+        FindMemberInq
+      );
     }
 
     const { guild } = pipeline;
@@ -85,7 +122,10 @@ export class InquirableFactory {
     ];
   }
 
-  private _createNullInquirable(...providers: Providable[]) {
-    return providers.map((provider) => [provider, () => null])
+  private _createNullInquirable(...providers: Providable[]): InquirableBundle {
+    return providers.map((provider) => [
+      provider,
+      () => null,
+    ]) as InquirableBundle;
   }
 }

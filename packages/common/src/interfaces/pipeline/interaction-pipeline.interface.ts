@@ -18,10 +18,6 @@ export interface InteractionPipeline extends PipelineBase {
    */
   command: string;
   /**
-   * Whether the interaction is from a guild or not
-   */
-  isFromGuild: boolean;
-  /**
    * The user from whom the message was sent
    */
   user: User;
