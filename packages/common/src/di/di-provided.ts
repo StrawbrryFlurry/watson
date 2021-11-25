@@ -4,6 +4,11 @@ import { mergeDefaults } from '@common/utils';
 
 import { InjectableOptions } from '.';
 
+/**
+ * Same as `@Injectable` but allows us to
+ * reference the static DI properties on
+ * the type without having to cast it first.
+ */
 export function DIProvided<T extends new (...args: any[]) => any>(
   options: InjectableOptions = {},
   xtends: T = class {} as T

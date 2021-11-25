@@ -1,6 +1,6 @@
-import { INJECTABLE_METADATA } from '@common/constants';
 import { InjectableOptions, InjectionToken, InjectorLifetime, ProvidedInScope } from '@common/di/injection-token';
-import { mergeDefaults } from '@common/utils';
+
+import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
 
 export interface InjectableMetadata extends Required<InjectableOptions> {}
 
@@ -21,13 +21,10 @@ export const CUSTOM_INJECTABLE_METADATA = new InjectionToken<string>(
 );
 
 export function Injectable(options: InjectableOptions = {}): ClassDecorator {
-  const metadata = mergeDefaults(options, {
-    lifetime: DEFAULT_LIFETIME,
-    providedIn: DEFAULT_SCOPE,
-  });
-
   return (target: Object) => {
-    Reflect.defineMetadata(INJECTABLE_METADATA, metadata, target);
+    const { lifetime, providedIn } = options;
+    target[W_PROV_SCOPE] = providedIn ?? DEFAULT_SCOPE;
+    target[W_PROV_LIFETIME] = lifetime ?? DEFAULT_LIFETIME;
   };
 }
 
