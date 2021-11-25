@@ -4,7 +4,6 @@ import {
   ClientCtx,
   ContextType,
   ExecutionContext,
-  FindMemberInq,
   InteractionPipeline,
   isNil,
 } from '@watsonjs/common';
@@ -20,6 +19,7 @@ import {
   VoiceChannel,
 } from 'discord.js';
 
+import { InquirableFactory } from '../../di/inquirable-factory';
 import { PipelineBaseImpl } from './pipeline-base';
 
 export class InteractionPipelineImpl
@@ -77,7 +77,10 @@ export class InteractionPipelineImpl
   ): Promise<InteractionPipeline> {
     const { guildId, channel, guild, user } = interaction;
     const interactionRef = new InteractionPipelineImpl(route, interaction);
-    const ctx = await interactionRef.createExecutionContext(injector);
+    const ctx = await interactionRef.createExecutionContext(
+      injector,
+      interaction
+    );
 
     interactionRef.user = user;
     interactionRef.channel = channel;
@@ -89,14 +92,16 @@ export class InteractionPipelineImpl
   }
 
   protected createExecutionContext(
-    moduleInj: Injector
+    moduleInj: Injector,
+    interaction: CommandInteraction | ContextMenuInteraction
   ): Promise<ExecutionContext> {
+    const inquirableFactory = new InquirableFactory(moduleInj);
     const bindFactory: ContextBindingFactory = (bind) => {
       bind(ClientCtx, this.interaction.client);
       bind(ChannelCtx, this.channel);
-      bind(FindMemberInq, (name: string, fuzzy = false) => {
-        return this.guild?.members.cache;
-      });
+      inquirableFactory
+        .createGlobals(interaction)
+        .forEach(([provide, value]) => bind(provide, value));
     };
 
     const inj = new ContextInjector(moduleInj, this, bindFactory);

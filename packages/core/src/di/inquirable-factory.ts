@@ -1,11 +1,19 @@
-import { FindChannelInq, FindMemberInq, FindRoleInq, isNil, Type } from '@watsonjs/common';
-import { CachedManager, Channel, Guild, GuildMember, Role, TextChannel } from 'discord.js';
+import {
+  CommandPipeline,
+  FindChannelInq,
+  FindMemberInq,
+  FindRoleInq,
+  InteractionPipeline,
+  isNil,
+  PipelineBase,
+  Providable,
+  Type,
+} from '@watsonjs/common';
+import { CachedManager, Channel, GuildMember, Role, TextChannel } from 'discord.js';
 
 import { Injector } from '..';
 
-interface EventBase {
-  guild?: Guild;
-}
+type UserBasedPipeline = InteractionPipeline | CommandPipeline
 
 export class InquirableFactory {
   constructor(private _injector: Injector) {}
@@ -15,16 +23,24 @@ export class InquirableFactory {
    * available through DI in router methods
    * and their constructors.
    */
-  public createGlobals(source: EventBase): [Type, Function][] {
+  public createGlobals(pipeline: PipelineBase): [Type, Function][] {
     const inquirables = [];
 
-    inquirables.push(...this._createFindInq(source));
+    inquirables.push(...this._createFindInq(pipeline as UserBasedPipeline));
 
     return [];
   }
 
-  private _createFindInq(source: EventBase) {
-    const { guild } = source;
+  private _createPromptInq(pipeline: UserBasedPipeline): [Type, Function] {
+    const user = pipeline.
+  }
+
+  private _createFindInq(pipeline: UserBasedPipeline) {
+    if(!pipeline.isFromGuild) {
+      return this._createNullInquirable(FindChannelInq, FindRoleInq, FindMemberInq)
+    }
+
+    const { guild } = pipeline;
 
     const findInManager = <T>(
       manager: CachedManager<string, T, any> | undefined,
@@ -67,5 +83,9 @@ export class InquirableFactory {
       [FindRoleInq, ROLE_INQ],
       [FindMemberInq, MEMBER_INQ],
     ];
+  }
+
+  private _createNullInquirable(...providers: Providable[]) {
+    return providers.map((provider) => [provider, () => null])
   }
 }

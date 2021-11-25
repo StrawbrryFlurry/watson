@@ -31,6 +31,7 @@ export abstract class PipelineBaseImpl<
   }
 
   protected abstract createExecutionContext(
-    moduleInj: Injector
+    moduleInj: Injector,
+    eventData: D
   ): Promise<ExecutionContext>;
 }
