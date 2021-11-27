@@ -15,7 +15,10 @@ interface FindInq<T> {
    * }
    * ```
    */
-  <F extends boolean, R extends F extends true ? Promise<T[]> : Promise<T>>(
+  <
+    F extends boolean,
+    R extends F extends true ? Promise<T[] | null> : Promise<T | null>
+  >(
     name: string,
     fuzzy?: F
   ): R;

@@ -1,6 +1,6 @@
 import { DIProvided } from '@common/di';
 import { MessageSendable } from '@common/interfaces';
-import { ChannelResolvable, GuildResolvable } from 'discord.js';
+import { ChannelResolvable, Guild, Message } from 'discord.js';
 
 /**
  * Sends a message to the channel that
@@ -13,13 +13,13 @@ import { ChannelResolvable, GuildResolvable } from 'discord.js';
  * Equivalent to `channel.send(/ ...Args /*)`
  */
 export declare interface SendInq {
-  (message: MessageSendable): Promise<void>;
-  (message: MessageSendable, channel?: ChannelResolvable): Promise<void>;
+  (message: MessageSendable): Promise<Message>;
+  (message: MessageSendable, channel?: ChannelResolvable): Promise<Message>;
   (
     message: MessageSendable,
     channel?: ChannelResolvable,
-    guild?: GuildResolvable
-  ): Promise<void>;
+    guild?: Guild
+  ): Promise<Message>;
 }
 
 export abstract class SendInq extends DIProvided({ providedIn: "ctx" }) {}

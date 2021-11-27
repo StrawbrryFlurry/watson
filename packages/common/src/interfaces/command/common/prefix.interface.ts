@@ -16,7 +16,7 @@ export type Prefix = PrefixResolvable | string;
  * ```ts
  * \@Injectable()
  * export class GuildPrefix implement PrefixResolvable {
- *  constructor(private readonly guildService) {  }
+ *  constructor(private readonly guildService: GuildService) {  }
  *
  *  public async resolve(message: Message) {
  *    const { guild: { id: guildId } } = message;

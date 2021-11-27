@@ -16,7 +16,7 @@ import { Message } from 'discord.js';
  * was used in.
  */
 export declare interface ReplyInq {
-  (message: MessageSendable): Promise<Message>;
+  (message: MessageSendable): Promise<void>;
 }
 
 export abstract class ReplyInq extends DIProvided({
