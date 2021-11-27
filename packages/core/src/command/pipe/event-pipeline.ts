@@ -1,1 +1,3 @@
-export class EventPipelineImpl {}
+export class EventPipelineImpl {
+  public static create() {}
+}

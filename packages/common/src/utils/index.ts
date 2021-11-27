@@ -1,3 +1,4 @@
+export * from "./extend-readonly-ctor.utils";
 export * from "./get-function-parameters.utils";
 export * from "./get-id.helper";
 export * from "./is-flag-set.utils";

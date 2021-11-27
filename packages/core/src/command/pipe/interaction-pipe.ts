@@ -1,13 +1,5 @@
-import {
-  ApplicationCommandRoute,
-  ChannelCtx,
-  ClientCtx,
-  ContextType,
-  ExecutionContext,
-  InteractionPipeline,
-  isNil,
-} from '@watsonjs/common';
-import { ContextBindingFactory, ContextInjector, Injector } from '@watsonjs/core';
+import { ApplicationCommandRoute, ContextType, InteractionPipeline } from '@watsonjs/common';
+import { ContextBindingFactory, Injector } from '@watsonjs/core';
 import {
   CommandInteraction,
   ContextMenuInteraction,
@@ -19,7 +11,7 @@ import {
   VoiceChannel,
 } from 'discord.js';
 
-import { InquirableFactory } from '../../di/inquirable-factory';
+import { ContextProviderFactory } from '../../di/context-provider-factory';
 import { PipelineBaseImpl } from './pipeline-base';
 
 export class InteractionPipelineImpl
@@ -29,45 +21,45 @@ export class InteractionPipelineImpl
   >
   implements InteractionPipeline
 {
-  public command: string;
-
+  public command: string | null;
   public user: User;
   public guild: Guild | null;
   public channel: TextBasedChannels | null;
 
-  public isFromGuild: boolean;
+  public isReplied = false;
 
   public route: ApplicationCommandRoute;
   public interaction: CommandInteraction | ContextMenuInteraction;
 
-  public readonly contextType: ContextType = "interaction";
-
-  protected _injector: Injector;
-
   public async getGuildMember(): Promise<GuildMember | null> {
-    if (!this.isFromGuild) {
+    if (!this.isFromGuild()) {
       return null;
     }
 
-    return this.guild!.members.fetch(this.user);
+    return this.guild.members.fetch(this.user);
   }
 
-  public async getVoiceChanel(): Promise<VoiceChannel | StageChannel | null> {
+  public async getVoiceChannel(): Promise<VoiceChannel | StageChannel | null> {
     const { voice } = (await this.getGuildMember()) ?? {};
-
-    if (isNil(voice)) {
-      return null;
-    }
-
-    return voice.channel;
+    return voice?.channel ?? null;
   }
 
-  constructor(
+  /**
+   * @hideconstructor
+   * @ignore use `InteractionPipelineImpl.create` instead
+   */
+  private constructor(
     route: ApplicationCommandRoute,
-    eventData: CommandInteraction | ContextMenuInteraction
+    interaction: CommandInteraction | ContextMenuInteraction
   ) {
-    super(route, "interaction", eventData);
-    this.interaction = eventData;
+    super(route, ContextType.interaction, interaction);
+    const { guildId, channel, guild, user } = interaction;
+    this.user = user;
+    this.channel = channel;
+    this.guild = guild;
+    this.interaction = interaction;
+    this._guildId = guildId;
+    this.command = interaction.command?.id ?? null;
   }
 
   public static async create(
@@ -75,36 +67,17 @@ export class InteractionPipelineImpl
     injector: Injector,
     interaction: CommandInteraction | ContextMenuInteraction
   ): Promise<InteractionPipeline> {
-    const { guildId, channel, guild, user } = interaction;
     const interactionRef = new InteractionPipelineImpl(route, interaction);
-    const ctx = await interactionRef.createExecutionContext(
-      injector,
-      interaction
-    );
-
-    interactionRef.user = user;
-    interactionRef.channel = channel;
-    interactionRef.guild = guild;
-    interactionRef.isFromGuild = !!guildId;
-    interactionRef._injector = ctx;
-
+    await interactionRef.createExecutionContext(injector);
     return interactionRef;
   }
 
-  protected createExecutionContext(
-    moduleInj: Injector,
-    interaction: CommandInteraction | ContextMenuInteraction
-  ): Promise<ExecutionContext> {
-    const inquirableFactory = new InquirableFactory(moduleInj);
-    const bindFactory: ContextBindingFactory = (bind) => {
-      bind(ClientCtx, this.interaction.client);
-      bind(ChannelCtx, this.channel);
-      inquirableFactory
-        .createGlobals(interaction)
-        .forEach(([provide, value]) => bind(provide, value));
+  protected async createExecutionContext(moduleInj: Injector): Promise<void> {
+    const inquirableFactory = new ContextProviderFactory(moduleInj);
+    const bindingFactory: ContextBindingFactory = (bind) => {
+      inquirableFactory.bind(this, bind);
     };
 
-    const inj = new ContextInjector(moduleInj, this, bindFactory);
-    return inj.get(ExecutionContext);
+    await this.createAndBindInjector(moduleInj, bindingFactory);
   }
 }

@@ -1,7 +1,7 @@
 import { ExecutionContext, isNil, PipelineBase, Providable, Type } from '@watsonjs/common';
 
 import { Injector } from '.';
-import { Binding, createResolvedBinding, ExecutionContextImpl, InjectorGetResult } from '..';
+import { Binding, createResolvedBinding, ExecutionContextImpl, InjectorGetResult, resolveAsyncValue } from '..';
 
 export type ContextBindingFactory<
   BindFn extends (provide: Providable, value: any) => void = (
@@ -57,7 +57,13 @@ export class ContextInjector implements Injector {
       return this.parent.get(typeOrToken, notFoundValue, this);
     }
 
-    return binding.instance;
+    /**
+     * We also allow binding promises in the
+     * constructor such that the `bindingFactory`
+     * doesn't need to be async. This will
+     * resolve the promise in case there is one.
+     */
+    return resolveAsyncValue(binding.instance);
   }
 
   public getWithin<T extends Providable, R extends InjectorGetResult<T>>(

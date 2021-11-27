@@ -16,7 +16,7 @@ export interface InteractionPipeline extends PipelineBase {
   /**
    * The command name used by the user
    */
-  command: string;
+  command: string | null;
   /**
    * The user from whom the message was sent
    */
@@ -39,6 +39,15 @@ export interface InteractionPipeline extends PipelineBase {
    */
   interaction: CommandInteraction | ContextMenuInteraction;
   /**
+   * If you reply to an interaction using
+   * `ReplyInq`, this is set to true.
+   * If true, the message returned from the
+   * interaction handler will be sent as
+   * a regular message to the interaction
+   * source channel.
+   */
+  isReplied: boolean;
+  /**
    * The resolved guild member object if
    * the message originated form a guild
    */
@@ -47,5 +56,5 @@ export interface InteractionPipeline extends PipelineBase {
    * The voice cannel the user is currently in
    * - `null` if the user is not currently in a voice channel.
    */
-  getVoiceChanel(): Promise<VoiceChannel | StageChannel | null>;
+  getVoiceChannel(): Promise<VoiceChannel | StageChannel | null>;
 }

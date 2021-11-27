@@ -1,5 +1,6 @@
-import { BaseRoute, ContextType, ExecutionContext, PipelineBase } from '@watsonjs/common';
-import { Injector } from '@watsonjs/core';
+import { BaseRoute, ContextType, ExecutionContext, PipelineBase, PipelineWithGuildCtx } from '@watsonjs/common';
+import { ContextBindingFactory, ContextInjector, Injector } from '@watsonjs/core';
+import { Snowflake } from 'discord.js';
 
 export abstract class PipelineBaseImpl<
   D extends unknown,
@@ -8,7 +9,8 @@ export abstract class PipelineBaseImpl<
 {
   public contextType: ContextType;
   public route: R;
-  protected abstract _injector: Injector;
+  protected _injector: Injector;
+  protected _guildId: Snowflake;
 
   public get eventData(): D {
     return this._eventData;
@@ -30,8 +32,37 @@ export abstract class PipelineBaseImpl<
     return this._injector as any as T;
   }
 
+  public isFromGuild(): this is PipelineBase<any, any> & PipelineWithGuildCtx {
+    return !!this._guildId;
+  }
+
+  /**
+   * Creates the `ExecutionContext` and
+   * the `ContextInjector` for the current
+   * pipeline.
+   *
+   * This function needs to call `createAndBindInjector`
+   * cause the `ExecutionContext`, which acts as
+   * the injector for any pipeline, needs a
+   * Pipeline reference to be created.
+   */
   protected abstract createExecutionContext(
     moduleInj: Injector,
     eventData: D
-  ): Promise<ExecutionContext>;
+  ): Promise<void>;
+
+  /**
+   * Creates the `ContextInjector` using
+   * `bindingFactory` and binds the
+   * `ExecutionContextRef` from `ContextInjector`
+   * as the injector of this pipeline.
+   */
+  protected async createAndBindInjector(
+    moduleInj: Injector,
+    bindingFactory: ContextBindingFactory
+  ) {
+    const inj = new ContextInjector(moduleInj, this, bindingFactory);
+    const ctx = await inj.get(ExecutionContext);
+    this._injector = ctx;
+  }
 }

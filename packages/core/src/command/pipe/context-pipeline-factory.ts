@@ -21,6 +21,12 @@ type RoutePipeMap<T extends BaseRoute> = T extends ApplicationCommandRoute
   ? [EventPipelineImpl, typeof EventPipelineImpl]
   : never;
 
+type CreatePipelineArguments<T extends { create: any }> = T["create"] extends (
+  ...args: infer Args
+) => any
+  ? Args
+  : never;
+
 /**
  * Used to create instances of a given `ExecutionContextPipeline`
  * which serves as a representation of an event emitted by the
@@ -35,7 +41,7 @@ export class ContextPipelineFactory {
     R extends BaseRoute,
     PipeMatch extends RoutePipeMap<R>,
     Pipe extends PipeMatch[0],
-    PipeCtor extends CtorParameters<PipeMatch[1]>,
+    PipeCtor extends CreatePipelineArguments<PipeMatch[1]>,
     O extends OmitFirstElement<PipeCtor>
   >(routeRef: R, ...options: O): Pipe {
     // We can only use the spread operator on tuples

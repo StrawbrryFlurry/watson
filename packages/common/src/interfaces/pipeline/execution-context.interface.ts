@@ -1,8 +1,9 @@
-import { DIProvided, InjectionToken } from '@common/di';
+import { InjectionToken } from '@common/di';
 import { DiscordAdapter } from '@common/interfaces';
 import { Base, Client } from 'discord.js';
 
 import { BaseRoute, CommandPipeline, ContextType, EventPipeline, InteractionPipeline, PipelineHost } from '..';
+import { Injectable } from '../..';
 import { Type } from '../type.interface';
 
 type InjectorGetResult<T> = T extends InjectionToken<infer R>
@@ -16,10 +17,8 @@ type InjectorGetResult<T> = T extends InjectionToken<infer R>
  * about the current command / event route invocation it
  * belongs to.
  */
-export abstract class ExecutionContext
-  extends DIProvided({ providedIn: "ctx" })
-  implements PipelineHost
-{
+@Injectable({ providedIn: "ctx" })
+export abstract class ExecutionContext implements PipelineHost {
   /**
    * Returns the router from which this
    * context originated
