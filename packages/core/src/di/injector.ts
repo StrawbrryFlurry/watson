@@ -2,22 +2,19 @@ import { Binding, DynamicInjector, Reflector } from '@core/di';
 import {
   ClassProvider,
   CustomProvider,
-  DEFAULT_LIFETIME,
-  DEFAULT_SCOPE,
   DIProvided,
   FactoryProvider,
-  INJECTABLE_METADATA,
+  HasProv,
   InjectableOptions,
   InjectionToken,
-  InjectorLifetime,
+  isNil,
   Providable,
-  ProvidedInScope,
   Type,
   UseExistingProvider,
   ValueProvider,
   W_BINDING_DEF,
-  W_PROV_LIFETIME,
-  W_PROV_SCOPE,
+  W_PROV,
+  ɵdefineInjectable,
 } from '@watsonjs/common';
 
 import { NullInjector } from './null-injector';
@@ -111,8 +108,7 @@ export function isValueProvider(
 
 export function createResolvedBinding(provider: ValueProvider): Binding {
   const { provide, useValue, multi } = provider;
-
-  const { lifetime, providedIn } = getProviderScope(provider);
+  const { lifetime, providedIn } = getInjectableDef(provider);
 
   const binding = new Binding(provide, lifetime, providedIn, () => useValue);
 
@@ -132,43 +128,31 @@ export function getProviderType(
   return provider;
 }
 
-// export async function getRootInjector(injector: Injector) {
-//   const { rootInjector } = await injector.get(ApplicationRef);
-//   return rootInjector;
-// }
-
-export function getProviderScope(
-  typeOrProvider: ProviderResolvable
+export function getInjectableDef(
+  typeOrProvider: ProviderResolvable | Providable
 ): Required<InjectableOptions> {
-  let lifetime: InjectorLifetime | undefined;
-  let scope: ProvidedInScope | undefined;
+  if (isNil(typeOrProvider)) {
+    throw "Can't get injectable definition of null or undefined";
+  }
+
+  let typeOrToken: Type | InjectionToken = typeOrProvider as Type;
 
   if (isCustomProvider(typeOrProvider)) {
     const { provide } = typeOrProvider;
-
-    scope = provide[W_PROV_LIFETIME];
-    lifetime = provide[W_PROV_SCOPE];
-  } else {
-    const metadata = Reflector.reflectMetadata<InjectableOptions>(
-      INJECTABLE_METADATA,
-      typeOrProvider
-    );
-
-    lifetime = typeOrProvider[W_PROV_LIFETIME] ?? metadata?.lifetime;
-    scope = typeOrProvider[W_PROV_SCOPE] ?? metadata?.providedIn;
+    typeOrToken = provide;
   }
 
-  lifetime ??= DEFAULT_LIFETIME;
-  scope ??= DEFAULT_SCOPE;
+  let injectableDef = (<HasProv>(<any>typeOrToken))[W_PROV];
 
-  return {
-    lifetime,
-    providedIn: scope,
-  } as Required<InjectableOptions>;
+  if (isNil(injectableDef)) {
+    injectableDef = ɵdefineInjectable(typeOrToken);
+  }
+
+  return injectableDef;
 }
 
 export function createBinding(provider: ProviderResolvable): Binding {
-  const { lifetime, providedIn } = getProviderScope(provider);
+  const { lifetime, providedIn } = getInjectableDef(provider);
 
   if (!isCustomProvider(provider)) {
     const deps = Reflector.reflectCtorArgs(provider);

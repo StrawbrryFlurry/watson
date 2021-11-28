@@ -1,17 +1,8 @@
 import { getProviderType, InjectorGetResult, isCustomProvider, isUseExistingProvider, ModuleRef } from '@core/di';
 import { resolveAsyncValue } from '@core/utils';
-import {
-  InjectorLifetime,
-  isFunction,
-  isNil,
-  Providable,
-  ProvidedInScope,
-  Type,
-  ValueProvider,
-  W_PROV_SCOPE,
-} from '@watsonjs/common';
+import { InjectorLifetime, isFunction, isNil, Providable, Type, ValueProvider } from '@watsonjs/common';
 
-import { createBinding, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
+import { createBinding, getInjectableDef, INJECTOR, InjectorBloomFilter, ProviderResolvable } from '..';
 import { Binding } from './binding';
 import { Injector } from './injector';
 
@@ -80,10 +71,10 @@ export class DynamicInjector implements Injector {
     notFoundValue?: any,
     ctx?: Injector
   ): Promise<R> {
-    const bindingScope = typeOrToken[W_PROV_SCOPE] as ProvidedInScope;
+    const { providedIn } = getInjectableDef(typeOrToken);
     let parent = this.parent ?? Injector.NULL;
 
-    if (bindingScope === "ctx") {
+    if (providedIn === "ctx") {
       if (isNil(ctx)) {
         throw new Error(
           "[DynamicInjector] Cannot resolve a context bound provider in the dynamic injector"
@@ -96,8 +87,8 @@ export class DynamicInjector implements Injector {
     if (
       !this._component &&
       !isNil(this._scope) &&
-      (bindingScope === "module" ||
-        (isFunction(bindingScope) && this._scope instanceof bindingScope))
+      (providedIn === "module" ||
+        (isFunction(providedIn) && this._scope instanceof providedIn))
     ) {
       parent = Injector.NULL;
     }

@@ -1,16 +1,7 @@
-import {
-  HasProvLifetime,
-  HasProvScope,
-  InjectorLifetime,
-  isEmpty,
-  isNil,
-  Providable,
-  ProvidedInScope,
-  Type,
-  W_ELEMENT_ID,
-  W_PROV_LIFETIME,
-} from '@watsonjs/common';
+import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, W_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
+
+import { getInjectableDef } from '..';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
   ...args: D
@@ -38,7 +29,7 @@ export class Binding<
     | NewableTo<InstanceType>
     | FactoryFn<InstanceType>
     | Type = any,
-  Deps extends (HasProvLifetime & HasProvScope)[] = any,
+  Deps extends Providable[] = any,
   InstanceType extends any = MetaType
 > {
   /** The type this binding represents */
@@ -77,7 +68,7 @@ export class Binding<
 
     for (let i = 0; i < this.deps!.length; i++) {
       const dep = this.deps![i];
-      const lifetime = dep[W_PROV_LIFETIME];
+      const { lifetime } = getInjectableDef(dep);
 
       if (lifetime & (InjectorLifetime.Event | InjectorLifetime.Transient)) {
         this._isTreeStatic = false;

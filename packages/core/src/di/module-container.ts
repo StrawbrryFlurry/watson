@@ -1,7 +1,8 @@
 import { ModuleRef } from '@core/di';
-import { DIProvided, Type } from '@watsonjs/common';
+import { Injectable, Type } from '@watsonjs/common';
 
-export class ModuleContainer extends DIProvided({ providedIn: "root" }) {
+@Injectable({ providedIn: "root" })
+export class ModuleContainer {
   public modules = new Map<Type, ModuleRef>();
 
   public apply(module: ModuleRef) {

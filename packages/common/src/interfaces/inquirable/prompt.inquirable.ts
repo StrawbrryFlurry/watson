@@ -1,6 +1,7 @@
-import { DIProvided } from '@common/di';
 import { MessageSendable } from '@common/interfaces';
 import { Message } from 'discord.js';
+
+import { Injectable } from '../..';
 
 /**
  * @param message The prompt message to be sent
@@ -12,4 +13,5 @@ export declare interface PromptInq {
   (message: MessageSendable): Promise<Message | null>;
 }
 
-export abstract class PromptInq extends DIProvided({ providedIn: "ctx" }) {}
+@Injectable({ providedIn: "ctx" })
+export abstract class PromptInq {}

@@ -1,7 +1,7 @@
 import { ContextInjector, Injector, NOT_FOUND } from '@core/di';
-import { DIProvided, Type } from '@watsonjs/common';
+import { Injectable, Type } from '@watsonjs/common';
 
-import { RouterRef } from './router-ref';
+import { RouterRef } from '..';
 
 /**
  * Helper class for creating instances
@@ -9,11 +9,8 @@ import { RouterRef } from './router-ref';
  * `Injectables` or the Module type
  * itself.
  */
-export class ComponentFactory extends DIProvided({ providedIn: "module" }) {
-  constructor() {
-    super();
-  }
-
+@Injectable({ providedIn: "module" })
+export class ComponentFactory {
   /**
    * Creates a new instance of `componentType`.
    *

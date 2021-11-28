@@ -1,10 +1,10 @@
-import { DynamicInjector, getProviderScope, InjectorGetResult, Reflector } from '@core/di';
+import { DynamicInjector, getInjectableDef, InjectorGetResult, Reflector } from '@core/di';
 import {
   CustomProvider,
-  DIProvided,
   EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
+  Injectable,
   isNil,
   PIPE_METADATA,
   PREFIX_METADATA,
@@ -19,10 +19,9 @@ import {
 } from '@watsonjs/common';
 import { IsInjectable } from 'packages/common/src/decorators/interceptors/is-injectable';
 
-import { ProviderResolvable } from '..';
+import { ProviderResolvable, RouterRefImpl } from '..';
 import { ComponentFactory } from './component-factory';
 import { Injector } from './injector';
-import { RouterRef } from './router-ref';
 
 /**
  * `ModuleRef` is a wrapper for a Watson Module which
@@ -30,10 +29,8 @@ import { RouterRef } from './router-ref';
  * factory used to create routers and other parts
  * of the module.
  */
-export abstract class ModuleRef<T = any>
-  extends DIProvided({ providedIn: "module" })
-  implements Injector
-{
+@Injectable({ providedIn: "module" })
+export abstract class ModuleRef<T = any> implements Injector {
   public parent: Injector | null;
   public metatype: Type;
 
@@ -118,7 +115,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
     ];
 
     this._injector = Injector.create(injectorBindableProviders, parent, this);
-    this._componentFactory = new ComponentFactory();
+    this.componentFactory = new ComponentFactory();
   }
 
   private _bindProviders(
@@ -128,7 +125,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
   ): ProviderResolvable[] {
     return providers
       .map((provider) => {
-        const { providedIn } = getProviderScope(provider);
+        const { providedIn } = getInjectableDef(provider);
 
         if (!isNil(provider[W_INJ_TYPE])) {
           routerInjectables.push(provider as any as IsInjectable);
@@ -172,7 +169,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
         ...componentScopedInjectables,
       ];
 
-      const routerRef = new RouterRef(
+      const routerRef = new RouterRefImpl(
         router,
         componentProviders,
         componentInjectables,

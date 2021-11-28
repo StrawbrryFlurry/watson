@@ -1,5 +1,6 @@
-import { DIProvided } from '@common/di';
 import { Channel, GuildMember, Role } from 'discord.js';
+
+import { Injectable } from '../..';
 
 interface FindInq<T> {
   /**
@@ -42,7 +43,8 @@ export declare interface FindChannelInq extends FindInq<Channel> {}
  * They can be safely ignored and
  * should not be extended.
  */
-export abstract class FindRoleInq extends DIProvided({ providedIn: "ctx" }) {}
+@Injectable({ providedIn: "ctx" })
+export abstract class FindRoleInq {}
 
 /**
  *
@@ -53,9 +55,8 @@ export abstract class FindRoleInq extends DIProvided({ providedIn: "ctx" }) {}
  * They can be safely ignored and
  * should not be extended.
  */
-export abstract class FindChannelInq extends DIProvided({
-  providedIn: "ctx",
-}) {}
+@Injectable({ providedIn: "ctx" })
+export abstract class FindChannelInq {}
 
 /**
  *
@@ -66,4 +67,5 @@ export abstract class FindChannelInq extends DIProvided({
  * They can be safely ignored and
  * should not be extended.
  */
-export abstract class FindMemberInq extends DIProvided({ providedIn: "ctx" }) {}
+@Injectable({ providedIn: "ctx" })
+export abstract class FindMemberInq {}

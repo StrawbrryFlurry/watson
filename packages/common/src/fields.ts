@@ -56,29 +56,21 @@ export enum InjectorElementId {
 export const W_BINDING_DEF = "ɵbidef";
 
 /**
- * Property on a {@link Type} that
- * defines what lifetime a given provider
- * has.
+ *
+ * Property on a {@link Type} or {@link InjectionToken}
+ * that defines what lifetime and provider scope
+ * the given provider has.
  *
  * {@link InjectorLifetime}
+ * {@link InjectorScope}
  */
-export const W_PROV_LIFETIME = "ɵprovlife";
+export const W_PROV = "ɵprov";
 
-export interface HasProvLifetime {
-  [W_PROV_LIFETIME]: any;
-}
-
-/**
- * Property on a {@link Type} that
- * defines what injector scope the type
- * is restricted to.
- *
- * {@link ProvidedInScope}
- */
-export const W_PROV_SCOPE = "ɵprovsc";
-
-export interface HasProvScope {
-  [W_PROV_SCOPE]: any;
+export interface HasProv {
+  [W_PROV]: {
+    providedIn: any;
+    lifetime: any;
+  };
 }
 
 export const W_MODULE_PROV = "ɵmoprov";

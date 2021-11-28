@@ -1,12 +1,12 @@
-import { DIProvided, DiscordAdapter, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
+import { DiscordAdapter, Injectable, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 import { ApplicationConfig } from '../application-config';
 import { EventProxy } from '../lifecycle';
 
+@Injectable({ providedIn: "root" })
 export abstract class AdapterRef<Client = any, Options = any>
-  extends DIProvided({ providedIn: "root" })
   implements DiscordAdapter<Client>
 {
   protected _activity: ActivityOptions | null;

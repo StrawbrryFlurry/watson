@@ -1,6 +1,7 @@
-import { DIProvided } from '@common/di';
 import { MessageSendable } from '@common/interfaces';
 import { ChannelResolvable, Guild, Message } from 'discord.js';
+
+import { Injectable } from '../..';
 
 /**
  * Sends a message to the channel that
@@ -22,4 +23,5 @@ export declare interface SendInq {
   ): Promise<Message>;
 }
 
-export abstract class SendInq extends DIProvided({ providedIn: "ctx" }) {}
+@Injectable({ providedIn: "ctx" })
+export abstract class SendInq {}

@@ -1,11 +1,6 @@
-import { InjectableOptions, InjectionToken, InjectorLifetime, ProvidedInScope } from '@common/di/injection-token';
-
-import { W_PROV_LIFETIME, W_PROV_SCOPE } from '../..';
+import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@common/di/injection-token';
 
 export interface InjectableMetadata extends Required<InjectableOptions> {}
-
-export const DEFAULT_LIFETIME = InjectorLifetime.Singleton;
-export const DEFAULT_SCOPE: ProvidedInScope = "root";
 
 /**
  * TODO: Evaluate if this is useful - if so figure
@@ -23,8 +18,7 @@ export const CUSTOM_INJECTABLE_METADATA = new InjectionToken<string>(
 export function Injectable(options: InjectableOptions = {}): ClassDecorator {
   return (target: Object) => {
     const { lifetime, providedIn } = options;
-    target[W_PROV_SCOPE] = providedIn ?? DEFAULT_SCOPE;
-    target[W_PROV_LIFETIME] = lifetime ?? DEFAULT_LIFETIME;
+    ɵdefineInjectable(target, providedIn, lifetime);
   };
 }
 

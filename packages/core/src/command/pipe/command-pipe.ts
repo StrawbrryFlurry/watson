@@ -1,8 +1,8 @@
+import { Injector } from '@core/di';
 import { CommandAst, CommandPipeline, CommandRoute, ContextType, MessageMatchResult, Prefix } from '@watsonjs/common';
 import { ContextBindingFactory } from '@watsonjs/core';
 import { Guild, GuildMember, Message, StageChannel, TextBasedChannels, User, VoiceChannel } from 'discord.js';
 
-import { Injector } from '../../di/injector';
 import { PipelineBaseImpl } from './pipeline-base';
 
 export interface ParsedCommandData {

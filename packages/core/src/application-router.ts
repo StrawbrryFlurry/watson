@@ -1,14 +1,13 @@
 import { Injector, InjectorGetResult } from '@core/di';
-import { BaseRoute, DIProvided, MessageSendable } from '@watsonjs/common';
+import { BaseRoute, Injectable, MessageSendable, Providable } from '@watsonjs/common';
 
 import { RouteRef } from '.';
 
-export abstract class RouterRef<T = any>
-  extends DIProvided({ providedIn: "module" })
-  implements Injector
-{
+@Injectable({ providedIn: "module" })
+export abstract class RouterRef<T = any> implements Injector {
   public abstract parent: Injector | null;
-  public abstract get<T extends unknown, R extends InjectorGetResult<T>>(
+
+  public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
     notFoundValue?: any,
     ctx?: Injector

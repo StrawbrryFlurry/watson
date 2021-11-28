@@ -1,8 +1,7 @@
-import { DEFAULT_LIFETIME, DEFAULT_SCOPE } from '@common/decorators/common/injectable.decorator';
-import { W_PROV_LIFETIME, W_PROV_SCOPE } from '@common/fields';
 import { mergeDefaults } from '@common/utils';
 
-import { InjectableOptions } from '.';
+import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions } from '.';
+import { HasProv, W_PROV } from '..';
 
 /**
  * Same as `@Injectable` but allows us to
@@ -23,7 +22,9 @@ export function DIProvided<T extends new (...args: any[]) => any>(
       super(...args);
     }
 
-    public static [W_PROV_LIFETIME] = lifetime;
-    public static [W_PROV_SCOPE] = providedIn;
+    public static [W_PROV]: HasProv["ɵprov"] = {
+      lifetime: lifetime,
+      providedIn: providedIn,
+    };
   };
 }

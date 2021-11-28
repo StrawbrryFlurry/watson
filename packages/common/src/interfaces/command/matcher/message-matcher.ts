@@ -1,4 +1,4 @@
-import { DIProvided } from '@common/di';
+import { Injectable } from '@common/decorators';
 import { Prefix, PrefixCache } from '@common/interfaces';
 import { Message } from 'discord.js';
 
@@ -19,9 +19,8 @@ export interface MessageMatchResult {
  * (May vary on the implementation.
  * This is how we do it by default)
  */
-export abstract class MessageMatcher<
-  Cache extends PrefixCache
-> extends DIProvided({ providedIn: "root" }) {
+@Injectable({ providedIn: "router" })
+export abstract class MessageMatcher<Cache extends PrefixCache> {
   protected _cache: Cache;
 
   /**
@@ -43,7 +42,6 @@ export abstract class MessageMatcher<
    * with an array of prefixes for the cache.
    */
   constructor(type: number, cache: Cache) {
-    super();
     this._type = type;
     this._cache = cache;
   }

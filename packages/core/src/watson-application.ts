@@ -1,5 +1,5 @@
 import { Injector } from '@core/di';
-import { CanActivate, DIProvided, ExceptionHandler, MatchingStrategy, PipeTransform, Type } from '@watsonjs/common';
+import { CanActivate, ExceptionHandler, Injectable, MatchingStrategy, PipeTransform, Type } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { config } from 'process';
 import { PassThrough } from 'stream';
@@ -12,16 +12,14 @@ import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler
 import { LifecycleHost } from './lifecycle/hooks';
 import { RouteExplorer } from './router';
 
-export abstract class ApplicationRef extends DIProvided({
-  providedIn: "root",
-}) {
+@Injectable({ providedIn: "root" })
+export abstract class ApplicationRef {
   public get rootInjector(): Injector {
     return this._rootInjector;
   }
   protected _rootInjector: Injector;
 
   constructor(rootInjector: Injector) {
-    super();
     this._rootInjector = rootInjector;
   }
 }

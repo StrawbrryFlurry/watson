@@ -1,4 +1,4 @@
-import { Binding, createBinding, getProviderScope, Injector, ModuleRef, ProviderResolvable } from '@core/di';
+import { Binding, createBinding, getInjectableDef, Injector, ModuleRef, ProviderResolvable } from '@core/di';
 import {
   BaseRoute,
   ExecutionContext,
@@ -10,6 +10,7 @@ import {
   Providable,
   Type,
   UniqueTypeArray,
+  ValueProvider,
   W_INJ_TYPE,
   ɵINJECTABLE_TYPE,
 } from '@watsonjs/common';
@@ -86,6 +87,11 @@ export class RouterRefImpl<T = any> extends RouterRef {
       [
         ...injectorProviders,
         /* We also want to be able to instantiate this router using its own injector */ metatype,
+        {
+          provide: RouterRef,
+          useValue: this,
+          multi: false,
+        } as ValueProvider,
       ],
       moduleRef,
       moduleRef,
@@ -98,7 +104,7 @@ export class RouterRefImpl<T = any> extends RouterRef {
   ): ProviderResolvable[] {
     return providers
       .map((provider) => {
-        const { providedIn } = getProviderScope(provider);
+        const { providedIn } = getInjectableDef(provider);
 
         if (providedIn === "ctx") {
           this._contextProviders.add(createBinding(provider));

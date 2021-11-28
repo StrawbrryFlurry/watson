@@ -1,14 +1,8 @@
-import { CommandRoute, DIProvided, isString } from '@watsonjs/common';
+import { CommandRoute, Injectable, isString } from '@watsonjs/common';
 import iterate from 'iterare';
 
-type CommandMapCtor = new (
-  entries?: readonly (readonly [string, CommandRoute])[] | null
-) => Map<string, CommandRoute>;
-
-export class CommandContainer extends DIProvided(
-  { providedIn: "root" },
-  Map as CommandMapCtor
-) {
+@Injectable({ providedIn: "root" })
+export class CommandContainer extends Map<string, CommandRoute> {
   public apply(routeRef: CommandRoute): void {
     const { name, alias, isSubCommand } = routeRef;
 
@@ -21,7 +15,7 @@ export class CommandContainer extends DIProvided(
       return;
     }
 
-    this.commands.set(name, routeRef);
+    this.set(name, routeRef);
 
     if (alias.length === 0) {
       return;
@@ -29,7 +23,7 @@ export class CommandContainer extends DIProvided(
 
     for (let i = 0; i < alias.length; i++) {
       const name = alias[i];
-      this.commands.set(name, routeRef);
+      this.set(name, routeRef);
     }
   }
 
@@ -42,7 +36,7 @@ export class CommandContainer extends DIProvided(
 
       for (let i = 0; i < names.length; i++) {
         const name = names[i];
-        this.commands.delete(name);
+        this.delete(name);
       }
     };
 
@@ -53,8 +47,6 @@ export class CommandContainer extends DIProvided(
     }
 
     cleanupNames(route);
-    const token = this._tokenFactory.get(route);
-    this.delete(token!);
   }
 
   public getAll() {

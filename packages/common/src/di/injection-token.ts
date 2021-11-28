@@ -1,5 +1,6 @@
-import { W_PROV_LIFETIME, W_PROV_SCOPE } from '@common/fields';
 import { Type } from '@common/interfaces';
+
+import { HasProv, W_PROV } from '..';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";
 
@@ -53,6 +54,11 @@ export enum InjectorLifetime {
  * defined in `providedIn` and modules that import
  * that module, given it is exported.
  *
+ * - `Router` Watson will try to resolve the provider
+ * at in the router's injection scope. If it's
+ * not found we'll try to resolve it as a
+ * module scoped provider.
+ *
  * - `Context` Provides the injectable in the
  * `ContextInjector`. Note that injectables with
  * a lifespan of `Event` need to be provided in
@@ -65,6 +71,7 @@ export type ProvidedInScope =
   | "internal"
   | "external"
   | "module"
+  | "router"
   | "ctx"
   | Type;
 
@@ -75,6 +82,9 @@ export interface InjectableOptions {
   providedIn?: ProvidedInScope;
 }
 
+export const DEFAULT_LIFETIME = InjectorLifetime.Singleton;
+export const DEFAULT_SCOPE: ProvidedInScope = "root";
+
 export function isInjectionToken(obj: any): obj is InjectionToken {
   return obj instanceof InjectionToken;
 }
@@ -82,17 +92,25 @@ export function isInjectionToken(obj: any): obj is InjectionToken {
 export class InjectionToken<T /* The value that this token provides */ = any> {
   public readonly name: string;
 
-  public readonly [W_PROV_LIFETIME]: InjectorLifetime;
-  public readonly [W_PROV_SCOPE]: ProvidedInScope;
-
   constructor(
     private readonly _description: string,
     options: InjectableOptions = {}
   ) {
     this.name = `[${INJECTION_TOKE_PREFIX}] ${this._description}`;
     const { lifetime, providedIn } = options;
-
-    this[W_PROV_LIFETIME] = lifetime ?? InjectorLifetime.Singleton;
-    this[W_PROV_SCOPE] = providedIn ?? "root";
+    ɵdefineInjectable(this, providedIn, lifetime);
   }
+}
+
+export function ɵdefineInjectable(
+  typeOrToken: Object | Type | InjectionToken,
+  providedIn: ProvidedInScope = DEFAULT_SCOPE,
+  lifetime: InjectorLifetime = DEFAULT_LIFETIME
+): HasProv["ɵprov"] {
+  const injectableDef = {
+    providedIn: providedIn,
+    lifetime: lifetime,
+  };
+  typeOrToken[W_PROV] = injectableDef;
+  return injectableDef;
 }

@@ -5,14 +5,14 @@ import {
   CommandParameterMetadata,
   ExecutionContext,
   getFunctionParameters,
-  HasProvScope,
   isFunction,
   isNil,
   ParameterMetadata,
   PipelineBase,
   Type,
-  W_PROV_SCOPE,
 } from '@watsonjs/common';
+
+import { getInjectableDef } from '..';
 
 export class RouteParamsFactory {
   public async createFromContext(
@@ -29,7 +29,7 @@ export class RouteParamsFactory {
       );
 
       if (!metadata) {
-        const provScope = (param as any as HasProvScope)[W_PROV_SCOPE];
+        const { providedIn } = getInjectableDef(param);
 
         /**
          * Only resolve context bound types as
@@ -38,7 +38,7 @@ export class RouteParamsFactory {
          * AUser, AString... or other parts
          * of the framework.
          */
-        if (provScope === "ctx") {
+        if (providedIn === "ctx") {
           resolvedParams[i] = await resolveAsyncValue(ctx.get(param));
         }
 

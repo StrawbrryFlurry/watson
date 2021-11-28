@@ -1,6 +1,7 @@
-import { DIProvided } from '@common/di';
 import { MessageSendable } from '@common/interfaces';
 import { Message } from 'discord.js';
+
+import { Injectable } from '../..';
 
 /**
  * Reply to an interaction using this
@@ -19,10 +20,6 @@ export declare interface ReplyInq {
   (message: MessageSendable): Promise<void>;
 }
 
-export abstract class ReplyInq extends DIProvided({
-  providedIn: "ctx",
-}) {}
-
 /**
  * Sends a follow-up message for an interaction
  * as you can only reply to an interaction once.
@@ -30,10 +27,6 @@ export abstract class ReplyInq extends DIProvided({
 export declare interface FollowUpInq {
   (message: MessageSendable): Promise<Message>;
 }
-
-export abstract class FollowUpInq extends DIProvided({
-  providedIn: "ctx",
-}) {}
 
 /**
  * Defers the response to an interaction event.
@@ -46,6 +39,11 @@ export declare interface DeferReplyInq {
   (ephemeral: boolean): Promise<void>;
 }
 
-export abstract class DeferReplyInq extends DIProvided({
-  providedIn: "ctx",
-}) {}
+@Injectable({ providedIn: "ctx" })
+export abstract class DeferReplyInq {}
+
+@Injectable({ providedIn: "ctx" })
+export abstract class FollowUpInq {}
+
+@Injectable({ providedIn: "ctx" })
+export abstract class ReplyInq {}

@@ -16,7 +16,7 @@ export interface IsInjectable {
   [W_INJ_TYPE]: ɵINJECTABLE_TYPE;
 }
 
-export function ɵDefineInjectableType(
+function defineInjectableType(
   injectables: (object | Function)[],
   type: ɵINJECTABLE_TYPE
 ) {
@@ -32,7 +32,7 @@ export function applyInjectableMetadata<T extends Array<unknown>>(
   target: any,
   descriptor?: PropertyDescriptor
 ) {
-  ɵDefineInjectableType(payload as Function[], type);
+  defineInjectableType(payload as Function[], type);
 
   if (isMethodDecorator(descriptor)) {
     return applyStackableMetadata(metadata, descriptor!.value, payload);
