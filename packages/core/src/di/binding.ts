@@ -1,7 +1,16 @@
-import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, W_ELEMENT_ID } from '@watsonjs/common';
+import {
+  ExecutionContext,
+  InjectorLifetime,
+  isEmpty,
+  isNil,
+  Providable,
+  ProvidedInScope,
+  Type,
+  W_ELEMENT_ID,
+} from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
-import { getInjectableDef } from '..';
+import { getInjectableDef, Injector, InjectorGetResult } from '..';
 
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
   ...args: D
@@ -9,10 +18,13 @@ export type NewableTo<T = any, D extends Array<any> = any[]> = new (
 export type FactoryFn<T = any, D extends Array<any> = any[]> = (
   ...args: D
 ) => T;
+export type FactoryFnWithoutDeps<T = any> = () => T;
 
 export interface WatsonDiProvidable {
   [W_ELEMENT_ID]: number;
 }
+
+const SINGLETON_BINDING_CONTEXT: ExecutionContext = <any>{};
 
 /**
  * A binding represents a provider
@@ -25,18 +37,20 @@ export interface WatsonDiProvidable {
  * context (By exporting it from the module).
  */
 export class Binding<
-  MetaType extends
-    | NewableTo<InstanceType>
-    | FactoryFn<InstanceType>
-    | Type = any,
-  Deps extends Providable[] = any,
-  InstanceType extends any = MetaType
+  Token extends Providable = Providable,
+  Deps extends Providable[] = Providable[],
+  InstanceType extends any = InjectorGetResult<Token>,
+  Factory extends (...deps: Deps) => InstanceType = any
 > {
   /** The type this binding represents */
-  public metatype: MetaType;
+  public metatype: Type | Function | any;
 
   /** The token with which the binding can be resolved */
   public readonly token: Providable;
+
+  public get name() {
+    return this.token.name;
+  }
 
   /**
    * If the binding has any dependencies,
@@ -49,13 +63,65 @@ export class Binding<
   public deps: Deps | null;
 
   public multi: boolean = false;
-
+  /**
+   * Whether the binding has any
+   * dependencies.
+   */
   private _isTreeStatic: boolean | null = null;
+
+  /**
+   * If the provider is a singleton,
+   * the instance type is stored in
+   * this property of the binding.
+   *
+   * @key The context injector for which
+   * the instance was created
+   * @value The instance value
+   */
+  private _instances = new WeakMap<
+    Injector,
+    InstanceType | InstanceType[] | null
+  >();
+
+  /** {@link  InjectorLifetime} */
+  public readonly lifetime: InjectorLifetime;
+  /** {@link ProvidedInScope} */
+  public readonly scope: ProvidedInScope;
+
+  constructor(
+    token: Token,
+    lifetime: InjectorLifetime,
+    scope: ProvidedInScope,
+    factory?: Factory
+  ) {
+    this.token = token;
+    this.lifetime = lifetime;
+    this.scope = scope;
+
+    this.factory = factory! ?? undefined;
+  }
 
   public isTransient() {
     return this.lifetime & InjectorLifetime.Event;
   }
 
+  public getInstance(
+    ctx?: Injector | null
+  ): InstanceType | InstanceType[] | null {
+    ctx ??= SINGLETON_BINDING_CONTEXT;
+    return this._instances.get(ctx) ?? null;
+  }
+
+  public setInstance(instance: InstanceType, ctx?: Injector | null): void {
+    // Handle `null` case.
+    ctx ??= SINGLETON_BINDING_CONTEXT;
+    this._instances.set(ctx, instance);
+  }
+
+  /**
+   * Whether the binding has any
+   * dependencies.
+   */
   public isDependencyTreeStatic(): boolean {
     if (!isNil(this._isTreeStatic)) {
       return this._isTreeStatic;
@@ -81,40 +147,11 @@ export class Binding<
   }
 
   public hasStaticInstance(): boolean {
-    return this.isDependencyTreeStatic() && !isNil(this.instance);
+    return this.isDependencyTreeStatic() && !isNil(this.getInstance());
   }
 
   public hasDependencies(): boolean {
     return !isNil(this.deps) && !isEmpty(this.deps);
-  }
-
-  /**
-   * If the provider is a singleton,
-   * the instance type is stored in
-   * this property of the binding.
-   */
-  public instance: InstanceType | InstanceType[] | null;
-
-  /** {@link  InjectorLifetime} */
-  public readonly lifetime: InjectorLifetime;
-  /** {@link ProvidedInScope} */
-  public readonly scope: ProvidedInScope;
-
-  constructor(
-    token: Providable,
-    lifetime: InjectorLifetime,
-    scope: ProvidedInScope,
-    factory?: () => InstanceType
-  ) {
-    this.token = token;
-    this.lifetime = lifetime;
-    this.scope = scope;
-
-    this.factory = factory! ?? undefined;
-  }
-
-  public clone(): Binding<MetaType, Deps, InstanceType> {
-    return new Binding(this.token, this.lifetime, this.scope);
   }
 
   /**

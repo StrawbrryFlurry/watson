@@ -1,13 +1,25 @@
-import { ExecutionContext, isNil, PipelineBase, Providable, Type } from '@watsonjs/common';
+import { ExecutionContext, FactoryProvider, isNil, PipelineBase, Providable, Type } from '@watsonjs/common';
 
 import { Injector } from '.';
-import { Binding, createResolvedBinding, ExecutionContextImpl, InjectorGetResult, resolveAsyncValue } from '..';
+import {
+  Binding,
+  createBinding,
+  createResolvedBinding,
+  ExecutionContextImpl,
+  getInjectableDef,
+  InjectorGetResult,
+  ProviderResolvable,
+  resolveAsyncValue,
+  ɵbindProviders,
+  ɵcreateBindingInstance,
+} from '..';
 
 export type ContextBindingFactory<
-  BindFn extends (provide: Providable, value: any) => void = (
+  BindFn extends (
     provide: Providable,
-    value: any
-  ) => void
+    value: any,
+    factory?: boolean
+  ) => void = (provide: Providable, value: any, factory?: boolean) => void
 > = (bind: BindFn) => void;
 
 export class ContextInjector implements Injector {
@@ -22,12 +34,25 @@ export class ContextInjector implements Injector {
     const bindings = new Map<Providable, Binding>();
     const ctx = new ExecutionContextImpl(pipeline);
 
-    const bindFn = (provide: Providable, target: Type) => {
-      const binding = createResolvedBinding({
-        provide: provide,
-        useValue: target,
-        multi: false,
-      });
+    const bindFn = (
+      provide: Providable,
+      value: Type,
+      factory: boolean = false
+    ) => {
+      let binding: Binding;
+
+      if (factory) {
+        binding = createBinding({
+          provide: provide,
+          useFactory: value,
+        } as FactoryProvider);
+      } else {
+        binding = createResolvedBinding({
+          provide: provide,
+          useValue: value,
+          multi: false,
+        });
+      }
 
       bindings.set(provide, binding);
     };
@@ -47,15 +72,27 @@ export class ContextInjector implements Injector {
     );
   }
 
+  public bind(...providers: ProviderResolvable[]) {
+    ɵbindProviders(this, this._records, providers);
+  }
+
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
     notFoundValue?: any
   ): Promise<R> {
-    const binding = this._records.get(typeOrToken);
+    const { providedIn } = getInjectableDef(typeOrToken);
+
+    if (providedIn !== "ctx") {
+      return this.parent.get(typeOrToken, notFoundValue, this);
+    }
+
+    const binding: Binding<T> | undefined = this._records.get(typeOrToken);
 
     if (isNil(binding)) {
       return this.parent.get(typeOrToken, notFoundValue, this);
     }
+
+    const instance = await ɵcreateBindingInstance(binding, this.parent, this);
 
     /**
      * We also allow binding promises in the
@@ -63,13 +100,6 @@ export class ContextInjector implements Injector {
      * doesn't need to be async. This will
      * resolve the promise in case there is one.
      */
-    return resolveAsyncValue(binding.instance);
-  }
-
-  public getWithin<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: T
-  ): R | null {
-    const binding = this._records.get(typeOrToken);
-    return binding?.instance ?? null;
+    return resolveAsyncValue(instance);
   }
 }

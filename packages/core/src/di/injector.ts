@@ -2,13 +2,14 @@ import { Binding, DynamicInjector, Reflector } from '@core/di';
 import {
   ClassProvider,
   CustomProvider,
-  DIProvided,
   FactoryProvider,
   HasProv,
+  Injectable,
   InjectableOptions,
   InjectionToken,
   isNil,
   Providable,
+  resolveForwardRef,
   Type,
   UseExistingProvider,
   ValueProvider,
@@ -32,12 +33,18 @@ export const ROOT_INJECTOR = new InjectionToken<Injector>(
   "The application root injector"
 );
 
-export type InjectorGetResult<T> = T extends InjectionToken<infer R>
+export type InjectorGetResult<T, Multi = false> = T extends InjectionToken<
+  infer R
+>
   ? R
   : T extends new (...args: any[]) => infer R
-  ? R
+  ? Multi extends false
+    ? R
+    : R[]
   : T extends abstract new (...args: any[]) => any
-  ? InstanceType<T>
+  ? Multi extends false
+    ? InstanceType<T>
+    : InstanceType<T>[]
   : never;
 
 /**
@@ -49,7 +56,8 @@ export type InjectorGetResult<T> = T extends InjectionToken<infer R>
  */
 export const NOT_FOUND = {};
 
-export abstract class Injector extends DIProvided({ providedIn: "module" }) {
+@Injectable({ providedIn: "module" })
+export abstract class Injector {
   public static NULL = new NullInjector();
 
   public parent: Injector | null = null;
@@ -57,7 +65,7 @@ export abstract class Injector extends DIProvided({ providedIn: "module" }) {
   public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
     notFoundValue?: any,
-    ctx?: Injector
+    ctx?: Injector | null
   ): Promise<R>;
 
   static create(
@@ -118,14 +126,14 @@ export function createResolvedBinding(provider: ValueProvider): Binding {
   return binding;
 }
 
-export function getProviderType(
+export function getProviderToken(
   provider: ProviderResolvable
 ): Type | InjectionToken {
   if (isCustomProvider(provider)) {
-    return provider.provide;
+    return resolveForwardRef(provider.provide);
   }
 
-  return provider;
+  return resolveForwardRef(provider);
 }
 
 export function getInjectableDef(
@@ -177,13 +185,13 @@ export function createBinding(provider: ProviderResolvable): Binding {
   if (isClassProvider(provider)) {
     const { useClass, deps } = provider;
     binding.metatype = useClass;
-    binding.deps = deps;
-    binding.factory = (...args) => Reflect.construct(useClass, args);
+    binding.deps = deps ?? null;
+    binding.factory = (...deps) => Reflect.construct(useClass, deps);
   } else if (isFactoryProvider(provider)) {
     const { useFactory, deps } = provider;
     binding.metatype = useFactory;
-    binding.deps = deps;
-    binding.factory = (...args) => useFactory(...args);
+    binding.deps = deps ?? null;
+    binding.factory = (...deps) => useFactory(...deps);
   } else {
     const { useValue } = provider as ValueProvider;
     binding.metatype = useValue;
