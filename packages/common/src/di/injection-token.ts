@@ -1,6 +1,7 @@
 import { Type } from '@common/interfaces';
 
 import { HasProv, W_PROV } from '..';
+import { resolveForwardRef } from './forward-ref';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";
 
@@ -108,9 +109,10 @@ export function ɵdefineInjectable(
   lifetime: InjectorLifetime = DEFAULT_LIFETIME
 ): HasProv["ɵprov"] {
   const injectableDef = {
-    providedIn: providedIn,
+    providedIn: resolveForwardRef(providedIn),
     lifetime: lifetime,
   };
+
   typeOrToken[W_PROV] = injectableDef;
   return injectableDef;
 }

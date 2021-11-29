@@ -14,6 +14,8 @@ import {
 } from '@watsonjs/common';
 import { Client } from 'discord.js';
 
+import { RouterRef } from '..';
+
 export class ExecutionContextImpl<
   PipelineHost extends
     | CommandPipeline
@@ -31,6 +33,7 @@ export class ExecutionContextImpl<
 
   constructor(pipeline: PipelineHost) {
     this.pipeline = pipeline;
+    this.parent = pipeline.router as RouterRef;
   }
 
   public get<T extends Providable, R extends InjectorGetResult<T>>(
@@ -60,7 +63,7 @@ export class ExecutionContextImpl<
   }
 
   public getClient(): Client {
-    return this.adapter.getClient();
+    return this.adapter.client;
   }
 
   public getAdapter(): DiscordAdapter {

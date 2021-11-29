@@ -1,5 +1,5 @@
 import { BaseRoute, ContextType, ExecutionContext, PipelineBase, PipelineWithGuildCtx } from '@watsonjs/common';
-import { ContextBindingFactory, ContextInjector, Injector } from '@watsonjs/core';
+import { ContextBindingFactory, ContextInjector, Injector, RouterRef } from '@watsonjs/core';
 import { Snowflake } from 'discord.js';
 
 export abstract class PipelineBaseImpl<
@@ -9,6 +9,7 @@ export abstract class PipelineBaseImpl<
 {
   public contextType: ContextType;
   public route: R;
+  public router: RouterRef;
   protected _injector: Injector;
   protected _guildId: Snowflake;
 
@@ -22,6 +23,7 @@ export abstract class PipelineBaseImpl<
     this.route = route;
     this.contextType = type;
     this._eventData = eventData;
+    this.router = route.host;
   }
 
   public getEvent(): D {

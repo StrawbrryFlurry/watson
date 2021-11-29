@@ -1,4 +1,4 @@
-import { ApplicationCommandRoute, ContextType, InteractionPipeline } from '@watsonjs/common';
+import { ApplicationCommandRoute, ContextType, InteractionCtx, InteractionPipeline } from '@watsonjs/common';
 import { ContextBindingFactory, Injector } from '@watsonjs/core';
 import {
   CommandInteraction,
@@ -75,6 +75,7 @@ export class InteractionPipelineImpl
   protected async createExecutionContext(moduleInj: Injector): Promise<void> {
     const inquirableFactory = new ContextProviderFactory(moduleInj);
     const bindingFactory: ContextBindingFactory = (bind) => {
+      bind(InteractionCtx, this.interaction);
       inquirableFactory.bind(this, bind);
     };
 

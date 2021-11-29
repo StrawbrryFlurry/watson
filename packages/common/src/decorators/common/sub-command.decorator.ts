@@ -4,10 +4,10 @@ import { And, FunctionPropertiesOfType, IsLowerCase, isNil, isString, StringHasL
 import { CommandOptions } from '.';
 import { SlashCommandOptions } from '../application';
 
-export type SubCommandOptions<N extends string, D extends string> = (
-  | CommandOptions
-  | SlashCommandOptions<N, D>
-) & {
+export type SubCommandOptions<
+  N extends string = any,
+  D extends string = any
+> = (CommandOptions | SlashCommandOptions<N, D>) & {
   parent: Function;
 };
 

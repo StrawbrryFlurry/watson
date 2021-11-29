@@ -18,6 +18,7 @@ export interface PipelineBase<
    * the event emitted.
    */
   route: T;
+  router: any;
   /** The raw event data emitted by the client */
   eventData: D;
   /**

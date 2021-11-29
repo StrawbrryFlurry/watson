@@ -1,5 +1,6 @@
 import { W_PARAM_TYPE } from '@common/fields';
 import { CommandParameterType } from '@common/interfaces/command/parameter-types/parameter-type.enum';
+import { ExtendReadonlyCtor } from '@common/utils';
 import { Emoji, Role, TextChannel, User } from 'discord.js';
 
 /** Text channel mentioned by a member using'#'
@@ -21,7 +22,7 @@ export abstract class AChannel extends TextChannel {
  * !members @moderator
  * ```
  */
-export abstract class ARole extends Role {
+export abstract class ARole extends ExtendReadonlyCtor(Role) {
   static [W_PARAM_TYPE] = CommandParameterType.Role;
 }
 

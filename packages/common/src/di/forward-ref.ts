@@ -1,6 +1,6 @@
-import { isFunction, Type } from "@watsonjs/common";
+import { isFunction, Type } from '..';
 
-const FORWARD_REF_KEY = "ɵforwardRef";
+const FORWARD_REF_KEY = "ɵfwd";
 
 /**
  * Allows to refer to references which are not yet defined.
@@ -30,6 +30,6 @@ export function isForwardRef(forwardRefFn: any): forwardRefFn is () => Type {
   return (
     isFunction(forwardRefFn) &&
     (forwardRefFn as Object).hasOwnProperty(FORWARD_REF_KEY) &&
-    forwardRefFn === forwardRef
+    forwardRefFn[FORWARD_REF_KEY] === forwardRef
   );
 }

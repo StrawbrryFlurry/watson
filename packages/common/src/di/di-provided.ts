@@ -1,6 +1,6 @@
 import { mergeDefaults } from '@common/utils';
 
-import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions } from '.';
+import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions, ɵdefineInjectable } from '.';
 import { HasProv, W_PROV } from '..';
 
 /**
@@ -20,11 +20,13 @@ export function DIProvided<T extends new (...args: any[]) => any>(
   return class extends xtends {
     constructor(...args: any) {
       super(...args);
+      ɵdefineInjectable(this.prototype, providedIn, lifetime);
     }
 
-    public static [W_PROV]: HasProv["ɵprov"] = {
-      lifetime: lifetime,
-      providedIn: providedIn,
-    };
+    public static [W_PROV]: HasProv["ɵprov"] = ɵdefineInjectable(
+      {},
+      providedIn,
+      lifetime
+    );
   };
 }

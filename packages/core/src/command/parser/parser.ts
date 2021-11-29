@@ -16,7 +16,6 @@ import {
   AstCommand,
   AstPrefix,
   ChannelMentionToken,
-  ClientCtx,
   CodeBlock,
   CodeBlockToken,
   CommandAst,
@@ -45,7 +44,8 @@ import {
   TokenWithValue,
   UserMentionToken,
 } from '@watsonjs/common';
-import { Channel, Emoji, Message, Role, User } from 'discord.js';
+import { AdapterRef } from '@watsonjs/core';
+import { Channel, Client, Emoji, Message, Role, User } from 'discord.js';
 import { DateTime, DateTimeOptions } from 'luxon';
 import { URL } from 'url';
 
@@ -752,7 +752,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<AstArgument<User>> {
     const { injector } = ctx;
-    const client = await injector.get(ClientCtx);
+    const { client } = await injector.get(AdapterRef);
     let userId: string;
 
     if (token.kind !== CommandTokenKind.UserMention) {
@@ -761,7 +761,7 @@ export class CommandParser implements Parser<CommandAst> {
       userId = (token as UserMentionToken).value;
     }
 
-    const user = await client.users.fetch(userId);
+    const user = await (<Client>client).users.fetch(userId);
     return new AstArgumentImpl(token, param, user);
   }
 
@@ -809,7 +809,7 @@ export class CommandParser implements Parser<CommandAst> {
     ctx: ClosureCtx
   ): Promise<AstArgument<Emoji>> {
     const { injector } = ctx;
-    const client = await injector.get(ClientCtx);
+    const { client } = await injector.get(AdapterRef);
     const argument = new AstArgumentImpl(token, param);
     let emojiId: string;
 
@@ -825,7 +825,7 @@ export class CommandParser implements Parser<CommandAst> {
       emojiId = idOrIsEmote;
     }
 
-    const emoji = client.emojis.resolve(emojiId);
+    const emoji = (<Client>client).emojis.resolve(emojiId);
     return argument.withValue(emoji!);
   }
 

@@ -1,3 +1,4 @@
+import { Injectable } from '@common/decorators';
 import { Message } from 'discord.js';
 import { Observable } from 'rxjs';
 
@@ -6,6 +7,17 @@ export type PrefixResolutionFn = (
 ) => string | Promise<string> | Observable<string>;
 
 export type Prefix = PrefixResolvable | string;
+
+/**
+ * Injects the prefix that was used
+ * by the user to run a command.
+ *
+ * Note that this will throw a `NullInjectorError`
+ * if you try to inject it anywhere other
+ * than a command handler.
+ */
+@Injectable({ providedIn: "ctx" })
+export class PrefixRef extends String {}
 
 /**
  * Implement this interface when creating your own

@@ -1,6 +1,6 @@
 import { Injectable } from '@common/decorators';
 import { ExtendReadonlyCtor } from '@common/utils';
-import { Channel, Guild, Message, VoiceChannel } from 'discord.js';
+import { Channel, ClientEvents, Guild, Interaction, Message, VoiceChannel } from 'discord.js';
 
 /**
  * Injects the channel that the
@@ -23,6 +23,22 @@ export abstract class VoiceChannelCtx extends VoiceChannel {}
  */
 @Injectable({ providedIn: "ctx" })
 export abstract class MessageCtx extends ExtendReadonlyCtor(Message) {}
+
+/**
+ * Injects the interaction that emitted
+ * the event
+ */
+@Injectable({ providedIn: "ctx" })
+export abstract class InteractionCtx extends Interaction {}
+
+/**
+ * Injects the interaction that emitted
+ * the event
+ */
+@Injectable({ providedIn: "ctx" })
+export abstract class EventCtx<T extends keyof ClientEvents> {
+  public data: ClientEvents[T];
+}
 
 /**
  * Injects the discord client from

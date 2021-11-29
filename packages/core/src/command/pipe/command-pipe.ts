@@ -1,6 +1,15 @@
 import { Injector } from '@core/di';
-import { CommandAst, CommandPipeline, CommandRoute, ContextType, MessageMatchResult, Prefix } from '@watsonjs/common';
-import { ContextBindingFactory } from '@watsonjs/core';
+import {
+  CommandAst,
+  CommandPipeline,
+  CommandRoute,
+  ContextType,
+  MessageCtx,
+  MessageMatchResult,
+  Prefix,
+  PrefixRef,
+} from '@watsonjs/common';
+import { ContextBindingFactory, ContextProviderFactory } from '@watsonjs/core';
 import { Guild, GuildMember, Message, StageChannel, TextBasedChannels, User, VoiceChannel } from 'discord.js';
 
 import { PipelineBaseImpl } from './pipeline-base';
@@ -24,6 +33,10 @@ export class CommandPipelineImpl
   public message: Message;
   public match: MessageMatchResult;
   public ast?: CommandAst;
+
+  public get prefixText() {
+    return this.match.prefixString;
+  }
 
   constructor(
     route: CommandRoute,
@@ -96,7 +109,12 @@ export class CommandPipelineImpl
     moduleInj: Injector,
     message: Message
   ): Promise<void> {
-    const bindingFactory: ContextBindingFactory = (bind) => {};
+    const inquirableFactory = new ContextProviderFactory(moduleInj);
+    const bindingFactory: ContextBindingFactory = (bind) => {
+      inquirableFactory.bind(this, bind);
+      bind(MessageCtx, message);
+      bind(PrefixRef, () => this.prefixText, true);
+    };
 
     await this.createAndBindInjector(moduleInj, bindingFactory);
   }

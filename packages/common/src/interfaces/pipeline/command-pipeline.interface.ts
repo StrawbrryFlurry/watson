@@ -27,6 +27,10 @@ export interface CommandPipeline extends PipelineBase {
    */
   prefix: Prefix;
   /**
+   * The prefix string in the message
+   */
+  prefixText: string;
+  /**
    * The guild in which the message was sent
    * - `null` if the message was sent in a dm
    */
