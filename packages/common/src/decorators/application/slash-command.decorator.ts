@@ -1,8 +1,8 @@
 import { SLASH_COMMAND_GROUP_METADATA, SLASH_COMMAND_METADATA } from '@common/constants';
+import { Router } from '@common/decorators/common/router.decorator';
 import { And, IsLowerCase, StringHasLength, ValueOrNever } from '@common/utils';
 
-import { ApplicationCommandType } from '.';
-import { Router } from '..';
+import { ApplicationCommandType } from './application-command.decorator';
 
 export interface SlashCommandOptions<N extends string, D extends string> {
   /**

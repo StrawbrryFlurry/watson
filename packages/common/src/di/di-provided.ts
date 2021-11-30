@@ -1,7 +1,7 @@
+import { HasProv, W_PROV } from '@common/fields';
 import { mergeDefaults } from '@common/utils';
 
-import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions, ɵdefineInjectable } from '.';
-import { HasProv, W_PROV } from '..';
+import { DEFAULT_LIFETIME, DEFAULT_SCOPE, InjectableOptions, ɵdefineInjectable } from './injection-token';
 
 /**
  * Same as `@Injectable` but allows us to

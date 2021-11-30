@@ -1,4 +1,4 @@
-import { CommandPipeline } from '@common/interfaces';
+import { CommandPipeline } from '@common/interfaces/pipeline';
 import { Message } from 'discord.js';
 
 import { Token } from './token.interface';

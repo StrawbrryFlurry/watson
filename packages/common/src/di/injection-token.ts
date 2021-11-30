@@ -1,6 +1,6 @@
+import { HasProv, W_PROV } from '@common/fields';
 import { Type } from '@common/interfaces';
 
-import { HasProv, W_PROV } from '..';
 import { resolveForwardRef } from './forward-ref';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";

@@ -1,6 +1,6 @@
+import { Parser } from '@common/interfaces/command/parsing/parser.interface';
+import { Token } from '@common/interfaces/command/parsing/token.interface';
 import { Observable } from 'rxjs';
-
-import { Parser, Token } from '../parsing';
 
 /**
  * All command arguments must implement this interface

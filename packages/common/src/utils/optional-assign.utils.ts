@@ -1,4 +1,4 @@
-import { isNil } from '@common/utils';
+import { isNil } from './shared.utils';
 
 export function optionalAssign<T>(
   target: Object,

@@ -36,24 +36,9 @@ export abstract class InteractionCtx extends Interaction {}
  * the event
  */
 @Injectable({ providedIn: "ctx" })
-export abstract class EventCtx<
-  T extends keyof ClientEvents,
-  A extends ClientEvents[T] = ClientEvents[T]
-> extends createTupleConstructor()<A> {}
-
-function foo([message, a, c]: EventCtx<"message">) {
-  message;
+export abstract class EventCtx<T extends keyof ClientEvents> {
+  public data: ClientEvents[T];
 }
-
-function createTupleConstructor(): {
-  new <T extends any[]>(): T;
-} {
-  return <any>class {};
-}
-
-const tupleCtor = createTupleConstructor();
-const boo = new tupleCtor<["A", "B"]>();
-const [a, b] = boo;
 
 /**
  * Injects the discord client from

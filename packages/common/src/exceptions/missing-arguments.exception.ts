@@ -1,6 +1,6 @@
 import { CommandParameterOptions } from '@common/decorators';
 
-import { RuntimeException } from '.';
+import { RuntimeException } from './runtime-exception';
 
 export class MissingArgumentException extends RuntimeException {
   constructor(

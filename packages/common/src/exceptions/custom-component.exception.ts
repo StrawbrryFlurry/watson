@@ -1,4 +1,4 @@
-import { RuntimeException } from '@common/exceptions';
+import { RuntimeException } from './runtime-exception';
 
 export class CustomComponentException extends RuntimeException {
   constructor(message: string) {

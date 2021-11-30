@@ -1,7 +1,8 @@
-import { RuntimeException } from '@common/exceptions';
 import { CommandArgument } from '@common/interfaces';
 import { isString } from '@common/utils';
 import { MessageEmbed } from 'discord.js';
+
+import { RuntimeException } from './runtime-exception';
 
 /**
  * Sends a default message to the channel with information about the correct usage of the command.
