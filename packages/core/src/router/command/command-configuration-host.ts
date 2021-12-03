@@ -11,7 +11,7 @@ import {
   isNil,
   PARAM_METADATA,
   ParameterConfiguration,
-  RouterOptions,
+  RouterDecoratorOptions,
   W_PARAM_TYPE,
 } from '@watsonjs/common';
 
@@ -35,7 +35,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
   constructor(
     public host: CommandRoute,
     private commandOptions: CommandOptions,
-    private routerOptions: RouterOptions,
+    private routerOptions: RouterDecoratorOptions,
     private method: MethodDescriptor
   ) {
     this._configure();
@@ -96,6 +96,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
           optional: false,
           type: null,
           configuration: null as any,
+          group: null,
         });
         continue;
       }
@@ -146,7 +147,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
       usage,
     } = this.commandOptions;
 
-    const { groupName } = this.routerOptions;
+    const { group } = this.routerOptions;
 
     this.alias = alias ?? [];
 
@@ -159,7 +160,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
 
     this.hidden = isNil(hidden) ? true : hidden;
     this.caseSensitive = isNil(caseSensitive) ? false : caseSensitive;
-    this.commandGroup = groupName!;
+    this.commandGroup = group!;
   }
 
   public hasParams(): boolean {

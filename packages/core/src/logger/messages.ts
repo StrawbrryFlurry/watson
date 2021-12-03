@@ -1,4 +1,4 @@
-import { RouterRef } from '@core/di';
+import { RouterRef } from '@core/router';
 import { CommandRoute, EventRoute, Type } from '@watsonjs/common';
 import { blue, cyan, yellow } from 'cli-color';
 
@@ -18,7 +18,7 @@ export const APP_STARTED = () => `Watson application successfully started`;
 export const EXPLORE_START = () => `Exploring application event handlers`;
 
 export const EXPLORE_ROUTER = (router: RouterRef) =>
-  `From ${blue(router.name)} in ${yellow(router.parent!.name)}`;
+  `From ${blue(router.name)} in ${yellow(router)}`;
 
 export const MAP_COMMAND = (route: CommandRoute) =>
   `Mapped command } in ${blue(route.host.name)}`;

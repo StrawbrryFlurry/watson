@@ -1,7 +1,6 @@
 import { InterceptorsConsumer } from '@core/router/interceptors';
 import { resolveAsyncValue } from '@core/utils';
 import { ExecutionContext, FiltersMetadata, PassThrough, PipelineBase } from '@watsonjs/common';
-import { Base } from 'discord.js';
 
 export class FiltersConsumer extends InterceptorsConsumer {
   constructor() {
@@ -21,7 +20,7 @@ export class FiltersConsumer extends InterceptorsConsumer {
 
     return async (pipeline: PipelineBase) => {
       for (const filter of filters) {
-        const data = pipeline.getEvent<Base[]>();
+        const data = pipeline.getEvent();
 
         const ctx = new (ExecutionContext as any)(
           pipeline,
@@ -43,7 +42,6 @@ export class FiltersConsumer extends InterceptorsConsumer {
 
   public tryPass(ctx: ExecutionContext, filter: PassThrough) {
     const { pass } = filter;
-    ctx.setNext(pass);
     return resolveAsyncValue(pass(ctx));
   }
 }

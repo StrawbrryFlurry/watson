@@ -1,5 +1,5 @@
+import { CommandRoute } from '@watsonjs/common';
 import { EmbedFieldData } from 'discord.js';
-import { CommandRoute } from 'packages/common/src/interfaces';
 
 /**
  * Generates an example of a command by using the

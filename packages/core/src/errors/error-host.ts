@@ -1,6 +1,12 @@
-import { BadArgumentException, MissingArgumentException, RuntimeException, UnauthorizedException } from '@watsonjs/common';
+import {
+  BadArgumentException,
+  CommandRoute,
+  ExecutionContext,
+  MissingArgumentException,
+  RuntimeException,
+  UnauthorizedException,
+} from '@watsonjs/common';
 import { ClientUser, MessageEmbed } from 'discord.js';
-import { CommandRoute, ExecutionContext } from 'packages/common/src/interfaces';
 
 import { BAD_ARGUMENT_ERROR } from './bad-argument.error';
 import { CUSTOM_ERROR } from './custom.error';

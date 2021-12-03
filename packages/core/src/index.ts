@@ -15,4 +15,3 @@ export * from "./application-proxy";
 export * from "./constants";
 export * from "./watson-application";
 export * from "./watson-factory";
-export * from "./application-router";

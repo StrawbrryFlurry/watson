@@ -1,7 +1,6 @@
+import { RouterRef } from '@core/router/application-router';
+import { RouteRef } from '@core/router/route-ref';
 import { WatsonEvent } from '@watsonjs/common';
-import { RouterRef } from '@watsonjs/core';
-
-import { RouteRef } from '..';
 
 // TODO:
 export class EventRouteImpl<T extends WatsonEvent> extends RouteRef {

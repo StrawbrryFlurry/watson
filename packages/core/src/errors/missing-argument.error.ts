@@ -1,4 +1,4 @@
-import { CommandParameterOptions } from 'packages/common/src/decorators';
+import { CommandParameterOptions } from '@watsonjs/common';
 
 import { commandExampleUtil, ReadableArgumentTypeHelper } from '../util';
 import { createBaseError } from './create-error';

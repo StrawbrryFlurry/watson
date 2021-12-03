@@ -1,13 +1,4 @@
-import {
-  ExecutionContext,
-  InjectorLifetime,
-  isEmpty,
-  isNil,
-  Providable,
-  ProvidedInScope,
-  Type,
-  W_ELEMENT_ID,
-} from '@watsonjs/common';
+import { InjectorLifetime, isEmpty, isNil, Providable, ProvidedInScope, Type, W_ELEMENT_ID } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
 import { getInjectableDef, Injector, InjectorGetResult } from '..';
@@ -24,7 +15,7 @@ export interface WatsonDiProvidable {
   [W_ELEMENT_ID]: number;
 }
 
-const SINGLETON_BINDING_CONTEXT: ExecutionContext = <any>{};
+const SINGLETON_BINDING_CONTEXT: Injector = <any>{};
 
 /**
  * A binding represents a provider

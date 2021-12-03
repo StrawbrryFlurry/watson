@@ -19,7 +19,6 @@ export abstract class AdapterRef<Client = any, Options = any>
   public ready = new BehaviorSubject<boolean>(false);
 
   constructor(configuration: ApplicationConfig) {
-    super();
     this.configuration = configuration;
   }
 

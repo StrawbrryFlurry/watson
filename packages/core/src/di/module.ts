@@ -5,6 +5,7 @@ import {
   FILTER_METADATA,
   GUARD_METADATA,
   Injectable,
+  IsInjectable,
   isNil,
   PIPE_METADATA,
   PREFIX_METADATA,
@@ -17,7 +18,6 @@ import {
   W_INJ_TYPE,
   W_MODULE_PROV,
 } from '@watsonjs/common';
-import { IsInjectable } from 'packages/common/src/decorators/interceptors/is-injectable';
 
 import { ProviderResolvable, RouterRefImpl } from '..';
 import { ComponentFactory } from './component-factory';

@@ -92,7 +92,11 @@ export class ContextInjector implements Injector {
       return this.parent.get(typeOrToken, notFoundValue, this);
     }
 
-    const instance = await ɵcreateBindingInstance(binding, this.parent, this);
+    const instance = await ɵcreateBindingInstance(
+      <Binding>binding,
+      this.parent,
+      this
+    );
 
     /**
      * We also allow binding promises in the

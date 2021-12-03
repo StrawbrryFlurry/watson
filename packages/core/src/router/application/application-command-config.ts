@@ -4,7 +4,7 @@ import {
   ApplicationCommandParameter,
   ApplicationCommandRoute,
   ApplicationCommandType,
-  RouterOptions,
+  RouterDecoratorOptions,
   SlashCommandMetadata,
 } from '@watsonjs/common';
 
@@ -17,7 +17,7 @@ export class ApplicationCommandConfig {
   constructor(
     public host: ApplicationCommandRoute,
     private options: ApplicationCommandMetadata | SlashCommandMetadata,
-    private routerOptions: RouterOptions,
+    private routerOptions: RouterDecoratorOptions,
     private method: MethodDescriptor
   ) {}
 }

@@ -1,6 +1,5 @@
-import { isNil, MessageMatcher, MessageMatchResult, Prefix } from '@watsonjs/common';
+import { isNil, MatchingStrategy, MessageMatcher, MessageMatchResult, Prefix } from '@watsonjs/common';
 import { Message } from 'discord.js';
-import { MatchingStrategy } from 'packages/common/src/interfaces/command/matcher/matching-strategy.enum';
 
 import { DEFAULT_SCOPED_CACHE_KEY } from '.';
 import { ScopedPrefixCache } from './scoped-prefix-cache';

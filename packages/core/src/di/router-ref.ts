@@ -1,4 +1,5 @@
 import { Binding, createBinding, getInjectableDef, Injector, ModuleRef, ProviderResolvable } from '@core/di';
+import { RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
   ExecutionContext,
@@ -15,7 +16,6 @@ import {
   ɵINJECTABLE_TYPE,
 } from '@watsonjs/common';
 
-import { RouterRef } from '..';
 import { InjectorGetResult } from './injector';
 
 interface InjectableBinding {

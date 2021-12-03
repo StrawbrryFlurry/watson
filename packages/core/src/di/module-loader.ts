@@ -69,7 +69,9 @@ export class ModuleLoader {
 
     await Promise.all(
       (imports as (Type | DynamicModule)[]).map((module) => {
-        const importType = isDynamicModule(module) ? module.module : module;
+        const importType = isDynamicModule(module)
+          ? (module as DynamicModule).module
+          : module;
 
         if (isNil(module) || ctx.includes(importType)) {
           throw new CircularDependencyException("ModuleLoader", type, ctx);

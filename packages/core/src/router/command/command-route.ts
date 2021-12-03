@@ -1,16 +1,17 @@
 import { MethodDescriptor } from '@core/di';
+import { RouterRef } from '@core/router/application-router';
+import { RouteRef } from '@core/router/route-ref';
 import {
   CommandConfiguration,
   CommandOptions,
   CommandRoute,
+  ContextType,
   isNil,
   RouterDecoratorOptions,
   WatsonEvent,
 } from '@watsonjs/common';
-import { RouterRef } from '@watsonjs/core';
 
 import { CommandConfigurationImpl } from '.';
-import { RouteRef } from '../route-ref';
 
 export class CommandRouteImpl
   extends RouteRef<WatsonEvent.COMMAND>
@@ -30,7 +31,7 @@ export class CommandRouteImpl
     handler: MethodDescriptor,
     parent?: CommandRoute
   ) {
-    super("command", WatsonEvent.COMMAND);
+    super(ContextType.command, WatsonEvent.COMMAND);
 
     this.configuration = new CommandConfigurationImpl(
       this,

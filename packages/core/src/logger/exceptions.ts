@@ -1,4 +1,4 @@
-import { RouterRef } from '@core/di';
+import { RouterRef } from '@core/router';
 import { blue, cyan, green, red } from 'cli-color';
 
 export const BOOTSTRAPPING_ERROR_MESSAGE = () =>

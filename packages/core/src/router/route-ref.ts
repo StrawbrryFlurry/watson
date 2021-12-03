@@ -1,4 +1,4 @@
-import { RouterRef } from '@core/di';
+import { RouterRef } from '@core/router';
 import { BaseRoute, ContextType, Type, WatsonEvent } from '@watsonjs/common';
 
 /**

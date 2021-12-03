@@ -1,6 +1,5 @@
-import { MessageMatcher, MessageMatchResult, Prefix } from '@watsonjs/common';
+import { MatchingStrategy, MessageMatcher, MessageMatchResult, Prefix } from '@watsonjs/common';
 import { Message } from 'discord.js';
-import { MatchingStrategy } from 'packages/common/src/interfaces/command/matcher/matching-strategy.enum';
 
 import { StaticPrefixCache } from './static-prefix-cache';
 

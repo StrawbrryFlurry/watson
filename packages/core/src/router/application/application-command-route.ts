@@ -1,8 +1,15 @@
-import { MethodDescriptor, RouterRef } from '@core/di';
-import { ApplicationCommandParameter, ApplicationCommandRoute, RouterDecoratorOptions, WatsonEvent } from '@watsonjs/common';
+import { MethodDescriptor } from '@core/di';
+import { RouterRef } from '@core/router/application-router';
+import { RouteRef } from '@core/router/route-ref';
+import {
+  ApplicationCommandParameter,
+  ApplicationCommandRoute,
+  ContextType,
+  RouterDecoratorOptions,
+  WatsonEvent,
+} from '@watsonjs/common';
 
-import { ApplicationCommandConfig } from '.';
-import { RouteRef } from '..';
+import { ApplicationCommandConfig } from './application-command-config';
 
 export class ApplicationCommandRouteImpl
   extends RouteRef<WatsonEvent.INTERACTION_CREATE>
@@ -28,6 +35,6 @@ export class ApplicationCommandRouteImpl
     handler: MethodDescriptor,
     parent?: ApplicationCommandRoute
   ) {
-    super("interaction", WatsonEvent.INTERACTION_CREATE);
+    super(ContextType.interaction, WatsonEvent.INTERACTION_CREATE);
   }
 }
