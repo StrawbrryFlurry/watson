@@ -93,7 +93,7 @@ export class Binding<
   }
 
   public isTransient() {
-    return this.lifetime & InjectorLifetime.Event;
+    return this.lifetime & InjectorLifetime.Transient;
   }
 
   public getInstance(

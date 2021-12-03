@@ -1,7 +1,7 @@
 import { Providable } from '@watsonjs/common';
 
 export class DependencyGraph {
-  private _dependencies: Providable[];
+  private _dependencies: Providable[] = [];
 
   public add(dependency: Providable) {
     this._dependencies.push(dependency);

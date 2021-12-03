@@ -7,6 +7,7 @@ import {
   Injectable,
   InjectableOptions,
   InjectionToken,
+  InjectorLifetime,
   isNil,
   Providable,
   resolveForwardRef,
@@ -161,6 +162,18 @@ export function getInjectableDef(
 
 export function createBinding(provider: ProviderResolvable): Binding {
   const { lifetime, providedIn } = getInjectableDef(provider);
+  const token = getProviderToken(provider);
+
+  /**
+   * For singleton providers we use the binding saved on
+   * the provider type such that we always use the same
+   * instance even throughout different injectors
+   */
+  const isSingletonProvider = lifetime & InjectorLifetime.Singleton;
+
+  if (isSingletonProvider && !isNil(token[W_BINDING_DEF])) {
+    return token[W_BINDING_DEF];
+  }
 
   if (!isCustomProvider(provider)) {
     const deps = Reflector.reflectCtorArgs(provider);
@@ -169,13 +182,14 @@ export function createBinding(provider: ProviderResolvable): Binding {
     binding.metatype = provider;
     binding.deps = deps;
     binding.factory = (...args) => Reflect.construct(provider as Type, args);
-    provider[W_BINDING_DEF] = binding;
+    token[W_BINDING_DEF] = binding;
     return binding;
   }
 
-  const { provide, multi } = provider;
-  const binding = new Binding(provide, lifetime, providedIn);
-  provide[W_BINDING_DEF] = binding;
+  const { multi } = provider;
+
+  const binding = new Binding(token, lifetime, providedIn);
+  token[W_BINDING_DEF] = binding;
   binding.multi = multi ?? false;
   /**
    * UseExisting providers are handled

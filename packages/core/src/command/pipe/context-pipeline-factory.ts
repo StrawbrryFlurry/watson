@@ -1,13 +1,5 @@
-import { CommandRouteImpl } from '@core/router';
-import {
-  ApplicationCommandRoute,
-  BaseRoute,
-  CommandRoute,
-  CtorParameters,
-  EventRoute,
-  OmitFirstElement,
-} from '@watsonjs/common';
-import { Injector } from '@watsonjs/core';
+import { Injector } from '@core/di';
+import { ApplicationCommandRoute, BaseRoute, CommandRoute, EventRoute, OmitFirstElement } from '@watsonjs/common';
 
 import { CommandPipelineImpl } from '.';
 import { EventPipelineImpl } from './event-pipeline';
@@ -71,16 +63,3 @@ export class ContextPipelineFactory {
     return "" as any;
   }
 }
-
-declare const a: CommandRoute;
-declare const ab: ApplicationCommandRoute;
-declare const ac: EventRoute;
-
-declare const c: CtorParameters<typeof CommandRouteImpl>;
-declare const b: CtorParameters<RoutePipeMap<typeof a>[1]>;
-
-declare const cpf: ContextPipelineFactory;
-
-cpf.create(a);
-cpf.create(ab);
-cpf.create(ac);

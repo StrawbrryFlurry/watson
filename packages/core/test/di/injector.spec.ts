@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { Injectable, InjectionToken, ValueProvider } from '@watsonjs/common';
 import { Injector } from '@watsonjs/core';
 
