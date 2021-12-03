@@ -10,10 +10,6 @@ node_modules/
 # config
 .env
 
-# bundle
-packages/**/*.d.ts
-packages/**/*.js
-
 # build folder
 dist
 tmp
