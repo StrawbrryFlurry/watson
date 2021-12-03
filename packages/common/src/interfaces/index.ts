@@ -1,4 +1,3 @@
-export * from "./adapter";
 export * from "./command";
 export * from "./discord";
 export * from "./event";

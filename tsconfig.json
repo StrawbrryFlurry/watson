@@ -34,6 +34,9 @@
       "@common/interfaces/*": ["./packages/common/src/interfaces/*"],
       "@common/enums": ["packages/common/src/enums"],
       "@common/decorators": ["./packages/common/src/decorators"],
+      "@common/injectable": [
+        "./packages/common/src/decorators/common/injectable.decorator.ts"
+      ],
       "@common/decorators/*": ["packages/common/src/decorators/*"],
       "@common/command": ["./packages/common/src/command"],
       "@common/utils": ["./packages/common/src/utils"],

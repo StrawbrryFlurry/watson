@@ -1,4 +1,4 @@
-import { Injectable } from '@common/decorators';
+import { Injectable } from '@common/injectable';
 import { Prefix, PrefixCache } from '@common/interfaces';
 import { Message } from 'discord.js';
 

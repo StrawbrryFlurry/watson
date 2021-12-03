@@ -1,4 +1,4 @@
-import { Injectable } from '@common/decorators';
+import { Injectable } from '@common/injectable';
 import { config, DotenvConfigOptions } from 'dotenv';
 
 @Injectable()

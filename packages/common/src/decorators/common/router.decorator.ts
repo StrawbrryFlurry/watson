@@ -22,12 +22,6 @@ export interface RouterDecoratorOptions {
   matchingStrategy?: MatchingStrategy;
 }
 
-export function Router(): ClassDecorator;
-/**
- * @param commandGroup The group all underlying commands will be mapped to.
- * @default commandGroup the name of the router without the `Router` suffix.
- */
-export function Router(group?: string): ClassDecorator;
 /**
  * Router options can be used to apply configuration to the underlying
  * event handlers.

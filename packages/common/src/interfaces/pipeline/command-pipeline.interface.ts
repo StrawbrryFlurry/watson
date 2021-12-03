@@ -1,3 +1,7 @@
+import { Prefix } from '@common/interfaces/command/common/prefix.interface';
+import { MessageMatchResult } from '@common/interfaces/command/matcher';
+import { CommandAst } from '@common/interfaces/command/parsing/ast.interface';
+import { CommandRoute } from '@common/interfaces/router/command-route.interface';
 import {
   DMChannel,
   Guild,
@@ -11,8 +15,6 @@ import {
   VoiceChannel,
 } from 'discord.js';
 
-import { CommandAst, MessageMatchResult, Prefix } from '../command';
-import { CommandRoute } from '../router';
 import { PipelineBase } from './pipeline-base.interface';
 
 export type TextBasedChannel = TextChannel | DMChannel | NewsChannel;

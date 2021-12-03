@@ -1,7 +1,6 @@
+import { Injectable } from '@common/injectable';
 import { MessageSendable } from '@common/interfaces';
 import { Message } from 'discord.js';
-
-import { Injectable } from '../..';
 
 /**
  * @param message The prompt message to be sent

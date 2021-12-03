@@ -1,7 +1,6 @@
+import { Injectable } from '@common/injectable';
 import { MessageSendable } from '@common/interfaces';
 import { ChannelResolvable, Guild, Message } from 'discord.js';
-
-import { Injectable } from '../..';
 
 /**
  * Sends a message to the channel that

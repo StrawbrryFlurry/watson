@@ -1,4 +1,5 @@
-import { isFunction, Type } from '..';
+import { Type } from '@common/interfaces/type.interface';
+import { isFunction } from '@common/utils';
 
 const FORWARD_REF_KEY = "ɵfwd";
 

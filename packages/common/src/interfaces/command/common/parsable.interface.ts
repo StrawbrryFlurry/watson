@@ -43,12 +43,3 @@ export abstract class Parsable<T = any> {
   peekToken?(): Token | null;
   ungetToken?(token: Token): void;
 }
-
-/**
- * @Injectable()
- * export class BoopArgument implements IParsable {
- *  parse(token: IToken) {
- *    return token.text.toUpperCase();
- *  }
- * }
- */

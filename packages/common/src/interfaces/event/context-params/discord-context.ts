@@ -1,4 +1,4 @@
-import { Injectable } from '@common/decorators';
+import { Injectable } from '@common/injectable';
 import { ExtendReadonlyCtor } from '@common/utils';
 import { Channel, ClientEvents, Guild, Interaction, Message, VoiceChannel } from 'discord.js';
 

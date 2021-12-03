@@ -14,6 +14,9 @@
       "@common/enums": ["packages/common/src/enums"],
       "@common/decorators": ["packages/common/src/decorators"],
       "@common/decorators/*": ["packages/common/src/decorators/*"],
+      "@common/injectable": [
+        "./packages/common/src/decorators/common/injectable.decorator.ts"
+      ],
       "@common/command": ["packages/common/src/command"],
       "@common/utils": ["packages/common/src/utils"]
     }
