@@ -1,5 +1,5 @@
 import { HasProv, W_PROV } from '@common/fields';
-import { Type } from '@common/interfaces/type.interface';
+import { Type } from '@common/type';
 
 import { resolveForwardRef } from './forward-ref';
 

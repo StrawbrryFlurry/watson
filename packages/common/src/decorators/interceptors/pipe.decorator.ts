@@ -1,8 +1,7 @@
+import { CommandArgument } from '@common/command/command-argument.interface';
 import { PIPE_METADATA } from '@common/constants';
-import { InterceptorMetadata } from '@common/decorators';
 import { InjectionToken, InjectorLifetime } from '@common/di';
 import { W_INJ_TYPE } from '@common/fields';
-import { CommandArgument } from '@common/interfaces';
 import { Observable } from 'rxjs';
 
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
@@ -22,14 +21,14 @@ export type PipeTransformFn = <T extends CommandArgument, R>(argument: T) => R;
 
 export type PipesMetadata = PipeTransform | WithPipeTransform | PipeTransformFn;
 
-export const GLOBAL_PIPE = new InjectionToken<InterceptorMetadata[]>(
+export const GLOBAL_PIPE = new InjectionToken<PipesMetadata[]>(
   "Pipe that are applied globally",
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
 GLOBAL_PIPE[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Pipe;
 
-export const PIPE = new InjectionToken<InterceptorMetadata[]>(
+export const PIPE = new InjectionToken<PipesMetadata[]>(
   "Pipe for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );

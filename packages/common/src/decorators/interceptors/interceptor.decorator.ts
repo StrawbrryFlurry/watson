@@ -1,7 +1,7 @@
 import { INTERCEPTOR_METADATA } from '@common/constants';
 import { InjectionToken, InjectorLifetime } from '@common/di';
 import { W_INJ_TYPE } from '@common/fields';
-import { ExecutionContext } from '@common/interfaces';
+import { ExecutionContext } from '@common/pipeline';
 import { Observable } from 'rxjs';
 
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';

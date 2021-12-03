@@ -1,4 +1,4 @@
-import { CommandParameterOptions } from '@common/decorators';
+import { CommandParameterOptions } from '@common/decorators/common';
 
 import { RuntimeException } from './runtime-exception';
 

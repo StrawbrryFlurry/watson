@@ -1,18 +1,15 @@
 import { Module } from '@common/decorators';
-import { DynamicModule, FactoryProvider, InjectionToken, ValueProvider } from '@common/di';
+import { DynamicModule, FactoryProvider, ValueProvider } from '@common/di';
 import { AxiosRequestConfig } from 'axios';
 
 import { httpClientFactory } from './http-client.provider';
+import { HTTP_CONFIG } from './http-config.token';
 import { HttpClient } from './http.service';
 
 const customProvider: FactoryProvider = {
   provide: HttpClient,
   useFactory: httpClientFactory,
 };
-
-export const HTTP_CONFIG = new InjectionToken("HTTP client configuration", {
-  providedIn: "root",
-});
 
 @Module({
   providers: [customProvider],

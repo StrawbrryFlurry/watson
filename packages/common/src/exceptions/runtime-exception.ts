@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@common/interfaces';
+import { ExecutionContext } from '@common/pipeline';
 
 import { WatsonException } from './watson-exception';
 

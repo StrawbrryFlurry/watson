@@ -1,9 +1,7 @@
 import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
-import { InterceptorMetadata } from '@common/decorators';
 import { InjectionToken } from '@common/di/injection-token';
-import { RuntimeException } from '@common/exceptions';
+import { ExceptionHandler, RuntimeException } from '@common/exceptions';
 import { W_INJ_TYPE } from '@common/fields';
-import { ExceptionHandler } from '@common/interfaces';
 
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 
@@ -14,14 +12,14 @@ interface WithCatch {
 export type ExceptionHandlerFn = (exception: RuntimeException) => void;
 
 export const GLOBAL_EXCEPTION_HANDLER = new InjectionToken<
-  InterceptorMetadata[]
+  ExceptionHandlerMetadata[]
 >("Exception handler that are applied globally", {
   providedIn: "root",
 });
 
 GLOBAL_EXCEPTION_HANDLER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.ExceptionHandler;
 
-export const EXCEPTION_HANDLER = new InjectionToken<InterceptorMetadata[]>(
+export const EXCEPTION_HANDLER = new InjectionToken<ExceptionHandlerMetadata[]>(
   "Exception handler for the current module",
   { providedIn: "module" }
 );

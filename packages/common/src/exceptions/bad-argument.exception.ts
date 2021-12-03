@@ -1,4 +1,4 @@
-import { CommandArgument } from '@common/interfaces';
+import { CommandArgument } from '@common/command/command-argument.interface';
 import { isString } from '@common/utils';
 import { MessageEmbed } from 'discord.js';
 

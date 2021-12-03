@@ -1,4 +1,6 @@
-import { CustomProvider, DynamicModule, mergeDefaults, Type } from '../..';
+import { CustomProvider, DynamicModule } from '@common/di';
+import { Type } from '@common/type';
+import { mergeDefaults } from '@common/utils';
 
 export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];

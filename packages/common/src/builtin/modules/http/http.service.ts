@@ -1,7 +1,8 @@
-import { HTTP_CONFIG } from '@common/builtin';
 import { Inject, Injectable } from '@common/decorators';
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { from, Observable } from 'rxjs';
+
+import { HTTP_CONFIG } from './http-config.token';
 
 export type HTTPBody = { [key: string]: any };
 

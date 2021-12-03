@@ -1,12 +1,20 @@
 import 'reflect-metadata';
 
-export * from "./builtin/components";
+export * from "./adapter";
+export * from "./builtin";
+export * from "./command";
+export * from "./data-structures";
 export * from "./decorators";
+export * from "./di";
+export * from "./discord-types";
 export * from "./enums";
+export * from "./event";
 export * from "./exceptions";
-export * from "./interfaces";
+export * from "./hooks";
+export * from "./inquirable";
+export * from "./pipeline";
+export * from "./router";
 export * from "./utils";
 export * from "./constants";
-export * from "./data-structures";
 export * from "./fields";
-export * from "./di";
+export * from "./type.interface";

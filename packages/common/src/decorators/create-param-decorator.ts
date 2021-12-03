@@ -1,6 +1,8 @@
 import { PARAM_METADATA } from '@common/constants';
-import { applyStackableMetadata } from '@common/decorators';
-import { ExecutionContext } from '@common/interfaces';
+
+import { applyStackableMetadata } from './apply-stackable-metadata';
+
+import type { ExecutionContext } from "@common/pipeline/execution-context.interface";
 
 export type ParamFactoryFn<T = any> = (ctx: ExecutionContext) => T;
 

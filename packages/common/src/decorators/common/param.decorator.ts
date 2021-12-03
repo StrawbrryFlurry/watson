@@ -1,7 +1,9 @@
+import { ADate, CommandParameterType, DateParameterOptions } from '@common/command/parameter-types';
 import { PARAM_METADATA } from '@common/constants';
-import { applyStackableMetadata, ParameterMetadata } from '@common/decorators';
+import { applyStackableMetadata } from '@common/decorators/apply-stackable-metadata';
+import { ParameterMetadata } from '@common/decorators/create-param-decorator';
 import { W_PARAM_TYPE } from '@common/fields';
-import { ADate, CommandParameterType, DateParameterOptions, Type } from '@common/interfaces';
+import { Type } from '@common/type';
 import { getFunctionParameters, mergeDefaults } from '@common/utils';
 
 type GetConfigurationsFromParameterType<T> = T extends ADate
@@ -50,7 +52,7 @@ export interface CommandParameterOptions<T = any> {
    * checked. You can inject the group name via
    * the token `ParameterGroup`
    */
-  group?: string;
+  group?: string | null;
   /**
    * The default value if none was provided
    */
@@ -185,9 +187,9 @@ const PATCH_VANILLA_JS_TYPES = () => {
     return;
   }
 
-  PATCH_VANILLA_JS_TYPES["ɵdidrun"] = true;
   String[W_PARAM_TYPE] = CommandParameterType.String;
   Date[W_PARAM_TYPE] = CommandParameterType.Date;
   Number[W_PARAM_TYPE] = CommandParameterType.Number;
+  PATCH_VANILLA_JS_TYPES["ɵdidrun"] = true;
 };
 PATCH_VANILLA_JS_TYPES();

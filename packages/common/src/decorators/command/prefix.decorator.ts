@@ -1,5 +1,5 @@
+import { Prefix } from '@common/command/common';
 import { PREFIX_METADATA } from '@common/constants';
-import { Prefix } from '@common/interfaces';
 import { isMethodDecorator } from '@common/utils';
 
 /**

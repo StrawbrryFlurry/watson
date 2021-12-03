@@ -1,4 +1,4 @@
-import { Type } from '@common/interfaces/type.interface';
+import { Type } from '@common/type';
 
 import { InjectionToken } from './injection-token';
 

@@ -1,4 +1,4 @@
-import { char } from '@common/interfaces';
+import { char } from '@common/command/parsing';
 
 export const TRIE_ROOT_NODE = Symbol("TrieRootNode");
 

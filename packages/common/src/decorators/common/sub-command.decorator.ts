@@ -1,8 +1,8 @@
 import { SUB_COMMAND_METADATA } from '@common/constants';
 import { And, FunctionPropertiesOfType, IsLowerCase, isNil, isString, StringHasLength, ValueOrNever } from '@common/utils';
 
-import { CommandOptions } from '.';
 import { SlashCommandOptions } from '../application';
+import { CommandOptions } from './command.decorator';
 
 export type SubCommandOptions<
   N extends string = any,

@@ -1,7 +1,6 @@
+import { applyStackableMetadata } from '@common/decorators/apply-stackable-metadata';
 import { W_INJ_TYPE } from '@common/fields';
 import { isMethodDecorator } from '@common/utils';
-
-import { applyStackableMetadata } from '..';
 
 export enum ɵINJECTABLE_TYPE {
   Guard,

@@ -1,6 +1,8 @@
+import { Prefix } from '@common/command/common';
+import { MatchingStrategy } from '@common/command/matcher';
 import { ROUTER_METADATA } from '@common/constants';
 import { CustomProvider } from '@common/di';
-import { MatchingStrategy, Prefix, Type } from '@common/interfaces';
+import { Type } from '@common/type';
 import { isNil, isObject, isString } from '@common/utils';
 
 export interface RouterDecoratorOptions {
