@@ -5,10 +5,7 @@ export class ExceptionHandlerImpl implements ExceptionHandler {
   private handlers: ExceptionHandler[];
 
   constructor(handlers: ExceptionHandler[]) {
-    // The first handler wil be the CommonExceptionHandler
-    // which would lead to custom handlers not being used
-    // when a common exception is thrown
-    this.handlers = handlers.reverse();
+    this.handlers = handlers;
   }
 
   public catch(

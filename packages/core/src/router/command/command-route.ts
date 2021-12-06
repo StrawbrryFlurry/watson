@@ -8,6 +8,7 @@ import {
   ContextType,
   isNil,
   RouterDecoratorOptions,
+  SubCommandOptions,
   WatsonEvent,
 } from '@watsonjs/common';
 
@@ -25,7 +26,7 @@ export class CommandRouteImpl
   public children: Map<string, CommandRoute> | null = null;
 
   constructor(
-    commandOptions: CommandOptions,
+    commandOptions: CommandOptions | SubCommandOptions,
     routerOptions: RouterDecoratorOptions,
     router: RouterRef,
     handler: MethodDescriptor,

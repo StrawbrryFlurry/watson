@@ -1,6 +1,6 @@
 import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
 import { InjectionToken } from '@common/di/injection-token';
-import { ExceptionHandler, RuntimeException } from '@common/exceptions';
+import { ExceptionHandler } from '@common/exceptions';
 import { W_INJ_TYPE } from '@common/fields';
 
 import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
@@ -8,8 +8,6 @@ import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
 interface WithCatch {
   prototype: ExceptionHandler;
 }
-
-export type ExceptionHandlerFn = (exception: RuntimeException) => void;
 
 export const GLOBAL_EXCEPTION_HANDLER = new InjectionToken<
   ExceptionHandlerMetadata[]
@@ -26,13 +24,10 @@ export const EXCEPTION_HANDLER = new InjectionToken<ExceptionHandlerMetadata[]>(
 
 EXCEPTION_HANDLER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.ExceptionHandler;
 
-export type ExceptionHandlerMetadata =
-  | WithCatch
-  | ExceptionHandler
-  | ExceptionHandlerFn;
+export type ExceptionHandlerMetadata = WithCatch | ExceptionHandler;
 
 export function UseExceptionHandler(
-  ...handlers: ExceptionHandler[]
+  ...handlers: ExceptionHandlerMetadata[]
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,

@@ -11,6 +11,8 @@ export type SubCommandOptions<
   parent: Function;
 };
 
+export type SubCommandMetadata = SubCommandOptions;
+
 /**
  * Marks a command in a router as a sub command.
  *

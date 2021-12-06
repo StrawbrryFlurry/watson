@@ -48,6 +48,12 @@ export interface InteractionPipeline extends PipelineBase {
    */
   isReplied: boolean;
   /**
+   * If you reply to the interaction
+   * using `DeferInq`, this is set to
+   * true.
+   */
+  isDeferred: boolean;
+  /**
    * The resolved guild member object if
    * the message originated form a guild
    */

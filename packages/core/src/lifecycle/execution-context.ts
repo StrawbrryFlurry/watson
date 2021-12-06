@@ -19,7 +19,7 @@ import { RouterRef } from '..';
 export class ExecutionContextImpl<
   PipelineHost extends
     | CommandPipeline
-    | EventPipeline
+    | EventPipeline<any>
     | InteractionPipeline = PipelineBase
 > implements ExecutionContext, Injector
 {
@@ -74,7 +74,7 @@ export class ExecutionContextImpl<
     return this.pipeline as CommandPipeline;
   }
 
-  public switchToEvent(): EventPipeline {
+  public switchToEvent(): EventPipeline<any> {
     throw new Error("Method not implemented.");
   }
 

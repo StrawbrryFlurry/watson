@@ -63,7 +63,7 @@ export class ContextProviderFactory {
    * providers when creating
    * a provider map for a {@link ContextInjector}.
    */
-  public bind(
+  public bindGlobals(
     pipeline: PipelineBase,
     bindFn: (provide: Providable, value: any) => void
   ): void {
@@ -81,6 +81,10 @@ export class ContextProviderFactory {
     const REPLY_INQ: ReplyInq = async (
       message: MessageSendable
     ): Promise<void> => {
+      if (pipeline.isReplied === true) {
+        throw "Already replied to pipeline";
+      }
+
       await interaction.reply(ParseMessageSendable(message));
       pipeline.isReplied = true;
     };
@@ -96,6 +100,7 @@ export class ContextProviderFactory {
     const DEFER_REPLY_INQ: DeferReplyInq = async (
       ephemeral = false
     ): Promise<void> => {
+      pipeline.isDeferred = true;
       interaction.deferReply({ ephemeral });
     };
 

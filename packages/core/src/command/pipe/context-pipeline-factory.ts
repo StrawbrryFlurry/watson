@@ -1,7 +1,15 @@
 import { Injector } from '@core/di';
-import { ApplicationCommandRoute, BaseRoute, CommandRoute, EventRoute, OmitFirstElement } from '@watsonjs/common';
+import {
+  ApplicationCommandRoute,
+  BaseRoute,
+  CommandRoute,
+  EventRoute,
+  MessageMatchResult,
+  OmitFirstElement,
+} from '@watsonjs/common';
+import { Message } from 'discord.js';
 
-import { CommandPipelineImpl } from '.';
+import { CommandPipelineImpl } from './command-pipe';
 import { EventPipelineImpl } from './event-pipeline';
 import { InteractionPipelineImpl } from './interaction-pipe';
 
@@ -10,7 +18,7 @@ type RoutePipeMap<T extends BaseRoute> = T extends ApplicationCommandRoute
   : T extends CommandRoute
   ? [CommandPipelineImpl, typeof CommandPipelineImpl]
   : T extends EventRoute
-  ? [EventPipelineImpl, typeof EventPipelineImpl]
+  ? [EventPipelineImpl<any>, typeof EventPipelineImpl]
   : never;
 
 type CreatePipelineArguments<T extends { create: any }> = T["create"] extends (
@@ -33,33 +41,36 @@ export class ContextPipelineFactory {
     R extends BaseRoute,
     PipeMatch extends RoutePipeMap<R>,
     Pipe extends PipeMatch[0],
-    PipeCtor extends CreatePipelineArguments<PipeMatch[1]>,
-    O extends OmitFirstElement<PipeCtor>
-  >(routeRef: R, ...options: O): Pipe {
+    PipeCreateFnArgs extends CreatePipelineArguments<PipeMatch[1]>,
+    O extends OmitFirstElement<OmitFirstElement<PipeCreateFnArgs>>
+  >(routeRef: R, moduleInjector: Injector, ...options: O): Promise<Pipe> {
     // We can only use the spread operator on tuples
-    const o = options as any as [any, any];
+    const o = <any>options;
 
     switch (routeRef.type) {
+      case "command": {
+        return CommandPipelineImpl.create(
+          routeRef as any as CommandRoute,
+          moduleInjector,
+          ...(o as [Message, MessageMatchResult])
+        ) as any;
+      }
       case "interaction": {
         return InteractionPipelineImpl.create(
           routeRef as any as ApplicationCommandRoute,
-          ...o
-        ) as any as Pipe;
+          moduleInjector,
+          ...(o as [any])
+        ) as any;
       }
       case "event": {
-        return InteractionPipelineImpl.create(
-          routeRef as any as ApplicationCommandRoute,
-          ...o
-        ) as any as Pipe;
-      }
-      case "command": {
-        return InteractionPipelineImpl.create(
-          routeRef as any as ApplicationCommandRoute,
-          ...o
-        ) as any as Pipe;
+        return EventPipelineImpl.create(
+          routeRef as any as EventRoute,
+          moduleInjector,
+          ...(o as [unknown[]])
+        ) as any;
       }
     }
 
-    return "" as any;
+    throw `Could not find a matching route type for [RouteRef]: ${routeRef.metatype.name}`;
   }
 }

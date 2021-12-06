@@ -1,5 +1,6 @@
+import { ContextBindingFactory, ContextInjector, Injector } from '@core/di';
+import { RouterRef } from '@core/router';
 import { BaseRoute, ContextType, ExecutionContext, PipelineBase, PipelineWithGuildCtx } from '@watsonjs/common';
-import { ContextBindingFactory, ContextInjector, Injector, RouterRef } from '@watsonjs/core';
 import { Snowflake } from 'discord.js';
 
 export abstract class PipelineBaseImpl<
@@ -48,10 +49,7 @@ export abstract class PipelineBaseImpl<
    * the injector for any pipeline, needs a
    * Pipeline reference to be created.
    */
-  protected abstract createExecutionContext(
-    moduleInj: Injector,
-    eventData: D
-  ): Promise<void>;
+  protected abstract createExecutionContext(moduleInj: Injector): Promise<void>;
 
   /**
    * Creates the `ContextInjector` using

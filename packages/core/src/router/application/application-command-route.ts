@@ -2,10 +2,13 @@ import { MethodDescriptor } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import { RouteRef } from '@core/router/route-ref';
 import {
+  ApplicationCommandMetadata,
   ApplicationCommandParameter,
   ApplicationCommandRoute,
   ContextType,
   RouterDecoratorOptions,
+  SlashCommandMetadata,
+  SubCommandMetadata,
   WatsonEvent,
 } from '@watsonjs/common';
 
@@ -28,8 +31,13 @@ export class ApplicationCommandRouteImpl
 
   public params?: ApplicationCommandParameter[];
 
+  public children: Map<string, ApplicationCommandRoute> | null = null;
+
   constructor(
-    commandOptions: ApplicationCommandConfig,
+    commandOptions:
+      | SlashCommandMetadata
+      | ApplicationCommandMetadata
+      | SubCommandMetadata,
     routerOptions: RouterDecoratorOptions,
     router: RouterRef,
     handler: MethodDescriptor,

@@ -21,7 +21,7 @@ export interface MessageMatchResult {
  * This is how we do it by default)
  */
 @Injectable({ providedIn: "router" })
-export abstract class MessageMatcher<Cache extends PrefixCache> {
+export abstract class MessageMatcher<Cache extends PrefixCache = PrefixCache> {
   protected _cache: Cache;
 
   /**

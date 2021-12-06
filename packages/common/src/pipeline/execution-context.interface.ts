@@ -3,7 +3,7 @@ import { InjectionToken } from '@common/di';
 import { Injectable } from '@common/injectable';
 import { BaseRoute } from '@common/router';
 import { Type } from '@common/type';
-import { Base, Client } from 'discord.js';
+import { Base, Client, ClientEvents } from 'discord.js';
 
 import { CommandPipeline } from './command-pipeline.interface';
 import { ContextType } from './context-type.enum';
@@ -23,7 +23,10 @@ type InjectorGetResult<T> = T extends InjectionToken<infer R>
  * belongs to.
  */
 @Injectable({ providedIn: "ctx" })
-export abstract class ExecutionContext implements PipelineHost {
+export abstract class ExecutionContext<
+  E extends keyof ClientEvents = keyof ClientEvents
+> implements PipelineHost
+{
   /**
    * Returns the router from which this
    * context originated
@@ -63,7 +66,7 @@ export abstract class ExecutionContext implements PipelineHost {
   /** @PipelineHost */
   public abstract switchToCommand(): CommandPipeline;
   public abstract switchToInteraction(): InteractionPipeline;
-  public abstract switchToEvent(): EventPipeline;
+  public abstract switchToEvent(): EventPipeline<E>;
   public abstract getType<T extends string = ContextType>(): T;
   public abstract getRoute(): BaseRoute;
 }

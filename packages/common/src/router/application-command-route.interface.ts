@@ -11,4 +11,5 @@ export interface ApplicationCommandRoute extends BaseRoute {
 
 export interface ApplicationSlashCommandRoute extends ApplicationCommandRoute {
   params: ApplicationCommandParameter[];
+  children: Map<string, ApplicationSlashCommandRoute>;
 }

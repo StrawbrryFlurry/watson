@@ -1,9 +1,18 @@
 import { CommandContainer } from '@core/command';
 import { Injector, MethodDescriptor, ModuleContainer, Reflector } from '@core/di';
-import { CommonExceptionHandler, EventProxy, ExceptionHandlerImpl } from '@core/lifecycle';
+import {
+  ApplicationCommandProxy,
+  CommandProxy,
+  CommonExceptionHandler,
+  EventProxy,
+  ExceptionHandlerImpl,
+} from '@core/lifecycle';
+import { ApplicationCommandRouteImpl, EventRouteImpl } from '@core/router';
 import {
   APPLICATION_COMMAND_METADATA,
-  BaseRoute,
+  ApplicationCommandMetadata,
+  ApplicationCommandRoute,
+  ApplicationSlashCommandRoute,
   COMMAND_METADATA,
   CommandOptions,
   CommandRoute,
@@ -11,22 +20,22 @@ import {
   EventRoute,
   EXCEPTION_HANDLER,
   EXCEPTION_HANDLER_METADATA,
-  ExceptionHandler,
   ExceptionHandlerMetadata,
   GLOBAL_EXCEPTION_HANDLER,
   isEmpty,
   isNil,
+  MessageMatcher,
   ROUTER_METADATA,
   RouterDecoratorOptions,
   SUB_COMMAND_METADATA,
   SubCommandOptions,
-  Type,
   UniqueTypeArray,
   WatsonEvent,
 } from '@watsonjs/common';
 
-import { CommandRouteImpl, LifecycleFunction, RouteHandlerFactory } from '.';
-import { RouterRef } from '..';
+import { RouterRef } from './application-router';
+import { CommandRouteImpl } from './command/command-route';
+import { RouteHandlerFactory } from './route-handler-factory';
 
 const ROUTE_METADATA = [
   COMMAND_METADATA,
@@ -46,10 +55,17 @@ export class RouteExplorer {
     /* Route descriptor */ Function,
     EventRoute
   >();
-  private commandRoutes = new WeakMap<Function, CommandRoute>();
-  private interactionRoutes = new WeakMap<Function, any>();
+  private commandRoutes = new WeakMap<
+    /* Route descriptor */ Function,
+    CommandRoute
+  >();
+  private applicationCommandRoutes = new WeakMap<
+    /* Route descriptor */ Function,
+    ApplicationCommandRoute
+  >();
 
   private eventProxies = new Map<WatsonEvent, EventProxy>();
+  private _commandProxies = new Map<MessageMatcher, EventProxy>();
   private routeHandlerFactory = new RouteHandlerFactory();
 
   public async explore(injector: Injector) {
@@ -68,49 +84,7 @@ export class RouteExplorer {
       await this._mapRoutesOfRouter(router, commandContainer);
     }
   }
-  /*
-      const {
-        createCommandHandler,
-        //  createEventHandler,
-        //  createSlashHandler,
-      } = this.routeHandlerFactory;
 
-      // await this.reflectRoute(
-      //   wrapper,
-      //   EVENT_METADATA,
-      //   EventRoute,
-      //   createEventHandler,
-      //   this.eventRoutes,
-      //   (metadata: WatsonEvent) => metadata,
-      //   MAP_EVENT
-      // );
-
-      await this.reflectRoute(
-        wrapper,
-        COMMAND_METADATA,
-        CommandRoute,
-        CommandProxy,
-        [this.container.getCommands()],
-        createCommandHandler,
-        this.commandRoutes,
-        () => WatsonEvent.MESSAGE_CREATE,
-        MAP_COMMAND
-      );
-
-      //  await this.reflectRoute(
-      //    wrapper,
-      //    SLASH_COMMAND_METADATA,
-      //    SlashRoute,
-      //    createSlashHandler,
-      //    this.slashRoutes,
-      //    () => WatsonEvent.INTERACTION_CREATE,
-      //    MAP_SLASH_COMMAND,
-      //    true
-      //  );
-    }
-    this.logger.logMessage(COMPLETED());
-  }
-*/
   private async _mapRoutesOfRouter(
     routerRef: RouterRef,
     commandContainer: CommandContainer
@@ -144,7 +118,6 @@ export class RouteExplorer {
     const interactionMetadata =
       methodsMetadata[APPLICATION_COMMAND_METADATA] ?? [];
 
-    // We need to map regular commands without parents first
     for (const { method, metadata } of commandMetadata) {
       const route = await this._bindCommandRoute(
         routerRef,
@@ -156,30 +129,70 @@ export class RouteExplorer {
       commandContainer.apply(route);
     }
 
+    for (const { method, metadata } of interactionMetadata) {
+      await this._bindInteractionRoute(
+        routerRef,
+        method,
+        metadata,
+        routerMetadata
+      );
+    }
+
+    for (const { method, metadata } of eventMetadata) {
+      await this._bindEventRoute(routerRef, method, metadata);
+    }
+
+    /**
+     * Subcommands are mapped last as they
+     * depend on either a sub-command
+     * or a command route to already
+     * exist.
+     */
     while (!isEmpty(subCommandMetadata)) {
       const nextMetadata = subCommandMetadata.shift()!;
       const { metadata, method } = nextMetadata;
       const { parent } = metadata as SubCommandOptions;
-      const parentRef = this.commandRoutes.get(parent);
+      const parentRef =
+        this.commandRoutes.get(parent) ??
+        <ApplicationSlashCommandRoute>this.applicationCommandRoutes.get(parent);
 
       if (isNil(parentRef)) {
         subCommandMetadata.push(nextMetadata);
         continue;
       }
 
-      const routeRef = await this._bindCommandRoute(
-        routerRef,
-        method,
-        metadata,
-        routerMetadata,
-        parentRef
-      );
+      let routeRef: CommandRoute | ApplicationCommandRoute;
+
+      if (parentRef instanceof ApplicationCommandRouteImpl) {
+        routeRef = await this._bindInteractionRoute(
+          routerRef,
+          method,
+          metadata,
+          routerMetadata,
+          parentRef
+        );
+      } else if (parentRef instanceof CommandRouteImpl) {
+        routeRef = await this._bindCommandRoute(
+          routerRef,
+          method,
+          metadata,
+          routerMetadata,
+          parentRef
+        );
+      }
+
+      if (isNil(routeRef!)) {
+        throw "boo!";
+      }
 
       if (isNil(parentRef.children)) {
         parentRef.children = new Map();
       }
 
-      const commandNames = [routeRef.name, ...routeRef.alias];
+      const commandNames = [
+        routeRef.name,
+        ...((<CommandRoute>routeRef!)?.alias ?? []),
+      ];
 
       for (const name of commandNames) {
         const existing = parentRef.children.get(name);
@@ -188,18 +201,8 @@ export class RouteExplorer {
           throw `Sub command with name "${name}" already exists as an alias of command "${existing.name}" in "${routerRef.name}"`;
         }
 
-        parentRef.children.set(name, routeRef);
+        parentRef.children.set(name, <any>routeRef);
       }
-    }
-
-    for (const { method, metadata } of eventMetadata) {
-      // TODO:
-      this._bindEventRoute();
-    }
-
-    for (const { method, metadata } of interactionMetadata) {
-      // TODO:
-      this._bindInteractionRoute();
     }
   }
 
@@ -219,7 +222,7 @@ export class RouteExplorer {
       method,
       parent
     );
-
+    const matcher = await routerRef.get(MessageMatcher);
     this.commandRoutes.set(descriptor, routeRef);
 
     const handlerFn = await this.routeHandlerFactory.createCommandHandler(
@@ -227,42 +230,84 @@ export class RouteExplorer {
       descriptor,
       routerRef
     );
-
-    let proxyRef = this.eventProxies.get(WatsonEvent.COMMAND);
-
-    if (isNil(proxyRef)) {
-      proxyRef = new (EventProxy as any)();
-      this.eventProxies.set(WatsonEvent.COMMAND, proxyRef!);
-    }
-
     const exceptionHandler = await this._createExceptionHandler(
       routerRef,
       method
     );
 
-    proxyRef!.bind(routeRef, handlerFn, exceptionHandler);
+    let proxyRef = this._commandProxies.get(matcher);
 
+    if (isNil(proxyRef)) {
+      proxyRef = new CommandProxy(matcher);
+      this._commandProxies.set(matcher, proxyRef);
+    }
+
+    proxyRef.bind(routeRef, handlerFn, exceptionHandler);
     return routeRef;
   }
 
-  private async _bindEventRoute() {}
+  private async _bindInteractionRoute(
+    routerRef: RouterRef,
+    method: MethodDescriptor,
+    metadata: ApplicationCommandMetadata | SubCommandOptions,
+    routerMetadata: RouterDecoratorOptions,
+    parent?: ApplicationCommandRoute
+  ): Promise<ApplicationCommandRoute> {
+    const { descriptor } = method;
 
-  private async _bindInteractionRoute() {}
+    const routeRef = new ApplicationCommandRouteImpl(
+      metadata,
+      routerMetadata,
+      routerRef,
+      method
+    );
 
-  private _bindHandler(
-    event: WatsonEvent,
-    route: BaseRoute,
-    proxyType: Type,
-    handler: LifecycleFunction,
-    exceptionHandler: ExceptionHandler,
-    proxyArgs: unknown[]
-  ) {
-    // if (!this.eventProxies.has(event)) {
-    //   this.eventProxies.set(event, new proxyType(...proxyArgs));
-    // }
-    //
-    // const proxyRef = this.eventProxies.get(event);
-    // proxyRef.bind(route, handler, exceptionHandler);
+    this.applicationCommandRoutes.set(descriptor, routeRef);
+
+    const handlerFn =
+      await this.routeHandlerFactory.createApplicationCommandHandler();
+    const exceptionHandler = await this._createExceptionHandler(
+      routerRef,
+      method
+    );
+
+    let proxyRef = this.eventProxies.get(WatsonEvent.INTERACTION_CREATE);
+
+    if (isNil(proxyRef)) {
+      proxyRef = new ApplicationCommandProxy();
+      this.eventProxies.set(WatsonEvent.INTERACTION_CREATE, proxyRef);
+    }
+
+    proxyRef.bind(routeRef, handlerFn, exceptionHandler);
+    return routeRef;
+  }
+
+  private async _bindEventRoute(
+    routerRef: RouterRef,
+    method: MethodDescriptor,
+    metadata: WatsonEvent
+  ): Promise<EventRoute> {
+    const { descriptor } = method;
+
+    const routeRef = new EventRouteImpl(metadata, routerRef, method);
+    this.eventRoutes.set(descriptor, routeRef);
+
+    const handlerFn = await this.routeHandlerFactory.createEventHandler();
+    const exceptionHandler = await this._createExceptionHandler(
+      routerRef,
+      method
+    );
+
+    let proxyRef = this.eventProxies.get(WatsonEvent.INTERACTION_CREATE);
+
+    if (isNil(proxyRef)) {
+      proxyRef = new ApplicationCommandProxy();
+      this.eventProxies.set(WatsonEvent.INTERACTION_CREATE, proxyRef);
+    }
+
+    proxyRef.bind(routeRef, handlerFn, exceptionHandler);
+
+    return routeRef;
   }
 
   private async _createExceptionHandler(
@@ -298,123 +343,9 @@ export class RouteExplorer {
       ...routeExceptionHandlers,
     ];
 
-    const handlers = [...defaultHandlers, ...customHandlers];
+    const handlers = [...customHandlers, ...defaultHandlers];
     const handler = new ExceptionHandlerImpl(handlers as any);
 
     return handler;
   }
-  /*
-  private async reflectCommands(router: InstanceWrapper<RouterDef>) {
-    const { metatype } = router;
-    const routerMethods = this.reflecRouterDefMehtods(metatype);
-    for (const method of routerMethods) {
-      const { descriptor, name } = method;
-      this.scanner.getMetadata<unknown[]>(DESIGN_PARAMETERS, metatype, name);
-    }
-  }
-
-  private async reflectRoute<T extends string>(
-    router: InstanceWrapper<RouterDef>,
-    metadataKey: string,
-    routeType: Type,
-    eventProxyType: Type<EventProxy>,
-    proxyArgs: unknown[],
-    handlerFactory: HandlerFactory,
-    collectionRef: Set<IBaseRoute>,
-    eventFunction: (metadata: unknown) => WatsonEvent,
-    logMessage: Function,
-    isWsEvent?: boolean
-  ) {
-    const { metatype } = router;
-    const routerMethods = this.reflecRouterDefMehtods(metatype);
-
-    for (const method of routerMethods) {
-      const { descriptor } = method;
-      const metadata = this.scanner.getMetadata<T>(metadataKey, descriptor);
-      const routerMetadata = this.scanner.getMetadata<T>(
-        ROUTER_METADATA,
-        router.metatype
-      );
-
-      if (!metadata) {
-        continue;
-      }
-
-      const routeRef = new routeType(
-        metadata,
-        routerMetadata,
-        router,
-        descriptor,
-        this.container
-      );
-
-      if (metadataKey === COMMAND_METADATA) {
-        this.container.addCommand(routeRef);
-      }
-
-      const moduleId = this.container.generateTokenFromModule(router.host);
-
-      const handler = await handlerFactory.call(
-        this.routeHandlerFactory,
-        routeRef,
-        method.descriptor,
-        router,
-        moduleId
-      );
-
-      collectionRef.add(routeRef);
-      this.logger.logMessage(logMessage(routeRef));
-
-      const exceptionHandler = this.createExceptionHandler(
-        router.metatype,
-        method.descriptor,
-        router.host
-      );
-
-      this.bindHandler(
-        eventFunction(metadata),
-        routeRef,
-        eventProxyType,
-        handler,
-        exceptionHandler,
-        proxyArgs
-      );
-    }
-  }
-
-  private reflectExceptionHandlers(
-    metadataKey: string,
-    reflectee: Type | Function,
-    module: Module
-  ) {
-    const handlerMetadata = this.scanner.getArrayMetadata<
-      EventExceptionHandler[]
-    >(metadataKey, reflectee);
-
-    const instances = handlerMetadata.filter(
-      (e: EventExceptionHandler) => e instanceof EventExceptionHandler
-    );
-    const injectables = handlerMetadata.filter(isFunction);
-    const injectableInstances = injectables.map(
-      (injectable) =>
-        module.injectables.get(injectable).instance as EventExceptionHandler
-    );
-
-    const hanlders = [...injectableInstances, ...instances];
-
-    return hanlders;
-  }
-
-  public getEventProxies() {
-    return this.eventProxies;
-  }
-
-  public getEventProxiesArray() {
-    return iterate(this.eventProxies).toArray();
-  }
-
-  public getEventProxy(event: WatsonEvent) {
-    return this.eventProxies.get(event);
-  }
-*/
 }

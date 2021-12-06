@@ -1,5 +1,5 @@
+import { ContextBindingFactory, Injector } from '@core/di';
 import { ApplicationCommandRoute, ContextType, InteractionCtx, InteractionPipeline } from '@watsonjs/common';
-import { ContextBindingFactory, Injector } from '@watsonjs/core';
 import {
   CommandInteraction,
   ContextMenuInteraction,
@@ -27,8 +27,7 @@ export class InteractionPipelineImpl
   public channel: TextBasedChannels | null;
 
   public isReplied = false;
-
-  public route: ApplicationCommandRoute;
+  public isDeferred = false;
   public interaction: CommandInteraction | ContextMenuInteraction;
 
   public async getGuildMember(): Promise<GuildMember | null> {
@@ -76,7 +75,7 @@ export class InteractionPipelineImpl
     const inquirableFactory = new ContextProviderFactory(moduleInj);
     const bindingFactory: ContextBindingFactory = (bind) => {
       bind(InteractionCtx, this.interaction);
-      inquirableFactory.bind(this, bind);
+      inquirableFactory.bindGlobals(this, bind);
     };
 
     await this.createAndBindInjector(moduleInj, bindingFactory);

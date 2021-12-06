@@ -1,9 +1,22 @@
+import { MethodDescriptor } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import { RouteRef } from '@core/router/route-ref';
-import { WatsonEvent } from '@watsonjs/common';
+import { ContextType, EventRoute, WatsonEvent } from '@watsonjs/common';
 
-// TODO:
-export class EventRouteImpl<T extends WatsonEvent> extends RouteRef {
+export class EventRouteImpl<T extends WatsonEvent>
+  extends RouteRef<WatsonEvent>
+  implements EventRoute
+{
   public handler: Function;
-  public host: RouterRef;
+  public host: RouterRef<any>;
+
+  constructor(
+    event: WatsonEvent,
+    router: RouterRef,
+    handler: MethodDescriptor
+  ) {
+    super(ContextType.event, event);
+    this.handler = handler.descriptor;
+    this.host = router;
+  }
 }

@@ -109,7 +109,13 @@ export class RouteHandlerFactory {
     return "lifeCycle" as any;
   }
 
-  public createInteractionHandler() {}
+  public async createApplicationCommandHandler(): Promise<LifecycleFunction> {
+    return null as any;
+  }
+
+  public async createEventHandler(): Promise<LifecycleFunction> {
+    return null as any;
+  }
 
   /**
    * Reflects the metadata key for both

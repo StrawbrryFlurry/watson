@@ -27,7 +27,7 @@ export interface PipelineHost {
    * Returns the EventPipeline for
    * this executions context.
    */
-  switchToEvent(): EventPipeline;
+  switchToEvent(): EventPipeline<any>;
   /**
    * Returns the context type of this execution context
    */

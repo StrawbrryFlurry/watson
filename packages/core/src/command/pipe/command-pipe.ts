@@ -1,4 +1,4 @@
-import { Injector } from '@core/di';
+import { ContextBindingFactory, ContextProviderFactory, Injector } from '@core/di';
 import {
   CommandAst,
   CommandPipeline,
@@ -9,7 +9,6 @@ import {
   Prefix,
   PrefixRef,
 } from '@watsonjs/common';
-import { ContextBindingFactory, ContextProviderFactory } from '@watsonjs/core';
 import { Guild, GuildMember, Message, StageChannel, TextBasedChannels, User, VoiceChannel } from 'discord.js';
 
 import { PipelineBaseImpl } from './pipeline-base';
@@ -66,14 +65,14 @@ export class CommandPipelineImpl
     return this.guild.members.fetch(this.user);
   }
 
-  public async create(
+  public static async create(
     route: CommandRoute,
     injector: Injector,
     message: Message,
     match: MessageMatchResult
   ): Promise<CommandPipeline> {
     const pipeline = new CommandPipelineImpl(route, message, match);
-    await pipeline.createExecutionContext(injector, message);
+    await pipeline.createExecutionContext(injector);
     return pipeline;
   }
 
@@ -105,14 +104,11 @@ export class CommandPipelineImpl
     return [this.message] as T;
   }
 
-  protected async createExecutionContext(
-    moduleInj: Injector,
-    message: Message
-  ): Promise<void> {
+  protected async createExecutionContext(moduleInj: Injector): Promise<void> {
     const inquirableFactory = new ContextProviderFactory(moduleInj);
     const bindingFactory: ContextBindingFactory = (bind) => {
-      inquirableFactory.bind(this, bind);
-      bind(MessageCtx, message);
+      inquirableFactory.bindGlobals(this, bind);
+      bind(MessageCtx, this.message);
       bind(PrefixRef, () => this.prefixText, true);
     };
 
