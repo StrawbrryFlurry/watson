@@ -12,6 +12,7 @@ specifiers:
   '@types/luxon': ^2.0.7
   '@types/node': 16.11.10
   '@types/xxhashjs': ^0.2.2
+  '@zerollup/ts-transform-paths': ^1.7.18
   axios: ^0.21.4
   bullmq: ^1.54.4
   class-transformer: ^0.3.1
@@ -68,6 +69,7 @@ devDependencies:
   '@types/luxon': 2.0.7
   '@types/node': 16.11.10
   '@types/xxhashjs': 0.2.2
+  '@zerollup/ts-transform-paths': 1.7.18_typescript@4.5.2
   delete-empty: 3.0.0
   dpdm: 3.8.0
   gulp: 4.0.2
@@ -1311,6 +1313,24 @@ packages:
 
   /@xtuc/long/4.2.2:
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
+    dev: true
+
+  /@zerollup/ts-helpers/1.7.18_typescript@4.5.2:
+    resolution: {integrity: sha512-S9zN+y+i5yN/evfWquzSO3lubqPXIsPQf6p9OiPMpRxDx/0totPLF39XoRw48Dav5dSvbIE8D2eAPpXXJxvKwg==}
+    peerDependencies:
+      typescript: '>=3.7.2'
+    dependencies:
+      resolve: 1.20.0
+      typescript: 4.5.2
+    dev: true
+
+  /@zerollup/ts-transform-paths/1.7.18_typescript@4.5.2:
+    resolution: {integrity: sha512-YPVUxvWQVzRx1OBN0Pmkd58+R9FcfUJuwTaPUSoi5rKxuXMtxevTXdfi0w5mEaIH8b0DfL+wg0wFDHiJE+S2zA==}
+    peerDependencies:
+      typescript: '>=3.7.2'
+    dependencies:
+      '@zerollup/ts-helpers': 1.7.18_typescript@4.5.2
+      typescript: 4.5.2
     dev: true
 
   /abab/2.0.5:

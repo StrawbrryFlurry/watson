@@ -70,6 +70,7 @@
     "@types/luxon": "^2.0.7",
     "@types/node": "16.11.10",
     "@types/xxhashjs": "^0.2.2",
+    "@zerollup/ts-transform-paths": "^1.7.18",
     "delete-empty": "^3.0.0",
     "dpdm": "^3.8.0",
     "gulp": "^4.0.2",

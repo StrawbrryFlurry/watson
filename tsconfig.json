@@ -22,6 +22,7 @@
     "types": ["node"],
     "moduleResolution": "node",
     "baseUrl": ".",
+    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }],
     "paths": {
       "@watsonjs/common": ["./packages/common/src"],
       "@watsonjs/core": ["./packages/core/src"],
