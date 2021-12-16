@@ -1,5 +1,5 @@
 import { CommandParameterType } from '@common/command/parameter-types/parameter-type.enum';
-import { W_PARAM_TYPE } from '@common/fields';
+import { ParameterType } from '@common/decorators/common/parameter-type.decorator';
 import { DateTime, DateTimeOptions } from 'luxon';
 
 export interface DateParameterOptions {
@@ -7,6 +7,5 @@ export interface DateParameterOptions {
   options?: DateTimeOptions;
 }
 
-export abstract class ADate extends DateTime {
-  static [W_PARAM_TYPE] = CommandParameterType.Date;
-}
+@ParameterType(CommandParameterType.Date)
+export abstract class ADate extends DateTime {}

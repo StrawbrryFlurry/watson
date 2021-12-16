@@ -32,6 +32,8 @@ export const isString = (fn: any): fn is string => typeof fn === "string";
 export const isNil = (obj: any): obj is null | undefined =>
   isUndefined(obj) || obj === null;
 export const isEmpty = (array: any): boolean => !(array && array.length > 0);
+export const isNilOrEmpty = (string: string): boolean =>
+  isNil(string) || string.length === 0;
 export const isSymbol = (fn: any): fn is symbol => typeof fn === "symbol";
 export const isClassConstructor = (fn: any): fn is NewableFunction =>
   isFunction(fn) && /^class\s/.test((fn as Function).toString());

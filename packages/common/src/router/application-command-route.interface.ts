@@ -1,7 +1,7 @@
 import { ApplicationCommandType } from '@common/decorators/application';
+import { SlashCommandParameter } from '@common/router';
 
 import { BaseRoute } from './base-route.interface';
-import { ApplicationCommandParameter } from './configuration';
 
 export interface ApplicationCommandRoute extends BaseRoute {
   name: string;
@@ -10,6 +10,6 @@ export interface ApplicationCommandRoute extends BaseRoute {
 }
 
 export interface ApplicationSlashCommandRoute extends ApplicationCommandRoute {
-  params: ApplicationCommandParameter[];
+  params: SlashCommandParameter[];
   children: Map<string, ApplicationSlashCommandRoute>;
 }

@@ -1,5 +1,5 @@
 import { CommandParameterType } from '@common/command/parameter-types/parameter-type.enum';
-import { W_PARAM_TYPE } from '@common/fields';
+import { ParameterType } from '@common/decorators/common/parameter-type.decorator';
 
 /**
  * Double quoted string literal - `"`
@@ -8,23 +8,20 @@ import { W_PARAM_TYPE } from '@common/fields';
  * @example
  * !say "Hewwo!"
  */
-export abstract class AStringExpandable extends String {
-  static [W_PARAM_TYPE] = CommandParameterType.StringExpandable;
-}
+@ParameterType(CommandParameterType.StringExpandable)
+export abstract class AStringExpandable extends String {}
 /**
  * Single quoted string literal - `'`
  *
  * @example
  * !say 'Hewwo!'
  */
-export abstract class AStringLiteral extends String {
-  static [W_PARAM_TYPE] = CommandParameterType.StringLiteral;
-}
+@ParameterType(CommandParameterType.StringLiteral)
+export abstract class AStringLiteral extends String {}
 /**
  * A string string literal quoted with a single back tick - '`'
  * @example
  * !say `Hewwo!`
  */
-export abstract class AStringTemplate extends String {
-  static [W_PARAM_TYPE] = CommandParameterType.StringTemplate;
-}
+@ParameterType(CommandParameterType.StringTemplate)
+export abstract class AStringTemplate extends String {}

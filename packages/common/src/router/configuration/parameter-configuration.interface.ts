@@ -1,8 +1,8 @@
 import { CommandParameterType } from '@common/command/parameter-types';
-import { CommandParameterOptions } from '@common/decorators/common/param.decorator';
+import { CommandParameterMetadata } from '@common/decorators/common/param.decorator';
 
 export interface ParameterConfiguration
-  extends Required<CommandParameterOptions> {
+  extends Required<Omit<CommandParameterMetadata, "factory">> {
   /**
    * The number representation of the type
    * which can be used easier than types

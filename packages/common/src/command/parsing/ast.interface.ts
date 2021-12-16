@@ -1,5 +1,4 @@
-import { GenericToken } from '@common/command/parsing';
-
+import { GenericToken } from './command-token.interface';
 import { TokenPosition } from './token.interface';
 
 export enum CommandAstType {

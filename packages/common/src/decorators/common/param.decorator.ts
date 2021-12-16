@@ -1,16 +1,18 @@
+import { Parsable } from '@common/command/common';
 import { ADate, CommandParameterType, DateParameterOptions } from '@common/command/parameter-types';
 import { PARAM_METADATA } from '@common/constants';
 import { applyStackableMetadata } from '@common/decorators/apply-stackable-metadata';
 import { ParameterMetadata } from '@common/decorators/create-param-decorator';
 import { W_PARAM_TYPE } from '@common/fields';
-import { Type } from '@common/type';
 import { getFunctionParameters, mergeDefaults } from '@common/utils';
+
+import type { SlashCommandParameterOptions } from "@common/decorators/application/application-command-parameter.interface";
 
 type GetConfigurationsFromParameterType<T> = T extends ADate
   ? DateParameterOptions
   : never;
 
-export interface CommandParameterOptions<T = any> {
+export interface BaseCommandParameter<T = any> {
   /**
    * Internal name the parameter should be referred as.
    * It can then also be used to get the pram data using the @\param() decorator
@@ -21,7 +23,7 @@ export interface CommandParameterOptions<T = any> {
    */
   description?: string;
   /** The type this parameter will be parsed as */
-  type?: Type | null;
+  type?: typeof Parsable | null;
   /**
    * Makes the parameter optional.
    * Optional parameters cannot be followed by mandatory ones.
@@ -29,6 +31,22 @@ export interface CommandParameterOptions<T = any> {
    * @default false
    */
   optional?: boolean;
+  /**
+   * The default value if none was provided
+   */
+  default?: T;
+  /**
+   * Supply some additional configuration
+   * for the parameter. You can get suggestions
+   * about what configurations can be applied
+   * by specifying the parameter type as a generic
+   * to this decorator.
+   */
+  configuration?: GetConfigurationsFromParameterType<T>;
+}
+
+export interface CommandParameterOptions<T = any>
+  extends BaseCommandParameter<T> {
   /**
    * Uses the rest of the message content **nom**
    *
@@ -53,55 +71,10 @@ export interface CommandParameterOptions<T = any> {
    * the token `ParameterGroup`
    */
   group?: string | null;
-  /**
-   * The default value if none was provided
-   */
-  default?: T;
-  /**
-   * Supply some additional configuration
-   * for the parameter. You can get suggestions
-   * about what configurations can be applied
-   * by specifying the parameter type as a generic
-   * to this decorator.
-   */
-  configuration?: GetConfigurationsFromParameterType<T>;
 }
 
-export interface ApplicationCommandParameterOptions<T = any> {
-  /**
-   * Internal name the parameter should be referred as.
-   * It can then also be used to get the pram data using the @\param() decorator
-   */
-  name?: string;
-  /**
-   * Description that describes the parameter
-   */
-  description?: string;
-  /** The type this parameter will be parsed as */
-  type?: Type | null;
-  /**
-   * Makes the parameter optional.
-   * If default is set this option will automatically be set
-   * @default false
-   */
-  optional?: boolean;
-  /**
-   * The default value if none was provided
-   */
-  default?: T;
-  /**
-   * Supply some additional configuration
-   * for the parameter. You can get suggestions
-   * about what configurations can be applied
-   * by specifying the parameter type as a generic
-   * to this decorator.
-   */
-  configuration?: GetConfigurationsFromParameterType<T>;
-}
-
-export interface ApplicationCommandParameterMetadata<T = any>
-  extends ApplicationCommandParameterOptions,
-    ParameterMetadata {}
+export type SlashCommandParameterMetadata<T = any> =
+  SlashCommandParameterOptions<T> & ParameterMetadata;
 
 export interface CommandParameterMetadata<T = any>
   extends CommandParameterOptions<T>,
@@ -137,13 +110,8 @@ export interface CommandParameterMetadata<T = any>
  * - `AEmote`
  * - `ACodeBlock`
  */
-export function Param(): ParameterDecorator;
-export function Param(options?: CommandParameterOptions): ParameterDecorator;
 export function Param(
-  options?: ApplicationCommandParameterOptions
-): ParameterDecorator;
-export function Param(
-  options: CommandParameterOptions | ApplicationCommandParameterOptions = {}
+  options: CommandParameterOptions | SlashCommandParameterOptions = {}
 ): ParameterDecorator {
   return (
     target: object,
@@ -190,6 +158,7 @@ const PATCH_VANILLA_JS_TYPES = () => {
   String[W_PARAM_TYPE] = CommandParameterType.String;
   Date[W_PARAM_TYPE] = CommandParameterType.Date;
   Number[W_PARAM_TYPE] = CommandParameterType.Number;
+  Boolean[W_PARAM_TYPE] = CommandParameterType.Boolean;
   PATCH_VANILLA_JS_TYPES["ɵdidrun"] = true;
 };
 PATCH_VANILLA_JS_TYPES();

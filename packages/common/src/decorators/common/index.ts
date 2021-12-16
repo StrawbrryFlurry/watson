@@ -6,5 +6,6 @@ export * from "./injectable.decorator";
 export * from "./module.decorator";
 export * from "./optional.decorator";
 export * from "./param.decorator";
+export * from "./parameter-type.decorator";
 export * from "./router.decorator";
 export * from "./sub-command.decorator";

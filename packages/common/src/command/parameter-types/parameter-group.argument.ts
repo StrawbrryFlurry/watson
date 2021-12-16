@@ -1,6 +1,6 @@
-import { CommandParameterType } from '@common/command/parameter-types';
-import { ApplicationCommandParameterOptions } from '@common/decorators';
-import { W_PARAM_TYPE } from '@common/fields';
+import { CommandParameterType } from '@common/command/parameter-types/parameter-type.enum';
+import { SlashCommandParameterOptions } from '@common/decorators/application';
+import { ParameterType } from '@common/decorators/common/parameter-type.decorator';
 
 /**
  * A parameter group can be used to bind multiple
@@ -39,16 +39,16 @@ import { W_PARAM_TYPE } from '@common/fields';
  * }
  * ```
  */
+
+@ParameterType(CommandParameterType.Group)
 export abstract class ParameterGroup<
-  P extends { [key: string]: ApplicationCommandParameterOptions | object },
+  P extends { [key: string]: SlashCommandParameterOptions | object },
   T = {
-    [K in keyof P]: P[K] extends ApplicationCommandParameterOptions
+    [K in keyof P]: P[K] extends SlashCommandParameterOptions
       ? P[K]["type"]
       : P[K];
   }
 > {
   public arguments!: T;
   public abstract parameters(): P;
-
-  private static [W_PARAM_TYPE] = CommandParameterType.Group;
 }

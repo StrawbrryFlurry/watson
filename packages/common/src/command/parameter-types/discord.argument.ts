@@ -1,5 +1,5 @@
 import { CommandParameterType } from '@common/command/parameter-types/parameter-type.enum';
-import { W_PARAM_TYPE } from '@common/fields';
+import { ParameterType } from '@common/decorators/common/parameter-type.decorator';
 import { ExtendReadonlyCtor } from '@common/utils';
 import { Emoji, Role, TextChannel, User } from 'discord.js';
 
@@ -10,9 +10,8 @@ import { Emoji, Role, TextChannel, User } from 'discord.js';
  * #music
  * ```
  */
-export abstract class AChannel extends TextChannel {
-  static [W_PARAM_TYPE] = CommandParameterType.Channel;
-}
+@ParameterType(CommandParameterType.Channel)
+export abstract class AChannel extends TextChannel {}
 
 /**
  * A role mentioned by a member using '@'
@@ -22,9 +21,8 @@ export abstract class AChannel extends TextChannel {
  * !members @moderator
  * ```
  */
-export abstract class ARole extends ExtendReadonlyCtor(Role) {
-  static [W_PARAM_TYPE] = CommandParameterType.Role;
-}
+@ParameterType(CommandParameterType.Role)
+export abstract class ARole extends ExtendReadonlyCtor(Role) {}
 
 /**
  * A user mentioned by using '@'
@@ -33,9 +31,8 @@ export abstract class ARole extends ExtendReadonlyCtor(Role) {
  * !ban @User
  * ```
  */
-export abstract class AUser extends User {
-  static [W_PARAM_TYPE] = CommandParameterType.User;
-}
+@ParameterType(CommandParameterType.User)
+export abstract class AUser extends User {}
 
 /**
  * An emote
@@ -43,9 +40,8 @@ export abstract class AUser extends User {
  * !add emote :pepega:
  * ```
  */
-export abstract class AEmote extends Emoji {
-  static [W_PARAM_TYPE] = CommandParameterType.Emote;
-}
+@ParameterType(CommandParameterType.Emote)
+export abstract class AEmote extends Emoji {}
 
 export interface CodeBlock {
   code: string;
@@ -61,10 +57,9 @@ export interface CodeBlock {
  * \`\`\`
  * ```
  */
+@ParameterType(CommandParameterType.CodeBlock)
 export abstract class ACodeBlock implements CodeBlock {
   code: string;
   raw: string;
   language: string;
-
-  static [W_PARAM_TYPE] = CommandParameterType.CodeBlock;
 }

@@ -46,3 +46,12 @@ export type CtorParameters<T extends Object> = T extends new (
 ) => any
   ? A
   : never;
+
+export type NullableT<T, K extends keyof T = keyof T> = T extends Object
+  ? { [P in keyof T]: P extends K ? T[P] | null : T[P] }
+  : T | null;
+
+export type MaxLengthArray<
+  T extends any[],
+  L extends number
+> = T[L] extends undefined ? T : never;
