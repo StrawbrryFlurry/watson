@@ -1,6 +1,5 @@
 import { resolveAsyncValue } from '@core/utils';
 import {
-  ApplicationCommandParameterMetadata,
   BaseRoute,
   CommandParameterMetadata,
   ExecutionContext,
@@ -9,6 +8,7 @@ import {
   isNil,
   ParameterMetadata,
   PipelineBase,
+  SlashCommandParameterMetadata,
   Type,
 } from '@watsonjs/common';
 
@@ -104,9 +104,9 @@ export class RouteParamsFactory {
   ) {
     const pipeline = ctx.switchToInteraction();
     const interactionMetadata =
-      metadata ?? ({} as ApplicationCommandParameterMetadata);
+      metadata ?? ({} as SlashCommandParameterMetadata);
 
-    let { name } = interactionMetadata as ApplicationCommandParameterMetadata;
+    let { name } = interactionMetadata as SlashCommandParameterMetadata;
 
     if (isNil(name)) {
       name = this._getParameterNameFromPipeline(pipeline, idx);

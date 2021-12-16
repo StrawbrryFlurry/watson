@@ -1,4 +1,4 @@
-import { Binding, createBinding, getInjectableDef, Injector, ModuleRef, ProviderResolvable } from '@core/di';
+import { Binding, createBinding, getInjectableDef, Injector, ModuleRef, NOT_FOUND, ProviderResolvable } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
@@ -94,8 +94,7 @@ export class RouterRefImpl<T = any> extends RouterRef {
         } as ValueProvider,
       ],
       moduleRef,
-      moduleRef,
-      true
+      moduleRef
     );
   }
 
@@ -187,11 +186,29 @@ export class RouterRefImpl<T = any> extends RouterRef {
     return this._injector.get(this.metatype, null, ctx);
   }
 
-  public get<T extends Providable, R extends InjectorGetResult<T>>(
+  public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
     notFoundValue?: any,
     ctx?: Injector
   ): Promise<R> {
-    return this._injector.get(typeOrToken, notFoundValue, ctx);
+    const resolved = await this._injector.get(typeOrToken, NOT_FOUND, ctx);
+
+    /**
+     * It's okay for router injectors not to
+     * have all providers that they require
+     * to resolve a given value. Usually we
+     * need to use the module injector which
+     * holds all resolvable providers available
+     * to routers in their module scope.
+     */
+    if (resolved === NOT_FOUND) {
+      return (
+        this.parent?.get(typeOrToken, notFoundValue, ctx) ??
+        // If the router isn't part of a module, throw a NullInjector error.
+        Injector.NULL.get(typeOrToken, notFoundValue)
+      );
+    }
+
+    return resolved as R;
   }
 }

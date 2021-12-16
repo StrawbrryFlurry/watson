@@ -1,5 +1,6 @@
 import { AdapterRef } from '@core/adapters';
 import { Injector, InjectorGetResult } from '@core/di';
+import { RouterRef } from '@core/router';
 import {
   BaseRoute,
   CommandPipeline,
@@ -13,8 +14,6 @@ import {
   Type,
 } from '@watsonjs/common';
 import { Client } from 'discord.js';
-
-import { RouterRef } from '..';
 
 export class ExecutionContextImpl<
   PipelineHost extends

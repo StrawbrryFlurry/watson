@@ -1,10 +1,11 @@
+import { AdapterRef } from '@core/adapters';
 import { Injector } from '@core/di';
+import { WatsonClientBase } from '@core/interfaces';
 import { CanActivate, ExceptionHandler, Injectable, MatchingStrategy, PipeTransform, Type } from '@watsonjs/common';
 import { ActivityOptions } from 'discord.js';
 import { config } from 'process';
 import { PassThrough } from 'stream';
 
-import { AdapterRef, WatsonClientBase } from '.';
 import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';

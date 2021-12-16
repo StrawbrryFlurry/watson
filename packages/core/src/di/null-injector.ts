@@ -1,5 +1,6 @@
-import { Injector } from '@core/di';
 import { isNil, Providable, RuntimeException, stringify } from '@watsonjs/common';
+
+import type { Injector } from "./injector";
 
 export class NullInjector implements Injector {
   public parent: null;

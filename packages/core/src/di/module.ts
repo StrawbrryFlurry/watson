@@ -47,7 +47,8 @@ export abstract class ModuleRef<T = any> implements Injector {
 
   public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
-    notFoundValue?: any
+    notFoundValue?: any,
+    ctx?: Injector
   ): Promise<R>;
 
   public abstract get injector(): Injector;

@@ -63,6 +63,6 @@ export abstract class PipelineBaseImpl<
   ) {
     const inj = new ContextInjector(moduleInj, this, bindingFactory);
     const ctx = await inj.get(ExecutionContext);
-    this._injector = ctx;
+    this._injector = <Injector>ctx;
   }
 }

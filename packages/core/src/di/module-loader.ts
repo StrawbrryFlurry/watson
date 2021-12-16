@@ -1,5 +1,4 @@
 import { Injector, ModuleDef, ModuleImpl, ModuleRef, ProviderResolvable, Reflector } from '@core/di';
-import { Logger } from '@core/logger';
 import { resolveAsyncValue } from '@core/utils';
 import {
   DynamicModule,
@@ -19,7 +18,6 @@ import { ModuleContainer } from './module-container';
  * and adds them to the di container.
  */
 export class ModuleLoader {
-  private _logger = new Logger("ModuleLoader");
   private _injector: Injector;
 
   constructor(injector: Injector) {

@@ -201,7 +201,7 @@ export class RouteExplorer {
           throw `Sub command with name "${name}" already exists as an alias of command "${existing.name}" in "${routerRef.name}"`;
         }
 
-        parentRef.children.set(name, <any>routeRef);
+        (<Map<string, any>>parentRef.children).set(name, <any>routeRef);
       }
     }
   }

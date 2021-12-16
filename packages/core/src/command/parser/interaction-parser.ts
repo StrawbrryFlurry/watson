@@ -12,7 +12,7 @@ export class InteractionRouter {
 
   public parseInteraction(interaction: Interaction) {
     if (interaction.isCommand() || interaction.isContextMenu()) {
-      return this._handleCommand(interaction);
+      return this._handleCommand("" as any);
     }
 
     if (interaction.isMessageComponent()) {

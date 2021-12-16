@@ -12,6 +12,9 @@ export class ApplicationCommandProxy extends AbstractProxy<
   }
 
   public proxy(args: any): Promise<void> {
+    // TODO:
+    // Check if the interaction is an event that should update a button or text
+    // Check if the interaction is a command, if so run that handler
     throw new Error("Method not implemented.");
   }
   public bind(

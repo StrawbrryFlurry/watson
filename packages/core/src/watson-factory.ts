@@ -1,7 +1,9 @@
+import { AdapterRef } from '@core/adapters';
+import { CommandContainer } from '@core/command';
 import { ModuleContainer, NewableTo } from '@core/di';
 import { ClassProvider, isNil, Type, ValueProvider } from '@watsonjs/common';
 
-import { AdapterRef, CommandContainer, Injector } from '.';
+import { Injector } from './di';
 import { ModuleLoader } from './di/module-loader';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
 import { WatsonClientBase } from './interfaces';
@@ -12,7 +14,7 @@ import { ApplicationRef, WatsonApplication } from './watson-application';
 const DEFAULT_ADAPTER_PACKAGE = "@watsonjs/platform-discordjs";
 
 export class WatsonFactory {
-  private static logger = new Logger("WatsonFactory");
+  private static logger = new Logger();
 
   private static async getAdapterOrDefault(
     adapter: NewableTo<AdapterRef> | undefined
@@ -44,7 +46,7 @@ export class WatsonFactory {
     const adapterRef = new AdapterCtor(options);
 
     const rootInjector = Injector.create(
-      this.GET_APPLICATION_PROVIDERS(adapterRef),
+      this.makeApplicationProviders(adapterRef),
       Injector.NULL
     );
 
@@ -60,7 +62,7 @@ export class WatsonFactory {
     return applicationRef;
   }
 
-  private static GET_APPLICATION_PROVIDERS(
+  private static makeApplicationProviders(
     adapter: AdapterRef
   ): (ValueProvider | ClassProvider)[] {
     return [
