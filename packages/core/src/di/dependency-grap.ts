@@ -1,17 +1,17 @@
-import { Providable } from '@watsonjs/common';
+import { Providable, stringify } from '@watsonjs/common';
 
 export class DependencyGraph {
-  private _dependencies: Providable[] = [];
+  public dependencies: Providable[] = [];
 
   public add(dependency: Providable) {
-    this._dependencies.push(dependency);
+    this.dependencies.push(dependency);
   }
 
   public remove(dependency: Providable) {
-    const idx = this._dependencies.indexOf(dependency);
+    const idx = this.dependencies.indexOf(dependency);
 
     if (idx !== -1) {
-      this._dependencies.splice(idx, 1);
+      this.dependencies.splice(idx, 1);
     }
   }
 
@@ -21,12 +21,14 @@ export class DependencyGraph {
    * throws a CircularDependencyException.
    */
   public checkAndThrow(dependency: Providable) {
-    if (this._dependencies.indexOf(dependency) !== -1) {
-      throw `Circular dependency detected for ${dependency.name}: ${this}`;
+    if (this.dependencies.indexOf(dependency) !== -1) {
+      throw `Circular dependency detected for ${stringify(
+        dependency.name
+      )}: ${this}`;
     }
   }
 
   public toString() {
-    return this._dependencies.join(" => ");
+    return this.dependencies.join(" => ");
   }
 }

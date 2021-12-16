@@ -1,18 +1,11 @@
+import { ExecutionContextImpl } from '@core/lifecycle';
+import { resolveAsyncValue } from '@core/utils';
 import { ExecutionContext, FactoryProvider, isNil, PipelineBase, Providable, Type } from '@watsonjs/common';
 
-import { Injector } from '.';
-import {
-  Binding,
-  createBinding,
-  createResolvedBinding,
-  ExecutionContextImpl,
-  getInjectableDef,
-  InjectorGetResult,
-  ProviderResolvable,
-  resolveAsyncValue,
-  ɵbindProviders,
-  ɵcreateBindingInstance,
-} from '..';
+import { Binding, createBinding, createResolvedBinding, getInjectableDef } from './binding';
+import { ɵbindProviders, ɵcreateBindingInstance } from './dynamic-injector';
+import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
+import { InjectorInquirerContext } from './inquirer-context';
 
 export type ContextBindingFactory<
   BindFn extends (
@@ -78,7 +71,13 @@ export class ContextInjector implements Injector {
 
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
-    notFoundValue?: any
+    notFoundValue?: any,
+    /**
+     * The context injector can't take another
+     * context to resolve a provider.
+     */
+    ctx: null = null,
+    inquirerContext?: InjectorInquirerContext
   ): Promise<R> {
     const { providedIn } = getInjectableDef(typeOrToken);
 
@@ -89,13 +88,14 @@ export class ContextInjector implements Injector {
     const binding: Binding<T> | undefined = this._records.get(typeOrToken);
 
     if (isNil(binding)) {
-      return this.parent.get(typeOrToken, notFoundValue, this);
+      return this.parent.get(typeOrToken, notFoundValue, this, inquirerContext);
     }
 
     const instance = await ɵcreateBindingInstance(
       <Binding>binding,
       this.parent,
-      this
+      this,
+      new InjectorInquirerContext()
     );
 
     /**

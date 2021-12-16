@@ -1,4 +1,3 @@
-import { getProviderToken, InjectorGetResult, isUseExistingProvider, ModuleRef } from '@core/di';
 import { resolveAsyncValue } from '@core/utils';
 import {
   CustomProvider,
@@ -12,16 +11,20 @@ import {
 } from '@watsonjs/common';
 
 import {
+  Binding,
   createBinding,
   FactoryFnWithoutDeps,
   getInjectableDef,
-  INJECTOR,
-  InjectorBloomFilter,
-  ProviderResolvable,
-} from '..';
-import { Binding } from './binding';
+  getProviderToken,
+  isUseExistingProvider,
+} from './binding';
 import { DependencyGraph } from './dependency-grap';
-import { Injector } from './injector';
+import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
+import { InjectorBloomFilter } from './injector-bloom-filter';
+import { INJECTOR } from './injector-token';
+import { InjectorInquirerContext } from './inquirer-context';
+import { ModuleRef } from './module';
+import { NullInjector } from './null-injector';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
@@ -30,23 +33,15 @@ export class DynamicInjector implements Injector {
   protected readonly _records: Map<Providable, Binding | Binding[]>;
 
   protected _scope: Type | null;
-  protected _component: boolean;
 
   constructor(
     providers: ProviderResolvable[],
-    parent: Injector | null = null,
-    scope: Type | null = null,
-    /**
-     * A component injector doesn't have it's own scoping
-     * so it always resolves unknown providers in the parent
-     * scope even if the binding scope is `module`.
-     */
-    component: boolean = false
+    parent: Injector | null,
+    scope: Type | null
   ) {
     this._records = new Map<Providable, Binding | Binding[]>();
     this.parent = parent;
     this._scope = scope;
-    this._component = component;
 
     if (scope) {
       this._records.set(
@@ -86,10 +81,11 @@ export class DynamicInjector implements Injector {
   public async get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T,
     notFoundValue?: any,
-    ctx: Injector | null = null
+    ctx: Injector | null = null,
+    inquirerContext: InjectorInquirerContext = new InjectorInquirerContext()
   ): Promise<R> {
     const { providedIn } = getInjectableDef(typeOrToken);
-    let parent = this.parent ?? Injector.NULL;
+    let parent = this.parent ?? new NullInjector();
 
     if (providedIn === "ctx") {
       if (isNil(ctx)) {
@@ -102,21 +98,24 @@ export class DynamicInjector implements Injector {
     }
 
     if (
-      !this._component &&
       !isNil(this._scope) &&
       (providedIn === "module" ||
         (isFunction(providedIn) && this._scope instanceof providedIn))
     ) {
-      parent = Injector.NULL;
+      parent = new NullInjector();
     }
 
     const binding = this._records.get(typeOrToken);
 
     if (isNil(binding)) {
-      return parent.get(typeOrToken, notFoundValue, ctx);
+      if (providedIn === InjectorInquirerContext) {
+        return <R>inquirerContext;
+      }
+
+      return parent.get(typeOrToken, notFoundValue, ctx, inquirerContext);
     }
 
-    return <R>ɵcreateBindingInstance(binding, this, ctx);
+    return <R>ɵcreateBindingInstance(binding, this, ctx, inquirerContext);
   }
 }
 
@@ -162,11 +161,13 @@ export function ɵresolveProvider<
 >(
   typeOrToken: T,
   injector: Injector,
-  dependencyGraph: DependencyGraph
+  ctx: Injector | null,
+  inquirerContext: InjectorInquirerContext
 ): Promise<R> {
-  dependencyGraph.checkAndThrow(typeOrToken);
-  dependencyGraph.add(typeOrToken);
-  return injector.get(typeOrToken);
+  const { dependencyGraph } = inquirerContext;
+  dependencyGraph!.checkAndThrow(typeOrToken);
+  dependencyGraph!.add(typeOrToken);
+  return injector.get(typeOrToken, null, ctx, inquirerContext);
 }
 
 export async function ɵcreateBindingInstance<
@@ -179,16 +180,16 @@ export async function ɵcreateBindingInstance<
   binding: B,
   injector: Injector,
   ctx: Injector | null,
-  dependencyGraph: DependencyGraph = new DependencyGraph()
+  inquirerContext: InjectorInquirerContext
 ): Promise<R> {
   if (Array.isArray(binding)) {
     const instances: I[] = [];
-
     for (let i = 0; i < binding.length; i++) {
       const instance = await ɵcreateBindingInstance(
         <Binding>binding[i],
         injector,
-        ctx
+        ctx,
+        inquirerContext
       );
       instances.push(<I>instance);
     }
@@ -197,9 +198,10 @@ export async function ɵcreateBindingInstance<
   }
 
   const { deps, token } = <Binding<T, D, I>>binding;
-  const instance = binding.getInstance(ctx);
+  const dependencyGraph = (inquirerContext.dependencyGraph ??=
+    new DependencyGraph());
 
-  dependencyGraph.checkAndThrow(token);
+  const instance = binding.getInstance(ctx);
 
   if (!isNil(instance) && binding.isDependencyTreeStatic()) {
     return <R>instance;
@@ -223,7 +225,19 @@ export async function ɵcreateBindingInstance<
   for (let i = 0; i < (<D>deps).length; i++) {
     const dep = deps![i];
 
-    const depInstance = await ɵresolveProvider(dep, injector, dependencyGraph);
+    // In this instance skip
+    if (dep === InjectorInquirerContext) {
+      dependencies.push(<any>inquirerContext.seal());
+      continue;
+    }
+
+    const dependencyContext = inquirerContext.clone(<Binding>binding, i);
+    const depInstance = await ɵresolveProvider(
+      dep,
+      injector,
+      ctx,
+      dependencyContext
+    );
     dependencyGraph.remove(dep);
     dependencies.push(depInstance);
   }

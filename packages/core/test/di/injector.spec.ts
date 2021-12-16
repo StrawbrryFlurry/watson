@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Injectable, InjectionToken, ValueProvider } from '@watsonjs/common';
+import { FactoryProvider, Injectable, InjectionToken, ValueProvider } from '@watsonjs/common';
 import { Injector } from '@watsonjs/core';
 
 describe("Basic injector test", () => {
@@ -39,8 +39,23 @@ describe("Basic injector test", () => {
     try {
       await inj.get(DATABASE_URL);
       fail("Expected to get a NullInjector error");
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
+  });
+
+  test("Multi providers create instances for each provider", async () => {
+    const MULTI_PROVIDER_TOKEN = new InjectionToken<string[]>(
+      "Multi provider test"
+    );
+    const PROVIDER_VALUE = "Beep Boop";
+
+    const multiProvider: FactoryProvider = {
+      provide: MULTI_PROVIDER_TOKEN,
+      useFactory: () => PROVIDER_VALUE,
+      multi: true,
+    };
+
+    const inj = Injector.create([multiProvider, multiProvider], null, Injector);
+    const providerInstances = await inj.get(MULTI_PROVIDER_TOKEN);
+    expect(providerInstances).toEqual([PROVIDER_VALUE, PROVIDER_VALUE]);
   });
 });

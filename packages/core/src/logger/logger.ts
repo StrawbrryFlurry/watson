@@ -1,25 +1,33 @@
+import { Injector, InjectorInquirerContext } from '@core/di';
+import { Injectable } from '@watsonjs/common';
 import { green, red, white, yellow } from 'cli-color';
 
-/**
- * @status Status type is logged as green
- * @information Infrmation type is logged in yellow
- * @error Error type is logged in red
- */
-export type LogInformationType = "status" | "information" | "error";
-/**
- * The Context the message is logged from
- * @example WatsonFactory
- */
-export type LogContext = string;
+export enum LogType {
+  STATUS,
+  INFO,
+  WARN,
+  ERROR,
+}
 
+@Injectable()
 export class Logger {
+  public context!: string;
+
   private messagePrefix = `${yellow("[Watson]")} ${white(
     `[${(() => this.getDateString())()}] ${yellow(`[${this.context || ""}]`)}`
   )}`;
 
-  constructor(private readonly context?: LogContext) {}
+  constructor(inquirerCtx: InjectorInquirerContext) {
+    const { inquirer } = inquirerCtx;
 
-  public log(messageArg: string | string[], type: LogInformationType) {
+    if (inquirer === Injector) {
+      this.context = "main";
+    } else {
+      this.context = inquirer.name;
+    }
+  }
+
+  public log(messageArg: string | string[], type: LogType) {
     let message: string;
 
     if (Array.isArray(messageArg)) {
@@ -31,7 +39,7 @@ export class Logger {
     const coloredMessage = this.colorMessage(message, type);
     const messageString = `${this.messagePrefix} ${coloredMessage}`;
 
-    if (type === "error") {
+    if (type === LogType.ERROR) {
       return process.stderr.write(`${messageString}\n`);
     }
 
@@ -50,12 +58,12 @@ export class Logger {
     console.error(stack);
   }
 
-  private colorMessage(message: string, type: LogInformationType) {
-    if (type === "information") {
+  private colorMessage(message: string, type: LogType) {
+    if (type === LogType.WARN) {
       return yellow(message);
-    } else if (type === "status") {
+    } else if (type === LogType.STATUS) {
       return green(message);
-    } else if (type === "error") {
+    } else if (type === LogType.ERROR) {
       return red(message);
     }
   }
