@@ -1,3 +1,4 @@
+import { AdapterRef } from '@core/adapters';
 import {
   AstArgumentImpl,
   CommandAstImpl,
@@ -15,6 +16,7 @@ import {
   AstArgument,
   AstCommand,
   AstPrefix,
+  BOOLEAN_LIKE_VALUES,
   ChannelMentionToken,
   CodeBlock,
   CodeBlockToken,
@@ -23,6 +25,7 @@ import {
   CommandPipeline,
   CommandRoute,
   CommandTokenKind,
+  DateParameterOptions,
   EmoteToken,
   GenericToken,
   GuildCtx,
@@ -44,10 +47,9 @@ import {
   TokenWithValue,
   UserMentionToken,
 } from '@watsonjs/common';
-import { AdapterRef } from '@watsonjs/core';
 import { Channel, Client, Emoji, Message, Role, User } from 'discord.js';
-import { DateTime, DateTimeOptions } from 'luxon';
-import { URL } from 'url';
+import { DateTime } from 'luxon';
+import { format, URL } from 'url';
 
 import { ParsingException } from '../exceptions/parsing.exception';
 import { AstCommandImpl, AstPrefixImpl } from './ast';
@@ -60,20 +62,6 @@ type ParseFn<T> = (
   configuration?: any,
   ...args: any[]
 ) => T | Promise<T>;
-
-export interface BooleanLikeValue {
-  name: string;
-  value: boolean;
-}
-
-const ACCEPTED_BOOLEAN_VALUES: BooleanLikeValue[] = [
-  { name: "true", value: true },
-  { name: "false", value: false },
-  { name: "yes", value: true },
-  { name: "no", value: false },
-  { name: "y", value: true },
-  { name: "n", value: false },
-];
 
 /**
  * Makes the passing of
@@ -695,8 +683,8 @@ export class CommandParser implements Parser<CommandAst> {
     }
 
     const lowerCaseValue = value.toLowerCase();
-    for (let i = 0; i < ACCEPTED_BOOLEAN_VALUES.length; i++) {
-      const booleanValue = ACCEPTED_BOOLEAN_VALUES[i];
+    for (let i = 0; i < BOOLEAN_LIKE_VALUES.length; i++) {
+      const booleanValue = BOOLEAN_LIKE_VALUES[i];
 
       if (lowerCaseValue === booleanValue) {
         return true;
@@ -733,17 +721,19 @@ export class CommandParser implements Parser<CommandAst> {
     token: StringLikeToken,
     param: ParameterConfiguration,
     ctx: ClosureCtx,
-    format?: string,
-    options?: DateTimeOptions
+    options: DateParameterOptions
   ): AstArgument<DateTime> {
+    const { format, options: formatOptions } = options;
     const argument = new AstArgumentImpl<DateTime>(token, param);
     const dateString = this.getValueFromStringLikeToken(token);
 
     if (isNil(format)) {
-      return argument.withValue(DateTime.fromISO(dateString));
+      return argument.withValue(DateTime.fromISO(dateString, formatOptions));
     }
 
-    return argument.withValue(DateTime.fromFormat(dateString, format, options));
+    return argument.withValue(
+      DateTime.fromFormat(dateString, format, formatOptions)
+    );
   }
 
   public async parseToUser(
@@ -886,8 +876,8 @@ export class CommandParser implements Parser<CommandAst> {
     const boolean = this.getValueFromStringLikeToken(token);
     const inferBooleanLikeValue = () => {
       const lowerCaseValue = boolean.toLowerCase();
-      for (let i = 0; i < ACCEPTED_BOOLEAN_VALUES.length; i++) {
-        const { name, value } = ACCEPTED_BOOLEAN_VALUES[i];
+      for (let i = 0; i < BOOLEAN_LIKE_VALUES.length; i++) {
+        const { name, value } = BOOLEAN_LIKE_VALUES[i];
 
         if (lowerCaseValue === name) {
           return value;

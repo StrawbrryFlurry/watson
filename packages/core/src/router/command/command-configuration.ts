@@ -88,15 +88,16 @@ export class CommandConfigurationImpl implements CommandConfiguration {
         const name = parameterNames[i];
 
         this.params.push({
-          paramType: type,
-          default: null,
-          hungry: false,
-          description: name,
           name: name,
-          optional: false,
+          description: name,
+          default: null,
           type: null,
-          configuration: null as any,
           group: null,
+          hungry: false,
+          optional: false,
+          paramType: type,
+          configuration: null as any,
+          parameterIndex: i,
         });
         continue;
       }

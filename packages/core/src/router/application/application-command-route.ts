@@ -2,17 +2,16 @@ import { MethodDescriptor } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import { RouteRef } from '@core/router/route-ref';
 import {
+  ApplicationCommandConfiguration,
   ApplicationCommandMetadata,
-  ApplicationCommandParameter,
   ApplicationCommandRoute,
   ContextType,
   RouterDecoratorOptions,
   SlashCommandMetadata,
+  SlashCommandParameter,
   SubCommandMetadata,
   WatsonEvent,
 } from '@watsonjs/common';
-
-import { ApplicationCommandConfig } from './application-command-config';
 
 export class ApplicationCommandRouteImpl
   extends RouteRef<WatsonEvent.INTERACTION_CREATE>
@@ -23,13 +22,13 @@ export class ApplicationCommandRouteImpl
   public host: any;
   public parent: ApplicationCommandRoute | null;
 
-  public readonly configuration: ApplicationCommandConfig;
+  public readonly configuration: ApplicationCommandConfiguration;
 
   public get name() {
     return this.configuration.name;
   }
 
-  public params?: ApplicationCommandParameter[];
+  public params?: SlashCommandParameter[];
 
   public children: Map<string, ApplicationCommandRoute> | null = null;
 

@@ -1,2 +1,2 @@
-export * from "./command-configuration-host";
+export * from "./command-configuration";
 export * from "./command-route";
