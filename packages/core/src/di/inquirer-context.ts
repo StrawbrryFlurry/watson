@@ -1,6 +1,6 @@
-import { Injectable } from '@watsonjs/common';
+import { Injectable, Type } from '@watsonjs/common';
 
-import { DependencyGraph } from './dependency-grap';
+import { DependencyGraph } from './dependency-graph';
 import { Injector } from './injector';
 
 import type { Binding } from "./binding";
@@ -11,14 +11,16 @@ import type { Binding } from "./binding";
  * from an injector.
  */
 @Injectable({ providedIn: InjectorInquirerContext })
-export class InjectorInquirerContext {
+export class InjectorInquirerContext<
+  T extends Binding | typeof Injector | Type = Binding | typeof Injector | Type
+> {
   /**
    * The {@link Binding} from which the current
    * provider was requested. If the provider was not
    * resolved using constructor injection,
    * it will have the type {@link Injector}.
    */
-  inquirer: Binding | typeof Injector;
+  inquirer: T;
   /**
    * The parameter index the current provider
    * will be injected into.
@@ -38,7 +40,7 @@ export class InjectorInquirerContext {
   dependencyGraph: DependencyGraph | null;
 
   constructor(
-    inquirer: Binding | typeof Injector = Injector,
+    inquirer: T = <T>Injector,
     parameterIdx: number | null = null,
     dependencyGraph: DependencyGraph | null = null
   ) {

@@ -117,8 +117,8 @@ export class Binding<
     this.factory = factory! ?? undefined;
   }
 
-  public isTransient() {
-    return this.lifetime & InjectorLifetime.Transient;
+  public isTransient(): boolean {
+    return !!(this.lifetime & InjectorLifetime.Transient);
   }
 
   public getInstance(

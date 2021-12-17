@@ -18,13 +18,12 @@ import {
   getProviderToken,
   isUseExistingProvider,
 } from './binding';
-import { DependencyGraph } from './dependency-grap';
+import { DependencyGraph } from './dependency-graph';
 import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
 import { InjectorBloomFilter } from './injector-bloom-filter';
 import { INJECTOR } from './injector-token';
 import { InjectorInquirerContext } from './inquirer-context';
 import { ModuleRef } from './module';
-import { NullInjector } from './null-injector';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
@@ -85,7 +84,7 @@ export class DynamicInjector implements Injector {
     inquirerContext: InjectorInquirerContext = new InjectorInquirerContext()
   ): Promise<R> {
     const { providedIn } = getInjectableDef(typeOrToken);
-    let parent = this.parent ?? new NullInjector();
+    let parent = this.parent ?? Injector.NULL;
 
     if (providedIn === "ctx") {
       if (isNil(ctx)) {
@@ -102,7 +101,7 @@ export class DynamicInjector implements Injector {
       (providedIn === "module" ||
         (isFunction(providedIn) && this._scope instanceof providedIn))
     ) {
-      parent = new NullInjector();
+      parent = Injector.NULL;
     }
 
     const binding = this._records.get(typeOrToken);

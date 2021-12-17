@@ -2,7 +2,7 @@ import { isNil } from './shared.utils';
 
 export function optionalAssign<T>(
   target: Object,
-  propertyKey: string,
+  propertyKey: string | symbol,
   value: T
 ): T {
   if (!target.hasOwnProperty(propertyKey) && !isNil(target[propertyKey])) {

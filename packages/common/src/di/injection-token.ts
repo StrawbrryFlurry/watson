@@ -107,7 +107,7 @@ export function ɵdefineInjectable(
   typeOrToken: Object | Type | InjectionToken,
   providedIn: ProvidedInScope = DEFAULT_SCOPE,
   lifetime: InjectorLifetime = DEFAULT_LIFETIME
-): HasProv["ɵprov"] {
+): HasProv[typeof W_PROV] {
   const injectableDef = {
     providedIn: resolveForwardRef(providedIn),
     lifetime: lifetime,

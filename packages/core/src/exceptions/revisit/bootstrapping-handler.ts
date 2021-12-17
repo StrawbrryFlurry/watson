@@ -19,7 +19,7 @@ export class BootstrappingHandler {
       } catch (err: unknown) {
         if (err instanceof Error) {
           const context = (err as any).getContext();
-          const logger = new Logger();
+          const logger = new Logger("" as any);
           const message = (err as any).getMessage();
           const stack = (err as any).getStack();
 
@@ -38,7 +38,7 @@ export class BootstrappingHandler {
 
           reject(err);
         } else {
-          const logger = new Logger();
+          const logger = new Logger("" as any);
           logger.logMessage(BOOTSTRAPPING_ERROR_MESSAGE());
           reject(err);
         }

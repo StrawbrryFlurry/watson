@@ -1,20 +1,20 @@
 import { AdapterRef } from '@core/adapters';
 import { CommandContainer } from '@core/command';
-import { ModuleContainer, NewableTo } from '@core/di';
+import { Injector, InjectorInquirerContext, ModuleContainer, ModuleLoader, NewableTo } from '@core/di';
+import { WatsonClientBase } from '@core/interfaces';
+import { LifecycleHost } from '@core/lifecycle';
+import { CREATE_APP_CONTEXT, Logger } from '@core/logger';
 import { ClassProvider, isNil, Type, ValueProvider } from '@watsonjs/common';
 
-import { Injector } from './di';
-import { ModuleLoader } from './di/module-loader';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
-import { WatsonClientBase } from './interfaces';
-import { LifecycleHost } from './lifecycle/hooks';
-import { CREATE_APP_CONTEXT, Logger } from './logger';
 import { ApplicationRef, WatsonApplication } from './watson-application';
 
 const DEFAULT_ADAPTER_PACKAGE = "@watsonjs/platform-discordjs";
 
 export class WatsonFactory {
-  private static logger = new Logger();
+  private static logger = new Logger(
+    new InjectorInquirerContext(WatsonFactory)
+  );
 
   private static async getAdapterOrDefault(
     adapter: NewableTo<AdapterRef> | undefined

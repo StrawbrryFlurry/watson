@@ -3,7 +3,7 @@ export * from "./component-factory";
 export * from "./context-injector";
 export * from "./context-provider-factory";
 export * from "./cross-platform-injector";
-export * from "./dependency-grap";
+export * from "./dependency-graph";
 export * from "./dynamic-injector";
 export * from "./injector-bloom-filter";
 export * from "./injector-token";
