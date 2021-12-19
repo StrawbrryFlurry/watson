@@ -16,6 +16,7 @@
     "test": "nx test",
     "lint": "nx workspace-lint && nx lint",
     "e2e": "nx e2e",
+    "docs": "typedoc",
     "check-circular-common": "dpdm --tsconfig ./tsconfig.json --circular ./packages/common/src",
     "check-circular-core": "dpdm --tsconfig ./tsconfig.json --circular ./packages/core/src",
     "affected:apps": "nx affected:apps",
@@ -81,6 +82,7 @@
     "prettier": "^2.5.0",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",
+    "typedoc": "^0.22.10",
     "typescript": "^4.5.2"
   }
 }
