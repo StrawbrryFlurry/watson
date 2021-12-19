@@ -58,7 +58,6 @@ export enum InjectorElementId {
 export const W_BINDING_DEF = "ɵbidef";
 
 /**
- *
  * Property on a {@link Type} or {@link InjectionToken}
  * that defines what lifetime and provider scope
  * the given provider has.
@@ -82,3 +81,10 @@ export const W_PARAM_TYPE = "ɵcmdprmtype";
 export interface ɵHasParamType {
   [W_PARAM_TYPE]: any;
 }
+
+/**
+ * Property on the {@link Injectable} decorator.
+ * This property saves a {@link UniqueTypeArray} of all injectables
+ * that should be provided in the root injector.
+ */
+export const W_GLOBAL_PROV = "ɵgprov";

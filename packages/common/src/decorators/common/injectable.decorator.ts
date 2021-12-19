@@ -1,4 +1,6 @@
 import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@common/di/injection-token';
+import { W_GLOBAL_PROV } from '@common/fields';
+import { UniqueTypeArray } from 'packages/common/src';
 
 export interface InjectableMetadata extends Required<InjectableOptions> {}
 
@@ -15,12 +17,26 @@ export const CUSTOM_INJECTABLE_METADATA = new InjectionToken<string>(
   }
 );
 
+interface InjectableDecoratorWithGlobalInjectablesProperty {
+  [W_GLOBAL_PROV]: UniqueTypeArray<InjectableOptions>;
+}
+
 export function Injectable(options: InjectableOptions = {}): ClassDecorator {
   return (target: Object) => {
     const { lifetime, providedIn } = options;
-    ɵdefineInjectable(target, providedIn, lifetime);
+    const injectableDef = ɵdefineInjectable(target, providedIn, lifetime);
+
+    if (injectableDef.providedIn === "root") {
+      <InjectableDecoratorWithGlobalInjectablesProperty>(
+        Injectable[W_GLOBAL_PROV].push(injectableDef)
+      );
+    }
   };
 }
+
+(<InjectableDecoratorWithGlobalInjectablesProperty>(<any>Injectable))[
+  W_GLOBAL_PROV
+] = new UniqueTypeArray();
 
 /**
  * TODO:
