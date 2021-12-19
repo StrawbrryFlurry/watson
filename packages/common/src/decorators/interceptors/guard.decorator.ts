@@ -1,10 +1,10 @@
 import { GUARD_METADATA } from '@common/constants';
 import { InjectionToken, InjectorLifetime } from '@common/di';
-import { W_INJ_TYPE } from '@common/fields';
+import { W_INT_TYPE } from '@common/fields';
 import { ExecutionContext } from '@common/pipeline';
 import { Observable } from 'rxjs';
 
-import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
 
 /**
  * Guards will check incoming commands for user permissions or other data you might
@@ -33,14 +33,14 @@ export const GLOBAL_GUARD = new InjectionToken<GuardsMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_GUARD[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Guard;
+GLOBAL_GUARD[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Guard;
 
 export const GUARD = new InjectionToken<GuardsMetadata[]>(
   "Filter for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-GUARD[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Guard;
+GUARD[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Guard;
 
 export function UseGuards(
   ...guards: GuardsMetadata[]
@@ -50,8 +50,8 @@ export function UseGuards(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    return applyInjectableMetadata(
-      ɵINJECTABLE_TYPE.Guard,
+    return applyInterceptorMetadata(
+      ɵINTERCEPTOR_TYPE.Guard,
       GUARD_METADATA,
       guards,
       target,

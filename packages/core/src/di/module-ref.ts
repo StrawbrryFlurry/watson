@@ -5,7 +5,7 @@ import {
   FILTER_METADATA,
   GUARD_METADATA,
   Injectable,
-  IsInjectable,
+  IsInterceptor,
   isNil,
   PIPE_METADATA,
   PREFIX_METADATA,
@@ -15,7 +15,7 @@ import {
   Type,
   UniqueTypeArray,
   ValueProvider,
-  W_INJ_TYPE,
+  W_INT_TYPE,
   W_MODULE_PROV,
 } from '@watsonjs/common';
 
@@ -98,7 +98,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
     this.providers.add(...providers);
 
     const injectorProviders = metatype[W_MODULE_PROV] as ProviderResolvable[];
-    const moduleScopedInjectables = new UniqueTypeArray<IsInjectable>();
+    const moduleScopedInjectables = new UniqueTypeArray<IsInterceptor>();
     const moduleInjectorProviders = this._bindProviders(
       injectorProviders,
       moduleScopedInjectables,
@@ -121,15 +121,15 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
   private _bindProviders(
     providers: ProviderResolvable[],
-    routerInjectables: IsInjectable[],
+    routerInjectables: IsInterceptor[],
     rootInjector: Injector
   ): ProviderResolvable[] {
     return providers
       .map((provider) => {
         const { providedIn } = getInjectableDef(provider);
 
-        if (!isNil(provider[W_INJ_TYPE])) {
-          routerInjectables.push(provider as any as IsInjectable);
+        if (!isNil(provider[W_INT_TYPE])) {
+          routerInjectables.push(provider as any as IsInterceptor);
           return false;
         }
 
@@ -157,7 +157,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
    */
   private _bindRouters(
     routers: Type[],
-    moduleScopedComponentInjectables: IsInjectable[]
+    moduleScopedComponentInjectables: IsInterceptor[]
   ): CustomProvider[] {
     return routers.map((router) => {
       const componentScopedInjectables =
@@ -165,7 +165,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
       const componentProviders = this._reflectComponentProviders(router);
 
-      const componentInjectables: IsInjectable[] = [
+      const componentInjectables: IsInterceptor[] = [
         ...moduleScopedComponentInjectables,
         ...componentScopedInjectables,
       ];
@@ -186,7 +186,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
   }
 
   private _reflectAllComponentInjectables(metatype: Type) {
-    const injectables = new UniqueTypeArray<IsInjectable>();
+    const injectables = new UniqueTypeArray<IsInterceptor>();
 
     if (isNil(metatype) || isNil(metatype.prototype)) {
       return injectables;
@@ -207,7 +207,7 @@ export class ModuleImpl extends ModuleRef implements Injector {
 
   private _reflectComponentInjectable(
     metatype: Type,
-    ctx: UniqueTypeArray<IsInjectable>,
+    ctx: UniqueTypeArray<IsInterceptor>,
     metadataKey: string
   ) {
     const prototypeInjectables =

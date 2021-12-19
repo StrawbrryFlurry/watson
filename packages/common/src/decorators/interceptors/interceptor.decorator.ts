@@ -1,10 +1,10 @@
 import { INTERCEPTOR_METADATA } from '@common/constants';
 import { InjectionToken, InjectorLifetime } from '@common/di';
-import { W_INJ_TYPE } from '@common/fields';
+import { W_INT_TYPE } from '@common/fields';
 import { ExecutionContext } from '@common/pipeline';
 import { Observable } from 'rxjs';
 
-import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
 
 export type NextHandler = () => any;
 
@@ -23,14 +23,14 @@ export const GLOBAL_INTERCEPTOR = new InjectionToken<InterceptorMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_INTERCEPTOR[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Interceptor;
+GLOBAL_INTERCEPTOR[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Interceptor;
 
 export const INTERCEPTOR = new InjectionToken<InterceptorMetadata[]>(
   "Interceptor for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-INTERCEPTOR[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Interceptor;
+INTERCEPTOR[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Interceptor;
 
 export function UseInterceptors(
   ...interceptors: InterceptorMetadata[]
@@ -40,8 +40,8 @@ export function UseInterceptors(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    return applyInjectableMetadata(
-      ɵINJECTABLE_TYPE.Interceptor,
+    return applyInterceptorMetadata(
+      ɵINTERCEPTOR_TYPE.Interceptor,
       INTERCEPTOR_METADATA,
       interceptors,
       target,

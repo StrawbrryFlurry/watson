@@ -19,6 +19,7 @@ import {
   SlashCommandStringParameterOptions,
   Type,
   W_PARAM_TYPE,
+  ɵHasParamType,
 } from '@watsonjs/common';
 
 export class ApplicationCommandConfigurationImpl
@@ -38,9 +39,10 @@ export class ApplicationCommandConfigurationImpl
   ) {
     const { name, type } = options;
     this.name = name;
-    this.type = type;
+    this.type = <ApplicationCommandType>type;
 
-    this.description = (options as SlashCommandMetadata).description ?? null;
+    this.description = (<SlashCommandMetadata>options).description ?? null;
+    this._applyCommandConfiguration();
   }
 
   private _applyCommandConfiguration() {
@@ -60,12 +62,16 @@ export class ApplicationCommandConfigurationImpl
     for (let i = 0; i < parameters.length; i++) {
       const parameter = parameters[i];
       const metadata = paramMetadata.find((meta) => meta.parameterIndex === i);
-      const type = (parameter as any)[W_PARAM_TYPE];
+      const type = ((<any>parameter) as ɵHasParamType)[W_PARAM_TYPE];
       const apiType = this._getApiParameterType(type);
 
       if (isNil(metadata)) {
         if (isNil(type)) {
           continue;
+        }
+
+        if (this.type !== ApplicationCommandType.Message) {
+          throw `Only SlashCommands can have parameters assigned to them`;
         }
 
         const name = parameterNames[i];
@@ -97,18 +103,11 @@ export class ApplicationCommandConfigurationImpl
   }
 
   private _validateParameter(parameter: SlashCommandParameter) {
-    const {
-      name,
-      description,
-      choices,
-      channelTypes,
-      maxValue,
-      minValue,
-      apiType,
-    } = parameter as SlashCommandNumberParameterOptions &
-      SlashCommandChannelParameterOptions &
-      SlashCommandStringParameterOptions &
-      Required<SlashCommandParameter>;
+    const { name, description, choices } =
+      parameter as SlashCommandNumberParameterOptions &
+        SlashCommandChannelParameterOptions &
+        SlashCommandStringParameterOptions &
+        Required<SlashCommandParameter>;
 
     if (!isNil(choices)) {
       const { length } = choices;

@@ -1,9 +1,9 @@
 import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
 import { InjectionToken } from '@common/di/injection-token';
 import { ExceptionHandler } from '@common/exceptions';
-import { W_INJ_TYPE } from '@common/fields';
+import { W_INT_TYPE } from '@common/fields';
 
-import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
 
 interface WithCatch {
   prototype: ExceptionHandler;
@@ -15,14 +15,14 @@ export const GLOBAL_EXCEPTION_HANDLER = new InjectionToken<
   providedIn: "root",
 });
 
-GLOBAL_EXCEPTION_HANDLER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.ExceptionHandler;
+GLOBAL_EXCEPTION_HANDLER[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.ExceptionHandler;
 
 export const EXCEPTION_HANDLER = new InjectionToken<ExceptionHandlerMetadata[]>(
   "Exception handler for the current module",
   { providedIn: "module" }
 );
 
-EXCEPTION_HANDLER[W_INJ_TYPE] = ɵINJECTABLE_TYPE.ExceptionHandler;
+EXCEPTION_HANDLER[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.ExceptionHandler;
 
 export type ExceptionHandlerMetadata = WithCatch | ExceptionHandler;
 
@@ -34,8 +34,8 @@ export function UseExceptionHandler(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    return applyInjectableMetadata(
-      ɵINJECTABLE_TYPE.ExceptionHandler,
+    return applyInterceptorMetadata(
+      ɵINTERCEPTOR_TYPE.ExceptionHandler,
       EXCEPTION_HANDLER_METADATA,
       handlers,
       target,

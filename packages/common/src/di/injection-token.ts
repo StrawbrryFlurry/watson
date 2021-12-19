@@ -1,4 +1,4 @@
-import { HasProv, W_PROV } from '@common/fields';
+import { W_PROV, ɵHasProv } from '@common/fields';
 import { Type } from '@common/type';
 
 import { resolveForwardRef } from './forward-ref';
@@ -107,7 +107,7 @@ export function ɵdefineInjectable(
   typeOrToken: Object | Type | InjectionToken,
   providedIn: ProvidedInScope = DEFAULT_SCOPE,
   lifetime: InjectorLifetime = DEFAULT_LIFETIME
-): HasProv[typeof W_PROV] {
+): ɵHasProv[typeof W_PROV] {
   const injectableDef = {
     providedIn: resolveForwardRef(providedIn),
     lifetime: lifetime,

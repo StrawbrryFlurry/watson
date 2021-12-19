@@ -5,20 +5,22 @@
  * to rename them to a more compact / efficient
  * one.
  *
- * Might want to use Symbol()?
+ * Symbol() somehow breaks unit tests. Until
+ * we figure out why that is, hidden properties
+ * will stay as strings.
  */
 
 /**
- * Injectables, which are types in the framework, that
+ * Interceptors, which are types in the framework, that
  * are used once a method in a component is called.
  *
- * Unlike providers, injectables can also be regular
+ * Unlike providers, Interceptors can also be regular
  * functions which have no way of identifying what
  * injectable type they belong to. Through this property
  * we have a reference point to what method a specific
  * injectable needs to be provided.
  */
-export const W_INJ_TYPE = "ɵinjt";
+export const W_INT_TYPE = "ɵintt";
 
 /**
  * The element ID is used by the DI
@@ -66,7 +68,7 @@ export const W_BINDING_DEF = "ɵbidef";
  */
 export const W_PROV = "ɵprov";
 
-export interface HasProv {
+export interface ɵHasProv {
   [W_PROV]: {
     providedIn: any;
     lifetime: any;
@@ -76,3 +78,7 @@ export interface HasProv {
 export const W_MODULE_PROV = "ɵmoprov";
 
 export const W_PARAM_TYPE = "ɵcmdprmtype";
+
+export interface ɵHasParamType {
+  [W_PARAM_TYPE]: any;
+}

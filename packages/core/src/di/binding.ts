@@ -2,7 +2,6 @@ import {
   ClassProvider,
   CustomProvider,
   FactoryProvider,
-  HasProv,
   InjectableOptions,
   InjectionToken,
   InjectorLifetime,
@@ -18,6 +17,7 @@ import {
   W_ELEMENT_ID,
   W_PROV,
   ɵdefineInjectable,
+  ɵHasProv,
 } from '@watsonjs/common';
 import { Observable } from 'rxjs';
 
@@ -232,7 +232,7 @@ export function getInjectableDef(
     typeOrToken = provide;
   }
 
-  let injectableDef = (<HasProv>(<any>typeOrToken))[W_PROV];
+  let injectableDef = (<ɵHasProv>(<any>typeOrToken))[W_PROV];
 
   if (isNil(injectableDef)) {
     injectableDef = ɵdefineInjectable(typeOrToken);

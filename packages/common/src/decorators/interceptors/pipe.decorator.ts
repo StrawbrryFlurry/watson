@@ -1,10 +1,10 @@
 import { CommandArgument } from '@common/command/command-argument.interface';
 import { PIPE_METADATA } from '@common/constants';
 import { InjectionToken, InjectorLifetime } from '@common/di';
-import { W_INJ_TYPE } from '@common/fields';
+import { W_INT_TYPE } from '@common/fields';
 import { Observable } from 'rxjs';
 
-import { applyInjectableMetadata, ɵINJECTABLE_TYPE } from './is-injectable';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
 
 /**
  * Alters an argument passed to a route
@@ -26,14 +26,14 @@ export const GLOBAL_PIPE = new InjectionToken<PipesMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_PIPE[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Pipe;
+GLOBAL_PIPE[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Pipe;
 
 export const PIPE = new InjectionToken<PipesMetadata[]>(
   "Pipe for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-PIPE[W_INJ_TYPE] = ɵINJECTABLE_TYPE.Pipe;
+PIPE[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Pipe;
 
 /**
  * TODO:
@@ -48,8 +48,8 @@ export function UsePipes(
     propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor
   ) => {
-    return applyInjectableMetadata(
-      ɵINJECTABLE_TYPE.Pipe,
+    return applyInterceptorMetadata(
+      ɵINTERCEPTOR_TYPE.Pipe,
       PIPE_METADATA,
       pipes,
       target,

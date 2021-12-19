@@ -1,8 +1,8 @@
 import { applyStackableMetadata } from '@common/decorators/apply-stackable-metadata';
-import { W_INJ_TYPE } from '@common/fields';
+import { W_INT_TYPE } from '@common/fields';
 import { isMethodDecorator } from '@common/utils';
 
-export enum ɵINJECTABLE_TYPE {
+export enum ɵINTERCEPTOR_TYPE {
   Guard,
   Prefix,
   ExceptionHandler,
@@ -11,27 +11,27 @@ export enum ɵINJECTABLE_TYPE {
   Filter,
 }
 
-export interface IsInjectable {
-  [W_INJ_TYPE]: ɵINJECTABLE_TYPE;
+export interface IsInterceptor {
+  [W_INT_TYPE]: ɵINTERCEPTOR_TYPE;
 }
 
-function defineInjectableType(
-  injectables: (object | Function)[],
-  type: ɵINJECTABLE_TYPE
+function defineInterceptorType(
+  interceptors: (object | Function)[],
+  type: ɵINTERCEPTOR_TYPE
 ) {
-  for (const injectable of injectables) {
-    injectable[W_INJ_TYPE] = type;
+  for (const interceptor of interceptors) {
+    interceptor[W_INT_TYPE] = type;
   }
 }
 
-export function applyInjectableMetadata<T extends Array<unknown>>(
-  type: ɵINJECTABLE_TYPE,
+export function applyInterceptorMetadata<T extends Array<unknown>>(
+  type: ɵINTERCEPTOR_TYPE,
   metadata: string,
   payload: T,
   target: any,
   descriptor?: PropertyDescriptor
 ) {
-  defineInjectableType(payload as Function[], type);
+  defineInterceptorType(payload as Function[], type);
 
   if (isMethodDecorator(descriptor)) {
     return applyStackableMetadata(metadata, descriptor!.value, payload);

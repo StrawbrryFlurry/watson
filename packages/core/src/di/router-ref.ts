@@ -1,24 +1,25 @@
-import { Binding, createBinding, getInjectableDef, Injector, ModuleRef, NOT_FOUND, ProviderResolvable } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
   ExecutionContext,
   isClassConstructor,
   isFunction,
-  IsInjectable,
+  IsInterceptor,
   isNil,
   MessageSendable,
   Providable,
   Type,
   UniqueTypeArray,
   ValueProvider,
-  W_INJ_TYPE,
-  ɵINJECTABLE_TYPE,
+  W_INT_TYPE,
+  ɵINTERCEPTOR_TYPE,
 } from '@watsonjs/common';
 
-import { InjectorGetResult } from './injector';
+import { Binding, createBinding, getInjectableDef } from './binding';
+import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from './injector';
+import { ModuleRef } from './module-ref';
 
-interface InjectableBinding {
+interface InterceptorBinding {
   /**
    * Means that the injectable
    * is an instance of a class that
@@ -48,7 +49,7 @@ interface InjectableBinding {
   metatype: Function | Type;
 }
 
-export class RouterRefImpl<T = any> extends RouterRef {
+export class RouterRefImpl<T = any> extends RouterRef<T> {
   public root: RouterRef<any>;
   public readonly metatype: Type;
 
@@ -69,12 +70,12 @@ export class RouterRefImpl<T = any> extends RouterRef {
    */
   private _contextProviders = new UniqueTypeArray<Binding>();
 
-  private _injectables = new Map<ɵINJECTABLE_TYPE, InjectableBinding[]>();
+  private _interceptors = new Map<ɵINTERCEPTOR_TYPE, InterceptorBinding[]>();
 
   constructor(
     metatype: Type,
     providers: ProviderResolvable[],
-    injectables: IsInjectable[],
+    injectables: IsInterceptor[],
     moduleRef: ModuleRef
   ) {
     super();
@@ -114,30 +115,30 @@ export class RouterRefImpl<T = any> extends RouterRef {
       .filter(Boolean) as ProviderResolvable[];
   }
 
-  private _bindInjectables(injectables: IsInjectable[]) {
+  private _bindInjectables(injectables: IsInterceptor[]) {
     for (const injectable of injectables) {
-      const type = injectable[W_INJ_TYPE];
-      const bindings = this._injectables.get(type) ?? [];
+      const type = injectable[W_INT_TYPE];
+      const bindings = this._interceptors.get(type) ?? [];
 
       const isClassCtor = isClassConstructor(injectable);
       const isPlainFunction = isFunction(injectable);
 
-      const injectableBinding: InjectableBinding = {
+      const injectableBinding: InterceptorBinding = {
         metatype: injectable as unknown as Type,
         isCtxFunction: !isClassCtor && isPlainFunction,
         isInstance: !isClassCtor && !isPlainFunction,
       };
 
-      this._injectables.set(type, [...bindings, injectableBinding]);
+      this._interceptors.set(type, [...bindings, injectableBinding]);
     }
   }
 
   public async createInjectablesByKey(
-    key: ɵINJECTABLE_TYPE,
+    key: ɵINTERCEPTOR_TYPE,
     injectableMethodKey: string,
     ctx?: ExecutionContext
   ): Promise<((...args: any[]) => any)[]> {
-    const injectableBindings = this._injectables.get(key);
+    const injectableBindings = this._interceptors.get(key);
 
     if (isNil(injectableBindings)) {
       return [];
@@ -168,10 +169,6 @@ export class RouterRefImpl<T = any> extends RouterRef {
     }
 
     return injectables;
-  }
-
-  public getRoutes(): BaseRoute[] {
-    return null as any;
   }
 
   public dispatch(route: BaseRoute): Promise<void | MessageSendable> {

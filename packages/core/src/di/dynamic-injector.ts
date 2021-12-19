@@ -23,7 +23,7 @@ import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
 import { InjectorBloomFilter } from './injector-bloom-filter';
 import { INJECTOR } from './injector-token';
 import { InjectorInquirerContext } from './inquirer-context';
-import { ModuleRef } from './module';
+import { ModuleRef } from './module-ref';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;

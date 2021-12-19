@@ -11,7 +11,7 @@ export * from "./injector";
 export * from "./inquirer-context";
 export * from "./module-container";
 export * from "./module-loader";
-export * from "./module";
+export * from "./module-ref";
 export * from "./null-injector";
 export * from "./reflector";
 export * from "./router-ref";
