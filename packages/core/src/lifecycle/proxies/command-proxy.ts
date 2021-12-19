@@ -1,4 +1,4 @@
-import { LifecycleFunction } from '@core/router/route-handler-factory';
+import { LifecycleFunction } from '@core/router';
 import { CommandRoute, ExceptionHandler, isNil, MessageMatcher, WatsonEvent } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
@@ -59,9 +59,9 @@ export class CommandProxy extends AbstractProxy<
 
   public bind(
     route: CommandRoute,
-    eventHandler: LifecycleFunction,
+    handlerFn: LifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void {
-    this.handlers.set(route, [eventHandler, exceptionHandler]);
+    Reflect.apply(this.bindHandler, this, arguments);
   }
 }

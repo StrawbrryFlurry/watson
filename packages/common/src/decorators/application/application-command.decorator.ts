@@ -6,13 +6,20 @@ export enum ApplicationCommandType {
   User,
   Message,
 }
+type ApplicationCommandTypeWithoutSlashCommands = Omit<
+  ApplicationCommandType,
+  1
+>;
 
 export interface ApplicationCommandMetadata {
   name: string;
-  type: ApplicationCommandType;
+  type: ApplicationCommandTypeWithoutSlashCommands;
 }
 
-function createApplicationCommand(name: string, type: ApplicationCommandType) {
+function createApplicationCommand(
+  name: string,
+  type: ApplicationCommandTypeWithoutSlashCommands
+) {
   return (
     target: Object,
     propertyKey: string | Symbol,

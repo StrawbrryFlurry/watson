@@ -1,6 +1,6 @@
 import { AdapterRef } from '@core/adapters';
 import { CommandContainer } from '@core/command';
-import { Injector, InjectorInquirerContext, ModuleContainer, ModuleLoader, NewableTo } from '@core/di';
+import { Injector, ModuleContainer, ModuleLoader, NewableTo } from '@core/di';
 import { WatsonClientBase } from '@core/interfaces';
 import { LifecycleHost } from '@core/lifecycle';
 import { CREATE_APP_CONTEXT, Logger } from '@core/logger';
@@ -13,7 +13,7 @@ const DEFAULT_ADAPTER_PACKAGE = "@watsonjs/platform-discordjs";
 
 export class WatsonFactory {
   private static logger = new Logger(
-    new InjectorInquirerContext(WatsonFactory)
+    "" as any //new InjectorInquirerContext("WatsonFactory" as any)
   );
 
   private static async getAdapterOrDefault(

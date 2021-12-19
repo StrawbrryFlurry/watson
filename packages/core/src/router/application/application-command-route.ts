@@ -21,6 +21,7 @@ export class ApplicationCommandRouteImpl
   public handler: Function;
   public host: any;
   public parent: ApplicationCommandRoute | null;
+  public commandId: string | null = null;
 
   public readonly configuration: ApplicationCommandConfiguration;
 

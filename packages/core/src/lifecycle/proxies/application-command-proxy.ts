@@ -1,27 +1,47 @@
+import { Injector } from '@core/di';
 import { LifecycleFunction } from '@core/router';
 import { ApplicationCommandRoute, BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
+import { Interaction } from 'discord.js';
 
 import { AbstractProxy } from './abstract-proxy';
 
 export class ApplicationCommandProxy extends AbstractProxy<
   WatsonEvent.INTERACTION_CREATE,
-  ApplicationCommandRoute
+  ApplicationCommandRoute,
+  Interaction
 > {
-  constructor() {
+  constructor(injector: Injector) {
     super(WatsonEvent.INTERACTION_CREATE);
   }
 
-  public proxy(args: any): Promise<void> {
-    // TODO:
-    // Check if the interaction is an event that should update a button or text
-    // Check if the interaction is a command, if so run that handler
+  public proxy(interaction: Interaction): Promise<void> {
+    /**
+     * Needs to be handled fist as the
+     * user expects real-time feedback
+     * as he's typing.
+     */
+    if (interaction.isAutocomplete()) {
+      // User is trying to autocomplete
+    }
+
+    if (interaction.isMessageComponent()) {
+      interaction;
+
+      // Handle existing message component listeners
+    }
+
+    if (interaction.isApplicationCommand()) {
+      const { commandId } = interaction;
+    }
+
     throw new Error("Method not implemented.");
   }
+
   public bind(
     route: BaseRoute,
     eventHandler: LifecycleFunction,
     exceptionHandler: ExceptionHandler
   ): void {
-    throw new Error("Method not implemented.");
+    Reflect.apply(this.bindHandler, this, arguments);
   }
 }

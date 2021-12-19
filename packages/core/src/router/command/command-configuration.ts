@@ -13,6 +13,7 @@ import {
   ParameterConfiguration,
   RouterDecoratorOptions,
   W_PARAM_TYPE,
+  ɵHasParamType,
 } from '@watsonjs/common';
 
 export class CommandConfigurationImpl implements CommandConfiguration {
@@ -78,7 +79,7 @@ export class CommandConfigurationImpl implements CommandConfiguration {
       const parameter = parameters[i];
       const metadata = paramMetadata.find((meta) => meta.parameterIndex === i);
 
-      const type = (parameter as any)[W_PARAM_TYPE];
+      const type = ((<any>parameter) as ɵHasParamType)[W_PARAM_TYPE];
 
       if (isNil(metadata)) {
         if (isNil(type)) {

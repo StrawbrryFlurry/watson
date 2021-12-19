@@ -49,8 +49,8 @@ export class ApplicationProxy {
     const handlerFns = proxy.getHandlerFns();
     const proxyRef = this.eventProxies.get(event)!;
 
-    for (const [routeRef, [eventHandler, exceptionHandler]] of handlerFns) {
-      proxyRef.bind(routeRef, eventHandler, exceptionHandler);
+    for (const [routeRef, { handlerFn, exceptionHandler }] of handlerFns) {
+      proxyRef.bind(routeRef, handlerFn, exceptionHandler);
     }
   }
 }

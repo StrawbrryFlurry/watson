@@ -144,6 +144,21 @@ export function ɵbindProviders(
     const { multi } = binding;
 
     if (!isNil(hasBinding) && !multi) {
+      /**
+       * If this injector is the root injector,
+       * it is likely that some providers are
+       * added to this injector's provider scope
+       * multiple times via modules or through
+       * providedIn "root" `@Injectable` declarations.
+       *
+       * We can just skip over them as they were added
+       * to the root injector before.
+       */
+      const { providedIn } = getInjectableDef(token);
+      if (providedIn === "root") {
+        continue;
+      }
+
       throw "Found multiple providers with the same token that are not `multi`";
     }
 
