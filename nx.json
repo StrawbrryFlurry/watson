@@ -1,8 +1,4 @@
 {
-  "npmScope": "watsonjs",
-  "affected": {
-    "defaultBase": "master"
-  },
   "implicitDependencies": {
     "package.json": {
       "dependencies": "*",
@@ -10,14 +6,7 @@
     },
     ".eslintrc.json": "*"
   },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
-      }
-    }
-  },
+  "npmScope": "watsonjs",
   "targetDependencies": {
     "build": [
       {
@@ -26,15 +15,24 @@
       }
     ]
   },
-  "projects": {
-    "common": {},
-    "core": {},
-    "platform-discordjs": {},
-    "testing": {},
-    "example": {}
-  },
   "workspaceLayout": {
     "appsDir": "packages",
     "libsDir": "packages"
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/workspace/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "parallel": 1
+      }
+    }
+  },
+  "affected": {
+    "defaultBase": "master"
+  },
+  "cli": {
+    "packageManager": "pnpm",
+    "defaultCollection": "@nrwl/node"
   }
 }

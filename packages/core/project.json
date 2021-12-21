@@ -1,0 +1,26 @@
+{
+  "root": "packages/core",
+  "sourceRoot": "packages/core/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:package",
+      "options": {
+        "outputPath": "dist/libs/core",
+        "tsConfig": "packages/core/tsconfig.json",
+        "packageJson": "packages/core/package.json",
+        "main": "packages/core/src/index.ts",
+        "assets": ["packages/core/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/core"],
+      "options": {
+        "jestConfig": "packages/core/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "implicitDependencies": ["di"]
+}

@@ -1,0 +1,26 @@
+{
+  "root": "packages/common",
+  "sourceRoot": "packages/common/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:package",
+      "options": {
+        "outputPath": "dist/libs/common",
+        "tsConfig": "packages/common/tsconfig.json",
+        "packageJson": "packages/common/package.json",
+        "main": "packages/common/src/index.ts",
+        "assets": ["packages/common/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/common"],
+      "options": {
+        "jestConfig": "packages/common/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "implicitDependencies": ["di", "common"]
+}

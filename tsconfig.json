@@ -26,6 +26,7 @@
     "paths": {
       "@watsonjs/common": ["./packages/common/src"],
       "@watsonjs/core": ["./packages/core/src"],
+      "@watsonjs/di": ["packages/di/src"],
       "@watsonjs/platform-discordjs": ["./packages/platform-discordjs/src"],
 
       "@common/builtin": ["./packages/common/src/builtin"],
@@ -64,7 +65,18 @@
       "@core/interfaces/*": ["./packages/core/src/interfaces/*"],
       "@core/lifecycle": ["./packages/core/src/lifecycle"],
       "@core/exceptions": ["./packages/core/src/exceptions"],
-      "@core/utils": ["./packages/core/src/util"]
+      "@core/utils": ["./packages/core/src/util"],
+
+      "@di/decorators": ["packages/di/src/decorators"],
+      "@di/data-structures": ["packages/di/src/data-structures"],
+      "@di/core/*": ["packages/di/src/core/*"],
+      "@di/hooks": ["packages/di/src/hooks"],
+      "@di/providers": ["packages/di/src/providers"],
+      "@di/types": ["packages/di/src/types"],
+      "@di/constants": ["packages/di/src/constants"],
+      "@di/utils": ["packages/di/src/utils"],
+      "@di/utils/common": ["packages/di/src/utils/shared.util"],
+      "@di/fields": ["packages/di/src/fields"]
     }
   },
   "exclude": ["../node_modules", "./**/*.spec.ts"]
