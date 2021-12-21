@@ -1,7 +1,7 @@
 import { CommandArgument } from '@common/command/command-argument.interface';
 import { PIPE_METADATA } from '@common/constants';
-import { InjectionToken, InjectorLifetime } from '@common/di';
 import { W_INT_TYPE } from '@common/fields';
+import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
 import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';

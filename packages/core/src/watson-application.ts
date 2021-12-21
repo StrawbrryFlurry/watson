@@ -1,7 +1,9 @@
 import { AdapterRef } from '@core/adapters';
-import { Injector } from '@core/di';
 import { WatsonClientBase } from '@core/interfaces';
-import { CanActivate, ExceptionHandler, Injectable, MatchingStrategy, PipeTransform, Type } from '@watsonjs/common';
+import { LifecycleHost } from '@core/lifecycle';
+import { RouteExplorer } from '@core/router';
+import { CanActivate, ExceptionHandler, MatchingStrategy, PipeTransform } from '@watsonjs/common';
+import { Injectable, Injector, Type } from '@watsonjs/di';
 import { ActivityOptions } from 'discord.js';
 import { config } from 'process';
 import { PassThrough } from 'stream';
@@ -10,8 +12,6 @@ import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
-import { LifecycleHost } from './lifecycle/hooks';
-import { RouteExplorer } from './router';
 
 @Injectable({ providedIn: "root" })
 export abstract class ApplicationRef {

@@ -1,6 +1,6 @@
-import { PassThrough } from '@common/decorators';
-import { Injectable } from '@common/injectable';
-import { ExecutionContext } from '@common/pipeline';
+import { PassThrough } from "@common/decorators";
+import { ExecutionContext } from "@common/pipeline";
+import { Injectable } from "@watsonjs/di";
 
 /**
  * Default filter for specifying guilds whose

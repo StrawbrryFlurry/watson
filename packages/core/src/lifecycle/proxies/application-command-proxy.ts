@@ -1,6 +1,6 @@
-import { Injector } from '@core/di';
 import { LifecycleFunction } from '@core/router';
 import { ApplicationCommandRoute, BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
+import { Injector } from '@watsonjs/di';
 import { Interaction } from 'discord.js';
 
 import { AbstractProxy } from './abstract-proxy';

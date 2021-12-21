@@ -1,4 +1,3 @@
-import { MethodDescriptor, Reflector } from '@core/di';
 import {
   CommandConfiguration,
   CommandCooldownOptions,
@@ -6,7 +5,6 @@ import {
   CommandParameterMetadata,
   CommandRoute,
   COOLDOWN_METADATA,
-  getFunctionParameters,
   isEmpty,
   isNil,
   PARAM_METADATA,
@@ -15,6 +13,7 @@ import {
   W_PARAM_TYPE,
   ɵHasParamType,
 } from '@watsonjs/common';
+import { getFunctionParameters, MethodDescriptor, Reflector } from '@watsonjs/di';
 
 export class CommandConfigurationImpl implements CommandConfiguration {
   public name: string;

@@ -1,7 +1,7 @@
 import { FILTER_METADATA } from '@common/constants';
-import { InjectionToken, InjectorLifetime } from '@common/di';
 import { W_INT_TYPE } from '@common/fields';
 import { ExecutionContext } from '@common/pipeline';
+import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
 import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';

@@ -1,4 +1,5 @@
-import { DiscordAdapter, Injectable, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
+import { DiscordAdapter, IWSEvent, RuntimeException, WatsonEvent } from '@watsonjs/common';
+import { Injectable } from '@watsonjs/di';
 import { ActivityOptions } from 'discord.js';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 

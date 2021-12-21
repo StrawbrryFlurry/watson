@@ -1,4 +1,3 @@
-import { MethodDescriptor } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import { RouteRef } from '@core/router/route-ref';
 import {
@@ -12,6 +11,7 @@ import {
   SubCommandMetadata,
   WatsonEvent,
 } from '@watsonjs/common';
+import { MethodDescriptor } from '@watsonjs/di';
 
 export class ApplicationCommandRouteImpl
   extends RouteRef<WatsonEvent.INTERACTION_CREATE>

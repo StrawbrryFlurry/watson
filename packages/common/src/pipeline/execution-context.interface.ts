@@ -1,15 +1,13 @@
-import { DiscordAdapter } from '@common/adapter';
-import { InjectionToken } from '@common/di';
-import { Injectable } from '@common/injectable';
-import { BaseRoute } from '@common/router';
-import { Type } from '@common/type';
-import { Base, Client, ClientEvents } from 'discord.js';
+import { DiscordAdapter } from "@common/adapter";
+import { BaseRoute } from "@common/router";
+import { Injectable, InjectionToken, Type } from "@watsonjs/di";
+import { Base, Client, ClientEvents } from "discord.js";
 
-import { CommandPipeline } from './command-pipeline.interface';
-import { ContextType } from './context-type.enum';
-import { EventPipeline } from './event-pipeline.interface';
-import { InteractionPipeline } from './interaction-pipeline.interface';
-import { PipelineHost } from './pipeline-host.interface';
+import { CommandPipeline } from "./command-pipeline.interface";
+import { ContextType } from "./context-type.enum";
+import { EventPipeline } from "./event-pipeline.interface";
+import { InteractionPipeline } from "./interaction-pipeline.interface";
+import { PipelineHost } from "./pipeline-host.interface";
 
 type InjectorGetResult<T> = T extends InjectionToken<infer R>
   ? R

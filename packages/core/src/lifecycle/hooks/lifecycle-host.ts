@@ -1,5 +1,3 @@
-import { Injector, ModuleContainer, ModuleRef } from '@core/di';
-import { resolveAsyncValue } from '@core/utils';
 import {
   isFunction,
   isNil,
@@ -7,8 +5,8 @@ import {
   OnApplicationShutdown,
   OnModuleDestroy,
   OnModuleInit,
-  Type,
 } from '@watsonjs/common';
+import { Injector, ModuleContainer, ModuleRef, resolveAsyncValue, Type } from '@watsonjs/di';
 import iterate from 'iterare';
 
 type ComponentWithLifecycleFunction<T extends {}> = {
@@ -48,7 +46,7 @@ export class LifecycleHost {
 
     for (const module of modules) {
       const components = this.getModuleComponents(module);
-      const componentInstances = [];
+      const componentInstances: unknown[] = [];
 
       for (const component of components) {
         const instance = await module.get(component);
@@ -71,17 +69,19 @@ export class LifecycleHost {
   }
 
   private getInstancesWithLifecycleHook<T extends {}>(
-    wrappers: ComponentWithLifecycleFunction<T>[],
+    wrappers: unknown[],
     hook: keyof T
   ): ComponentWithLifecycleFunction<T>[] {
     return wrappers
       .filter((instance) => !isNil(instance))
-      .filter((instance) => isFunction(instance[hook]));
+      .filter((instance) =>
+        isFunction((<ComponentWithLifecycleFunction<T>>instance)[hook])
+      ) as ComponentWithLifecycleFunction<T>[];
   }
 
   private getModuleComponents(module: ModuleRef): Type[] {
-    const { routers, providers } = module;
-    return [...routers, ...providers] as Type[];
+    const { components, providers } = module;
+    return [...components, ...providers] as Type[];
   }
 
   private async getModules(): Promise<ModuleRef[]> {

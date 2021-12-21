@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@watsonjs/common": "1.0.0",
-    "@watsonjs/core": "1.0.0",
+    "@watsonjs/di": "1.0.0",
     "reflect-metadata": "^0.1.12"
   },
   "homepage": "https://watsonjs.io",

@@ -1,5 +1,5 @@
 import { MessageSendable } from '@common/discord-types';
-import { Injectable } from '@common/injectable';
+import { Injectable } from '@watsonjs/di';
 import { ChannelResolvable, Guild, Message } from 'discord.js';
 
 /**

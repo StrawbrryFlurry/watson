@@ -1,5 +1,6 @@
-import { ContextBindingFactory, Injector } from '@core/di';
+import { ContextBindingFactory, ContextProviderFactory } from '@core/di';
 import { ApplicationCommandRoute, ContextType, InteractionCtx, InteractionPipeline } from '@watsonjs/common';
+import { Injector } from '@watsonjs/di';
 import {
   CommandInteraction,
   ContextMenuInteraction,
@@ -11,7 +12,6 @@ import {
   VoiceChannel,
 } from 'discord.js';
 
-import { ContextProviderFactory } from '../../di/context-provider-factory';
 import { PipelineBaseImpl } from './pipeline-base';
 
 export class InteractionPipelineImpl

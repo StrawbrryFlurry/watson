@@ -1,5 +1,5 @@
-import { ModuleRef } from '@core/di';
-import { isClassConstructor, isUndefined, Type } from '@watsonjs/common';
+import { isClassConstructor, isUndefined } from '@watsonjs/common';
+import { ModuleRef, Type } from '@watsonjs/di';
 
 export class CircularDependencyException<
   T extends Type | ModuleRef

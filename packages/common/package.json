@@ -25,7 +25,8 @@
   },
   "peerDependencies": {
     "rxjs": "^6.6.3",
-    "luxon": "^2.0.2"
+    "luxon": "^2.0.2",
+    "@watsonjs/di": "1.0"
   },
   "homepage": "https://watsonjs.io",
   "publishConfig": {

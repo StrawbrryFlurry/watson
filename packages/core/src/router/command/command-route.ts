@@ -1,4 +1,3 @@
-import { MethodDescriptor } from '@core/di';
 import { RouterRef } from '@core/router/application-router';
 import { RouteRef } from '@core/router/route-ref';
 import {
@@ -11,8 +10,9 @@ import {
   SubCommandOptions,
   WatsonEvent,
 } from '@watsonjs/common';
+import { MethodDescriptor } from '@watsonjs/di';
 
-import { CommandConfigurationImpl } from '.';
+import { CommandConfigurationImpl } from './command-configuration';
 
 export class CommandRouteImpl
   extends RouteRef<WatsonEvent.COMMAND>

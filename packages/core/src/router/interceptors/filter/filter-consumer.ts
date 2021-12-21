@@ -1,6 +1,6 @@
 import { InterceptorsConsumer } from '@core/router/interceptors';
-import { resolveAsyncValue } from '@core/utils';
 import { ExecutionContext, FiltersMetadata, PassThrough, PipelineBase } from '@watsonjs/common';
+import { resolveAsyncValue } from '@watsonjs/di';
 
 export class FiltersConsumer extends InterceptorsConsumer {
   constructor() {

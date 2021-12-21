@@ -1,6 +1,6 @@
-import { Module } from '@common/decorators/common/module.decorator';
-import { DynamicModule, ValueProvider } from '@common/di';
+import { DynamicModule, Module } from '@common/decorators/common/module.decorator';
 import { isNil } from '@common/utils';
+import { ValueProvider } from '@watsonjs/di';
 import { DotenvConfigOptions } from 'dotenv';
 
 import { ConfigService } from './config.service';
@@ -30,7 +30,6 @@ export class ConfigModule {
           useValue: new ConfigService(dotEnv, withConfig),
         } as ValueProvider,
       ],
-      global: global,
     };
   }
 }

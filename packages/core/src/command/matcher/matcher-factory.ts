@@ -1,5 +1,5 @@
-import { Injector, NOT_FOUND } from '@core/di';
 import { MatchingStrategy, MessageMatcher, PrefixCache } from '@watsonjs/common';
+import { Injector, NOT_FOUND } from '@watsonjs/di';
 
 import { CachedDynamicMessageMatcher, TransientDynamicMessageMatcher } from '.';
 import { GuildScopedMessageMatcher } from './scoped';

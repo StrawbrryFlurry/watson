@@ -1,5 +1,6 @@
 import { RouterRef } from '@core/router';
-import { CommandRoute, EventRoute, Type } from '@watsonjs/common';
+import { CommandRoute, EventRoute } from '@watsonjs/common';
+import { Type } from '@watsonjs/di';
 import { blue, cyan, yellow } from 'cli-color';
 
 // WATSON FACTORY

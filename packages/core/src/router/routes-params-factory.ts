@@ -1,18 +1,14 @@
-import { resolveAsyncValue } from '@core/utils';
 import {
   BaseRoute,
   CommandParameterMetadata,
   ExecutionContext,
-  getFunctionParameters,
   isFunction,
   isNil,
   ParameterMetadata,
   PipelineBase,
   SlashCommandParameterMetadata,
-  Type,
 } from '@watsonjs/common';
-
-import { getInjectableDef } from '..';
+import { getFunctionParameters, getInjectableDef, resolveAsyncValue, Type } from '@watsonjs/di';
 
 export class RouteParamsFactory {
   public async createFromContext(

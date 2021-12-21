@@ -1,0 +1,19 @@
+{
+  "extends": "./../../tsconfig.json",
+  "compilerOptions": {
+    "sourceRoot": "src",
+    "paths": {
+      "@di/decorators": ["packages/di/src/decorators"],
+      "@di/data-structures": ["packages/di/src/data-structures"],
+      "@di/core/*": ["packages/di/src/core/*"],
+      "@di/hooks": ["packages/di/src/hooks"],
+      "@di/providers": ["packages/di/src/providers"],
+      "@di/types": ["packages/di/src/types"],
+      "@di/constants": ["packages/di/src/constants"],
+      "@di/utils": ["packages/di/src/utils"],
+      "@di/utils/common": ["packages/di/src/utils/shared.util"],
+      "@di/fields": ["packages/di/src/fields"]
+    }
+  },
+  "include": ["*.ts", "**/*.ts"]
+}

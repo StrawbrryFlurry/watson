@@ -26,7 +26,8 @@
       "@common/utils": ["./packages/common/src/utils"],
       "@common/di": ["packages/common/src/di"],
       "@common/di/*": ["packages/common/src/di/*"],
-      "@common/constants": ["./packages/common/src/constants.ts"]
+      "@common/constants": ["./packages/common/src/constants.ts"],
+      "@watsonjs/di": ["./packages/di/src"]
     }
   },
   "include": ["*.ts", "**/*.ts"]

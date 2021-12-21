@@ -1,4 +1,3 @@
-import { Injector } from '@core/di';
 import {
   ApplicationCommandRoute,
   BaseRoute,
@@ -7,6 +6,7 @@ import {
   MessageMatchResult,
   OmitFirstElement,
 } from '@watsonjs/common';
+import { Injector } from '@watsonjs/di';
 import { Message } from 'discord.js';
 
 import { CommandPipelineImpl } from './command-pipe';

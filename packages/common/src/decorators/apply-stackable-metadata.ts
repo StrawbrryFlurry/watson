@@ -1,4 +1,4 @@
-import { Type } from '@common/type';
+import { Type } from '@watsonjs/di';
 
 export function applyStackableMetadata<T>(
   key: string,

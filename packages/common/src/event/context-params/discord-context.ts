@@ -1,5 +1,5 @@
-import { Injectable } from '@common/injectable';
 import { ExtendReadonlyCtor } from '@common/utils';
+import { Injectable } from '@watsonjs/di';
 import { Channel, ClientEvents, Guild, Interaction, Message, VoiceChannel } from 'discord.js';
 
 /**

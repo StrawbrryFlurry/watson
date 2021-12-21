@@ -1,5 +1,5 @@
-import { Module } from '@common/decorators';
-import { DynamicModule, FactoryProvider, ValueProvider } from '@common/di';
+import { DynamicModule, Module } from '@common/decorators';
+import { FactoryProvider, ValueProvider } from '@watsonjs/di';
 import { AxiosRequestConfig } from 'axios';
 
 import { httpClientFactory } from './http-client.provider';

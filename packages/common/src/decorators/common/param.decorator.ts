@@ -1,13 +1,17 @@
-import { Parsable } from '@common/command/common';
-import { ADate, CommandParameterType, DateParameterOptions } from '@common/command/parameter-types';
-import { PARAM_METADATA } from '@common/constants';
-import { applyStackableMetadata } from '@common/decorators/apply-stackable-metadata';
-import { ParameterMetadata } from '@common/decorators/create-param-decorator';
-import { W_PARAM_TYPE } from '@common/fields';
-import { getFunctionParameters, mergeDefaults } from '@common/utils';
+import { Parsable } from "@common/command/common";
+import {
+  ADate,
+  CommandParameterType,
+  DateParameterOptions,
+} from "@common/command/parameter-types";
+import { PARAM_METADATA } from "@common/constants";
+import { applyStackableMetadata } from "@common/decorators/apply-stackable-metadata";
+import { ParameterMetadata } from "@common/decorators/create-param-decorator";
+import { W_PARAM_TYPE } from "@common/fields";
+import { mergeDefaults } from "@common/utils";
+import { getFunctionParameters } from "@watsonjs/di";
 
 import type { SlashCommandParameterOptions } from "@common/decorators/application/application-command-parameter.interface";
-
 type GetConfigurationsFromParameterType<T> = T extends ADate
   ? DateParameterOptions
   : never;

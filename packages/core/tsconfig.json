@@ -16,6 +16,7 @@
       "@core/exceptions": ["packages/core/src/exceptions"],
       "@core/utils": ["packages/core/src/util"],
       "@watsonjs/common": ["packages/common/src"],
+      "@watsonjs/di": ["packages/di/src"],
       "@watsonjs/platform-discordjs": ["packages/platform-discordjs/src"]
     }
   },

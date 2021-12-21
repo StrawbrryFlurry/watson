@@ -1,14 +1,9 @@
-import { Injector, InjectorGetResult } from '@core/di';
-import { BaseRoute, Injectable, MessageSendable, Providable, Type } from '@watsonjs/common';
-import iterate from 'iterare';
+import { BaseRoute, MessageSendable } from "@watsonjs/common";
+import { Injectable, WatsonComponentRef } from "@watsonjs/di";
+import iterate from "iterare";
 
 @Injectable({ providedIn: "module" })
-export abstract class RouterRef<T = any> implements Injector {
-  public abstract parent: Injector | null;
-  public abstract metatype: Type;
-  public abstract name: string;
-  public abstract instance: T | null;
-
+export abstract class RouterRef<T = any> extends WatsonComponentRef<T> {
   /**
    * A map of all routes that are
    * bound within this router.
@@ -20,12 +15,6 @@ export abstract class RouterRef<T = any> implements Injector {
      */ Function,
     BaseRoute
   >();
-
-  public abstract get<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: T,
-    notFoundValue?: any,
-    ctx?: Injector
-  ): Promise<R>;
 
   /**
    * The application level router.

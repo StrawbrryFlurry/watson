@@ -1,5 +1,6 @@
-import { ContextBindingFactory, ContextProviderFactory, Injector } from '@core/di';
+import { ContextBindingFactory, ContextProviderFactory } from '@core/di';
 import { ContextType, EventCtx, EventPipeline, EventRoute } from '@watsonjs/common';
+import { Injector } from '@watsonjs/di';
 import { ClientEvents } from 'discord.js';
 
 import { PipelineBaseImpl } from './pipeline-base';

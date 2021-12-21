@@ -1,9 +1,9 @@
-import { Reflector } from '@core/di';
 import { ResponseController } from '@core/lifecycle';
 import { RouteParamsFactory } from '@core/router';
 import { RouterRef } from '@core/router/application-router';
 import { FiltersConsumer, GuardsConsumer, PipesConsumer } from '@core/router/interceptors';
 import { BaseRoute, CommandRoute, ExecutionContext, PARAM_METADATA, ParameterMetadata } from '@watsonjs/common';
+import { Reflector } from '@watsonjs/di';
 
 /**
  * The handler function will be called by

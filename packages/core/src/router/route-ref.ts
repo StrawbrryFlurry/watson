@@ -1,5 +1,6 @@
 import { RouterRef } from '@core/router';
-import { BaseRoute, ContextType, Type, WatsonEvent } from '@watsonjs/common';
+import { BaseRoute, ContextType, WatsonEvent } from '@watsonjs/common';
+import { Type } from '@watsonjs/di';
 
 /**
  * Represents a route of any type

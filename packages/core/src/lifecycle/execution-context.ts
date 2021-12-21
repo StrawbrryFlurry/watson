@@ -1,5 +1,4 @@
 import { AdapterRef } from '@core/adapters';
-import { Injector, InjectorGetResult } from '@core/di';
 import { RouterRef } from '@core/router';
 import {
   BaseRoute,
@@ -10,9 +9,8 @@ import {
   ExecutionContext,
   InteractionPipeline,
   PipelineBase,
-  Providable,
-  Type,
 } from '@watsonjs/common';
+import { Injector, InjectorGetResult, Providable, Type } from '@watsonjs/di';
 import { Client } from 'discord.js';
 
 export class ExecutionContextImpl<

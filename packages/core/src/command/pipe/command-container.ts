@@ -1,4 +1,5 @@
-import { CommandRoute, Injectable, isString } from '@watsonjs/common';
+import { CommandRoute, isString } from '@watsonjs/common';
+import { Injectable } from '@watsonjs/di';
 import iterate from 'iterare';
 
 @Injectable({ providedIn: "root" })

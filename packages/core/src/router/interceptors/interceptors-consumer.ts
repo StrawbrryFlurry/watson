@@ -1,5 +1,6 @@
 import { Interceptor } from '@core/logger';
-import { isFunction, isNil, Type } from '@watsonjs/common';
+import { isFunction, isNil } from '@watsonjs/common';
+import { Type } from '@watsonjs/di';
 
 import { ModuleInitException } from '../../exceptions/revisit';
 

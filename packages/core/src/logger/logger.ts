@@ -1,5 +1,4 @@
-import { Injector, InjectorInquirerContext } from '@core/di';
-import { Injectable } from '@watsonjs/common';
+import { Injectable, Injector, InjectorInquirerContext } from '@watsonjs/di';
 import { green, red, white, yellow } from 'cli-color';
 
 export enum LogType {

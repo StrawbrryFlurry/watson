@@ -41,12 +41,6 @@ export type And<R extends boolean[], T extends boolean = true> = T extends false
     : true
   : true;
 
-export type CtorParameters<T extends Object> = T extends new (
-  ...args: infer A
-) => any
-  ? A
-  : never;
-
 export type NullableT<T, K extends keyof T = keyof T> = T extends Object
   ? { [P in keyof T]: P extends K ? T[P] | null : T[P] }
   : T | null;

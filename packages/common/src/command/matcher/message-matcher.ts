@@ -1,6 +1,6 @@
 import { Prefix } from '@common/command/common';
 import { PrefixCache } from '@common/command/matcher';
-import { Injectable } from '@common/injectable';
+import { Injectable } from '@watsonjs/di';
 import { Message } from 'discord.js';
 
 import { MatchingStrategy } from './matching-strategy.enum';

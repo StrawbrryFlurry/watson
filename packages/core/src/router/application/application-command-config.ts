@@ -1,11 +1,9 @@
-import { MethodDescriptor, Reflector } from '@core/di';
 import {
   ApplicationCommandConfiguration,
   ApplicationCommandMetadata,
   ApplicationCommandRoute,
   ApplicationCommandType,
   CommandParameterType,
-  getFunctionParameters,
   isNil,
   isNilOrEmpty,
   PARAM_METADATA,
@@ -17,10 +15,10 @@ import {
   SlashCommandParameterApiType,
   SlashCommandParameterMetadata,
   SlashCommandStringParameterOptions,
-  Type,
   W_PARAM_TYPE,
   ɵHasParamType,
 } from '@watsonjs/common';
+import { getFunctionParameters, MethodDescriptor, Reflector, Type } from '@watsonjs/di';
 
 export class ApplicationCommandConfigurationImpl
   implements ApplicationCommandConfiguration

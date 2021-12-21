@@ -1,4 +1,4 @@
-import { Type } from '@watsonjs/common';
+import { Type } from 'typescript';
 
 import { BootstrapException } from '../bootstrap.exception';
 

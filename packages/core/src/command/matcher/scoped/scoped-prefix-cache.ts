@@ -1,5 +1,5 @@
-import { resolveAsyncValue } from '@core/utils';
 import { isNil, isString, Prefix, PrefixCache } from '@watsonjs/common';
+import { resolveAsyncValue } from '@watsonjs/di';
 import { Message } from 'discord.js';
 
 export interface ScopedPrefixCacheData {

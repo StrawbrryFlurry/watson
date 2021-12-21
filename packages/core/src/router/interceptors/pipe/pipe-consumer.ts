@@ -1,6 +1,6 @@
 import { InterceptorsConsumer } from '@core/router/interceptors/interceptors-consumer';
-import { resolveAsyncValue } from '@core/utils';
 import { PipelineBase, PipeTransform } from '@watsonjs/common';
+import { resolveAsyncValue } from '@watsonjs/di';
 
 export class PipesConsumer extends InterceptorsConsumer {
   constructor() {

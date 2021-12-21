@@ -1,6 +1,6 @@
 import { InterceptorsConsumer } from '@core/router/interceptors/interceptors-consumer';
-import { resolveAsyncValue } from '@core/utils';
 import { CanActivate, ExecutionContext, PipelineBase, UnauthorizedException } from '@watsonjs/common';
+import { resolveAsyncValue } from '@watsonjs/di';
 
 export class GuardsConsumer extends InterceptorsConsumer {
   constructor() {

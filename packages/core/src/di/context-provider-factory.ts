@@ -1,3 +1,5 @@
+import { ContextInjector } from '@core/di';
+import { ParseMessageSendable } from '@core/lifecycle';
 import {
   ChannelCtx,
   CommandPipeline,
@@ -15,16 +17,14 @@ import {
   MessageSendable,
   PipelineBase,
   PromptInq,
-  Providable,
   ReplyInq,
   SendInq,
   TextBasedChannel,
   UnauthorizedException,
   VoiceChannelCtx,
 } from '@watsonjs/common';
+import { Injector, Providable } from '@watsonjs/di';
 import { CachedManager, Channel, ChannelResolvable, Guild, GuildMember, Message, Role, TextChannel } from 'discord.js';
-
-import { ContextInjector, Injector, ParseMessageSendable } from '..';
 
 type UserBasedPipeline = InteractionPipeline | CommandPipeline;
 type ProviderBundle = [Providable, any][];

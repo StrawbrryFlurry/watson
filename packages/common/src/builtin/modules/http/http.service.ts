@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@common/decorators';
+import { Inject, Injectable } from '@watsonjs/di';
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { from, Observable } from 'rxjs';
 

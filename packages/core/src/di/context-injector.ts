@@ -1,11 +1,21 @@
-import { ExecutionContextImpl } from '@core/lifecycle';
-import { resolveAsyncValue } from '@core/utils';
-import { ExecutionContext, FactoryProvider, isNil, PipelineBase, Providable, Type } from '@watsonjs/common';
-
-import { Binding, createBinding, createResolvedBinding, getInjectableDef } from './binding';
-import { ɵbindProviders, ɵcreateBindingInstance } from './dynamic-injector';
-import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
-import { InjectorInquirerContext } from './inquirer-context';
+import { ExecutionContextImpl } from "@core/lifecycle";
+import { ExecutionContext, isNil, PipelineBase } from "@watsonjs/common";
+import {
+  Binding,
+  createBinding,
+  createResolvedBinding,
+  FactoryProvider,
+  getInjectableDef,
+  Injector,
+  InjectorGetResult,
+  InjectorInquirerContext,
+  Providable,
+  ProviderResolvable,
+  resolveAsyncValue,
+  Type,
+  ɵbindProviders,
+  ɵcreateBindingInstance,
+} from "@watsonjs/di";
 
 export type ContextBindingFactory<
   BindFn extends (

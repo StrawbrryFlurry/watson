@@ -1,7 +1,6 @@
-import { ContextInjector, Injector, NOT_FOUND } from '@core/di';
-import { Injectable, Type } from '@watsonjs/common';
-
-import { RouterRef } from '..';
+import { ContextInjector } from '@core/di';
+import { RouterRef } from '@core/router';
+import { Injectable, Injector, NOT_FOUND, Type } from '@watsonjs/di';
 
 /**
  * Helper class for creating instances

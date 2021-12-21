@@ -1,4 +1,4 @@
-import { ContextBindingFactory, ContextProviderFactory, Injector } from '@core/di';
+import { ContextBindingFactory, ContextProviderFactory } from '@core/di';
 import {
   CommandAst,
   CommandPipeline,
@@ -9,6 +9,7 @@ import {
   Prefix,
   PrefixRef,
 } from '@watsonjs/common';
+import { Injector } from '@watsonjs/di';
 import { Guild, GuildMember, Message, StageChannel, TextBasedChannels, User, VoiceChannel } from 'discord.js';
 
 import { PipelineBaseImpl } from './pipeline-base';

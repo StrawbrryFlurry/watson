@@ -1,6 +1,4 @@
-import { CustomProvider, DynamicModule } from '@common/di';
-import { Type } from '@common/type';
-import { mergeDefaults } from '@common/utils';
+import { CustomProvider, Type, WatsonDynamicModule, WatsonModule, WatsonModuleOptions } from '@watsonjs/di';
 
 export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
@@ -9,23 +7,17 @@ export interface ModuleOptions {
   exports?: (Type | CustomProvider)[];
 }
 
-export function Module(options: ModuleOptions = {}): ClassDecorator {
-  const metadata = mergeDefaults<any>(options, {
-    exports: undefined,
-    imports: undefined,
-    providers: undefined,
-    routers: undefined,
-  });
-
-  return (target: Object) => {
-    for (const [key, value] of Object.entries(metadata)) {
-      Reflect.defineMetadata(`module-${key}:meta`, value, target);
-    }
-  };
+export interface DynamicModule extends Omit<WatsonDynamicModule, "components"> {
+  routers?: Type[];
 }
 
-export function isDynamicModule(
-  module: Type | DynamicModule
-): module is DynamicModule {
-  return "module" in module;
+export function Module(options: ModuleOptions = {}): ClassDecorator {
+  const moduleOptions: WatsonModuleOptions = {
+    components: options.routers ?? undefined,
+    providers: options.providers ?? undefined,
+    imports: options.imports ?? undefined,
+    exports: options.exports ?? undefined,
+  };
+
+  return WatsonModule(moduleOptions);
 }

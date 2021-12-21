@@ -1,4 +1,4 @@
-import { Injectable } from '@common/injectable';
+import { Injectable } from '@watsonjs/di';
 import { Message } from 'discord.js';
 import { Observable } from 'rxjs';
 

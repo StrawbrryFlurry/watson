@@ -1,4 +1,4 @@
-import { Injectable } from '@common/injectable';
+import { Injectable } from '@watsonjs/di';
 import { Channel, GuildMember, Role } from 'discord.js';
 
 interface FindInq<T> {

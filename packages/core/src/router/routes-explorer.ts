@@ -1,5 +1,4 @@
 import { CommandContainer } from '@core/command';
-import { Injector, MethodDescriptor, ModuleContainer, Reflector } from '@core/di';
 import {
   AbstractProxy,
   ApplicationCommandProxy,
@@ -27,13 +26,12 @@ import {
   isEmpty,
   isNil,
   MessageMatcher,
-  ROUTER_METADATA,
   RouterDecoratorOptions,
   SUB_COMMAND_METADATA,
   SubCommandOptions,
-  UniqueTypeArray,
   WatsonEvent,
 } from '@watsonjs/common';
+import { COMPONENT_METADATA, Injector, MethodDescriptor, ModuleContainer, Reflector, UniqueTypeArray } from '@watsonjs/di';
 
 import { RouterRef } from './application-router';
 import { CommandRouteImpl } from './command/command-route';
@@ -75,9 +73,9 @@ export class RouteExplorer {
     const commandContainer = await injector.get(CommandContainer);
     const routerRefs: RouterRef[] = new UniqueTypeArray();
 
-    for (const [metatype, { injector, routers }] of modules) {
+    for (const [metatype, { injector, components }] of modules) {
       const refs = await Promise.all(
-        routers.map((router) => injector.get(router))
+        components.map((router) => injector.get(router))
       );
       routerRefs.push(...refs);
     }
@@ -94,7 +92,7 @@ export class RouteExplorer {
     const { metatype } = routerRef;
     const methods = Reflector.reflectMethodsOfType(metatype);
     const routerMetadata = Reflector.reflectMetadata<RouterDecoratorOptions>(
-      ROUTER_METADATA,
+      COMPONENT_METADATA,
       metatype
     );
 

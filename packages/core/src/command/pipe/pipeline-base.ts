@@ -1,6 +1,7 @@
-import { ContextBindingFactory, ContextInjector, Injector } from '@core/di';
+import { ContextBindingFactory, ContextInjector } from '@core/di';
 import { RouterRef } from '@core/router';
 import { BaseRoute, ContextType, ExecutionContext, PipelineBase, PipelineWithGuildCtx } from '@watsonjs/common';
+import { Injector } from '@watsonjs/di';
 import { Snowflake } from 'discord.js';
 
 export abstract class PipelineBaseImpl<
