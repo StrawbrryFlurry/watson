@@ -21,7 +21,7 @@ export function WatsonModule(options: WatsonModuleOptions): ClassDecorator {
   };
 
   return (target: Object) => {
-    Reflect.defineMetadata(MODULE_DEFINITION_METADATA, target, metadata);
+    Reflect.defineMetadata(MODULE_DEFINITION_METADATA, metadata, target);
   };
 }
 

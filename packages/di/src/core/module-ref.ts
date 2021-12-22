@@ -1,20 +1,15 @@
-import { COMPONENT_METADATA } from "@di/constants";
-import { getInjectableDef } from "@di/core/binding";
-import { ɵComponentRefImpl } from "@di/core/component-ref";
-import { DynamicInjector } from "@di/core/dynamic-injector";
-import { Injector, ProviderResolvable } from "@di/core/injector";
-import { Reflector } from "@di/core/reflector";
-import { UniqueTypeArray } from "@di/data-structures";
-import { ComponentDecoratorOptions, Injectable } from "@di/decorators";
-import { W_MODULE_PROV } from "@di/fields";
-import {
-  CustomProvider,
-  InjectionToken,
-  Providable,
-  ValueProvider,
-} from "@di/providers";
-import { Type } from "@di/types";
-import { isNil } from "@di/utils/common";
+import { COMPONENT_METADATA } from '@di/constants';
+import { getInjectableDef } from '@di/core/binding';
+import { ɵComponentRefImpl } from '@di/core/component-ref';
+import { DynamicInjector } from '@di/core/dynamic-injector';
+import { Injector, ProviderResolvable } from '@di/core/injector';
+import { Reflector } from '@di/core/reflector';
+import { UniqueTypeArray } from '@di/data-structures';
+import { ComponentDecoratorOptions, Injectable } from '@di/decorators';
+import { W_MODULE_PROV } from '@di/fields';
+import { CustomProvider, InjectionToken, Providable, ValueProvider } from '@di/providers';
+import { Type } from '@di/types';
+import { isNil } from '@di/utils/common';
 
 export interface ModuleDef {
   metatype: Type;
@@ -84,7 +79,7 @@ export abstract class ModuleRef<T = any> implements Injector {
     this.components.add(...components);
     this.providers.add(...providers);
 
-    const moduleProviders = <ProviderResolvable[]>metatype[W_MODULE_PROV];
+    const moduleProviders = <ProviderResolvable[]>metatype[W_MODULE_PROV] ?? [];
     const moduleInjectorProviders = this._bindProviders(
       moduleProviders,
       rootInjector
@@ -100,7 +95,7 @@ export abstract class ModuleRef<T = any> implements Injector {
       ...moduleInjectorProviders,
     ];
 
-    this._injector = Injector.create(injectorProviders, parent, this);
+    this._injector = Injector.create(injectorProviders, parent, metatype);
   }
 
   public async getInstance(): Promise<T> {
@@ -162,10 +157,11 @@ export abstract class ModuleRef<T = any> implements Injector {
   }
 
   protected _reflectComponentProviders(metatype: Type): ProviderResolvable[] {
-    const { providers } = Reflector.reflectMetadata<ComponentDecoratorOptions>(
-      COMPONENT_METADATA,
-      metatype
-    );
+    const { providers } =
+      Reflector.reflectMetadata<ComponentDecoratorOptions>(
+        COMPONENT_METADATA,
+        metatype
+      ) ?? {};
 
     const prov = providers ?? [];
     return [...prov, ...this._contextProviders];
@@ -187,4 +183,13 @@ export abstract class ModuleRef<T = any> implements Injector {
   }
 }
 
-export class ɵModuleRefImpl extends ModuleRef {}
+export class ɵModuleRefImpl extends ModuleRef {
+  constructor(
+    metatype: Type,
+    rootInjector: Injector,
+    parent: Injector,
+    moduleDef: ModuleDef
+  ) {
+    super(metatype, rootInjector, parent, moduleDef, ɵComponentRefImpl);
+  }
+}

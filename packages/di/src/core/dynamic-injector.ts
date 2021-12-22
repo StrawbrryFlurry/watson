@@ -1,15 +1,9 @@
-import { ModuleRef } from "@di/core/module-ref";
-import { AfterResolution } from "@di/hooks";
-import {
-  CustomProvider,
-  FactoryProvider,
-  Providable,
-  UseExistingProvider,
-  ValueProvider,
-} from "@di/providers";
-import { Type } from "@di/types";
-import { resolveAsyncValue } from "@di/utils";
-import { isFunction, isNil } from "@di/utils/common";
+import { ModuleRef } from '@di/core/module-ref';
+import { AfterResolution } from '@di/hooks';
+import { CustomProvider, FactoryProvider, Providable, UseExistingProvider, ValueProvider } from '@di/providers';
+import { Type } from '@di/types';
+import { resolveAsyncValue } from '@di/utils';
+import { isFunction, isNil } from '@di/utils/common';
 
 import {
   Binding,
@@ -18,12 +12,12 @@ import {
   getInjectableDef,
   getProviderToken,
   isUseExistingProvider,
-} from "./binding";
-import { DependencyGraph } from "./dependency-graph";
-import { Injector, InjectorGetResult, ProviderResolvable } from "./injector";
-import { InjectorBloomFilter } from "./injector-bloom-filter";
-import { INJECTOR } from "./injector-token";
-import { InjectorInquirerContext } from "./inquirer-context";
+} from './binding';
+import { DependencyGraph } from './dependency-graph';
+import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
+import { InjectorBloomFilter } from './injector-bloom-filter';
+import { INJECTOR } from './injector-token';
+import { InjectorInquirerContext } from './inquirer-context';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
@@ -99,7 +93,7 @@ export class DynamicInjector implements Injector {
     if (
       !isNil(this._scope) &&
       (providedIn === "module" ||
-        (isFunction(providedIn) && this._scope instanceof providedIn))
+        (isFunction(providedIn) && this._scope === providedIn))
     ) {
       parent = Injector.NULL;
     }

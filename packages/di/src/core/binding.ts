@@ -252,7 +252,8 @@ export function getInjectableDef(
   return injectableDef;
 }
 
-export function createResolvedBinding(provider: ValueProvider): Binding {
+export function createResolvedBinding(_provider: ValueProvider): Binding {
+  const provider = resolveForwardRef(_provider);
   const { provide, useValue, multi } = provider;
   const { lifetime, providedIn } = getInjectableDef(provider);
 
@@ -264,7 +265,8 @@ export function createResolvedBinding(provider: ValueProvider): Binding {
   return binding;
 }
 
-export function createBinding(provider: ProviderResolvable): Binding {
+export function createBinding(_provider: ProviderResolvable): Binding {
+  const provider = resolveForwardRef(_provider);
   const { lifetime, providedIn } = getInjectableDef(provider);
   const token = getProviderToken(provider);
 

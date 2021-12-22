@@ -1,15 +1,10 @@
-import { Binding, createBinding, getInjectableDef } from "@di/core/binding";
-import {
-  Injector,
-  InjectorGetResult,
-  NOT_FOUND,
-  ProviderResolvable,
-} from "@di/core/injector";
-import { ModuleRef } from "@di/core/module-ref";
-import { UniqueTypeArray } from "@di/data-structures";
-import { Providable, ValueProvider } from "@di/providers";
-import { Type } from "@di/types";
-import { isNil } from "@di/utils/common";
+import { Binding, createBinding, getInjectableDef } from '@di/core/binding';
+import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
+import { ModuleRef } from '@di/core/module-ref';
+import { UniqueTypeArray } from '@di/data-structures';
+import { Providable, ValueProvider } from '@di/providers';
+import { Type } from '@di/types';
+import { isNil } from '@di/utils/common';
 
 export abstract class WatsonComponentRef<T = any> implements Injector {
   public parent: ModuleRef | null;
@@ -42,7 +37,10 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
     this._injector = Injector.create(
       [
         ...injectorProviders,
-        metatype,
+        //TODO:
+        // Resolve component instances using
+        // ComponentFactory
+        // metatype,
         {
           provide: WatsonComponentRef,
           useValue: this,
@@ -86,19 +84,20 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
     const resolved = await this._injector.get(typeOrToken, NOT_FOUND, ctx);
 
     /**
-     * It's okay for router injectors not to
+     * It's okay for component injectors not to
      * have all providers that they require
      * to resolve a given value. Usually we
      * need to use the module injector which
      * holds all resolvable providers available
-     * to routers in their module scope.
+     * to components in their module scope.
      */
     if (resolved === NOT_FOUND) {
-      return (
-        this.parent?.get(typeOrToken, notFoundValue, ctx) ??
+      if (isNil(this.parent)) {
         // If the router isn't part of a module, throw a NullInjector error.
-        Injector.NULL.get(typeOrToken, notFoundValue)
-      );
+        return Injector.NULL.get(typeOrToken, notFoundValue);
+      }
+
+      return this.parent.get(typeOrToken, notFoundValue, ctx);
     }
 
     return resolved as R;

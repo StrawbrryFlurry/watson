@@ -1,18 +1,16 @@
-import {
-  MODULE_DEFINITION_METADATA,
-  MODULE_REF_IMPL_METADATA,
-} from "@di/constants";
-import { Injector, ProviderResolvable } from "@di/core/injector";
-import { ModuleDef, ModuleRef, ɵModuleRefImpl } from "@di/core/module-ref";
-import { Reflector } from "@di/core/reflector";
-import { isDynamicModule, WatsonModuleOptions } from "@di/decorators";
-import { W_MODULE_PROV } from "@di/fields";
-import { WatsonDynamicModule } from "@di/providers";
-import { Type } from "@di/types";
-import { optionalAssign, resolveAsyncValue } from "@di/utils";
-import { isNil } from "@di/utils/common";
+import { MODULE_DEFINITION_METADATA, MODULE_REF_IMPL_METADATA } from '@di/constants';
+import { DynamicInjector } from '@di/core/dynamic-injector';
+import { Injector, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
+import { ModuleDef, ModuleRef, ɵModuleRefImpl } from '@di/core/module-ref';
+import { Reflector } from '@di/core/reflector';
+import { isDynamicModule, WatsonModuleOptions } from '@di/decorators';
+import { W_MODULE_PROV } from '@di/fields';
+import { resolveForwardRef, WatsonDynamicModule } from '@di/providers';
+import { Type } from '@di/types';
+import { optionalAssign, resolveAsyncValue } from '@di/utils';
+import { isNil } from '@di/utils/common';
 
-import { ModuleContainer } from "./module-container";
+import { ModuleContainer } from './module-container';
 
 /**
  * Resolves module dependencies
@@ -28,9 +26,11 @@ export class ModuleLoader {
   /**
    * Resolves the root module to recursively add its imports to the container
    */
-  public async resolveRootModule(metatype: Type) {
+  public async resolveRootModule<T extends ModuleRef = ModuleRef>(
+    metatype: Type
+  ): Promise<T> {
     const modules = await this.scanModuleRecursively(metatype);
-    await this.bindModuleProvidersAndCreateModuleRef(metatype, modules);
+    return this.bindModuleProvidersAndCreateModuleRef<T>(metatype, modules);
   }
 
   private async scanModuleRecursively(
@@ -38,7 +38,7 @@ export class ModuleLoader {
     resolved = new Map<Type, ModuleDef>(),
     ctx: Type[] = []
   ): Promise<Map<Type, ModuleDef>> {
-    const {
+    let {
       imports,
       metatype: type,
       exports,
@@ -48,13 +48,26 @@ export class ModuleLoader {
 
     ctx.push(type);
 
-    const _imports = (await Promise.all(
+    /**
+     * DynamicModules can return
+     * a promise so we need to make
+     * sure that we await all modules
+     */
+    let _imports = (await Promise.all(
       imports.map(async (module) =>
         isDynamicModule(await module)
           ? (module as WatsonDynamicModule).module
           : module
       )
     )) as Type[];
+
+    /**
+     * Resolve all module forwardRefs so that we
+     * don't have to deal with them later
+     */
+    [providers, components] = [providers, components].map(
+      (_) => <Type[]>_.map(resolveForwardRef)
+    );
 
     const moduleDef: ModuleDef = {
       metatype: type,
@@ -89,18 +102,23 @@ export class ModuleLoader {
     return resolved;
   }
 
-  private async bindModuleProvidersAndCreateModuleRef(
+  private async bindModuleProvidersAndCreateModuleRef<T extends ModuleRef>(
     rootModule: Type,
     modules: Map<Type, ModuleDef>
-  ): Promise<void> {
-    const container = await this._injector.get(ModuleContainer);
-    const ModuleImpl = Reflector.reflectMetadata<typeof ɵModuleRefImpl>(
-      MODULE_REF_IMPL_METADATA,
-      Injector
-    );
+  ): Promise<T> {
+    let container = await this._injector.get(ModuleContainer, NOT_FOUND);
+    const ModuleImpl =
+      Reflector.reflectMetadata<typeof ɵModuleRefImpl>(
+        MODULE_REF_IMPL_METADATA,
+        Injector
+      ) ?? ɵModuleRefImpl;
 
-    if (isNil(ModuleImpl)) {
-      throw "Could not find an Implementation for ModuleRef. Decorate a class that extends ModuleRef with `DeclareWatsonModuleRef()` to promote it to the application module ref.";
+    if (container === NOT_FOUND) {
+      container = new ModuleContainer();
+      (<DynamicInjector>this._injector).bind({
+        provide: ModuleContainer,
+        useValue: container,
+      });
     }
 
     const rootDef = modules.get(rootModule)!;
@@ -139,6 +157,7 @@ export class ModuleLoader {
     };
 
     createModuleRecursively(rootDef, rootRef);
+    return <T>rootRef;
   }
 
   /**
@@ -155,7 +174,9 @@ export class ModuleLoader {
     modules: Map<Type, ModuleDef>
   ): ProviderResolvable[] {
     const { imports, providers, metatype } = moduleDef;
-    const moduleProviders: ProviderResolvable[] = [...providers];
+    const moduleProviders: ProviderResolvable[] = providers.map(
+      (provider) => provider
+    );
 
     if (!isNil(metatype[W_MODULE_PROV])) {
       return metatype[W_MODULE_PROV];
