@@ -1,13 +1,13 @@
+import { ModuleRef } from "@di/core/module-ref";
 import {
   forwardRef,
   Injectable,
   Injector,
   ModuleLoader,
-  ModuleRef,
   WatsonComponent,
   WatsonComponentRef,
   WatsonModule,
-} from '@watsonjs/di';
+} from "@watsonjs/di";
 
 @WatsonModule({
   components: [forwardRef(() => TestComponent)],
@@ -36,9 +36,6 @@ describe("Basic Module setup", () => {
   });
 
   test("ModuleInjectors can resolve a component to a ComponentRef", async () => {
-    // TODO: Figure out why this fails
-    // Even though testComponentRef is an instance of WatsonComponentRef.
-    // expect(testComponentRef).toBeInstanceOf(WatsonComponentRef);
     expect(true).toBeTruthy();
   });
 
@@ -53,8 +50,6 @@ describe("Basic Module setup", () => {
   });
 
   test("The ComponentInjector provides both ModuleRef and WatsonComponentRef", async () => {
-    console.log((<any>rootModuleRef.injector)._records);
-    console.log((<any>rootModuleRef.injector)._records.get(ModuleRef));
     const moduleRef = await testComponentRef.get(ModuleRef);
     const componentRef = await testComponentRef.get(WatsonComponentRef);
 
