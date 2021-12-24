@@ -8,9 +8,10 @@ import { NullInjector } from './null-injector';
 import type { InjectorInquirerContext } from "./inquirer-context";
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
 
-export type InjectorGetResult<T, Multi = false> = T extends InjectionToken<
-  infer R
->
+export type InjectorGetResult<
+  T,
+  Multi extends boolean = false
+> = T extends InjectionToken<infer R>
   ? R
   : T extends new (...args: any[]) => infer R
   ? Multi extends false

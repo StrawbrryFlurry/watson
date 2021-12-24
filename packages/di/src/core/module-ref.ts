@@ -7,7 +7,7 @@ import { Reflector } from '@di/core/reflector';
 import { UniqueTypeArray } from '@di/data-structures';
 import { ComponentDecoratorOptions, Injectable } from '@di/decorators';
 import { W_MODULE_PROV } from '@di/fields';
-import { CustomProvider, InjectionToken, Providable, ValueProvider } from '@di/providers';
+import { CustomProvider, Providable, ValueProvider } from '@di/providers';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
@@ -18,10 +18,6 @@ export interface ModuleDef {
   providers: ProviderResolvable[];
   exports: ProviderResolvable[];
 }
-
-export const MODULE_REF_IMPL = new InjectionToken<typeof ɵModuleRefImpl>(
-  "Watson custom ModuleRef implementation"
-);
 
 /**
  * `ModuleRef` is a wrapper for a Watson Module which

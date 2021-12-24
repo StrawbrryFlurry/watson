@@ -6,7 +6,7 @@ export interface WatsonModuleOptions {
   imports?: (Type | WatsonDynamicModule | Promise<WatsonDynamicModule>)[];
   components?: Type[];
   providers?: (Type | CustomProvider)[];
-  exports?: (Type | CustomProvider)[];
+  exports?: Type[];
 }
 
 export function WatsonModule(options: WatsonModuleOptions): ClassDecorator {

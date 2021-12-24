@@ -1,16 +1,23 @@
 import { MODULE_DEFINITION_METADATA, MODULE_REF_IMPL_METADATA } from '@di/constants';
 import { DynamicInjector } from '@di/core/dynamic-injector';
 import { Injector, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
+import { ModuleContainer } from '@di/core/module-container';
 import { ModuleDef, ModuleRef, ɵModuleRefImpl } from '@di/core/module-ref';
 import { Reflector } from '@di/core/reflector';
 import { isDynamicModule, WatsonModuleOptions } from '@di/decorators';
 import { W_MODULE_PROV } from '@di/fields';
-import { resolveForwardRef, WatsonDynamicModule } from '@di/providers';
+import { CustomProvider, resolveForwardRef, WatsonDynamicModule } from '@di/providers';
 import { Type } from '@di/types';
 import { optionalAssign, resolveAsyncValue } from '@di/utils';
 import { isNil } from '@di/utils/common';
 
-import { ModuleContainer } from './module-container';
+export interface WatsonModuleMetadata {
+  metatype: Type;
+  imports: (Type | WatsonDynamicModule | Promise<WatsonDynamicModule>)[];
+  exports: Type[];
+  components: Type[];
+  providers: (Type | CustomProvider)[];
+}
 
 /**
  * Resolves module dependencies
@@ -29,11 +36,11 @@ export class ModuleLoader {
   public async resolveRootModule<T extends ModuleRef = ModuleRef>(
     metatype: Type
   ): Promise<T> {
-    const modules = await this.scanModuleRecursively(metatype);
-    return this.bindModuleProvidersAndCreateModuleRef<T>(metatype, modules);
+    const modules = await this._scanModuleRecursively(metatype);
+    return this._bindModuleProvidersAndCreateModuleRef<T>(metatype, modules);
   }
 
-  private async scanModuleRecursively(
+  private async _scanModuleRecursively(
     metatype: Type | WatsonDynamicModule,
     resolved = new Map<Type, ModuleDef>(),
     ctx: Type[] = []
@@ -56,7 +63,9 @@ export class ModuleLoader {
     let _imports = (await Promise.all(
       imports.map(async (module) =>
         isDynamicModule(await module)
-          ? (module as WatsonDynamicModule).module
+          ? (
+              await (<Promise<WatsonDynamicModule>>module)
+            ).module
           : module
       )
     )) as Type[];
@@ -93,7 +102,7 @@ export class ModuleLoader {
           return;
         }
 
-        return this.scanModuleRecursively(module as Type, resolved);
+        return this._scanModuleRecursively(module as Type, resolved);
       })
     );
 
@@ -102,7 +111,7 @@ export class ModuleLoader {
     return resolved;
   }
 
-  private async bindModuleProvidersAndCreateModuleRef<T extends ModuleRef>(
+  private async _bindModuleProvidersAndCreateModuleRef<T extends ModuleRef>(
     rootModule: Type,
     modules: Map<Type, ModuleDef>
   ): Promise<T> {
@@ -126,7 +135,7 @@ export class ModuleLoader {
     // Calling this method on the root module
     // should resolve injector providers for all
     // other modules as well.
-    this.recursivelyResolveModuleProviders(rootDef, modules);
+    this._recursivelyResolveModuleProviders(rootDef, modules);
 
     const rootRef = new ModuleImpl(
       rootModule,
@@ -169,38 +178,30 @@ export class ModuleLoader {
    * read all the modules providers including
    * imports.
    */
-  private recursivelyResolveModuleProviders(
+  private _recursivelyResolveModuleProviders(
     moduleDef: ModuleDef,
     modules: Map<Type, ModuleDef>
-  ): ProviderResolvable[] {
+  ): ProviderResolvable[] | void {
     const { imports, providers, metatype } = moduleDef;
-    const moduleProviders: ProviderResolvable[] = providers.map(
-      (provider) => provider
-    );
+    const moduleProviders: ProviderResolvable[] = providers;
 
     if (!isNil(metatype[W_MODULE_PROV])) {
       return metatype[W_MODULE_PROV];
     }
 
-    const resolveExports = (module: ModuleDef): ProviderResolvable[] => {
-      const { imports, exports, providers, metatype } = module;
-      const exportProviders: ProviderResolvable[] = [];
-
-      if (!isNil(metatype[W_MODULE_PROV])) {
-        moduleProviders.push(...metatype[W_MODULE_PROV]);
-        return metatype[W_MODULE_PROV];
-      }
-
-      // If the module exports itself,
-      // export all of it's providers
-      if (exports.includes(metatype)) {
-        moduleProviders.push(...providers);
-        exportProviders.push(...providers);
-      }
+    const resolveModuleExports = (moduleDef: ModuleDef) => {
+      const { imports, exports, providers, metatype } = moduleDef;
 
       // Check for module re-exporting
       for (const _export of exports) {
-        const moduleDef = modules.get(_export as Type);
+        // If the module exports itself,
+        // export all of it's providers
+        if (_export === metatype) {
+          moduleProviders.push(...providers);
+          continue;
+        }
+
+        const moduleDef = modules.get(<Type>_export);
 
         if (isNil(moduleDef)) {
           moduleProviders.push(_export);
@@ -211,32 +212,30 @@ export class ModuleLoader {
           throw `ModuleLoader: Could not find an import for the exported module ${moduleDef.metatype.name}`;
         }
 
-        const nestedExportProviders = resolveExports(moduleDef);
-        exportProviders.push(...nestedExportProviders);
+        resolveModuleExports(moduleDef);
       }
-
-      return optionalAssign(metatype, W_MODULE_PROV, exportProviders);
     };
 
     for (const _import of imports) {
       const importDef = modules.get(_import);
 
       if (isNil(importDef)) {
-        throw `ModuleLoader: COuld not find a corresponding module for import ${_import.name}`;
+        throw `ModuleLoader: Could not find module definition for module ${_import.name}`;
       }
 
-      optionalAssign(_import, W_MODULE_PROV, resolveExports(importDef));
+      resolveModuleExports(importDef);
+      this._recursivelyResolveModuleProviders(importDef, modules);
     }
 
     optionalAssign(metatype, W_MODULE_PROV, moduleProviders);
     return moduleProviders;
   }
 
-  public reflectModuleMetadata(target: Type | WatsonDynamicModule) {
-    if (isDynamicModule(target as WatsonDynamicModule)) {
-      return this.getDataFromDynamicModule(
-        target as WatsonDynamicModule & Type
-      );
+  public async reflectModuleMetadata(
+    target: Type | WatsonDynamicModule | Promise<WatsonDynamicModule>
+  ): Promise<WatsonModuleMetadata> {
+    if (isDynamicModule((await target) as WatsonDynamicModule)) {
+      return this._getDataFromDynamicModule(<WatsonDynamicModule>target);
     }
 
     const { components, exports, imports, providers } =
@@ -254,17 +253,19 @@ export class ModuleLoader {
     };
   }
 
-  private async getDataFromDynamicModule(
-    WatsonDynamicModule: WatsonDynamicModule & Type
-  ) {
-    const dynamicModuleDef = await resolveAsyncValue(WatsonDynamicModule);
+  private async _getDataFromDynamicModule(
+    dynamicModule: WatsonDynamicModule | Type
+  ): Promise<WatsonModuleMetadata> {
+    const dynamicModuleDef = await resolveAsyncValue(dynamicModule);
 
     if (isNil(dynamicModuleDef)) {
-      throw `The dynamic module ${WatsonDynamicModule.name} did not return valid module metadata.`;
+      throw `The dynamic module ${
+        (<Type>dynamicModule).name
+      } did not return module metadata.`;
     }
 
     const { module, components, imports, providers, exports } =
-      dynamicModuleDef;
+      dynamicModuleDef as WatsonDynamicModule;
 
     return {
       metatype: module,
