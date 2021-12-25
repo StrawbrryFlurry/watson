@@ -1,0 +1,31 @@
+{
+  "name": "@watsonjs/ts-transformer",
+  "version": "0.0.1",
+  "description": "Fast, scalable framework for building Discord applications (@ts-transformer)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/M1CH3L1US/Watson/tree/Watson"
+  },
+  "keywords": [
+    "typescript",
+    "plugin"
+  ],
+  "authors": [
+    "Michael S."
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "tslib": "^2.0.3"
+  },
+  "devDependencies": {},
+  "peerDependencies": {
+    "typescript": "4.5.4"
+  },
+  "homepage": "https://watsonjs.io",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "extends": "./../../tsconfig.json",
+  "compilerOptions": {
+    "sourceRoot": "src"
+  },
+  "include": ["src/*.ts", "src/**/*.ts"]
+}

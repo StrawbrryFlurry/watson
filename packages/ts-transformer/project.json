@@ -1,0 +1,34 @@
+{
+  "root": "packages/ts-transformer",
+  "sourceRoot": "packages/ts-transformer/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/ts-transformer/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/ts-transformer"],
+      "options": {
+        "jestConfig": "packages/ts-transformer/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "build": {
+      "executor": "@nrwl/node:package",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/ts-transformer",
+        "tsConfig": "packages/ts-transformer/tsconfig.json",
+        "packageJson": "packages/ts-transformer/package.json",
+        "main": "packages/ts-transformer/src/index.ts",
+        "assets": ["packages/ts-transformer/*.md"]
+      }
+    }
+  },
+  "tags": []
+}
