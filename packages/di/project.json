@@ -3,14 +3,32 @@
   "sourceRoot": "packages/di/src",
   "projectType": "library",
   "targets": {
+    "build-deploy": {
+      "builder": "@nrwl/workspace:run-commands",
+      "options": {
+        "commands": [
+          "nx build di",
+          "ttsc -p dist/packages/di/tsconfig.build.json"
+        ],
+        "parallel": false
+      }
+    },
     "build": {
       "executor": "@nrwl/node:package",
       "options": {
-        "outputPath": "dist/libs/di",
+        "outputPath": "dist/packages/di",
         "tsConfig": "packages/di/tsconfig.json",
         "packageJson": "packages/di/package.json",
         "main": "packages/di/src/index.ts",
-        "assets": ["packages/di/*.md"]
+        "assets": ["tsconfig.build.json", "packages/di/README.md"],
+        "tsPlugins": [
+          {
+            "name": "@watsonjs/ts-transformer",
+            "options": {
+              "excludeNamespace": ["@watsonjs"]
+            }
+          }
+        ]
       }
     },
     "test": {

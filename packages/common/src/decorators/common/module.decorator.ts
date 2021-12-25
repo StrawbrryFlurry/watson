@@ -4,7 +4,7 @@ export interface ModuleOptions {
   imports?: (Type | DynamicModule | Promise<DynamicModule>)[];
   routers?: Type[];
   providers?: (Type | CustomProvider)[];
-  exports?: (Type | CustomProvider)[];
+  exports?: Type[];
 }
 
 export interface DynamicModule extends Omit<WatsonDynamicModule, "components"> {

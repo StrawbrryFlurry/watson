@@ -3,6 +3,7 @@
   "projects": {
     "common": "packages/common",
     "core": "packages/core",
-    "di": "packages/di"
+    "di": "packages/di",
+    "ts-transformer": "packages/ts-transformer"
   }
 }

@@ -13,7 +13,7 @@ const customProvider: FactoryProvider = {
 
 @Module({
   providers: [customProvider],
-  exports: [customProvider],
+  exports: [HttpClient],
 })
 export class HttpModule {
   static forConfig(config: AxiosRequestConfig): DynamicModule {

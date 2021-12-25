@@ -3,14 +3,32 @@
   "sourceRoot": "packages/common/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nrwl/node:package",
+    "build-deploy": {
+      "builder": "@nrwl/workspace:run-commands",
       "options": {
-        "outputPath": "dist/libs/common",
+        "commands": [
+          "nx build common",
+          "ttsc -p dist/packages/common/tsconfig.build.json"
+        ],
+        "parallel": false
+      }
+    },
+    "build": {
+      "builder": "@nrwl/node:package",
+      "options": {
+        "outputPath": "dist/packages/common",
         "tsConfig": "packages/common/tsconfig.json",
         "packageJson": "packages/common/package.json",
         "main": "packages/common/src/index.ts",
-        "assets": ["packages/common/*.md"]
+        "assets": ["packages/common/README.md"],
+        "tsPlugins": [
+          {
+            "name": "@watsonjs/ts-transformer",
+            "options": {
+              "excludeNamespace": ["@watsonjs"]
+            }
+          }
+        ]
       }
     },
     "test": {
@@ -22,5 +40,5 @@
       }
     }
   },
-  "implicitDependencies": ["di", "common"]
+  "implicitDependencies": []
 }

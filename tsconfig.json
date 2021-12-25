@@ -1,33 +1,27 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "declaration": true,
-    "noImplicitAny": true,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "lib": ["es2020", "dom"],
-    "suppressImplicitAnyIndexErrors": true,
-    "strictPropertyInitialization": false,
-    "importHelpers": true,
-    "removeComments": false,
-    "noLib": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "es2017",
-    "sourceMap": true,
-    "allowJs": false,
-    "strict": true,
-    "strictNullChecks": true,
+    "baseUrl": ".",
+    "module": "CommonJS",
+    "target": "ESNext",
+    "lib": ["ES2020", "dom"],
     "types": ["node"],
     "moduleResolution": "node",
-    "baseUrl": ".",
-    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }],
+    "esModuleInterop": true,
+    "declaration": true,
+    "removeComments": false,
+    "importHelpers": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "strictPropertyInitialization": false,
     "paths": {
-      "@watsonjs/common": ["./packages/common/src"],
-      "@watsonjs/core": ["./packages/core/src"],
-      "@watsonjs/di": ["packages/di/src"],
-      "@watsonjs/platform-discordjs": ["./packages/platform-discordjs/src"],
+      "@watsonjs/*": ["packages/*"],
 
       "@common/builtin": ["./packages/common/src/builtin"],
       "@common/adapter": ["./packages/common/src/adapter"],
@@ -43,15 +37,9 @@
       "@common/pipeline/*": ["packages/common/src/pipeline/*"],
       "@common/discord-types": ["packages/common/src/discord-types"],
       "@common/decorators": ["./packages/common/src/decorators"],
-      "@common/injectable": [
-        "./packages/common/src/decorators/common/injectable.decorator.ts"
-      ],
       "@common/decorators/*": ["packages/common/src/decorators/*"],
-      "@common/type": ["packages/common/src/type.interface"],
       "@common/command/*": ["packages/common/src/command/*"],
       "@common/utils": ["./packages/common/src/utils"],
-      "@common/di": ["packages/common/src/di"],
-      "@common/di/*": ["packages/common/src/di/*"],
       "@common/constants": ["./packages/common/src/constants.ts"],
 
       "@core/adapters": ["./packages/core/src/adapters"],
@@ -79,5 +67,5 @@
       "@di/fields": ["packages/di/src/fields"]
     }
   },
-  "exclude": ["../node_modules", "./**/*.spec.ts"]
+  "exclude": ["node_modules", "./**/*.spec.ts", "dist"]
 }
