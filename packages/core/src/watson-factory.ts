@@ -16,7 +16,7 @@ import {
 } from '@watsonjs/di';
 
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
-import { ApplicationRef, WatsonApplication } from './watson-application';
+import { WatsonApplication } from './watson-application';
 
 const DEFAULT_ADAPTER_PACKAGE = "@watsonjs/platform-discordjs";
 
@@ -62,12 +62,6 @@ export class WatsonFactory {
     await this.initialize(module, rootInjector);
 
     const applicationRef = new WatsonApplication<T>(rootInjector);
-
-    rootInjector.bind({
-      provide: ApplicationRef,
-      useValue: applicationRef,
-    } as ValueProvider);
-
     return applicationRef;
   }
 

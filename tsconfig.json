@@ -5,6 +5,7 @@
     "target": "ESNext",
     "lib": ["ES2020", "dom"],
     "types": ["node"],
+    "outDir": "__",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "declaration": true,
@@ -40,7 +41,7 @@
       "@common/decorators/*": ["packages/common/src/decorators/*"],
       "@common/command/*": ["packages/common/src/command/*"],
       "@common/utils": ["./packages/common/src/utils"],
-      "@common/constants": ["./packages/common/src/constants.ts"],
+      "@common/constants": ["./packages/common/src/constants"],
 
       "@core/adapters": ["./packages/core/src/adapters"],
       "@core/command": ["./packages/core/src/command"],

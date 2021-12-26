@@ -3,18 +3,8 @@ import { WatsonClientBase } from '@core/interfaces';
 import { LifecycleHost } from '@core/lifecycle';
 import { RouteExplorer } from '@core/router';
 import { CanActivate, ExceptionHandler, MatchingStrategy, PipeTransform } from '@watsonjs/common';
-import {
-  getInjectableDef,
-  Injectable,
-  Injector,
-  InjectorGetResult,
-  ModuleContainer,
-  ModuleRef,
-  Providable,
-  Type,
-} from '@watsonjs/di';
+import { ApplicationRef, Injector, Type } from '@watsonjs/di';
 import { ActivityOptions } from 'discord.js';
-import { isNil } from 'packages/di/src/utils/shared.util';
 import { config } from 'process';
 import { PassThrough } from 'stream';
 
@@ -22,52 +12,6 @@ import { ApplicationConfig } from './application-config';
 import { ApplicationProxy } from './application-proxy';
 import { SHUTDOWN_SIGNALS } from './constants';
 import { BootstrappingHandler } from './exceptions/revisit/bootstrapping-handler';
-
-@Injectable({ providedIn: "root" })
-export abstract class ApplicationRef {
-  public get rootInjector(): Injector {
-    return this._rootInjector;
-  }
-  protected _rootInjector: Injector;
-
-  constructor(rootInjector: Injector) {
-    this._rootInjector = rootInjector;
-  }
-
-  /**
-   * Returns an instance of a provider registered in the root- or any
-   * module-injector.
-   */
-  public async get<T extends Providable, R extends InjectorGetResult<T>>(
-    typeOrToken: Providable,
-    module?: Type | ModuleRef
-  ): Promise<R> {
-    const { providedIn } = getInjectableDef(typeOrToken);
-
-    if (isNil(module) || providedIn === "root") {
-      return this.rootInjector.get(typeOrToken);
-    }
-
-    let moduleRef: ModuleRef = <ModuleRef>module;
-
-    if (isNil((<ModuleRef>module).injector)) {
-      moduleRef = await this.getModuleRef(<Type>module);
-    }
-
-    return moduleRef.get(typeOrToken);
-  }
-
-  public async getModuleRef(module: Type): Promise<ModuleRef> {
-    const moduleContainerRef = await this.rootInjector.get(ModuleContainer);
-    const moduleRef = moduleContainerRef.get(module);
-
-    if (isNil(moduleRef)) {
-      throw `Could not find module ${module.name}`;
-    }
-
-    return moduleRef;
-  }
-}
 
 /**
  * Main Application class

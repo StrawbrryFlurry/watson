@@ -20,7 +20,7 @@ export interface MessageMatchResult {
  * (May vary on the implementation.
  * This is how we do it by default)
  */
-@Injectable({ providedIn: "router" })
+@Injectable({ providedIn: "component" })
 export abstract class MessageMatcher<Cache extends PrefixCache = PrefixCache> {
   protected _cache: Cache;
 
