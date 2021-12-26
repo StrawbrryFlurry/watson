@@ -6,7 +6,7 @@ import { ModuleDef, ModuleRef, ɵModuleRefImpl } from '@di/core/module-ref';
 import { Reflector } from '@di/core/reflector';
 import { isDynamicModule, WatsonModuleOptions } from '@di/decorators';
 import { W_MODULE_PROV } from '@di/fields';
-import { CustomProvider, resolveForwardRef, WatsonDynamicModule } from '@di/providers';
+import { CustomProvider, InjectionToken, isInjectionToken, resolveForwardRef, WatsonDynamicModule } from '@di/providers';
 import { Type } from '@di/types';
 import { optionalAssign, resolveAsyncValue } from '@di/utils';
 import { isNil } from '@di/utils/common';
@@ -14,7 +14,7 @@ import { isNil } from '@di/utils/common';
 export interface WatsonModuleMetadata {
   metatype: Type;
   imports: (Type | WatsonDynamicModule | Promise<WatsonDynamicModule>)[];
-  exports: Type[];
+  exports: (Type | InjectionToken)[];
   components: Type[];
   providers: (Type | CustomProvider)[];
 }
@@ -144,6 +144,8 @@ export class ModuleLoader {
       rootDef
     );
 
+    container.apply(rootRef);
+
     const createModuleRecursively = (
       parentDef: ModuleDef,
       parentRef: ModuleRef
@@ -204,6 +206,19 @@ export class ModuleLoader {
         const moduleDef = modules.get(<Type>_export);
 
         if (isNil(moduleDef)) {
+          const hasCustomProviderWithType = providers.find(
+            (provider) => (<CustomProvider>provider)?.provide === _export
+          );
+
+          if (!isNil(hasCustomProviderWithType)) {
+            moduleProviders.push(hasCustomProviderWithType);
+            continue;
+          }
+
+          if (isInjectionToken(_export)) {
+            throw `Could not find export ${_export.name} in ${metatype.name}`;
+          }
+
           moduleProviders.push(_export);
           continue;
         }

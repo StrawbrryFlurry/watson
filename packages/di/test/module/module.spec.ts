@@ -6,16 +6,27 @@ import { ModuleContainer } from '@di/core/module-container';
 import { ModuleLoader } from '@di/core/module-loader';
 import { ModuleRef } from '@di/core/module-ref';
 import { Injectable, WatsonComponent, WatsonModule } from '@di/decorators';
-import { forwardRef, WatsonDynamicModule } from '@di/providers';
+import { CustomProvider, forwardRef, InjectionToken, WatsonDynamicModule } from '@di/providers';
 
 @Injectable({ providedIn: "module" })
 class NoopLogger {}
+
+const PROVIDER_TOKEN = new InjectionToken<string>("Custom Provider");
+
+const customProviderWithInjectionToken: CustomProvider = {
+  provide: PROVIDER_TOKEN,
+  useValue: PROVIDER_TOKEN.name,
+};
 
 class TestDynamicModule {
   static async create(): Promise<WatsonDynamicModule> {
     return {
       module: TestDynamicModule,
-      providers: [{ provide: NoopLogger, useClass: NoopLogger }],
+      providers: [
+        { provide: NoopLogger, useClass: NoopLogger },
+        customProviderWithInjectionToken,
+      ],
+      exports: [PROVIDER_TOKEN],
     };
   }
 }
@@ -82,5 +93,11 @@ describe("Basic Module setup", () => {
     const dynamicModuleRef = moduleContainerRef.get(TestDynamicModule)!;
     const logger = await dynamicModuleRef.get(NoopLogger);
     expect(logger).toBeInstanceOf(NoopLogger);
+  });
+
+  test("Dynamic module exports work with InjectionTokens", async () => {
+    const rootModuleRef = moduleContainerRef.get(TestModule)!;
+    const exportedProvider = await rootModuleRef.get(PROVIDER_TOKEN);
+    expect(exportedProvider).toBe(PROVIDER_TOKEN.name);
   });
 });

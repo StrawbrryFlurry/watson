@@ -1,5 +1,5 @@
 import { Injectable } from '@di/decorators';
-import { CustomProvider, InjectionToken, Providable } from '@di/providers';
+import { CustomProvider, InjectionToken, InjectorLifetime, Providable } from '@di/providers';
 import { Type } from '@di/types';
 
 import { DynamicInjector } from './dynamic-injector';
@@ -53,7 +53,7 @@ const CREATE_INJECTOR = (
   scope: Type | null = null
 ) => new DynamicInjector(providers, parent, scope);
 
-@Injectable({ providedIn: "module" })
+@Injectable({ providedIn: "module", lifetime: InjectorLifetime.Module })
 export abstract class Injector {
   public parent: Injector | null = null;
 

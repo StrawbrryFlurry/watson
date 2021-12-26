@@ -2,10 +2,12 @@ import { Binding, createBinding, getInjectableDef } from '@di/core/binding';
 import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { ModuleRef } from '@di/core/module-ref';
 import { UniqueTypeArray } from '@di/data-structures';
-import { Providable, ValueProvider } from '@di/providers';
+import { Injectable } from '@di/decorators';
+import { InjectorLifetime, Providable, ValueProvider } from '@di/providers';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
+@Injectable({ providedIn: "component", lifetime: InjectorLifetime.Module })
 export abstract class WatsonComponentRef<T = any> implements Injector {
   public parent: ModuleRef | null;
   public readonly metatype: Type;

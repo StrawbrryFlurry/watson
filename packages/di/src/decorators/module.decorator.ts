@@ -9,7 +9,9 @@ export interface WatsonModuleOptions {
   exports?: Type[];
 }
 
-export function WatsonModule(options: WatsonModuleOptions): ClassDecorator {
+export function WatsonModule(
+  options: WatsonModuleOptions = {}
+): ClassDecorator {
   const metadata: WatsonModuleOptions = {
     ...{
       exports: undefined,

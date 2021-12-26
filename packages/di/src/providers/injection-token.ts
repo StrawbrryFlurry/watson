@@ -1,7 +1,7 @@
-import { W_PROV, ɵHasProv } from "@di/fields";
-import { Type } from "@di/types";
+import { W_PROV, ɵHasProv } from '@di/fields';
+import { Type } from '@di/types';
 
-import { resolveForwardRef } from "./forward-ref";
+import { resolveForwardRef } from './forward-ref';
 
 const INJECTION_TOKE_PREFIX = "InjectionToken";
 
@@ -30,6 +30,11 @@ export enum InjectorLifetime {
    * provide an event scoped instance.
    */
   Event = 1 << 3,
+  /**
+   * Creates a provider instance
+   * for every module.
+   */
+  Module = 1 << 4,
 }
 
 /**
@@ -72,7 +77,7 @@ export type ProvidedInScope =
   | "internal"
   | "external"
   | "module"
-  | "router"
+  | "component"
   | "ctx"
   | Type;
 

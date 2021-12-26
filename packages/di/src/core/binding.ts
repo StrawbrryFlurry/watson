@@ -1,4 +1,5 @@
 import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { Reflector } from '@di/core/reflector';
 import { W_BINDING_DEF, W_PROV, ɵHasProv } from '@di/fields';
 import { BeforeResolution } from '@di/hooks';
 import {
@@ -19,8 +20,6 @@ import { Type } from '@di/types';
 import { resolveAsyncValue } from '@di/utils';
 import { isEmpty, isFunction, isNil } from '@di/utils/common';
 import { Observable } from 'rxjs';
-
-import { Reflector } from './reflector';
 
 import type {
   Injector,

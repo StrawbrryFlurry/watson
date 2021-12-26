@@ -1,6 +1,6 @@
-import { COMPONENT_METADATA } from "@di/constants";
-import { CustomProvider } from "@di/providers";
-import { Type } from "@di/types";
+import { COMPONENT_METADATA } from '@di/constants';
+import { CustomProvider } from '@di/providers';
+import { Type } from '@di/types';
 
 export interface ComponentDecoratorOptions {
   /**
@@ -11,7 +11,7 @@ export interface ComponentDecoratorOptions {
 }
 
 export function WatsonComponent(
-  options: ComponentDecoratorOptions
+  options: ComponentDecoratorOptions = {}
 ): ClassDecorator {
   return (target: object) => {
     Reflect.defineMetadata(COMPONENT_METADATA, target, options);

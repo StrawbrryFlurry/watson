@@ -7,7 +7,7 @@ import { Reflector } from '@di/core/reflector';
 import { UniqueTypeArray } from '@di/data-structures';
 import { ComponentDecoratorOptions, Injectable } from '@di/decorators';
 import { W_MODULE_PROV } from '@di/fields';
-import { CustomProvider, Providable, ValueProvider } from '@di/providers';
+import { CustomProvider, InjectionToken, InjectorLifetime, Providable, ValueProvider } from '@di/providers';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
@@ -16,7 +16,7 @@ export interface ModuleDef {
   imports: Type[];
   components: Type[];
   providers: ProviderResolvable[];
-  exports: ProviderResolvable[];
+  exports: (ProviderResolvable | InjectionToken)[];
 }
 
 /**
@@ -24,7 +24,7 @@ export interface ModuleDef {
  * contains that module's injector as well as all
  * components and providers that were mapped to it.
  */
-@Injectable({ providedIn: "module" })
+@Injectable({ providedIn: "module", lifetime: InjectorLifetime.Module })
 export abstract class ModuleRef<T = any> implements Injector {
   public parent: Injector | null;
   public metatype: Type;
@@ -40,7 +40,9 @@ export abstract class ModuleRef<T = any> implements Injector {
   }
   private _injector: Injector;
 
-  public readonly exports = new UniqueTypeArray<ProviderResolvable>();
+  public readonly exports = new UniqueTypeArray<
+    ProviderResolvable | InjectionToken
+  >();
   public readonly imports = new UniqueTypeArray<Type>();
   /**
    * Components are the main DI consumer type of application.
