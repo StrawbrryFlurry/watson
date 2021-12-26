@@ -4,6 +4,16 @@ import { ImportDeclaration, SourceFile, TransformationContext } from 'typescript
 import { getPathAlias } from './get-path-alias';
 import { slash } from './slash';
 
+const fixSameFolderImport = (path: string) => {
+  const segments = path.split("/");
+
+  if (segments.length === 1) {
+    return `./${path}`;
+  }
+
+  return path;
+};
+
 export const transformImportDeclaration = (
   ctx: TransformationContext,
   sf: SourceFile,
@@ -21,7 +31,8 @@ export const transformImportDeclaration = (
 
   const fileDirectory = dirname(sf.fileName);
   const relativePath = relative(fileDirectory, knownPathAlias);
-  const relativeModulePath = relativePath === "" ? "." : slash(relativePath);
+  const slashedModulePath = relativePath === "" ? "." : slash(relativePath);
+  const relativeModulePath = fixSameFolderImport(slashedModulePath);
 
   const declaration = ctx.factory.updateImportDeclaration(
     node,

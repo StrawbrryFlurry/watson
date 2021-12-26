@@ -13,6 +13,7 @@ import {
 
 import { transformImportDeclaration } from './transform-import-declaration';
 
+const FILE_EXTENSIONS = ["js", "ts", "jsx", "tsx"];
 const noopFactory = (sf: SourceFile) => sf;
 
 const transformerFactory = (
@@ -42,7 +43,13 @@ const transformerFactory = (
         }
 
         const fullPath = join(rootPath, path);
-        const extension = extname(fullPath);
+        let extension: string | undefined = extname(fullPath);
+
+        // Don't remove extensions such as .util
+        if (!FILE_EXTENSIONS.some((ext) => ext === extension!.toLowerCase())) {
+          extension = undefined;
+        }
+
         const fileName = basename(fullPath, extension);
         const dirName = dirname(fullPath);
         const fullBaseName = join(dirName, fileName);
@@ -71,4 +78,5 @@ export const before = transformerFactory;
 export const afterDeclarations = transformerFactory;
 
 // Export for ttypescript
-export default transformerFactory;
+export default (program: Program, options: any) =>
+  transformerFactory(options, program);
