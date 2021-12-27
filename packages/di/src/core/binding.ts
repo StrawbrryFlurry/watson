@@ -130,7 +130,9 @@ export class Binding<
 
   /**
    * Whether the binding has any
-   * dependencies.
+   * dependencies that might change
+   * depending on the context the
+   * binding is created in.
    */
   public isDependencyTreeStatic(): boolean {
     if (!isNil(this._isTreeStatic)) {
@@ -144,9 +146,12 @@ export class Binding<
 
     for (let i = 0; i < this.deps!.length; i++) {
       const dep = this.deps![i];
-      const { lifetime } = getInjectableDef(dep);
+      const { lifetime, providedIn } = getInjectableDef(dep);
 
-      if (lifetime & (InjectorLifetime.Event | InjectorLifetime.Transient)) {
+      if (
+        lifetime & (InjectorLifetime.Event | InjectorLifetime.Transient) ||
+        providedIn === "ctx"
+      ) {
         this._isTreeStatic = false;
         return false;
       }
@@ -310,16 +315,19 @@ export function createBinding(_provider: ProviderResolvable): Binding {
    */
   if (isClassProvider(provider)) {
     const { useClass, deps } = provider;
+
     binding.metatype = provider;
-    binding.deps = deps ?? null;
+    binding.deps = deps ?? Reflector.reflectCtorArgs(useClass) ?? null;
     binding.factory = (...deps) => Reflect.construct(useClass, deps);
   } else if (isFactoryProvider(provider)) {
     const { useFactory, deps } = provider;
+
     binding.metatype = provider;
     binding.deps = deps ?? null;
     binding.factory = (...deps) => useFactory(...deps);
   } else {
     const { useValue } = provider as ValueProvider;
+
     binding.metatype = provider;
     binding.factory = () => useValue;
   }

@@ -3,7 +3,7 @@ import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/
 import { ModuleRef } from '@di/core/module-ref';
 import { UniqueTypeArray } from '@di/data-structures';
 import { Injectable } from '@di/decorators';
-import { InjectorLifetime, Providable, ValueProvider } from '@di/providers';
+import { InjectorLifetime, Providable, ValueProvider, ɵdefineInjectable } from '@di/providers';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
@@ -35,6 +35,8 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
     this.metatype = metatype;
     this.parent = moduleRef;
 
+    ɵdefineInjectable(metatype, "module", InjectorLifetime.Module);
+
     const injectorProviders = this._bindProviders(providers);
     this._injector = Injector.create(
       [
@@ -42,7 +44,7 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
         //TODO:
         // Resolve component instances using
         // ComponentFactory
-        // metatype,
+        metatype,
         {
           provide: WatsonComponentRef,
           useValue: this,
@@ -75,7 +77,19 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
       return this.instance;
     }
 
-    return this._injector.get(this.metatype, null, ctx);
+    const instance = await this.get(this.metatype, null, ctx);
+    // TODO:
+    // Replace with ComponentFactory
+    // and cache the instance in there
+    const bindingRef = <Binding>(
+      (<any>this._injector)._records.get(this.metatype)
+    );
+
+    if (bindingRef.isDependencyTreeStatic()) {
+      this.instance = instance;
+    }
+
+    return instance;
   }
 
   public async get<T extends Providable, R extends InjectorGetResult<T>>(

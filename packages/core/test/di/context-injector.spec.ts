@@ -1,5 +1,6 @@
-import { ContextInjector, uuid } from "@watsonjs/core";
-import { Injectable, Injector, InjectorLifetime } from "@watsonjs/di";
+import { ContextInjector } from '@core/di';
+import { uuid } from '@core/utils';
+import { Injectable, Injector, InjectorLifetime } from '@watsonjs/di';
 
 class TestLifetimeProvider {
   public id: string;

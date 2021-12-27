@@ -1,15 +1,17 @@
-import { ModuleRef } from "@di/core/module-ref";
-import { AfterResolution } from "@di/hooks";
+import { ModuleRef } from '@di/core/module-ref';
+import { AfterResolution } from '@di/hooks';
 import {
   CustomProvider,
   FactoryProvider,
+  InjectorLifetime,
   Providable,
   UseExistingProvider,
   ValueProvider,
-} from "@di/providers";
-import { Type } from "@di/types";
-import { resolveAsyncValue } from "@di/utils";
-import { isFunction, isNil } from "@di/utils/common";
+} from '@di/providers';
+import { Type } from '@di/types';
+import { resolveAsyncValue } from '@di/utils';
+import { isFunction, isNil } from '@di/utils/common';
+import { WatsonComponentRef } from '@watsonjs/di/src';
 
 import {
   Binding,
@@ -18,19 +20,23 @@ import {
   getInjectableDef,
   getProviderToken,
   isUseExistingProvider,
-} from "./binding";
-import { DependencyGraph } from "./dependency-graph";
-import { Injector, InjectorGetResult, ProviderResolvable } from "./injector";
-import { InjectorBloomFilter } from "./injector-bloom-filter";
-import { INJECTOR } from "./injector-token";
-import { InjectorInquirerContext } from "./inquirer-context";
+} from './binding';
+import { DependencyGraph } from './dependency-graph';
+import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
+import { InjectorBloomFilter } from './injector-bloom-filter';
+import { INJECTOR } from './injector-token';
+import { InjectorInquirerContext } from './inquirer-context';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
   protected _bloom: InjectorBloomFilter;
+  protected _isComponent: boolean;
 
   protected readonly _records: Map<Providable, Binding | Binding[]>;
 
+  public get scope(): Type | null {
+    return this._scope;
+  }
   protected _scope: Type | null;
 
   constructor(
@@ -41,6 +47,12 @@ export class DynamicInjector implements Injector {
     this._records = new Map<Providable, Binding | Binding[]>();
     this.parent = parent;
     this._scope = scope;
+
+    // All components and only components
+    // provide themselves as a component ref.
+    this._isComponent = providers.some(
+      (provider) => (<CustomProvider>provider)?.provide === WatsonComponentRef
+    );
 
     if (scope) {
       this._records.set(
@@ -97,6 +109,7 @@ export class DynamicInjector implements Injector {
     }
 
     if (
+      !this._isComponent &&
       !isNil(this._scope) &&
       (providedIn === "module" ||
         (isFunction(providedIn) && this._scope === providedIn))
@@ -211,11 +224,21 @@ export async function ɵcreateBindingInstance<
     return instances as R;
   }
 
-  const { deps, token } = <Binding<T, D, I>>binding;
+  const { deps, token, lifetime } = <Binding<T, D, I>>binding;
   const dependencyGraph = (inquirerContext.dependencyGraph ??=
     new DependencyGraph());
+  let lookupCtx = ctx;
 
-  const instance = binding.getInstance(ctx);
+  /**
+   * When dealing with module scoped dependencies
+   * we're using the module injector as the key
+   * for the binding instance map.
+   */
+  if (lifetime & InjectorLifetime.Module) {
+    lookupCtx = injector;
+  }
+
+  const instance = binding.getInstance(lookupCtx);
 
   if (!isNil(instance) && binding.isDependencyTreeStatic()) {
     return <R>instance;
@@ -227,7 +250,7 @@ export async function ɵcreateBindingInstance<
     );
 
     if (!binding.isTransient()) {
-      binding.setInstance(<I>instance, ctx);
+      binding.setInstance(<I>instance, lookupCtx);
     }
 
     return <R>instance;
@@ -275,7 +298,7 @@ export async function ɵcreateBindingInstance<
   }
 
   if (!binding.isTransient()) {
-    binding.setInstance(<I>_instance, ctx);
+    binding.setInstance(<I>_instance, lookupCtx);
   }
 
   return <R>_instance;

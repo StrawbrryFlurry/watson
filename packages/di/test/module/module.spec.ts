@@ -22,10 +22,18 @@ class TestDynamicModule {
   static async create(): Promise<WatsonDynamicModule> {
     return {
       module: TestDynamicModule,
-      providers: [
-        { provide: NoopLogger, useClass: NoopLogger },
-        customProviderWithInjectionToken,
-      ],
+      imports: [TestNestedDynamicModule.create()],
+      providers: [{ provide: NoopLogger, useClass: NoopLogger }],
+      exports: [PROVIDER_TOKEN, TestNestedDynamicModule],
+    };
+  }
+}
+
+class TestNestedDynamicModule {
+  static async create(): Promise<WatsonDynamicModule> {
+    return {
+      module: TestNestedDynamicModule,
+      providers: [customProviderWithInjectionToken],
       exports: [PROVIDER_TOKEN],
     };
   }
@@ -38,8 +46,10 @@ class TestDynamicModule {
 })
 class TestModule {}
 
-@WatsonComponent({})
-class TestComponent {}
+@WatsonComponent()
+class TestComponent {
+  constructor(private _componentRef: WatsonComponentRef) {}
+}
 
 @Injectable({ providedIn: "module" })
 class TestModuleProvider {}
@@ -63,7 +73,7 @@ describe("Basic Module setup", () => {
   });
 
   test("ModuleInjectors can resolve a component to a ComponentRef", async () => {
-    expect(true).toBeTruthy();
+    expect(testComponentRef).toBeInstanceOf(WatsonComponentRef);
   });
 
   test("Both the ModuleInjector and the ComponentInjector can resolve module dependencies", async () => {
@@ -99,5 +109,10 @@ describe("Basic Module setup", () => {
     const rootModuleRef = moduleContainerRef.get(TestModule)!;
     const exportedProvider = await rootModuleRef.get(PROVIDER_TOKEN);
     expect(exportedProvider).toBe(PROVIDER_TOKEN.name);
+  });
+
+  test("Can create an instance of components", async () => {
+    const testComponent = await testComponentRef.getInstance();
+    expect(testComponent).toBeInstanceOf(TestComponent);
   });
 });

@@ -12,3 +12,4 @@ export * from "./module-loader";
 export * from "./module-ref";
 export * from "./null-injector";
 export * from "./reflector";
+export * from "./application-ref";

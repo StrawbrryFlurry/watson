@@ -8,7 +8,7 @@ import { isDynamicModule, WatsonModuleOptions } from '@di/decorators';
 import { W_MODULE_PROV } from '@di/fields';
 import { CustomProvider, InjectionToken, isInjectionToken, resolveForwardRef, WatsonDynamicModule } from '@di/providers';
 import { Type } from '@di/types';
-import { optionalAssign, resolveAsyncValue } from '@di/utils';
+import { optionalAssign, resolveAsyncValue, stringify } from '@di/utils';
 import { isNil } from '@di/utils/common';
 
 export interface WatsonModuleMetadata {
@@ -206,8 +206,14 @@ export class ModuleLoader {
         const moduleDef = modules.get(<Type>_export);
 
         if (isNil(moduleDef)) {
-          const hasCustomProviderWithType = providers.find(
-            (provider) => (<CustomProvider>provider)?.provide === _export
+          const getCustomProviderByType = (
+            providers: CustomProvider[],
+            type: InjectionToken
+          ) => providers.find((provider) => provider?.provide === type);
+
+          const hasCustomProviderWithType = getCustomProviderByType(
+            <CustomProvider[]>providers,
+            <InjectionToken>_export
           );
 
           if (!isNil(hasCustomProviderWithType)) {
@@ -215,12 +221,56 @@ export class ModuleLoader {
             continue;
           }
 
-          if (isInjectionToken(_export)) {
-            throw `Could not find export ${_export.name} in ${metatype.name}`;
+          if (!isInjectionToken(_export)) {
+            moduleProviders.push(_export);
+            continue;
           }
 
-          moduleProviders.push(_export);
-          continue;
+          /**
+           * Check nested import exports.
+           *
+           * Module M has provider Foo
+           *
+           * A imports M exports M
+           * B imports A exports A
+           * C imports B exports B
+           *
+           * C needs to find the provider Foo
+           */
+          const checkNestedImportExports = (__imports: Type[]) => {
+            for (const __import of __imports) {
+              const {
+                exports,
+                providers,
+                imports: ___imports,
+              } = modules.get(__import)!;
+              const doesExportItselfOrProvider = exports.find(
+                (__export) => __export === _export || __export === __import
+              );
+
+              if (doesExportItselfOrProvider) {
+                const provider = getCustomProviderByType(
+                  <CustomProvider[]>providers,
+                  _export
+                );
+
+                if (provider) {
+                  return provider;
+                }
+              }
+
+              checkNestedImportExports(___imports);
+            }
+          };
+
+          const exportInImport = checkNestedImportExports(imports);
+
+          if (!isNil(exportInImport)) {
+            moduleProviders.push(exportInImport);
+            continue;
+          }
+
+          throw `ModuleLoader: Could not find an import for the exported provider ${_export.name} in ${metatype.name}`;
         }
 
         if (!imports.includes(moduleDef.metatype)) {
@@ -253,11 +303,18 @@ export class ModuleLoader {
       return this._getDataFromDynamicModule(<WatsonDynamicModule>target);
     }
 
-    const { components, exports, imports, providers } =
-      Reflector.reflectMetadata<WatsonModuleOptions>(
-        MODULE_DEFINITION_METADATA,
-        <Type>target
-      );
+    const moduleMetadata = Reflector.reflectMetadata<WatsonModuleOptions>(
+      MODULE_DEFINITION_METADATA,
+      <Type>target
+    );
+
+    if (isNil(moduleMetadata)) {
+      throw `Could not find any module definition for ${stringify(
+        target
+      )}. Did you mean to import it as a DynamicModule?`;
+    }
+
+    const { components, exports, imports, providers } = moduleMetadata;
 
     return {
       metatype: target as Type,

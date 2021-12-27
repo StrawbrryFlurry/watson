@@ -1,13 +1,8 @@
-import {
-  DESIGN_PARAMETERS,
-  DESIGN_RETURN_TYPE,
-  DESIGN_TYPE,
-  INJECT_DEPENDENCY_METADATA,
-} from "@di/constants";
-import { InjectMetadata } from "@di/decorators";
-import { InjectionToken } from "@di/providers";
-import { Type } from "@di/types";
-import { isEmpty, isNil } from "@di/utils/common";
+import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, INJECT_DEPENDENCY_METADATA } from '@di/constants';
+import { InjectMetadata } from '@di/decorators';
+import { InjectionToken } from '@di/providers';
+import { Type } from '@di/types';
+import { isEmpty, isNil } from '@di/utils/common';
 
 export interface MethodDescriptor {
   propertyKey: string;
@@ -49,7 +44,7 @@ export class Reflector {
       throw "Failed to reflect methods of type as it is `null`";
     }
 
-    const prototype = Object.getPrototypeOf(metatype);
+    const { prototype } = metatype;
 
     if (isNil(prototype)) {
       throw `Failed to reflect methods of type ${metatype.name} as it does not have a valid prototype`;
