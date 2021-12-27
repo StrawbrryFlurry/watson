@@ -1,6 +1,6 @@
 {
   "name": "@watsonjs/di",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Fast, scalable framework for building Discord applications (@di)",
   "repository": {
     "type": "git",
