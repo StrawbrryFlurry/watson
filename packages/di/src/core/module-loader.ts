@@ -4,12 +4,13 @@ import { Injector, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { ModuleContainer } from '@di/core/module-container';
 import { ModuleDef, ModuleRef, ɵModuleRefImpl } from '@di/core/module-ref';
 import { Reflector } from '@di/core/reflector';
-import { isDynamicModule, WatsonModuleOptions } from '@di/decorators';
-import { W_MODULE_PROV } from '@di/fields';
+import { Injectable, isDynamicModule, WatsonModuleOptions } from '@di/decorators';
+import { W_GLOBAL_PROV, W_MODULE_PROV } from '@di/fields';
 import { CustomProvider, InjectionToken, isInjectionToken, resolveForwardRef, WatsonDynamicModule } from '@di/providers';
 import { Type } from '@di/types';
 import { optionalAssign, resolveAsyncValue, stringify } from '@di/utils';
 import { isNil } from '@di/utils/common';
+import { UniqueTypeArray } from '@watsonjs/di/src';
 
 export interface WatsonModuleMetadata {
   metatype: Type;
@@ -142,6 +143,21 @@ export class ModuleLoader {
       this._injector,
       this._injector,
       rootDef
+    );
+
+    /**
+     * When a provider is registered using
+     * `@Injectable` and providedIn is root
+     * that type is added to this array.
+     * Doing this will allow users to register
+     * global providers without having to provide
+     * them in any module.
+     */
+    const providedInRootByInjectableDecorator = Injectable[
+      W_GLOBAL_PROV
+    ] as UniqueTypeArray<Type>;
+    (<DynamicInjector>rootRef.injector).bind(
+      ...providedInRootByInjectableDecorator
     );
 
     container.apply(rootRef);

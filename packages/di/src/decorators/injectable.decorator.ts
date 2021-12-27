@@ -1,11 +1,6 @@
-import { UniqueTypeArray } from "@di/data-structures";
-import { W_GLOBAL_PROV } from "@di/fields";
-import {
-  InjectableOptions,
-  InjectionToken,
-  InjectorLifetime,
-  ɵdefineInjectable,
-} from "@di/providers";
+import { UniqueTypeArray } from '@di/data-structures';
+import { W_GLOBAL_PROV } from '@di/fields';
+import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@di/providers';
 
 export interface InjectableMetadata extends Required<InjectableOptions> {}
 
@@ -33,7 +28,7 @@ export function Injectable(options: InjectableOptions = {}): ClassDecorator {
 
     if (injectableDef.providedIn === "root") {
       <InjectableDecoratorWithGlobalInjectablesProperty>(
-        Injectable[W_GLOBAL_PROV].push(injectableDef)
+        Injectable[W_GLOBAL_PROV].push(target)
       );
     }
   };
