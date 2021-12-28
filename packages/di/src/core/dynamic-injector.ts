@@ -1,3 +1,6 @@
+import { WatsonComponentRef } from '@di/core/component-ref';
+import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
+import { InjectorInquirerContext } from '@di/core/inquirer-context';
 import { ModuleRef } from '@di/core/module-ref';
 import { AfterResolution } from '@di/hooks';
 import {
@@ -11,7 +14,6 @@ import {
 import { Type } from '@di/types';
 import { resolveAsyncValue } from '@di/utils';
 import { isFunction, isNil } from '@di/utils/common';
-import { WatsonComponentRef } from '@watsonjs/di/src';
 
 import {
   Binding,
@@ -22,10 +24,8 @@ import {
   isUseExistingProvider,
 } from './binding';
 import { DependencyGraph } from './dependency-graph';
-import { Injector, InjectorGetResult, ProviderResolvable } from './injector';
 import { InjectorBloomFilter } from './injector-bloom-filter';
 import { INJECTOR } from './injector-token';
-import { InjectorInquirerContext } from './inquirer-context';
 
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
@@ -35,14 +35,14 @@ export class DynamicInjector implements Injector {
   protected readonly _records: Map<Providable, Binding | Binding[]>;
 
   public get scope(): Type | null {
-    return this._scope;
+    return this._scope?.metatype ?? null;
   }
-  protected _scope: Type | null;
+  protected _scope: ModuleRef | null;
 
   constructor(
     providers: ProviderResolvable[],
     parent: Injector | null,
-    scope: Type | null
+    scope: ModuleRef | null
   ) {
     this._records = new Map<Providable, Binding | Binding[]>();
     this.parent = parent;
@@ -54,7 +54,7 @@ export class DynamicInjector implements Injector {
       (provider) => (<CustomProvider>provider)?.provide === WatsonComponentRef
     );
 
-    if (scope) {
+    if (!isNil(this.scope)) {
       this._records.set(
         ModuleRef,
         createBinding({
@@ -62,8 +62,6 @@ export class DynamicInjector implements Injector {
           useValue: scope,
         } as ValueProvider)
       );
-
-      this._records.set(scope, createBinding(scope));
     }
 
     this._records.set(
@@ -110,9 +108,9 @@ export class DynamicInjector implements Injector {
 
     if (
       !this._isComponent &&
-      !isNil(this._scope) &&
+      !isNil(this.scope) &&
       (providedIn === "module" ||
-        (isFunction(providedIn) && this._scope === providedIn))
+        (isFunction(providedIn) && this.scope === providedIn))
     ) {
       parent = Injector.NULL;
     }

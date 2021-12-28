@@ -1,5 +1,6 @@
 import { COMPONENT_METADATA } from '@di/constants';
 import { getInjectableDef } from '@di/core/binding';
+import { ComponentFactoryResolver, ComponentFactoryResolverImpl } from '@di/core/component-factory-resolver';
 import { ɵComponentRefImpl } from '@di/core/component-ref';
 import { DynamicInjector } from '@di/core/dynamic-injector';
 import { Injector, ProviderResolvable } from '@di/core/injector';
@@ -7,9 +8,15 @@ import { Reflector } from '@di/core/reflector';
 import { UniqueTypeArray } from '@di/data-structures';
 import { ComponentDecoratorOptions, Injectable } from '@di/decorators';
 import { W_MODULE_PROV } from '@di/fields';
-import { CustomProvider, InjectionToken, InjectorLifetime, Providable, ValueProvider } from '@di/providers';
+import {
+  CustomProvider,
+  InjectionToken,
+  InjectorLifetime,
+  Providable,
+  ValueProvider,
+  ɵdefineInjectable,
+} from '@di/providers';
 import { Type } from '@di/types';
-import { isNil } from '@di/utils/common';
 
 export interface ModuleDef {
   metatype: Type;
@@ -26,10 +33,12 @@ export interface ModuleDef {
  */
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Module })
 export abstract class ModuleRef<T = any> implements Injector {
-  public parent: Injector | null;
+  public parent: ModuleRef | Injector | null;
   public metatype: Type;
 
   public instance: T | null = null;
+  public componentFactoryResolver: ComponentFactoryResolver =
+    new ComponentFactoryResolverImpl(this);
 
   public get name() {
     return this.metatype.name;
@@ -91,17 +100,19 @@ export abstract class ModuleRef<T = any> implements Injector {
     const injectorProviders = [
       ...moduleComponentProviders,
       ...moduleInjectorProviders,
+      ...this._makeModuleProviders(),
     ];
 
-    this._injector = Injector.create(injectorProviders, parent, metatype);
+    this._injector = Injector.create(injectorProviders, parent, this);
   }
 
-  public async getInstance(): Promise<T> {
-    if (!isNil(this.instance)) {
-      return this.instance;
-    }
-
-    return this.injector.get(this.metatype);
+  private _makeModuleProviders(): ValueProvider[] {
+    return [
+      {
+        provide: ComponentFactoryResolver,
+        useValue: this.componentFactoryResolver,
+      },
+    ];
   }
 
   protected _bindProviders(
@@ -140,6 +151,7 @@ export abstract class ModuleRef<T = any> implements Injector {
   ): CustomProvider[] {
     return components.map((component) => {
       const componentProviders = this._reflectComponentProviders(component);
+      ɵdefineInjectable(component, { lifetime: InjectorLifetime.Module });
       const componentRef = new ComponentRefImpl(
         component,
         componentProviders,
@@ -163,6 +175,14 @@ export abstract class ModuleRef<T = any> implements Injector {
 
     const prov = providers ?? [];
     return [...prov, ...this._contextProviders];
+  }
+
+  public async createComponent<T extends Type = Type>(
+    component: T,
+    ctx?: Injector
+  ) {
+    const compFactory = await this.componentFactoryResolver.resolve(component);
+    return compFactory.create(null, ctx);
   }
 
   /**

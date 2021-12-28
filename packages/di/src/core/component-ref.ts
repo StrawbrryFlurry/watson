@@ -1,9 +1,10 @@
 import { Binding, createBinding, getInjectableDef } from '@di/core/binding';
+import { ComponentFactoryRef } from '@di/core/component-factory';
 import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { ModuleRef } from '@di/core/module-ref';
 import { UniqueTypeArray } from '@di/data-structures';
 import { Injectable } from '@di/decorators';
-import { InjectorLifetime, Providable, ValueProvider, ɵdefineInjectable } from '@di/providers';
+import { InjectorLifetime, Providable, ValueProvider } from '@di/providers';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
@@ -11,8 +12,6 @@ import { isNil } from '@di/utils/common';
 export abstract class WatsonComponentRef<T = any> implements Injector {
   public parent: ModuleRef | null;
   public readonly metatype: Type;
-
-  public instance: T | null = null;
 
   public get name() {
     return this.metatype.name;
@@ -35,8 +34,6 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
     this.metatype = metatype;
     this.parent = moduleRef;
 
-    ɵdefineInjectable(metatype, "module", InjectorLifetime.Module);
-
     const injectorProviders = this._bindProviders(providers);
     this._injector = Injector.create(
       [
@@ -50,6 +47,11 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
           useValue: this,
           multi: false,
         } as ValueProvider,
+        {
+          provide: ComponentFactoryRef,
+          useFactory: () =>
+            this.parent?.componentFactoryResolver.resolve(this.metatype),
+        },
       ],
       moduleRef,
       moduleRef
@@ -72,11 +74,10 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
       .filter(Boolean) as ProviderResolvable[];
   }
 
+  /**
+   * @deprecated use `ModuleRef`.componentFactoryResolver instead
+   */
   public async getInstance(ctx?: Injector): Promise<T> {
-    if (!isNil(this.instance)) {
-      return this.instance;
-    }
-
     const instance = await this.get(this.metatype, null, ctx);
     // TODO:
     // Replace with ComponentFactory
@@ -84,10 +85,6 @@ export abstract class WatsonComponentRef<T = any> implements Injector {
     const bindingRef = <Binding>(
       (<any>this._injector)._records.get(this.metatype)
     );
-
-    if (bindingRef.isDependencyTreeStatic()) {
-      this.instance = instance;
-    }
 
     return instance;
   }
