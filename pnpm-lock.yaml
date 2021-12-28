@@ -12,7 +12,7 @@ specifiers:
   '@types/luxon': ^2.0.7
   '@types/node': 16.11.10
   '@types/xxhashjs': ^0.2.2
-  '@watsonjs/ts-transformer': 0.0.2
+  '@watsonjs/ts-transformer': 0.0.3
   '@zerollup/ts-transform-paths': ^1.7.18
   axios: ^0.21.4
   bullmq: ^1.54.4
@@ -71,7 +71,7 @@ devDependencies:
   '@types/luxon': 2.0.7
   '@types/node': 16.11.10
   '@types/xxhashjs': 0.2.2
-  '@watsonjs/ts-transformer': 0.0.2_typescript@4.5.4
+  '@watsonjs/ts-transformer': 0.0.3_typescript@4.5.4
   '@zerollup/ts-transform-paths': 1.7.18_typescript@4.5.4
   delete-empty: 3.0.0
   dpdm: 3.8.0
@@ -1307,8 +1307,8 @@ packages:
       '@types/yargs-parser': 20.2.1
     dev: true
 
-  /@watsonjs/ts-transformer/0.0.2_typescript@4.5.4:
-    resolution: {integrity: sha512-QEsp32eKKYlkr1F7wIgWSgnHFRibqutOp36iaRkdBFje7gSl9ZAHfMRS3Y1/a8v34hMhdO0ngaPNDk3kLKnQHA==}
+  /@watsonjs/ts-transformer/0.0.3_typescript@4.5.4:
+    resolution: {integrity: sha512-2TKl6LEnKRkP8q1SX1dljDwKcqavLY09BIna9Wyep1Np1n/W7fbC24gsNioRVRPQB7hWyjaHyWfPlr0O+1vDRw==}
     peerDependencies:
       typescript: 4.5.4
     dependencies:
