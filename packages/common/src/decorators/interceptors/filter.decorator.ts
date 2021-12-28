@@ -4,7 +4,7 @@ import { ExecutionContext } from '@common/pipeline';
 import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
 
 /**
  * Filters work in a similar way to guards. Their difference being that they will not throw an error if the command shouldn't be run.

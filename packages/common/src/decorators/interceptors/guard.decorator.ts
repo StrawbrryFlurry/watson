@@ -4,7 +4,7 @@ import { ExecutionContext } from '@common/pipeline';
 import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
 
 /**
  * Guards will check incoming commands for user permissions or other data you might

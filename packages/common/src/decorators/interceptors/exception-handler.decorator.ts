@@ -1,9 +1,9 @@
-import { EXCEPTION_HANDLER_METADATA } from "@common/constants";
-import { ExceptionHandler } from "@common/exceptions";
-import { W_INT_TYPE } from "@common/fields";
-import { InjectionToken } from "@watsonjs/di";
+import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
+import { ExceptionHandler } from '@common/exceptions';
+import { W_INT_TYPE } from '@common/fields';
+import { InjectionToken } from '@watsonjs/di';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from "./is-interceptor";
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
 
 interface WithCatch {
   prototype: ExceptionHandler;

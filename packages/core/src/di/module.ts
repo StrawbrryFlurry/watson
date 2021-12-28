@@ -1,29 +1,17 @@
-import { RouterRefImpl } from "@core/di";
+import { RouterRefImpl } from '@core/di';
 import {
   EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
-  IsInterceptor,
   isNil,
   PIPE_METADATA,
   PREFIX_METADATA,
-} from "@watsonjs/common";
-import {
-  DeclareModuleRef,
-  Injector,
-  ModuleDef,
-  ModuleRef,
-  Reflector,
-  Type,
-  UniqueTypeArray,
-} from "@watsonjs/di";
-
-import { ComponentFactory } from "./component-factory";
+  ɵInterceptor,
+} from '@watsonjs/common';
+import { DeclareModuleRef, Injector, ModuleDef, ModuleRef, Reflector, Type, UniqueTypeArray } from '@watsonjs/di';
 
 @DeclareModuleRef()
 export class ModuleImpl extends ModuleRef {
-  public componentFactory: ComponentFactory;
-
   constructor(
     metatype: Type,
     rootInjector: Injector,
@@ -34,7 +22,7 @@ export class ModuleImpl extends ModuleRef {
   }
 
   private _reflectAllComponentInjectables(metatype: Type) {
-    const injectables = new UniqueTypeArray<IsInterceptor>();
+    const injectables = new UniqueTypeArray<ɵInterceptor>();
 
     if (isNil(metatype) || isNil(metatype.prototype)) {
       return injectables;
@@ -55,7 +43,7 @@ export class ModuleImpl extends ModuleRef {
 
   private _reflectComponentInjectable(
     metatype: Type,
-    ctx: UniqueTypeArray<IsInterceptor>,
+    ctx: UniqueTypeArray<ɵInterceptor>,
     metadataKey: string
   ) {
     const prototypeInjectables =

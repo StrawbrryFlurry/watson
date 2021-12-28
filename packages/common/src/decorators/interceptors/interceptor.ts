@@ -11,11 +11,11 @@ export enum ɵINTERCEPTOR_TYPE {
   Filter,
 }
 
-export interface IsInterceptor {
+export interface ɵInterceptor {
   [W_INT_TYPE]: ɵINTERCEPTOR_TYPE;
 }
 
-function defineInterceptorType(
+function ɵdefineInterceptorType(
   interceptors: (object | Function)[],
   type: ɵINTERCEPTOR_TYPE
 ) {
@@ -31,7 +31,7 @@ export function applyInterceptorMetadata<T extends Array<unknown>>(
   target: any,
   descriptor?: PropertyDescriptor
 ) {
-  defineInterceptorType(payload as Function[], type);
+  ɵdefineInterceptorType(payload as Function[], type);
 
   if (isMethodDecorator(descriptor)) {
     return applyStackableMetadata(metadata, descriptor!.value, payload);

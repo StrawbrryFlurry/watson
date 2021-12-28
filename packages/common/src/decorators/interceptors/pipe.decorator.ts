@@ -4,7 +4,7 @@ import { W_INT_TYPE } from '@common/fields';
 import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './is-interceptor';
+import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
 
 /**
  * Alters an argument passed to a route
