@@ -50,7 +50,7 @@ const CREATE_INJECTOR = (
    * `null` if it does not belong to any
    * component.
    */
-  scope: Type | null = null
+  scope: any | null = null
 ) => new DynamicInjector(providers, parent, scope);
 
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Module })

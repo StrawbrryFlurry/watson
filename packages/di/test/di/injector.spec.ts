@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
+import { Injector } from '@di/core/injector';
 import { Injectable } from '@di/decorators';
 import { FactoryProvider, InjectionToken, ValueProvider } from '@di/providers';
-import { Injector } from '@watsonjs/di';
 
 describe("Basic injector test", () => {
   @Injectable()

@@ -1,23 +1,16 @@
-import { RouterRef } from "@core/router/application-router";
+import { RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
   ExecutionContext,
   isClassConstructor,
   isFunction,
-  IsInterceptor,
   isNil,
   MessageSendable,
   W_INT_TYPE,
+  ɵInterceptor,
   ɵINTERCEPTOR_TYPE,
-} from "@watsonjs/common";
-import {
-  DynamicInjector,
-  Injector,
-  ModuleRef,
-  ProviderResolvable,
-  Type,
-  ValueProvider,
-} from "@watsonjs/di";
+} from '@watsonjs/common';
+import { DynamicInjector, ModuleRef, Providable, ProviderResolvable, Type, ValueProvider } from '@watsonjs/di';
 
 interface InterceptorBinding {
   /**
@@ -49,10 +42,33 @@ interface InterceptorBinding {
   metatype: Function | Type;
 }
 
+export interface RouterRefInjectableBindings {
+  /**
+   * Injectables registered by using the class Type
+   */
+  classInjectables: Type & ɵInterceptor[];
+  /**
+   * Injectables registered by using a class instance
+   */
+  instanceInjectables: object[];
+  /**
+   * Injectables registered as a callback function
+   */
+  callbackInjectables: {
+    cb: () => any;
+    deps: Providable[];
+  }[];
+}
+
 export class RouterRefImpl<T = any> extends RouterRef<T> {
   public root: RouterRef<any>;
 
-  private _interceptors = new Map<ɵINTERCEPTOR_TYPE, InterceptorBinding[]>();
+  private __interceptors = new Map<ɵINTERCEPTOR_TYPE, InterceptorBinding[]>();
+
+  protected _interceptors = new Map<
+    ɵINTERCEPTOR_TYPE,
+    RouterRefInjectableBindings
+  >();
 
   constructor(
     metatype: Type,
@@ -71,10 +87,10 @@ export class RouterRefImpl<T = any> extends RouterRef<T> {
     });
   }
 
-  private _bindInjectables(injectables: IsInterceptor[]) {
+  private _bindInjectables(injectables: ɵInterceptor[]) {
     for (const injectable of injectables) {
       const type = injectable[W_INT_TYPE];
-      const bindings = this._interceptors.get(type) ?? [];
+      // const bindings = this._interceptors.get(type) ?? [];
 
       const isClassCtor = isClassConstructor(injectable);
       const isPlainFunction = isFunction(injectable);
@@ -85,7 +101,7 @@ export class RouterRefImpl<T = any> extends RouterRef<T> {
         isInstance: !isClassCtor && !isPlainFunction,
       };
 
-      this._interceptors.set(type, [...bindings, injectableBinding]);
+      // this._interceptors.set(type, [...bindings, injectableBinding]);
     }
   }
 
@@ -100,29 +116,29 @@ export class RouterRefImpl<T = any> extends RouterRef<T> {
       return [];
     }
 
-    const injectables = [];
+    const injectables: any[] = [];
 
-    for (let i = 0; i < injectableBindings.length; i++) {
-      const injectable = injectableBindings[i];
-      const { isCtxFunction, isInstance, metatype } = injectable;
+    //for (let i = 0; i < injectableBindings.length; i++) {
+    //  const injectable = injectableBindings[i];
+    //  const { isCtxFunction, isInstance, metatype } = injectable;
 
-      if (isCtxFunction) {
-        injectables.push(metatype);
-        continue;
-      }
+    //  if (isCtxFunction) {
+    //    injectables.push(metatype);
+    //    continue;
+    //  }
 
-      let instance: any = metatype;
+    //  let instance: any = metatype;
 
-      if (!isInstance) {
-        instance = await this._injector.get(metatype, null, <Injector>ctx);
-      }
+    //  if (!isInstance) {
+    //    instance = await this._injector.get(metatype, null, <Injector>ctx);
+    //  }
 
-      const injectableMethod = instance[injectableMethodKey];
+    //  const injectableMethod = instance[injectableMethodKey];
 
-      if (isFunction(injectableMethod)) {
-        injectables.push(injectableMethod.bind(instance));
-      }
-    }
+    //  if (isFunction(injectableMethod)) {
+    //    injectables.push(injectableMethod.bind(instance));
+    //  }
+    //}
 
     return injectables;
   }

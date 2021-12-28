@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 
+import { Injector } from '@di/core/injector';
+import { InjectorInquirerContext } from '@di/core/inquirer-context';
 import { Injectable } from '@di/decorators';
 import { InjectorLifetime } from '@di/providers';
-import { Injector, InjectorInquirerContext } from '@watsonjs/di';
 import { randomUUID } from 'crypto';
 
 class TestLifetimeProvider {

@@ -1,8 +1,8 @@
-import { Injectable } from "@di/decorators";
-import { Type } from "@di/types";
+import { Injector } from '@di/core/injector';
+import { Injectable } from '@di/decorators';
+import { Type } from '@di/types';
 
-import { DependencyGraph } from "./dependency-graph";
-import { Injector } from "./injector";
+import { DependencyGraph } from './dependency-graph';
 
 import type { Binding } from "./binding";
 /**

@@ -90,7 +90,8 @@ export class Reflector {
         type
       ) ?? [];
 
-    for (const inject of injectParameters) {
+    for (let i = 0; i < injectParameters.length; i++) {
+      const inject = injectParameters[i];
       const { parameterIndex, provide } = inject;
 
       deps[parameterIndex] = provide;
