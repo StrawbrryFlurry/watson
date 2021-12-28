@@ -144,21 +144,14 @@ export class Binding<
       return true;
     }
 
-    for (let i = 0; i < this.deps!.length; i++) {
-      const dep = this.deps![i];
-      const { lifetime, providedIn } = getInjectableDef(dep);
+    const lifetime = findMostTransientDependencyLifetime(this.deps ?? []);
+    const isTreeStatic = !!(
+      lifetime &
+      (InjectorLifetime.Event | InjectorLifetime.Transient)
+    );
 
-      if (
-        lifetime & (InjectorLifetime.Event | InjectorLifetime.Transient) ||
-        providedIn === "ctx"
-      ) {
-        this._isTreeStatic = false;
-        return false;
-      }
-    }
-
-    this._isTreeStatic = true;
-    return true;
+    this._isTreeStatic = isTreeStatic;
+    return isTreeStatic;
   }
 
   public hasStaticInstance(): boolean {
@@ -256,6 +249,42 @@ export function getInjectableDef(
   return injectableDef;
 }
 
+/**
+ * Takes an array of provider dependencies and checks whether
+ * constructing the provider with those dependencies will
+ * ever yield different results depending on the context.
+ */
+export function findMostTransientDependencyLifetime(
+  deps: Providable[]
+): InjectorLifetime {
+  let providerLifetime = InjectorLifetime.Singleton;
+
+  for (let i = 0; i < deps!.length; i++) {
+    const dep = deps![i];
+    const { lifetime, providedIn } = getInjectableDef(dep);
+
+    if (lifetime & InjectorLifetime.Transient) {
+      /**
+       * If a dependency is transient the
+       * whole provider is automatically
+       * marked transient as well.
+       */
+      return InjectorLifetime.Transient;
+    }
+
+    if (lifetime & InjectorLifetime.Event || providedIn === "ctx") {
+      providerLifetime = InjectorLifetime.Event;
+    }
+  }
+
+  return providerLifetime;
+}
+
+/**
+ * Creates a `useValue` binding which
+ * maps the provider token `provide` with
+ * the resolved value in the value provider.
+ */
 export function createResolvedBinding(_provider: ValueProvider): Binding {
   const provider = resolveForwardRef(_provider);
   const { provide, useValue, multi } = provider;
@@ -269,6 +298,13 @@ export function createResolvedBinding(_provider: ValueProvider): Binding {
   return binding;
 }
 
+/**
+ * Creates a new binding using `_provider`.
+ * Resolves a forwardRef if there is one and
+ * figures out the actual type from a custom
+ * provider as well as it's providedIn scope
+ * and lifetime.
+ */
 export function createBinding(_provider: ProviderResolvable): Binding {
   const provider = resolveForwardRef(_provider);
   const { lifetime, providedIn } = getInjectableDef(provider);

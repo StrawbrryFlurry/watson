@@ -82,10 +82,10 @@ export type ProvidedInScope =
   | Type;
 
 export interface InjectableOptions {
-  /** {@link InjectorLifetime} */
-  lifetime?: InjectorLifetime;
   /** {@link ProvidedInScope} */
   providedIn?: ProvidedInScope;
+  /** {@link InjectorLifetime} */
+  lifetime?: InjectorLifetime;
 }
 
 export const DEFAULT_LIFETIME = InjectorLifetime.Singleton;
@@ -104,18 +104,22 @@ export class InjectionToken<T /* The value that this token provides */ = any> {
   ) {
     this.name = `[${INJECTION_TOKE_PREFIX}] ${this._description}`;
     const { lifetime, providedIn } = options;
-    ɵdefineInjectable(this, providedIn, lifetime);
+    ɵdefineInjectable(this, { providedIn, lifetime });
   }
 }
 
 export function ɵdefineInjectable(
   typeOrToken: Object | Type | InjectionToken,
-  providedIn: ProvidedInScope = DEFAULT_SCOPE,
-  lifetime: InjectorLifetime = DEFAULT_LIFETIME
+  options: InjectableOptions = {
+    providedIn: DEFAULT_SCOPE,
+    lifetime: DEFAULT_LIFETIME,
+  }
 ): ɵHasProv[typeof W_PROV] {
+  const { lifetime, providedIn } = options;
+
   const injectableDef = {
-    providedIn: resolveForwardRef(providedIn),
-    lifetime: lifetime,
+    providedIn: resolveForwardRef(providedIn) ?? DEFAULT_SCOPE,
+    lifetime: lifetime ?? DEFAULT_LIFETIME,
   };
 
   typeOrToken[W_PROV] = injectableDef;

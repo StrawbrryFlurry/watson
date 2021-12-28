@@ -23,8 +23,7 @@ interface InjectableDecoratorWithGlobalInjectablesProperty {
 
 export function Injectable(options: InjectableOptions = {}): ClassDecorator {
   return (target: Object) => {
-    const { lifetime, providedIn } = options;
-    const injectableDef = ɵdefineInjectable(target, providedIn, lifetime);
+    const injectableDef = ɵdefineInjectable(target, options);
 
     if (injectableDef.providedIn === "root") {
       <InjectableDecoratorWithGlobalInjectablesProperty>(
