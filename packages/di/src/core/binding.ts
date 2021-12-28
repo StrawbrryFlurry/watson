@@ -78,6 +78,7 @@ export class Binding<
    * dependencies.
    */
   private _isTreeStatic: boolean | null = null;
+  private _isTransientByDependency: boolean | null = null;
 
   /**
    * If the provider is a singleton,
@@ -112,7 +113,24 @@ export class Binding<
   }
 
   public isTransient(): boolean {
-    return !!(this.lifetime & InjectorLifetime.Transient);
+    return (
+      !!(this.lifetime & InjectorLifetime.Transient) ||
+      this.isTransientByDependency()
+    );
+  }
+
+  public isTransientByDependency(): boolean {
+    if (!isNil(this._isTransientByDependency)) {
+      return this._isTransientByDependency;
+    }
+
+    const lifetime = findMostTransientDependencyLifetime(this.deps ?? []);
+
+    if (lifetime & InjectorLifetime.Transient) {
+      return (this._isTransientByDependency = true);
+    }
+
+    return (this._isTransientByDependency = false);
   }
 
   public getInstance(
@@ -140,12 +158,11 @@ export class Binding<
     }
 
     if (!this.hasDependencies()) {
-      this._isTreeStatic = true;
-      return true;
+      return (this._isTreeStatic = true);
     }
 
     const lifetime = findMostTransientDependencyLifetime(this.deps ?? []);
-    const isTreeStatic = !!(
+    const isTreeStatic = !(
       lifetime &
       (InjectorLifetime.Event | InjectorLifetime.Transient)
     );

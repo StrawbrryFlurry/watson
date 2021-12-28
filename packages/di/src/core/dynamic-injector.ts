@@ -238,7 +238,16 @@ export async function ɵcreateBindingInstance<
 
   const instance = binding.getInstance(lookupCtx);
 
-  if (!isNil(instance) && binding.isDependencyTreeStatic()) {
+  if (
+    !isNil(instance) &&
+    // The binding only has static dependencies
+    (binding.isDependencyTreeStatic() ||
+      // We have a ContextInjector and the binding
+      // we're looking for has an instance for that
+      // context PLUS the binding doesn't have
+      // purely transient dependencies
+      (ctx === lookupCtx && !binding.isTransientByDependency()))
+  ) {
     return <R>instance;
   }
 
