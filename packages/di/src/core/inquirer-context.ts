@@ -1,10 +1,14 @@
-import { Injector } from '@di/core/injector';
 import { Injectable } from '@di/decorators/injectable.decorator';
+import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 
 import { DependencyGraph } from './dependency-graph';
 
 import type { Binding } from "./binding";
+export const REQUESTED_BY_INJECTOR = new InjectionToken(
+  "Token for `InjectorInquirerContext indicating that the request was made by an injector`"
+);
+
 /**
  * Provides metadata information about
  * the inquirer who requested a provider
@@ -12,13 +16,16 @@ import type { Binding } from "./binding";
  */
 @Injectable({ providedIn: InjectorInquirerContext })
 export class InjectorInquirerContext<
-  T extends Binding | typeof Injector | Type = Binding | typeof Injector | Type
+  T extends Binding | typeof REQUESTED_BY_INJECTOR | Type =
+    | Binding
+    | Type
+    | typeof REQUESTED_BY_INJECTOR
 > {
   /**
    * The {@link Binding} from which the current
    * provider was requested. If the provider was not
    * resolved using constructor injection,
-   * it will have the type {@link Injector}.
+   * it will have the type {@link REQUESTED_BY_INJECTOR}.
    */
   inquirer: T;
   /**
@@ -40,7 +47,7 @@ export class InjectorInquirerContext<
   dependencyGraph: DependencyGraph | null;
 
   constructor(
-    inquirer: T = <T>Injector,
+    inquirer: T = <T>REQUESTED_BY_INJECTOR,
     parameterIdx: number | null = null,
     dependencyGraph: DependencyGraph | null = null
   ) {

@@ -1,3 +1,4 @@
+export * from "./abstract-factory";
 export * from "./application-ref";
 export * from "./binding";
 export * from "./component-factory-resolver";
@@ -14,4 +15,7 @@ export * from "./module-container";
 export * from "./module-loader";
 export * from "./module-ref";
 export * from "./null-injector";
+export * from "./provider-factory-resolver";
+export * from "./provider-factory";
 export * from "./reflector";
+export * from "./ɵinjector";

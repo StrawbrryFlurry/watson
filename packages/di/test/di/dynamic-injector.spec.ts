@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 
 import { Injector } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { InjectorInquirerContext, REQUESTED_BY_INJECTOR } from '@di/core/inquirer-context';
 import { Injectable } from '@di/decorators/injectable.decorator';
-import { InjectorLifetime } from '@di/providers';
+import { InjectorLifetime } from '@di/providers/injection-token';
 import { randomUUID } from 'crypto';
 
 class TestLifetimeProvider {
@@ -26,7 +26,7 @@ class NoopLogger {
   constructor(inquirerCtx: InjectorInquirerContext) {
     const { inquirer } = inquirerCtx;
 
-    if (inquirer === Injector) {
+    if (inquirer === REQUESTED_BY_INJECTOR) {
       this.name = "[GLOBAL]";
     } else {
       this.name = inquirer.name;
