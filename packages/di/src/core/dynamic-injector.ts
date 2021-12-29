@@ -1,4 +1,12 @@
-import { WatsonComponentRef } from '@di/core/component-ref';
+import {
+  Binding,
+  createBinding,
+  FactoryFnWithoutDeps,
+  getInjectableDef,
+  getProviderToken,
+  isUseExistingProvider,
+} from '@di/core/binding';
+import { ComponentRef } from '@di/core/component-ref';
 import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
 import { InjectorInquirerContext } from '@di/core/inquirer-context';
 import { ModuleRef } from '@di/core/module-ref';
@@ -15,14 +23,6 @@ import { Type } from '@di/types';
 import { resolveAsyncValue } from '@di/utils';
 import { isFunction, isNil } from '@di/utils/common';
 
-import {
-  Binding,
-  createBinding,
-  FactoryFnWithoutDeps,
-  getInjectableDef,
-  getProviderToken,
-  isUseExistingProvider,
-} from './binding';
 import { DependencyGraph } from './dependency-graph';
 import { InjectorBloomFilter } from './injector-bloom-filter';
 import { INJECTOR } from './injector-token';
@@ -51,7 +51,7 @@ export class DynamicInjector implements Injector {
     // All components and only components
     // provide themselves as a component ref.
     this._isComponent = providers.some(
-      (provider) => (<CustomProvider>provider)?.provide === WatsonComponentRef
+      (provider) => (<CustomProvider>provider)?.provide === ComponentRef
     );
 
     if (!isNil(this.scope)) {

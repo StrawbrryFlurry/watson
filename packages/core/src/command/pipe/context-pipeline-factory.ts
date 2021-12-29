@@ -44,7 +44,6 @@ export class ContextPipelineFactory {
     PipeCreateFnArgs extends CreatePipelineArguments<PipeMatch[1]>,
     O extends OmitFirstElement<OmitFirstElement<PipeCreateFnArgs>>
   >(routeRef: R, moduleInjector: Injector, ...options: O): Promise<Pipe> {
-    // We can only use the spread operator on tuples
     const o = <any>options;
 
     switch (routeRef.type) {

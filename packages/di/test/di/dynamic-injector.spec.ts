@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 import { Injector } from '@di/core/injector';
 import { InjectorInquirerContext } from '@di/core/inquirer-context';
-import { Injectable } from '@di/decorators';
+import { Injectable } from '@di/decorators/injectable.decorator';
 import { InjectorLifetime } from '@di/providers';
 import { randomUUID } from 'crypto';
 

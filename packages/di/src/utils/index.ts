@@ -1,3 +1,4 @@
+export * from "./get-class-of-instance.util";
 export * from "./get-function-parameters.util";
 export * from "./optional-assign.utils";
 export * from "./resolve-async-value.util";

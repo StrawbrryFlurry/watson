@@ -1,11 +1,13 @@
 import 'reflect-metadata';
 
-import { WatsonComponentRef } from '@di/core/component-ref';
+import { ComponentRef } from '@di/core/component-ref';
 import { Injector } from '@di/core/injector';
 import { ModuleContainer } from '@di/core/module-container';
 import { ModuleLoader } from '@di/core/module-loader';
 import { ModuleRef } from '@di/core/module-ref';
-import { Injectable, WatsonComponent, WatsonModule } from '@di/decorators';
+import { WatsonComponent } from '@di/decorators/component.decorator';
+import { Injectable } from '@di/decorators/injectable.decorator';
+import { WatsonModule } from '@di/decorators/module.decorator';
 import { CustomProvider, forwardRef, InjectionToken, WatsonDynamicModule } from '@di/providers';
 
 @Injectable({ providedIn: "module" })
@@ -48,7 +50,7 @@ class TestModule {}
 
 @WatsonComponent()
 class TestComponent {
-  constructor(private _componentRef: WatsonComponentRef) {}
+  constructor(private _componentRef: ComponentRef) {}
 }
 
 @Injectable({ providedIn: "module" })
@@ -61,19 +63,19 @@ describe("Basic Module setup", () => {
   const moduleLoader = new ModuleLoader(rootInjector);
 
   let rootModuleRef: ModuleRef;
-  let testComponentRef: WatsonComponentRef;
+  let testComponentRef: ComponentRef;
   let moduleContainerRef: ModuleContainer;
 
   beforeAll(async () => {
     rootModuleRef = await moduleLoader.resolveRootModule(TestModule);
-    testComponentRef = await rootModuleRef.get<
-      WatsonComponentRef<TestComponent>
-    >(TestComponent);
+    testComponentRef = await rootModuleRef.get<ComponentRef<TestComponent>>(
+      TestComponent
+    );
     moduleContainerRef = await rootInjector.get(ModuleContainer);
   });
 
   test("ModuleInjectors can resolve a component to a ComponentRef", async () => {
-    expect(testComponentRef).toBeInstanceOf(WatsonComponentRef);
+    expect(testComponentRef).toBeInstanceOf(ComponentRef);
   });
 
   test("Both the ModuleInjector and the ComponentInjector can resolve module dependencies", async () => {
@@ -86,12 +88,12 @@ describe("Basic Module setup", () => {
     expect(testProviderInComponent).toBeInstanceOf(TestModuleProvider);
   });
 
-  test("The ComponentInjector provides both ModuleRef and WatsonComponentRef", async () => {
+  test("The ComponentInjector provides both ModuleRef and ComponentRef", async () => {
     const moduleRef = await testComponentRef.get(ModuleRef);
-    const componentRef = await testComponentRef.get(WatsonComponentRef);
+    const componentRef = await testComponentRef.get(ComponentRef);
 
     expect(moduleRef).toBeInstanceOf(ModuleRef);
-    expect(componentRef).toBeInstanceOf(WatsonComponentRef);
+    expect(componentRef).toBeInstanceOf(ComponentRef);
   });
 
   test("Dynamic modules are added to the module tree", async () => {

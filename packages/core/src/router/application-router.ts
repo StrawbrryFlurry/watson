@@ -1,9 +1,9 @@
-import { BaseRoute, MessageSendable } from "@watsonjs/common";
-import { Injectable, WatsonComponentRef } from "@watsonjs/di";
-import iterate from "iterare";
+import { BaseRoute, MessageSendable } from '@watsonjs/common';
+import { ComponentRef, Injectable } from '@watsonjs/di';
+import iterate from 'iterare';
 
 @Injectable({ providedIn: "module" })
-export abstract class RouterRef<T = any> extends WatsonComponentRef<T> {
+export abstract class RouterRef<T = any> extends ComponentRef<T> {
   /**
    * A map of all routes that are
    * bound within this router.

@@ -2,8 +2,6 @@ import { UniqueTypeArray } from '@di/data-structures';
 import { W_GLOBAL_PROV } from '@di/fields';
 import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@di/providers';
 
-export interface InjectableMetadata extends Required<InjectableOptions> {}
-
 /**
  * TODO: Evaluate if this is useful - if so figure
  * out how to bind this in the `ModuleRef` constructor

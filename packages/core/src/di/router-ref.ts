@@ -77,7 +77,7 @@ export class RouterRefImpl<T = any> extends RouterRef<T> {
   ) {
     super(metatype, providers, moduleRef);
     /**
-     * WatsonComponentsRef only binds `WatsonComponentRef`
+     * ComponentsRef only binds `ComponentRef`
      * as a provider for this instance.
      */
     (<DynamicInjector>this._injector).bind(<ValueProvider>{

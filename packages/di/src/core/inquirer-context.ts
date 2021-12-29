@@ -1,5 +1,5 @@
 import { Injector } from '@di/core/injector';
-import { Injectable } from '@di/decorators';
+import { Injectable } from '@di/decorators/injectable.decorator';
 import { Type } from '@di/types';
 
 import { DependencyGraph } from './dependency-graph';

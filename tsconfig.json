@@ -56,7 +56,7 @@
       "@core/exceptions": ["./packages/core/src/exceptions"],
       "@core/utils": ["./packages/core/src/util"],
 
-      "@di/decorators": ["packages/di/src/decorators"],
+      "@di/decorators/*": ["packages/di/src/decorators/*"],
       "@di/data-structures": ["packages/di/src/data-structures"],
       "@di/core/*": ["packages/di/src/core/*"],
       "@di/hooks": ["packages/di/src/hooks"],

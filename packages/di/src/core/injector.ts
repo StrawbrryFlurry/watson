@@ -1,4 +1,4 @@
-import { Injectable } from '@di/decorators';
+import { Injectable } from '@di/decorators/injectable.decorator';
 import { CustomProvider, InjectionToken, InjectorLifetime, Providable } from '@di/providers';
 import { Type } from '@di/types';
 

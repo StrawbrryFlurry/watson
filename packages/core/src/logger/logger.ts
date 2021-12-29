@@ -1,4 +1,4 @@
-import { Injectable, Injector, InjectorInquirerContext } from '@watsonjs/di';
+import { Injectable, Injector, InjectorInquirerContext, InjectorLifetime } from '@watsonjs/di';
 import { green, red, white, yellow } from 'cli-color';
 
 export enum LogType {
@@ -8,7 +8,7 @@ export enum LogType {
   ERROR,
 }
 
-@Injectable()
+@Injectable({ lifetime: InjectorLifetime.Module })
 export class Logger {
   public context!: string;
 

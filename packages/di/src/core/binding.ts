@@ -6,7 +6,7 @@ import {
   ClassProvider,
   CustomProvider,
   FactoryProvider,
-  InjectableOptions,
+  InjectableDef,
   InjectionToken,
   InjectorLifetime,
   Providable,
@@ -243,9 +243,14 @@ export function getProviderToken(
   return resolveForwardRef(provider);
 }
 
-export function getInjectableDef(
+/**
+ * Same as `getInjectableDef` but can return
+ * `null` if there is no injectable definition
+ * set.
+ */
+export function getUnsafeInjectableDef(
   typeOrProvider: ProviderResolvable | Providable
-): Required<InjectableOptions> {
+): InjectableDef | null {
   if (isNil(typeOrProvider)) {
     throw "Can't get injectable definition of null or undefined";
   }
@@ -257,13 +262,25 @@ export function getInjectableDef(
     typeOrToken = provide;
   }
 
-  let injectableDef = (<ɵHasProv>(<any>typeOrToken))[W_PROV];
+  return (<ɵHasProv>(<any>typeOrToken))[W_PROV] ?? null;
+}
 
-  if (isNil(injectableDef)) {
-    injectableDef = ɵdefineInjectable(typeOrToken);
+export function getInjectableDef(
+  typeOrProvider: ProviderResolvable | Providable
+): InjectableDef {
+  let injectableDef = getUnsafeInjectableDef(typeOrProvider);
+  let typeOrToken = typeOrProvider;
+
+  if (!isNil(injectableDef)) {
+    return injectableDef;
   }
 
-  return injectableDef;
+  if (isCustomProvider(typeOrProvider)) {
+    const { provide } = typeOrProvider;
+    typeOrToken = provide;
+  }
+
+  return ɵdefineInjectable(typeOrToken);
 }
 
 /**

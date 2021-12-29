@@ -1,7 +1,6 @@
-import { INJECT_DEPENDENCY_METADATA } from "@di/constants";
-import { Reflector } from "@di/core/reflector";
-import { InjectionToken } from "@di/providers";
-import { Type } from "@di/types";
+import { INJECT_DEPENDENCY_METADATA } from '@di/constants';
+import { InjectionToken } from '@di/providers';
+import { Type } from '@di/types';
 
 export interface InjectMetadata {
   propertyKey: string | symbol;
@@ -29,9 +28,8 @@ export function Inject(token: Type | InjectionToken): ParameterDecorator {
     };
 
     const existingMetadata =
-      Reflector.reflectMetadata<InjectMetadata[]>(
-        INJECT_DEPENDENCY_METADATA,
-        <Type>target
+      <InjectMetadata[]>(
+        Reflect.getMetadata(INJECT_DEPENDENCY_METADATA, <Type>target)
       ) ?? [];
 
     const concatenatedMetadata = [...existingMetadata, metadata];

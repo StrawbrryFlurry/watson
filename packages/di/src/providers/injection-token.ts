@@ -88,6 +88,8 @@ export interface InjectableOptions {
   lifetime?: InjectorLifetime;
 }
 
+export interface InjectableDef extends Required<InjectableOptions> {}
+
 export const DEFAULT_LIFETIME = InjectorLifetime.Singleton;
 export const DEFAULT_SCOPE: ProvidedInScope = "root";
 

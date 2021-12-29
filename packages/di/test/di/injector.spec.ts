@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 import { Injector } from '@di/core/injector';
-import { Injectable } from '@di/decorators';
+import { Injectable } from '@di/decorators/injectable.decorator';
 import { FactoryProvider, InjectionToken, ValueProvider } from '@di/providers';
 
 describe("Basic injector test", () => {
