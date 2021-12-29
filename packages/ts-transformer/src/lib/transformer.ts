@@ -1,6 +1,9 @@
 import { basename, dirname, extname, join, resolve } from 'path';
 import {
+  isImportClause,
   isImportDeclaration,
+  isImportSpecifier,
+  isTypeOnlyImportOrExportDeclaration,
   Node,
   Program,
   SourceFile,
@@ -16,9 +19,14 @@ import { transformImportDeclaration } from './transform-import-declaration';
 const FILE_EXTENSIONS = ["js", "ts", "jsx", "tsx"];
 const noopFactory = (sf: SourceFile) => sf;
 
+interface TransformerOptions {
+  excludeNamespace: string[];
+}
+
 const transformerFactory = (
-  options: { excludeNamespace: string[] },
-  program: Program
+  options: TransformerOptions,
+  program: Program,
+  isAfterDeclarations: boolean = false
 ): TransformerFactory<SourceFile> => {
   return (ctx: TransformationContext): Transformer<SourceFile> => {
     const { paths, baseUrl } = ctx.getCompilerOptions();
@@ -61,7 +69,23 @@ const transformerFactory = (
 
     return (sf: SourceFile) => {
       const visitor = (node: Node): Node => {
+        if (
+          isImportClause(node) ||
+          isImportSpecifier(node) ||
+          isTypeOnlyImportOrExportDeclaration(node)
+        ) {
+          console.log(node.getText());
+          return node;
+        }
+
         if (isImportDeclaration(node)) {
+          const { importClause } = node;
+
+          // Skip type only imports when compiling regular files
+          if (importClause && importClause.isTypeOnly && !isAfterDeclarations) {
+            return node;
+          }
+
           return transformImportDeclaration(ctx, sf, node, moduleAliases);
         }
 
@@ -75,7 +99,10 @@ const transformerFactory = (
 
 // Export for nx
 export const before = transformerFactory;
-export const afterDeclarations = transformerFactory;
+export const afterDeclarations = (
+  options: TransformerOptions,
+  program: Program
+) => transformerFactory(options, program, true);
 
 // Export for ttypescript
 export default (program: Program, options: any) =>
