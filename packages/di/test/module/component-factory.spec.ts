@@ -4,7 +4,8 @@ import { Injector } from '@di/core/injector';
 import { ModuleContainer } from '@di/core/module-container';
 import { ModuleLoader } from '@di/core/module-loader';
 import { ModuleRef } from '@di/core/module-ref';
-import { InjectorLifetime, ValueProvider } from '@di/providers';
+import { ValueProvider } from '@di/providers/custom-provider.interface';
+import { InjectorLifetime } from '@di/providers/injection-token';
 import { ContextInjector } from 'packages/di/test/test-utils';
 
 import { AppModule } from './app.module';

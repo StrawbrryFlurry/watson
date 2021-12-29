@@ -3,6 +3,7 @@ import { ComponentFactoryResolver, ComponentFactoryResolverImpl } from '@di/core
 import { ɵComponentRefImpl } from '@di/core/component-ref';
 import { DynamicInjector } from '@di/core/dynamic-injector';
 import { Injector, ProviderResolvable } from '@di/core/injector';
+import { ProviderFactoryResolver, ProviderFactoryResolverImpl } from '@di/core/provider-factory-resolver';
 import { Reflector } from '@di/core/reflector';
 import { UniqueTypeArray } from '@di/data-structures';
 import { ComponentDecoratorOptions } from '@di/decorators/component.decorator';
@@ -107,12 +108,12 @@ export abstract class ModuleRef<T = any> implements Injector {
         provide: ComponentFactoryResolver,
         useValue: this.componentFactoryResolver,
       },
-      // {
-      //   provide: ProviderFactoryResolver,
-      //   // We use a factory function cause not every module
-      //   // needs a `ProviderFactoryResolver`.
-      //   useFactory: () => new ProviderFactoryResolverImpl(this),
-      // },
+      {
+        provide: ProviderFactoryResolver,
+        // We use a factory function cause not every module
+        // needs a `ProviderFactoryResolver`.
+        useFactory: () => new ProviderFactoryResolverImpl(this),
+      },
     ];
   }
 

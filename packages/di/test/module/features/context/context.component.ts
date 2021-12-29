@@ -1,6 +1,6 @@
 import { WatsonComponent } from '@di/decorators/component.decorator';
 import { Inject } from '@di/decorators/inject.decorator';
-import { InjectionToken } from '@di/providers';
+import { InjectionToken } from '@di/providers/injection-token';
 
 export const CONTEXT_PROVIDER = new InjectionToken<string>(
   "Some context provider",

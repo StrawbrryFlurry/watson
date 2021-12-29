@@ -1,4 +1,4 @@
-import { WatsonDynamicModule } from '@di/providers';
+import { WatsonDynamicModule } from '@di/providers/dynamic-module.interface';
 
 import { DynamicModuleComponent } from './dynamic-module.component';
 

@@ -8,7 +8,10 @@ import { ModuleRef } from '@di/core/module-ref';
 import { WatsonComponent } from '@di/decorators/component.decorator';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { WatsonModule } from '@di/decorators/module.decorator';
-import { CustomProvider, forwardRef, InjectionToken, WatsonDynamicModule } from '@di/providers';
+import { CustomProvider } from '@di/providers/custom-provider.interface';
+import { WatsonDynamicModule } from '@di/providers/dynamic-module.interface';
+import { forwardRef } from '@di/providers/forward-ref';
+import { InjectionToken } from '@di/providers/injection-token';
 
 @Injectable({ providedIn: "module" })
 class NoopLogger {}

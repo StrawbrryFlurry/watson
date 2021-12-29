@@ -8,12 +8,18 @@ import { stringify } from '@di/utils';
 import { isNil } from '@di/utils/common';
 
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Scoped })
-export abstract class ProviderFactoryResolver extends AbstractInjectableFactoryResolver {}
+export abstract class ProviderFactoryResolver extends AbstractInjectableFactoryResolver {
+  public abstract resolve<T extends Type>(
+    provider: T,
+    /** Providing a ModuleRef here doesn't do anything. */
+    moduleRef?: ModuleRef | null,
+    injectableOptions?: InjectableOptions
+  ): Promise<ProviderFactory<T>>;
+}
 
 export class ProviderFactoryResolverImpl extends ProviderFactoryResolver {
   public async resolve<T extends Type>(
     provider: T,
-    /** Providing a ModuleRef here doesn't do anything. */
     moduleRef: ModuleRef | null = null,
     injectableOptions?: InjectableOptions
   ): Promise<ProviderFactory<T>> {

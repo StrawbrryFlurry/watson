@@ -1,9 +1,7 @@
 import { AbstractInjectableFactory } from '@di/core/abstract-factory';
 import { Binding } from '@di/core/binding';
 import { Injector } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
-import { ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { getUnsafeInjectableDef } from '@di/providers/injectable-def';
 import {
@@ -14,8 +12,7 @@ import {
   InjectorLifetime,
   ɵdefineInjectable,
 } from '@di/providers/injection-token';
-import { Constructable, Type } from '@di/types';
-import { getClassOfInstance } from '@di/utils';
+import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
 /**
@@ -29,6 +26,9 @@ import { isNil } from '@di/utils/common';
  * made globally available as they could
  * possibly overwrite existing module
  * provided singletons.
+ *
+ * Providers can only depend on known
+ * module dependencies.
  */
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Scoped })
 export abstract class ProviderFactoryRef<
@@ -65,22 +65,5 @@ export class ProviderFactory<
     binding.factory = (...args: any[]) => Reflect.construct(this.type, args);
 
     this.bindingRef = binding;
-  }
-
-  public create<R extends T extends Constructable<infer R> ? R : T>(
-    injector?: Injector | null,
-    ctx?: Injector
-  ): Promise<R> {
-    const inj = injector ?? this._injector;
-    const inquirerCtx = new InjectorInquirerContext(
-      getClassOfInstance<typeof ProviderFactory>(this)
-    );
-
-    return ɵcreateBindingInstance(
-      this.bindingRef,
-      inj,
-      ctx ?? null,
-      inquirerCtx
-    );
   }
 }
