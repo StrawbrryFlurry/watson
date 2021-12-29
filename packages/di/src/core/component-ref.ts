@@ -1,14 +1,16 @@
-import { Binding, createBinding, getInjectableDef } from '@di/core/binding';
+import { Binding, createBinding } from '@di/core/binding';
 import { ComponentFactoryRef } from '@di/core/component-factory';
 import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { ModuleRef } from '@di/core/module-ref';
 import { UniqueTypeArray } from '@di/data-structures';
 import { Injectable } from '@di/decorators/injectable.decorator';
-import { InjectorLifetime, Providable, ValueProvider } from '@di/providers';
+import { ValueProvider } from '@di/providers/custom-provider.interface';
+import { getInjectableDef } from '@di/providers/injectable-def';
+import { InjectorLifetime, Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
-@Injectable({ providedIn: "component", lifetime: InjectorLifetime.Module })
+@Injectable({ providedIn: "component", lifetime: InjectorLifetime.Scoped })
 export abstract class ComponentRef<T extends Type = any> implements Injector {
   public parent: ModuleRef | null;
   public readonly metatype: T;

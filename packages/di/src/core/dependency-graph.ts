@@ -1,5 +1,5 @@
-import { Providable } from "@di/providers";
-import { stringify } from "@di/utils";
+import { Providable } from '@di/providers/injection-token';
+import { stringify } from '@di/utils';
 
 export class DependencyGraph {
   public dependencies: Providable[] = [];

@@ -1,21 +1,12 @@
 import { InjectorInquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
-import { W_BINDING_DEF, W_PROV, ɵHasProv } from '@di/fields';
+import { W_BINDING_DEF } from '@di/fields';
 import { BeforeResolution } from '@di/hooks';
-import {
-  ClassProvider,
-  CustomProvider,
-  FactoryProvider,
-  InjectableDef,
-  InjectionToken,
-  InjectorLifetime,
-  Providable,
-  ProvidedInScope,
-  resolveForwardRef,
-  UseExistingProvider,
-  ValueProvider,
-  ɵdefineInjectable,
-} from '@di/providers';
+import { isClassProvider, isCustomProvider, isFactoryProvider } from '@di/providers/custom-provider';
+import { ValueProvider } from '@di/providers/custom-provider.interface';
+import { resolveForwardRef } from '@di/providers/forward-ref';
+import { getInjectableDef, getProviderToken } from '@di/providers/injectable-def';
+import { InjectorLifetime, Providable, ProvidedInScope } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { resolveAsyncValue } from '@di/utils';
 import { isEmpty, isFunction, isNil } from '@di/utils/common';
@@ -26,6 +17,7 @@ import type {
   InjectorGetResult,
   ProviderResolvable,
 } from "./injector";
+
 export type NewableTo<T = any, D extends Array<any> = any[]> = new (
   ...args: D
 ) => T;
@@ -203,84 +195,6 @@ export class Binding<
   ) => Observable<InstanceType> | Promise<InstanceType> | InstanceType;
 
   public beforeResolutionHook?: BeforeResolution<any>["beforeResolution"];
-}
-
-export function isCustomProvider(provider: any): provider is CustomProvider {
-  return provider && "provide" in provider;
-}
-
-export function isUseExistingProvider(
-  provider: CustomProvider
-): provider is UseExistingProvider {
-  return provider && "useExisting" in provider;
-}
-
-export function isClassProvider(
-  provider: CustomProvider
-): provider is ClassProvider {
-  return provider && "useClass" in provider;
-}
-
-export function isFactoryProvider(
-  provider: CustomProvider
-): provider is FactoryProvider {
-  return provider && "useFactory" in provider;
-}
-
-export function isValueProvider(
-  provider: CustomProvider
-): provider is ValueProvider {
-  return provider && "useValue" in provider;
-}
-
-export function getProviderToken(
-  provider: ProviderResolvable
-): Type | InjectionToken {
-  if (isCustomProvider(provider)) {
-    return resolveForwardRef(provider.provide);
-  }
-
-  return resolveForwardRef(provider);
-}
-
-/**
- * Same as `getInjectableDef` but can return
- * `null` if there is no injectable definition
- * set.
- */
-export function getUnsafeInjectableDef(
-  typeOrProvider: ProviderResolvable | Providable
-): InjectableDef | null {
-  if (isNil(typeOrProvider)) {
-    throw "Can't get injectable definition of null or undefined";
-  }
-
-  let typeOrToken: Type | InjectionToken = typeOrProvider as Type;
-
-  if (isCustomProvider(typeOrProvider)) {
-    const { provide } = typeOrProvider;
-    typeOrToken = provide;
-  }
-
-  return (<ɵHasProv>(<any>typeOrToken))[W_PROV] ?? null;
-}
-
-export function getInjectableDef(
-  typeOrProvider: ProviderResolvable | Providable
-): InjectableDef {
-  let injectableDef = getUnsafeInjectableDef(typeOrProvider);
-  let typeOrToken = typeOrProvider;
-
-  if (!isNil(injectableDef)) {
-    return injectableDef;
-  }
-
-  if (isCustomProvider(typeOrProvider)) {
-    const { provide } = typeOrProvider;
-    typeOrToken = provide;
-  }
-
-  return ɵdefineInjectable(typeOrToken);
 }
 
 /**

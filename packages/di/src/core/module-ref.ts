@@ -1,21 +1,16 @@
 import { COMPONENT_METADATA } from '@di/constants';
-import { getInjectableDef } from '@di/core/binding';
 import { ComponentFactoryResolver, ComponentFactoryResolverImpl } from '@di/core/component-factory-resolver';
 import { ɵComponentRefImpl } from '@di/core/component-ref';
 import { DynamicInjector } from '@di/core/dynamic-injector';
 import { Injector, ProviderResolvable } from '@di/core/injector';
 import { Reflector } from '@di/core/reflector';
 import { UniqueTypeArray } from '@di/data-structures';
-import { ComponentDecoratorOptions, Injectable } from '@di/decorators';
+import { ComponentDecoratorOptions } from '@di/decorators/component.decorator';
+import { Injectable } from '@di/decorators/injectable.decorator';
 import { W_MODULE_PROV } from '@di/fields';
-import {
-  CustomProvider,
-  InjectionToken,
-  InjectorLifetime,
-  Providable,
-  ValueProvider,
-  ɵdefineInjectable,
-} from '@di/providers';
+import { CustomProvider, ValueProvider } from '@di/providers/custom-provider.interface';
+import { getInjectableDef } from '@di/providers/injectable-def';
+import { InjectionToken, InjectorLifetime, Providable, ɵdefineInjectable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 
 export interface ModuleDef {
@@ -31,7 +26,7 @@ export interface ModuleDef {
  * contains that module's injector as well as all
  * components and providers that were mapped to it.
  */
-@Injectable({ providedIn: "module", lifetime: InjectorLifetime.Module })
+@Injectable({ providedIn: "module", lifetime: InjectorLifetime.Scoped })
 export abstract class ModuleRef<T = any> implements Injector {
   public parent: ModuleRef | Injector | null;
   public metatype: Type;
@@ -106,12 +101,18 @@ export abstract class ModuleRef<T = any> implements Injector {
     this._injector = Injector.create(injectorProviders, parent, this);
   }
 
-  private _makeModuleProviders(): ValueProvider[] {
+  private _makeModuleProviders(): CustomProvider[] {
     return [
       {
         provide: ComponentFactoryResolver,
         useValue: this.componentFactoryResolver,
       },
+      // {
+      //   provide: ProviderFactoryResolver,
+      //   // We use a factory function cause not every module
+      //   // needs a `ProviderFactoryResolver`.
+      //   useFactory: () => new ProviderFactoryResolverImpl(this),
+      // },
     ];
   }
 
@@ -142,7 +143,7 @@ export abstract class ModuleRef<T = any> implements Injector {
 
   /**
    * Returns an array of custom providers
-   * that resolve to the {@link WatsonComponentRef} of
+   * that resolve to the {@link ComponentRef} of
    * all the components in the module.
    */
   protected _bindComponents(
@@ -151,7 +152,7 @@ export abstract class ModuleRef<T = any> implements Injector {
   ): CustomProvider[] {
     return components.map((component) => {
       const componentProviders = this._reflectComponentProviders(component);
-      ɵdefineInjectable(component, { lifetime: InjectorLifetime.Module });
+      ɵdefineInjectable(component, { lifetime: InjectorLifetime.Scoped });
       const componentRef = new ComponentRefImpl(
         component,
         componentProviders,

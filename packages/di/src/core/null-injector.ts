@@ -1,4 +1,4 @@
-import { Providable } from '@di/providers';
+import { Providable } from '@di/providers/injection-token';
 import { stringify } from '@di/utils';
 import { isNil } from '@di/utils/common';
 

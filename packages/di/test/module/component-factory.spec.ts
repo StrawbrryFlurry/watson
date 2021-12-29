@@ -66,7 +66,7 @@ describe("Component Factory basics", () => {
         TransientComponent
       );
 
-    expect(fooCompFac.bindingRef.lifetime).toBe(InjectorLifetime.Module);
+    expect(fooCompFac.bindingRef.lifetime).toBe(InjectorLifetime.Scoped);
     expect(transientCompFac.bindingRef.lifetime).toBe(
       InjectorLifetime.Transient
     );

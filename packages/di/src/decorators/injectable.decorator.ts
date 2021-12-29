@@ -1,6 +1,6 @@
 import { UniqueTypeArray } from '@di/data-structures';
 import { W_GLOBAL_PROV } from '@di/fields';
-import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@di/providers';
+import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@di/providers/injection-token';
 
 /**
  * TODO: Evaluate if this is useful - if so figure

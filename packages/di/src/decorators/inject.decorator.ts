@@ -1,5 +1,5 @@
 import { INJECT_DEPENDENCY_METADATA } from '@di/constants';
-import { InjectionToken } from '@di/providers';
+import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 
 export interface InjectMetadata {

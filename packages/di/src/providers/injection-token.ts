@@ -31,10 +31,12 @@ export enum InjectorLifetime {
    */
   Event = 1 << 3,
   /**
-   * Creates a provider instance
-   * for every module.
+   * Creates a provider instance every
+   * module injector. A `ComponentRef` that
+   * is used for provider resolution is also
+   * treated as its own module.
    */
-  Module = 1 << 4,
+  Scoped = 1 << 4,
 }
 
 /**

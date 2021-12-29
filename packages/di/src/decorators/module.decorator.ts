@@ -1,5 +1,6 @@
 import { MODULE_DEFINITION_METADATA } from '@di/constants';
-import { CustomProvider, WatsonDynamicModule } from '@di/providers';
+import { CustomProvider } from '@di/providers/custom-provider.interface';
+import { WatsonDynamicModule } from '@di/providers/dynamic-module.interface';
 import { Type } from '@di/types';
 
 export interface WatsonModuleOptions {

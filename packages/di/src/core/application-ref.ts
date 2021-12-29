@@ -1,10 +1,10 @@
-import { getInjectableDef } from '@di/core/binding';
 import { DynamicInjector } from '@di/core/dynamic-injector';
 import { Injector, InjectorGetResult } from '@di/core/injector';
 import { ModuleContainer } from '@di/core/module-container';
 import { ModuleRef } from '@di/core/module-ref';
 import { Injectable } from '@di/decorators/injectable.decorator';
-import { Providable } from '@di/providers';
+import { getInjectableDef } from '@di/providers/injectable-def';
+import { Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 

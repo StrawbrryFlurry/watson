@@ -8,7 +8,7 @@ export enum LogType {
   ERROR,
 }
 
-@Injectable({ lifetime: InjectorLifetime.Module })
+@Injectable({ lifetime: InjectorLifetime.Scoped })
 export class Logger {
   public context!: string;
 

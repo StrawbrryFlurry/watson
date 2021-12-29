@@ -1,4 +1,4 @@
-import { WatsonModule } from '@di/decorators';
+import { WatsonModule } from '@di/decorators/module.decorator';
 
 import { ContextModule, DependsOnFooModule, DynamicModuleModule, TransientModule } from './features';
 

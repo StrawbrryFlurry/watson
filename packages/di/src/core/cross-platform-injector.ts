@@ -1,6 +1,6 @@
-import { Providable } from "@di/providers";
+import { Providable } from '@di/providers/injection-token';
 
-import { Injector, InjectorGetResult } from "./injector";
+import { Injector, InjectorGetResult } from './injector';
 
 /**
  * When working with other DI capable frameworks

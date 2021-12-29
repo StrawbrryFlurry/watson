@@ -1,4 +1,5 @@
-import { InjectionToken } from "@di/providers";
+import { InjectionToken } from '@di/providers/injection-token';
+
 import type { Injector } from "./injector";
 
 export const INJECTOR = new InjectionToken<Injector>(

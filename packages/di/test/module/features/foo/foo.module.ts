@@ -1,4 +1,4 @@
-import { WatsonModule } from '@di/decorators';
+import { WatsonModule } from '@di/decorators/module.decorator';
 
 import { FooComponent } from './foo.component';
 

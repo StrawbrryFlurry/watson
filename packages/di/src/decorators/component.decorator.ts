@@ -1,5 +1,5 @@
 import { COMPONENT_METADATA } from '@di/constants';
-import { CustomProvider } from '@di/providers';
+import { CustomProvider } from '@di/providers/custom-provider.interface';
 import { Type } from '@di/types';
 
 export interface ComponentDecoratorOptions {

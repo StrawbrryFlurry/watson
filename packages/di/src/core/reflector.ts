@@ -1,6 +1,6 @@
 import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, INJECT_DEPENDENCY_METADATA } from '@di/constants';
 import { InjectMetadata } from '@di/decorators/inject.decorator';
-import { InjectionToken } from '@di/providers';
+import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isEmpty, isNil } from '@di/utils/common';
 

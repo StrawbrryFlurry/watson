@@ -1,4 +1,4 @@
-import { WatsonModule } from '@di/decorators';
+import { WatsonModule } from '@di/decorators/module.decorator';
 
 import { FooModule } from '../foo';
 import { DependsOnFooComponent } from './depends-on-foo.component';
