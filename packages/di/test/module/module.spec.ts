@@ -68,9 +68,9 @@ describe("Basic Module setup", () => {
 
   beforeAll(async () => {
     rootModuleRef = await moduleLoader.resolveRootModule(TestModule);
-    testComponentRef = await rootModuleRef.get<ComponentRef<TestComponent>>(
-      TestComponent
-    );
+    testComponentRef = await rootModuleRef.get<
+      ComponentRef<typeof TestComponent>
+    >(TestComponent);
     moduleContainerRef = await rootInjector.get(ModuleContainer);
   });
 
@@ -111,10 +111,5 @@ describe("Basic Module setup", () => {
     const rootModuleRef = moduleContainerRef.get(TestModule)!;
     const exportedProvider = await rootModuleRef.get(PROVIDER_TOKEN);
     expect(exportedProvider).toBe(PROVIDER_TOKEN.name);
-  });
-
-  test("Can create an instance of components", async () => {
-    const testComponent = await testComponentRef.getInstance();
-    expect(testComponent).toBeInstanceOf(TestComponent);
   });
 });
