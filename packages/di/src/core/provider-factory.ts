@@ -1,5 +1,5 @@
 import { AbstractInjectableFactory } from '@di/core/abstract-factory';
-import { Binding } from '@di/core/binding';
+import { Binding, findMostTransientDependencyLifetime } from '@di/core/binding';
 import { Injector } from '@di/core/injector';
 import { Reflector } from '@di/core/reflector';
 import { Injectable } from '@di/decorators/injectable.decorator';
@@ -57,10 +57,11 @@ export class ProviderFactory<
         };
     }
 
-    const { lifetime, providedIn } = injectableDef;
+    const { providedIn } = injectableDef;
     const deps = Reflector.reflectCtorArgs(this.type);
+    const transience = findMostTransientDependencyLifetime(deps);
+    const binding = new Binding<T, any, T>(this.type, transience, providedIn);
 
-    const binding = new Binding<T, any, T>(this.type, lifetime, providedIn);
     binding.deps = deps;
     binding.factory = (...args: any[]) => Reflect.construct(this.type, args);
 

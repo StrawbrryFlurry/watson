@@ -40,7 +40,7 @@ export class DynamicInjector implements Injector {
       (provider) => (<CustomProvider>provider)?.provide === ComponentRef
     );
 
-    if (!isNil(this.scope)) {
+    if (!isNil(this.scope) && !this._isComponent) {
       this._records.set(
         ModuleRef,
         createBinding({

@@ -11,9 +11,13 @@ import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
 @Injectable({ providedIn: "component", lifetime: InjectorLifetime.Scoped })
-export abstract class ComponentRef<T extends Type = any> implements Injector {
+export abstract class ComponentRef<
+  T extends object = Type,
+  C extends Type<T> = Type<T>
+> implements Injector
+{
   public parent: ModuleRef | null;
-  public readonly metatype: T;
+  public readonly metatype: C;
 
   public get name() {
     return this.metatype.name;
@@ -29,7 +33,7 @@ export abstract class ComponentRef<T extends Type = any> implements Injector {
    */
   private _contextProviders = new UniqueTypeArray<Binding>();
   constructor(
-    metatype: T,
+    metatype: C,
     providers: ProviderResolvable[],
     moduleRef: ModuleRef
   ) {
