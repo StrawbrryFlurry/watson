@@ -23,16 +23,28 @@ export interface ModuleDef {
 }
 
 /**
- * `ModuleRef` is a wrapper for a Watson Module which
+ * An `InjectionToken` provided in the "root"
+ * or "application" module with which
+ * `ModuleLoader.resolveRootModule` was called.
+ */
+export const ROOT_MODULE_REF = new InjectionToken<ModuleRef>(
+  "The root module of the application"
+);
+
+/**
+ * `ModuleRef` is a wrapper for a module which
  * contains that module's injector as well as all
  * components and providers that were mapped to it.
  */
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Scoped })
-export abstract class ModuleRef<T = any> implements Injector {
+export abstract class ModuleRef<
+  T extends object = Type,
+  M extends Type<T> = Type<T>
+> implements Injector
+{
   public parent: ModuleRef | Injector | null;
-  public metatype: Type;
+  public metatype: M;
 
-  public instance: T | null = null;
   public componentFactoryResolver: ComponentFactoryResolver =
     new ComponentFactoryResolverImpl(this);
 
@@ -62,7 +74,7 @@ export abstract class ModuleRef<T = any> implements Injector {
     new UniqueTypeArray<ProviderResolvable>();
 
   constructor(
-    metatype: Type,
+    metatype: M,
     rootInjector: Injector,
     parent: Injector,
     moduleDef: ModuleDef,
@@ -145,7 +157,7 @@ export abstract class ModuleRef<T = any> implements Injector {
   /**
    * Returns an array of custom providers
    * that resolve to the {@link ComponentRef} of
-   * all the components in the module.
+   * all components in this module.
    */
   protected _bindComponents(
     components: Type[],
@@ -153,7 +165,16 @@ export abstract class ModuleRef<T = any> implements Injector {
   ): CustomProvider[] {
     return components.map((component) => {
       const componentProviders = this._reflectComponentProviders(component);
+      /**
+       * The lifetime of any type is Singleton by default
+       * which would make us share instances of the component
+       * binding whenever we create a new one. `ComponentRef`
+       * provides this type again which would then reuse this
+       * binding for `ComponentRef` instead of the component
+       * instance.
+       */
       ɵdefineInjectable(component, { lifetime: InjectorLifetime.Scoped });
+
       const componentRef = new ComponentRefImpl(
         component,
         componentProviders,
@@ -179,6 +200,10 @@ export abstract class ModuleRef<T = any> implements Injector {
     return [...prov, ...this._contextProviders];
   }
 
+  /**
+   * Creates an instance of a component
+   * that is part of this module.
+   */
   public async createComponent<T extends Type = Type>(
     component: T,
     ctx?: Injector

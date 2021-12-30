@@ -7,8 +7,7 @@ const FORWARD_REF_KEY = "ɵfwd";
  * Allows to refer to references which are not yet defined.
  *
  * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
- * DI is declared, but not yet defined. It is also used when the `token` which we use when creating
- * a query is not yet defined.
+ * DI is declared, but not yet defined.
  *
  * Refer to the {@link [Angular usage notes of forward ref](https://angular.io/api/core/forwardRef)}
  */

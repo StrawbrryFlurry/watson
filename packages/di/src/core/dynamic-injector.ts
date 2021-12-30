@@ -8,7 +8,7 @@ import { CustomProvider, ValueProvider } from '@di/providers/custom-provider.int
 import { getInjectableDef } from '@di/providers/injectable-def';
 import { Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
-import { isFunction, isNil } from '@di/utils/common';
+import { isNil } from '@di/utils/common';
 
 import { InjectorBloomFilter } from './injector-bloom-filter';
 import { INJECTOR } from './injector-token';
@@ -92,12 +92,7 @@ export class DynamicInjector implements Injector {
       return ctx.get(typeOrToken);
     }
 
-    if (
-      !this._isComponent &&
-      !isNil(this.scope) &&
-      (providedIn === "module" ||
-        (isFunction(providedIn) && this.scope === providedIn))
-    ) {
+    if (!this._isComponent && !isNil(this.scope) && providedIn === "module") {
       parent = Injector.NULL;
     }
 

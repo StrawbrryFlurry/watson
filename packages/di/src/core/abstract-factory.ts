@@ -13,6 +13,12 @@ export abstract class AbstractInjectableFactoryResolver<
     this._moduleRef = moduleRef;
   }
 
+  /**
+   * Creates a factory instance for the
+   * provider. Additionally provide a
+   * `ModuleRef` for using a different
+   * lookup context.
+   */
   public abstract resolve<T extends Type>(
     provider: T,
     moduleRef?: ModuleRef
@@ -29,6 +35,10 @@ export abstract class AbstractInjectableFactory<T extends Type = Type> {
     this._injector = injector;
   }
 
+  /**
+   * Creates an instance of the type
+   * of this factory.
+   */
   public abstract create<R extends T extends Constructable<infer R> ? R : T>(
     injector?: Injector | null,
     ctx?: Injector

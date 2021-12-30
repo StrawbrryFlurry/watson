@@ -7,6 +7,18 @@ import { isType, Type } from '@di/types';
 import { stringify } from '@di/utils';
 import { isNil } from '@di/utils/common';
 
+/**
+ * The `ProviderFactoryResolver` can be used
+ * to create `ProviderFactoryRef`s of a type
+ * that was not previously registered in any
+ * module or component.
+ *
+ * Beware that we can only reflect constructor
+ * metadata of classes that are decorated. If
+ * your provider class is not decorated, we
+ * can't resolve it's dependencies and thus
+ * call the constructor with no arguments.
+ */
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Scoped })
 export abstract class ProviderFactoryResolver extends AbstractInjectableFactoryResolver {
   public abstract resolve<T extends Type>(

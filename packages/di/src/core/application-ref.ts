@@ -46,6 +46,9 @@ export abstract class ApplicationRef {
     return moduleRef.get(typeOrToken);
   }
 
+  /**
+   * Returns the `ModuleRef` for a given module type
+   */
   public async getModuleRef(module: Type): Promise<ModuleRef> {
     const moduleContainerRef = await this.rootInjector.get(ModuleContainer);
     const moduleRef = moduleContainerRef.get(module);

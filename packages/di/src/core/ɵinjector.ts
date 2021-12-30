@@ -7,14 +7,21 @@ import { isUseExistingProvider } from '@di/providers/custom-provider';
 import { CustomProvider, FactoryProvider, UseExistingProvider } from '@di/providers/custom-provider.interface';
 import { getInjectableDef, getProviderToken } from '@di/providers/injectable-def';
 import { InjectorLifetime, Providable } from '@di/providers/injection-token';
-import { resolveAsyncValue } from '@di/utils';
+import { resolveAsyncValue, stringify } from '@di/utils';
 import { isFunction, isNil } from '@di/utils/common';
 
+// @internal
 // Internal injector implementation
-// File name is subject to change!!
+// File name is subject to change
+// DO NOT use these functions outside
+// of the core API.
 
+/**
+ * Binds a set of providers to an injector.
+ */
 export function ɵbindProviders(
   injector: Injector,
+  /** The records map of the injector */
   records: Map<Providable, Binding | Binding[]>,
   providers: ProviderResolvable[]
 ): void {
@@ -39,6 +46,7 @@ export function ɵbindProviders(
     const { multi } = binding;
 
     if (!isNil(hasBinding) && !multi) {
+      const { providedIn } = getInjectableDef(token);
       /**
        * If this injector is the root injector,
        * it is likely that some providers are
@@ -47,14 +55,15 @@ export function ɵbindProviders(
        * providedIn "root" `@Injectable` declarations.
        *
        * We can just skip over them as they were added
-       * to the root injector before.
+       * to the root injector already.
        */
-      const { providedIn } = getInjectableDef(token);
       if (providedIn === "root") {
         continue;
       }
 
-      throw "Found multiple providers with the same token that are not `multi`";
+      throw `Found multiple providers with the same token: "${stringify(
+        token
+      )}" that are not \`multi\``;
     }
 
     const record = multi

@@ -14,6 +14,16 @@ export abstract class ComponentFactoryRef<
   T extends Type
 > extends AbstractInjectableFactory<T> {}
 
+/**
+ * The `ComponentFactory` is used to create
+ * instances of a component in the context of
+ * a module.
+ *
+ * A `ComponentFactory` can be created by the
+ * `ComponentFactoryResolver` available in every
+ * module. All components provide a `ComponentFactory`
+ * for their own type.
+ */
 export class ComponentFactory<
   T extends Type = Type
 > extends ComponentFactoryRef<T> {

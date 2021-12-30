@@ -9,6 +9,10 @@ export interface MethodDescriptor {
   descriptor: Function;
 }
 
+/**
+ * Helper class for `reflect-metadata` proving
+ * commonly used reflection features.
+ */
 export class Reflector {
   /** {@link DESIGN_PARAMETERS} */
   public static reflectMethodParameters<T extends unknown[] = Type[]>(
@@ -77,6 +81,12 @@ export class Reflector {
     return Reflect.getMetadata(key, metatype, propertyKey!) as T;
   }
 
+  /**
+   * Reflects the constructor argument types
+   * for `type`. Additionally checks for
+   * `@Inject` metadata for injecting InjectionTokens
+   * in a constructor.
+   */
   public static reflectCtorArgs(type: Type): (Type | InjectionToken)[] {
     const deps = this.reflectMethodParameters<(Type | InjectionToken)[]>(type);
 

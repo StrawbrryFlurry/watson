@@ -1,6 +1,7 @@
 import { UniqueTypeArray } from '@di/data-structures';
 import { W_GLOBAL_PROV } from '@di/fields';
 import { InjectableOptions, InjectionToken, InjectorLifetime, ɵdefineInjectable } from '@di/providers/injection-token';
+import { isNil } from '@di/utils/common';
 
 /**
  * TODO: Evaluate if this is useful - if so figure
@@ -19,8 +20,30 @@ interface InjectableDecoratorWithGlobalInjectablesProperty {
   [W_GLOBAL_PROV]: UniqueTypeArray<InjectableOptions>;
 }
 
-export function Injectable(options: InjectableOptions = {}): ClassDecorator {
+/**
+ * Marks any provider as an injectable which
+ * allows you to specify additional behavior
+ * for that injectable within the application.
+ *
+ * If you don't specify anything, the framework
+ * will provide the injectable as a singleton in
+ * the root module. Note that you'll have to
+ * manually add it into a module for it to be
+ * registered in the application.
+ *
+ * Providing an object without any additional
+ * configuration or using `{ providedIn: "root" }`
+ * will add the injectable to the root module injector
+ * automatically.
+ *
+ * See {@link InjectableOptions} for more information.
+ */
+export function Injectable(options?: InjectableOptions): ClassDecorator {
   return (target: Object) => {
+    if (isNil(options)) {
+      return;
+    }
+
     const injectableDef = ɵdefineInjectable(target, options);
 
     if (injectableDef.providedIn === "root") {
@@ -34,19 +57,3 @@ export function Injectable(options: InjectableOptions = {}): ClassDecorator {
 (<InjectableDecoratorWithGlobalInjectablesProperty>(<any>Injectable))[
   W_GLOBAL_PROV
 ] = new UniqueTypeArray();
-
-/**
- * TODO:
- * Guild injectables are
- * scoped providers that
- * allow you to implement guild
- * specific features by having
- * access to data on the
- * execution context like the guildID.
- *
- * A guild injectable is cached in a
- * `Map<GuildId, InjectableWrapper>`
- * so that it doesn't have to be
- * re-created on every request.
- */
-export function GuildInjectable() {}

@@ -10,13 +10,23 @@ import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
 import type { ModuleRef } from "@di/core/module-ref";
-
+/**
+ * ComponentRef is a wrapper for any framework
+ * component that can be accessed form either
+ * a module or the component itself. It provides
+ * the component injector with it's providers
+ * as well as additional metadata.
+ */
 @Injectable({ providedIn: "component", lifetime: InjectorLifetime.Scoped })
 export abstract class ComponentRef<
   T extends object = Type,
   C extends Type<T> = Type<T>
 > implements Injector
 {
+  /**
+   * The module this component was registered
+   * in.
+   */
   public parent: ModuleRef | null;
   public readonly metatype: C;
 
@@ -29,10 +39,11 @@ export abstract class ComponentRef<
   /**
    * Context providers are not bound to the injector of the
    * component or the module but instead are bound to
-   * every context injector created for- an event bound in this
+   * every context injector created for an event bound in this
    * router.
    */
-  private _contextProviders = new UniqueTypeArray<Binding>();
+  protected _contextProviders = new UniqueTypeArray<Binding>();
+
   constructor(
     metatype: C,
     providers: ProviderResolvable[],
@@ -41,25 +52,29 @@ export abstract class ComponentRef<
     this.metatype = metatype;
     this.parent = moduleRef;
 
-    const injectorProviders = this._bindProviders(providers);
-    this._injector = Injector.create(
-      [
-        ...injectorProviders,
-        metatype,
-        {
-          provide: ComponentRef,
-          useValue: this,
-          multi: false,
-        } as ValueProvider,
-        {
-          provide: ComponentFactoryRef,
-          useFactory: () =>
-            this.parent?.componentFactoryResolver.resolve(this.metatype),
-        },
-      ],
-      moduleRef,
-      moduleRef
-    );
+    const boundProviders = this._bindProviders(providers);
+    const injectorProviders = [
+      ...boundProviders,
+      ...this._makeComponentProviders(),
+    ];
+
+    this._injector = Injector.create(injectorProviders, moduleRef, moduleRef);
+  }
+
+  private _makeComponentProviders(): ProviderResolvable[] {
+    return [
+      this.metatype,
+      {
+        provide: ComponentRef,
+        useValue: this,
+        multi: false,
+      } as ValueProvider,
+      {
+        provide: ComponentFactoryRef,
+        useFactory: () =>
+          this.parent?.componentFactoryResolver.resolve(this.metatype),
+      },
+    ];
   }
 
   protected _bindProviders(
@@ -73,6 +88,7 @@ export abstract class ComponentRef<
           this._contextProviders.add(createBinding(provider));
           return false;
         }
+
         return provider;
       })
       .filter(Boolean) as ProviderResolvable[];
@@ -93,16 +109,16 @@ export abstract class ComponentRef<
      * holds all resolvable providers available
      * to components in their module scope.
      */
-    if (resolved === NOT_FOUND) {
-      if (isNil(this.parent)) {
-        // If the router isn't part of a module, throw a NullInjector error.
-        return Injector.NULL.get(typeOrToken, notFoundValue);
-      }
-
-      return this.parent.get(typeOrToken, notFoundValue, ctx);
+    if (resolved !== NOT_FOUND) {
+      return <R>resolved;
     }
 
-    return resolved as R;
+    if (isNil(this.parent)) {
+      // If the router isn't part of a module, throw a NullInjector error.
+      return Injector.NULL.get(typeOrToken, notFoundValue);
+    }
+
+    return this.parent.get(typeOrToken, notFoundValue, ctx);
   }
 }
 

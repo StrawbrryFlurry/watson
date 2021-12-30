@@ -8,7 +8,3 @@ export const INJECTOR = new InjectionToken<Injector>(
     providedIn: "module",
   }
 );
-
-export const ROOT_INJECTOR = new InjectionToken<Injector>(
-  "The application root injector"
-);

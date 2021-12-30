@@ -5,6 +5,7 @@ import { Type } from '@di/types';
 import { DependencyGraph } from './dependency-graph';
 
 import type { Binding } from "./binding";
+
 export const REQUESTED_BY_INJECTOR = new InjectionToken(
   "Token for `InjectorInquirerContext indicating that the request was made by an injector`"
 );
@@ -56,6 +57,11 @@ export class InjectorInquirerContext<
     this.dependencyGraph = dependencyGraph;
   }
 
+  /**
+   * Duplicates this instance such that
+   * changes made to the new context
+   * don't change this current instance.
+   */
   public clone(inquirer: Binding, parameterIdx: number | null = null) {
     return new InjectorInquirerContext(
       inquirer,
@@ -64,6 +70,14 @@ export class InjectorInquirerContext<
     );
   }
 
+  /**
+   * Duplicates this instance using the
+   * current state but bind a new dependency
+   * graph to it such that, if the dependency
+   * graph is updated after this method was
+   * called, the new instance is not affected
+   * by that change.
+   */
   public seal() {
     let graph = null;
 

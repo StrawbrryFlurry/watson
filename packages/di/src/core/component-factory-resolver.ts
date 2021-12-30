@@ -8,6 +8,13 @@ import { isNil } from '@di/utils/common';
 
 import type { ComponentRef } from "@di/core/component-ref";
 import type { ModuleRef } from "@di/core/module-ref";
+
+/**
+ * The `ComponentFactoryResolver` of a module can be used
+ * to create a factory to create component instances of
+ * any component in that module without being dependent
+ * on having the original `ModuleRef`.
+ */
 @Injectable({ providedIn: "module", lifetime: InjectorLifetime.Scoped })
 export abstract class ComponentFactoryResolver extends AbstractInjectableFactoryResolver<ComponentFactory> {}
 

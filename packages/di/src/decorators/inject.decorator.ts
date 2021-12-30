@@ -9,11 +9,13 @@ export interface InjectMetadata {
 }
 
 /**
- * Injects a dependency into the argument
- * of a class constructor.
+ * Injects an instance for `token` into the
+ * decorated parameter of a class constructor.
  *
- * Note that this decorator cannot be used
- * in class methods.
+ * This decorator doesn't do anything in
+ * class methods. That behavior is to be
+ * implemented by other framework specific
+ * tools.
  */
 export function Inject(token: Type | InjectionToken): ParameterDecorator {
   return (

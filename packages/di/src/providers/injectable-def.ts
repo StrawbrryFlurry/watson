@@ -39,6 +39,12 @@ export function getUnsafeInjectableDef(
   return (<ɵHasProv>(<any>typeOrToken))[W_PROV] ?? null;
 }
 
+/**
+ * Returns the injectable definition of
+ * a type defined in `W_PROV`. If no
+ * definition can be found, the default
+ * configuration will be set and returned.
+ */
 export function getInjectableDef(
   typeOrProvider: ProviderResolvable | Providable
 ): InjectableDef {

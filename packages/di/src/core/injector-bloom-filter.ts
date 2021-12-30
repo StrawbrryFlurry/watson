@@ -1,5 +1,10 @@
-import { Type } from "@di/types";
-import { isNil } from "@di/utils/common";
+import { Type } from '@di/types';
+import { isNil } from '@di/utils/common';
+
+// TODO:
+// Does this significantly improve
+// lookup performance or slow it
+// down in the majority of cases.
 
 const BLOOM_BUCKET_SIZE = 256;
 const BLOOM_MASK = BLOOM_BUCKET_SIZE - 1;
@@ -14,6 +19,9 @@ const BLOOM_MASK = BLOOM_BUCKET_SIZE - 1;
  */
 let W_ELEMENT_ID = 1;
 
+/**
+ * @private
+ */
 export class InjectorBloomFilter {
   /**
    * The buckets are 8 bit vectors

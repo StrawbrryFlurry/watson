@@ -30,13 +30,13 @@ const SINGLETON_BINDING_CONTEXT: Injector = <any>{};
 
 /**
  * A binding represents a provider
- * in a given module context.
+ * in an injector context.
  *
  * The `Binding` wrapper for a provider
  * stores additional information about the
  * binding which can be reused if a module
  * provider is used in another injector
- * context (By exporting it from the module).
+ * context.
  */
 export class Binding<
   Token extends Providable = any,
@@ -65,21 +65,27 @@ export class Binding<
   public deps: Deps | null;
 
   public multi: boolean = false;
+
   /**
-   * Whether the binding has any
-   * dependencies.
+   * Whether the binding has any dependencies
+   * that will cause the instance to get
+   * different instances depending on when or
+   * by whom the dependency is created.
    */
   private _isTreeStatic: boolean | null = null;
+  /**
+   * Whether the binding was made a transient
+   * provider by any of it's dependencies.
+   */
   private _isTransientByDependency: boolean | null = null;
 
   /**
-   * If the provider is a singleton,
-   * the instance type is stored in
-   * this property of the binding.
+   * Keeps track of all instances that were created
+   * for this binding.
    *
-   * @key The context injector for which
+   * @key The context injector with which
    * the instance was created
-   * @value The instance value
+   * @value The instance
    */
   private _instances = new WeakMap<
     Injector,
@@ -125,6 +131,11 @@ export class Binding<
     return (this._isTransientByDependency = false);
   }
 
+  /**
+   * Checks the internal instance cache using
+   * the context injector provided or the singleton
+   * key.
+   */
   public getInstance(
     ctx?: Injector | null
   ): InstanceType | InstanceType[] | null {
@@ -132,6 +143,10 @@ export class Binding<
     return this._instances.get(ctx) ?? null;
   }
 
+  /**
+   * Caches the instance in the binding
+   * for the context injector provided.
+   */
   public setInstance(instance: InstanceType, ctx?: Injector | null): void {
     // Handle `null` case.
     ctx ??= SINGLETON_BINDING_CONTEXT;

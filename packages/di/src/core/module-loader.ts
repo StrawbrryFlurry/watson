@@ -2,13 +2,13 @@ import { MODULE_DEFINITION_METADATA, MODULE_REF_IMPL_METADATA } from '@di/consta
 import { DynamicInjector } from '@di/core/dynamic-injector';
 import { Injector, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { ModuleContainer } from '@di/core/module-container';
-import { ModuleDef, ModuleRef, ɵModuleRefImpl } from '@di/core/module-ref';
+import { ModuleDef, ModuleRef, ROOT_MODULE_REF, ɵModuleRefImpl } from '@di/core/module-ref';
 import { Reflector } from '@di/core/reflector';
 import { UniqueTypeArray } from '@di/data-structures';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { isDynamicModule, WatsonModuleOptions } from '@di/decorators/module.decorator';
 import { W_GLOBAL_PROV, W_MODULE_PROV } from '@di/fields';
-import { CustomProvider } from '@di/providers/custom-provider.interface';
+import { CustomProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { WatsonDynamicModule } from '@di/providers/dynamic-module.interface';
 import { resolveForwardRef } from '@di/providers/forward-ref';
 import { InjectionToken, isInjectionToken } from '@di/providers/injection-token';
@@ -25,8 +25,9 @@ export interface WatsonModuleMetadata {
 }
 
 /**
- * Resolves module dependencies
- * and adds them to the di container.
+ * Responsible for resolving all module metadata
+ * belonging to the "application"-module specified when
+ * calling `resolveRootModule` and its' imports.
  */
 export class ModuleLoader {
   private _injector: Injector;
@@ -36,15 +37,26 @@ export class ModuleLoader {
   }
 
   /**
-   * Resolves the root module to recursively add its imports to the container
+   * Recursively looks through all imports of
+   * `moduleType`, resolving it's definition and
+   * creating a `ModuleRef` instance for every one
+   * of them. All modules are added to the `ModuleContainer`
+   * in the root injector of the `ModuleLoader`.
+   *
+   * Returns the `ModuleRef` of the root module.
    */
   public async resolveRootModule<T extends ModuleRef = ModuleRef>(
-    metatype: Type
+    moduleType: Type
   ): Promise<T> {
-    const modules = await this._scanModuleRecursively(metatype);
-    return this._bindModuleProvidersAndCreateModuleRef<T>(metatype, modules);
+    const modules = await this._scanModuleRecursively(moduleType);
+    return this._bindModuleProvidersAndCreateModuleRef<T>(moduleType, modules);
   }
 
+  /**
+   * Scans the module type or dynamic module
+   * for it's metadata and adds it to the
+   * `resolved` map.
+   */
   private async _scanModuleRecursively(
     metatype: Type | WatsonDynamicModule,
     resolved = new Map<Type, ModuleDef>(),
@@ -61,18 +73,18 @@ export class ModuleLoader {
     ctx.push(type);
 
     /**
-     * DynamicModules can return
+     * Dynamic modules can return
      * a promise so we need to make
-     * sure that we await all modules
+     * sure that we await all module
+     * types.
      */
     let _imports = (await Promise.all(
-      imports.map(async (module) =>
-        isDynamicModule(await module)
-          ? (
-              await (<Promise<WatsonDynamicModule>>module)
-            ).module
-          : module
-      )
+      imports.map(async (module) => {
+        const typeOrDynamicModule = await module;
+        return isDynamicModule(typeOrDynamicModule)
+          ? typeOrDynamicModule.module
+          : typeOrDynamicModule;
+      })
     )) as Type[];
 
     /**
@@ -93,11 +105,11 @@ export class ModuleLoader {
 
     resolved.set(type, moduleDef);
 
+    // Repeat this for all module imports
     await Promise.all(
+      // We have already awaited the dynamic modules
       (imports as (Type | WatsonDynamicModule)[]).map((module) => {
-        const importType = isDynamicModule(module)
-          ? (module as WatsonDynamicModule).module
-          : module;
+        const importType = isDynamicModule(module) ? module.module : module;
 
         if (isNil(module) || ctx.includes(importType)) {
           throw `Circular dependency detected`;
@@ -116,11 +128,20 @@ export class ModuleLoader {
     return resolved;
   }
 
+  /**
+   * Creates an instance of `ModuleRef` for all
+   * previously found modules.
+   */
   private async _bindModuleProvidersAndCreateModuleRef<T extends ModuleRef>(
     rootModule: Type,
     modules: Map<Type, ModuleDef>
   ): Promise<T> {
     let container = await this._injector.get(ModuleContainer, NOT_FOUND);
+    /**
+     * We allow users to provide their own Module implementation
+     * using `@DeclareModuleRef`. Use the default `ModuleRef`
+     * if there is none.
+     */
     const ModuleImpl =
       Reflector.reflectMetadata<typeof ɵModuleRefImpl>(
         MODULE_REF_IMPL_METADATA,
@@ -137,9 +158,11 @@ export class ModuleLoader {
 
     const rootDef = modules.get(rootModule)!;
 
-    // Calling this method on the root module
-    // should resolve injector providers for all
-    // other modules as well.
+    /*
+     * Calling this method on the root module
+     * should resolve injector providers for all
+     * other modules as well.
+     */
     this._recursivelyResolveModuleProviders(rootDef, modules);
 
     const rootRef = new ModuleImpl(
@@ -160,9 +183,15 @@ export class ModuleLoader {
     const providedInRootByInjectableDecorator = Injectable[
       W_GLOBAL_PROV
     ] as UniqueTypeArray<Type>;
-    (<DynamicInjector>rootRef.injector).bind(
-      ...providedInRootByInjectableDecorator
-    );
+
+    const rootModuleProviders = [
+      ...providedInRootByInjectableDecorator,
+      <ValueProvider>{
+        provide: ROOT_MODULE_REF,
+        useValue: rootRef,
+      },
+    ];
+    (<DynamicInjector>rootRef.injector).bind(...rootModuleProviders);
 
     container.apply(rootRef);
 
@@ -207,10 +236,14 @@ export class ModuleLoader {
     const { imports, providers, metatype } = moduleDef;
     const moduleProviders: ProviderResolvable[] = providers;
 
+    // If this property exists we have already
+    // processed the module.
     if (!isNil(metatype[W_MODULE_PROV])) {
       return metatype[W_MODULE_PROV];
     }
 
+    // Add all exported providers of the module to
+    // this module's providers recursively.
     const resolveModuleExports = (moduleDef: ModuleDef) => {
       const { imports, exports, providers, metatype } = moduleDef;
 
@@ -253,7 +286,7 @@ export class ModuleLoader {
            *
            * A imports M exports M
            * B imports A exports A
-           * C imports B exports B
+           * C imports B
            *
            * C needs to find the provider Foo
            */

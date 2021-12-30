@@ -1,6 +1,11 @@
 import { Providable } from '@di/providers/injection-token';
 import { stringify } from '@di/utils';
 
+/**
+ * Helper class to keep track of
+ * dependencies when resolving
+ * provider instances.
+ */
 export class DependencyGraph {
   public dependencies: Providable[] = [];
 

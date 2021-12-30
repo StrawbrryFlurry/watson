@@ -7,12 +7,16 @@ import { Injector, InjectorGetResult } from './injector';
  * like NestJs we need a way for these different
  * injector models to interact to each other and
  * resolve providers that are available in
- * the other di constructs.
+ * the other di framework.
  *
  * When building an adapter for other frameworks,
  * provide a concrete implementation of this class
  * patching the injector of that framework as well
  * as combining it with Watson's injector.
+ *
+ * This injector is responsible for handling providers
+ * marked as `{ providedIn: "external" }`.
+ *
  */
 export abstract class CrossPlatformInjector implements Injector {
   public parent: Injector | null;
