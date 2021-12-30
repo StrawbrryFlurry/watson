@@ -1,19 +1,18 @@
 import 'reflect-metadata';
 
+import { ComponentRef } from '@di/core/component-ref';
 import { Injector } from '@di/core/injector';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { FactoryProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { InjectionToken } from '@di/providers/injection-token';
+import { TestLogger } from 'packages/di/test/shared/test-logger';
+
+@Injectable()
+class NoopLogger {
+  constructor(public logger: TestLogger) {}
+}
 
 describe("Basic injector test", () => {
-  @Injectable()
-  class Foo {}
-
-  @Injectable()
-  class DependsOnFoo {
-    constructor(public foo: Foo) {}
-  }
-
   const DATABASE_URL = new InjectionToken<string>(
     "Some arbitrary provider token",
     { providedIn: "module" }
@@ -28,20 +27,23 @@ describe("Basic injector test", () => {
   ]);
 
   test("Create instance with static dependency", async () => {
-    const inj = Injector.create([Foo, DependsOnFoo]);
-    const instance = await inj.get(DependsOnFoo);
+    const inj = Injector.create([NoopLogger, TestLogger]);
+    const noopLogger = await inj.get(NoopLogger);
 
-    expect(instance).toBeInstanceOf(DependsOnFoo);
-    expect(instance.foo).toBeInstanceOf(Foo);
+    expect(noopLogger).toBeInstanceOf(NoopLogger);
+    expect(noopLogger.logger).toBeInstanceOf(TestLogger);
   });
 
   test("Fail resolution from parent for module scoped providers", async () => {
-    const inj = Injector.create([], rootInjector, Injector);
+    // We check for module / component level providers by using this provider
+    const inj = Injector.create([ComponentRef], rootInjector, Injector);
+    expect.assertions(1);
 
     try {
       await inj.get(DATABASE_URL);
-      fail("Expected to get a NullInjector error");
-    } catch (err) {}
+    } catch (err) {
+      expect(err).toBeTruthy();
+    }
   });
 
   test("Multi providers create instances for each provider", async () => {
@@ -58,6 +60,7 @@ describe("Basic injector test", () => {
 
     const inj = Injector.create([multiProvider, multiProvider], null, Injector);
     const providerInstances = await inj.get(MULTI_PROVIDER_TOKEN);
+
     expect(providerInstances).toEqual([PROVIDER_VALUE, PROVIDER_VALUE]);
   });
 });

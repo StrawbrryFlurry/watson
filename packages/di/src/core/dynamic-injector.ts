@@ -21,7 +21,7 @@ export class DynamicInjector implements Injector {
   protected readonly _records: Map<Providable, Binding | Binding[]>;
 
   public get scope(): Type | null {
-    return this._scope?.metatype ?? null;
+    return this._scope ? this._scope.metatype ?? this._scope : null;
   }
   protected _scope: ModuleRef | null;
 
