@@ -1,7 +1,3 @@
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
-import { ɵcreateBindingInstance } from '@di/core/ɵinjector';
-import { getClassOfInstance } from '@di/utils';
-
 import type { Binding } from "@di/core/binding";
 import type { Injector } from "@di/core/injector";
 import type { ModuleRef } from "@di/core/module-ref";
@@ -33,20 +29,8 @@ export abstract class AbstractInjectableFactory<T extends Type = Type> {
     this._injector = injector;
   }
 
-  public create<R extends T extends Constructable<infer R> ? R : T>(
+  public abstract create<R extends T extends Constructable<infer R> ? R : T>(
     injector?: Injector | null,
     ctx?: Injector
-  ): Promise<R> {
-    const inj = injector ?? this._injector;
-    const inquirerCtx = new InjectorInquirerContext(
-      getClassOfInstance<typeof AbstractInjectableFactory>(this)
-    );
-
-    return ɵcreateBindingInstance(
-      this.bindingRef,
-      inj,
-      ctx ?? null,
-      inquirerCtx
-    );
-  }
+  ): Promise<R>;
 }

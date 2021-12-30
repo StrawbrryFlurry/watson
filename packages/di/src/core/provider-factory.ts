@@ -1,7 +1,9 @@
 import { AbstractInjectableFactory } from '@di/core/abstract-factory';
 import { Binding, findMostTransientDependencyLifetime } from '@di/core/binding';
 import { Injector } from '@di/core/injector';
+import { InjectorInquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
+import { ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { getUnsafeInjectableDef } from '@di/providers/injectable-def';
 import {
@@ -12,7 +14,8 @@ import {
   InjectorLifetime,
   ɵdefineInjectable,
 } from '@di/providers/injection-token';
-import { Type } from '@di/types';
+import { Constructable, Type } from '@di/types';
+import { getClassOfInstance } from '@di/utils';
 import { isNil } from '@di/utils/common';
 
 /**
@@ -66,5 +69,22 @@ export class ProviderFactory<
     binding.factory = (...args: any[]) => Reflect.construct(this.type, args);
 
     this.bindingRef = binding;
+  }
+
+  public create<R extends T extends Constructable<infer R> ? R : T>(
+    injector?: Injector | null,
+    ctx?: Injector
+  ): Promise<R> {
+    const inj = injector ?? this._injector;
+    const inquirerCtx = new InjectorInquirerContext(
+      getClassOfInstance<typeof AbstractInjectableFactory>(this)
+    );
+
+    return ɵcreateBindingInstance(
+      this.bindingRef,
+      inj,
+      ctx ?? null,
+      inquirerCtx
+    );
   }
 }

@@ -1,7 +1,6 @@
 import { Binding, createBinding } from '@di/core/binding';
 import { ComponentFactoryRef } from '@di/core/component-factory';
 import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
-import { ModuleRef } from '@di/core/module-ref';
 import { UniqueTypeArray } from '@di/data-structures';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { ValueProvider } from '@di/providers/custom-provider.interface';
@@ -9,6 +8,8 @@ import { getInjectableDef } from '@di/providers/injectable-def';
 import { InjectorLifetime, Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
+
+import type { ModuleRef } from "@di/core/module-ref";
 
 @Injectable({ providedIn: "component", lifetime: InjectorLifetime.Scoped })
 export abstract class ComponentRef<
