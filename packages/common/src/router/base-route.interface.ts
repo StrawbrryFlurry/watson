@@ -1,6 +1,6 @@
-import { WatsonEvent } from "@common/enums";
-import { ContextType } from "@common/pipeline/context-type.enum";
-import { Type } from "@watsonjs/di";
+import { WatsonEvent } from '@common/enums';
+import { ContextType } from '@common/pipeline/context-type.enum';
+import { Type } from '@watsonjs/di';
 
 export interface BaseRoute {
   /**

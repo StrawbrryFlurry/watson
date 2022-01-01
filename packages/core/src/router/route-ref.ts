@@ -1,6 +1,5 @@
 import { RouterRef } from '@core/router';
 import { BaseRoute, ContextType, WatsonEvent } from '@watsonjs/common';
-import { Type } from '@watsonjs/di';
 
 /**
  * Represents a route of any type
@@ -45,14 +44,6 @@ export abstract class RouteRef<Event extends WatsonEvent = any>
 
   public getType<T extends string = ContextType>(): T {
     return this.type as T;
-  }
-
-  public getHandler(): Function {
-    return this.handler;
-  }
-
-  public getHost<T extends Type<any>>(): T {
-    return this.host.instance as T;
   }
 
   public getEvent(): Event {

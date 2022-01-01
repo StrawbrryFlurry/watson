@@ -1,5 +1,5 @@
-import { ExecutionContextImpl } from "@core/lifecycle";
-import { ExecutionContext, isNil, PipelineBase } from "@watsonjs/common";
+import { ExecutionContextImpl } from '@core/lifecycle';
+import { ExecutionContext, isNil, PipelineBase } from '@watsonjs/common';
 import {
   Binding,
   createBinding,
@@ -8,14 +8,14 @@ import {
   getInjectableDef,
   Injector,
   InjectorGetResult,
-  InjectorInquirerContext,
+  InquirerContext,
   Providable,
   ProviderResolvable,
   resolveAsyncValue,
   Type,
   ɵbindProviders,
   ɵcreateBindingInstance,
-} from "@watsonjs/di";
+} from '@watsonjs/di';
 
 export type ContextBindingFactory<
   BindFn extends (
@@ -87,7 +87,7 @@ export class ContextInjector implements Injector {
      * context to resolve a provider.
      */
     ctx: null = null,
-    inquirerContext?: InjectorInquirerContext
+    inquirerContext?: InquirerContext
   ): Promise<R> {
     const { providedIn } = getInjectableDef(typeOrToken);
 
@@ -105,7 +105,7 @@ export class ContextInjector implements Injector {
       <Binding>binding,
       this.parent,
       this,
-      new InjectorInquirerContext()
+      new InquirerContext()
     );
 
     /**

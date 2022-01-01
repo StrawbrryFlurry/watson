@@ -1,3 +1,5 @@
+import type { Observable } from "rxjs";
+
 export type ArgumentsOf<T extends Function> = T extends (
   ...args: infer A
 ) => any
@@ -49,3 +51,11 @@ export type MaxLengthArray<
   T extends any[],
   L extends number
 > = T[L] extends undefined ? T : never;
+
+export type AsyncResolvable<T> = T | Promise<T> | Observable<T>;
+
+export type ResolvedAsyncValue<T> = T extends Promise<infer R>
+  ? R
+  : T extends Observable<infer R>
+  ? R
+  : T;

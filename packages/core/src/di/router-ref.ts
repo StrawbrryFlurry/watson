@@ -1,81 +1,60 @@
-import { RouterRef } from '@core/router/application-router';
+import { ApplicationRouterRef, RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
-  ExecutionContext,
+  EXCEPTION_HANDLER_METADATA,
+  FILTER_METADATA,
+  GUARD_METADATA,
   isClassConstructor,
   isFunction,
   isNil,
   MessageSendable,
+  PIPE_METADATA,
+  PREFIX_METADATA,
   W_INT_TYPE,
   ɵInterceptor,
   ɵINTERCEPTOR_TYPE,
 } from '@watsonjs/common';
-import { DynamicInjector, ModuleRef, Providable, ProviderResolvable, Type, ValueProvider } from '@watsonjs/di';
+import {
+  DynamicInjector,
+  ModuleRef,
+  ProviderResolvable,
+  Reflector,
+  Type,
+  UniqueTypeArray,
+  ValueProvider,
+} from '@watsonjs/di';
 
-interface InterceptorBinding {
+export interface RouterRefInjectableBinding {
   /**
-   * Means that the injectable
-   * is an instance of a class that
-   * the injectable specific method
-   * can be called on.
+   * Interceptors registered by using the class Type
    */
-  isInstance: boolean;
+  classInterceptors?: (Type & ɵInterceptor)[];
   /**
-   * Means that the injectable
-   * is a plain function that
-   * we can call with the execution
-   * context.
+   * Interceptors registered by using a class instance
    */
-  isCtxFunction: boolean;
+  instanceInterceptors?: object[];
   /**
-   * Any injectable that does not meet
-   * the other requirements means that
-   * it is a class reference
-   * that we need to create an instance
-   * of before we can run the method on it.
-   *
-   * If it doesn't have any context dependencies
-   * we can then replace that injectable with a
-   * static instance provider.
+   * Interceptors registered as a callback function
    */
-  __?: any;
-  metatype: Function | Type;
+  callbackInterceptors?: (() => any)[];
 }
 
-export interface RouterRefInjectableBindings {
-  /**
-   * Injectables registered by using the class Type
-   */
-  classInjectables: Type & ɵInterceptor[];
-  /**
-   * Injectables registered by using a class instance
-   */
-  instanceInjectables: object[];
-  /**
-   * Injectables registered as a callback function
-   */
-  callbackInjectables: {
-    cb: () => any;
-    deps: Providable[];
-  }[];
-}
-
-export class RouterRefImpl<T = any> extends RouterRef<T> {
-  public root: RouterRef<any>;
-
-  private __interceptors = new Map<ɵINTERCEPTOR_TYPE, InterceptorBinding[]>();
+export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
+  public root: ApplicationRouterRef;
 
   protected _interceptors = new Map<
     ɵINTERCEPTOR_TYPE,
-    RouterRefInjectableBindings
+    RouterRefInjectableBinding
   >();
 
   constructor(
     metatype: Type,
     providers: ProviderResolvable[],
-    moduleRef: ModuleRef
+    moduleRef: ModuleRef,
+    root: ApplicationRouterRef
   ) {
     super(metatype, providers, moduleRef);
+    this.root = root;
     /**
      * ComponentsRef only binds `ComponentRef`
      * as a provider for this instance.
@@ -85,62 +64,69 @@ export class RouterRefImpl<T = any> extends RouterRef<T> {
       useValue: this,
       multi: false,
     });
+
+    const interceptors = this.reflectAllInterceptors(metatype);
+    this._bindInterceptors(interceptors);
   }
 
-  private _bindInjectables(injectables: ɵInterceptor[]) {
-    for (const injectable of injectables) {
-      const type = injectable[W_INT_TYPE];
-      // const bindings = this._interceptors.get(type) ?? [];
+  public reflectAllInterceptors(metatype: Type) {
+    const injectables = new UniqueTypeArray<ɵInterceptor>();
 
-      const isClassCtor = isClassConstructor(injectable);
-      const isPlainFunction = isFunction(injectable);
-
-      const injectableBinding: InterceptorBinding = {
-        metatype: injectable as unknown as Type,
-        isCtxFunction: !isClassCtor && isPlainFunction,
-        isInstance: !isClassCtor && !isPlainFunction,
-      };
-
-      // this._interceptors.set(type, [...bindings, injectableBinding]);
-    }
-  }
-
-  public async createInjectablesByKey(
-    key: ɵINTERCEPTOR_TYPE,
-    injectableMethodKey: string,
-    ctx?: ExecutionContext
-  ): Promise<((...args: any[]) => any)[]> {
-    const injectableBindings = this._interceptors.get(key);
-
-    if (isNil(injectableBindings)) {
-      return [];
+    if (isNil(metatype) || isNil(metatype.prototype)) {
+      return injectables;
     }
 
-    const injectables: any[] = [];
-
-    //for (let i = 0; i < injectableBindings.length; i++) {
-    //  const injectable = injectableBindings[i];
-    //  const { isCtxFunction, isInstance, metatype } = injectable;
-
-    //  if (isCtxFunction) {
-    //    injectables.push(metatype);
-    //    continue;
-    //  }
-
-    //  let instance: any = metatype;
-
-    //  if (!isInstance) {
-    //    instance = await this._injector.get(metatype, null, <Injector>ctx);
-    //  }
-
-    //  const injectableMethod = instance[injectableMethodKey];
-
-    //  if (isFunction(injectableMethod)) {
-    //    injectables.push(injectableMethod.bind(instance));
-    //  }
-    //}
+    this._reflectInterceptorOfType(metatype, injectables, GUARD_METADATA);
+    this._reflectInterceptorOfType(metatype, injectables, PIPE_METADATA);
+    this._reflectInterceptorOfType(metatype, injectables, FILTER_METADATA);
+    this._reflectInterceptorOfType(
+      metatype,
+      injectables,
+      EXCEPTION_HANDLER_METADATA
+    );
+    this._reflectInterceptorOfType(metatype, injectables, PREFIX_METADATA);
 
     return injectables;
+  }
+
+  private _bindInterceptors(interceptors: ɵInterceptor[]) {
+    for (const interceptor of interceptors) {
+      const type = interceptor[W_INT_TYPE];
+      let binding = this._interceptors.get(type);
+
+      if (isNil(binding)) {
+        binding = {};
+        this._interceptors.set(type, binding);
+      }
+
+      const isClassCtor = isClassConstructor(interceptor);
+      const isPlainFunction = isFunction(interceptor);
+
+      const isCallbackFunction = !isClassCtor && isPlainFunction;
+      const isInstance = !isClassCtor && !isPlainFunction;
+
+      let collection: unknown[];
+
+      if (isCallbackFunction) {
+        collection = binding.callbackInterceptors ??= [];
+      } else if (isInstance) {
+        collection = binding.instanceInterceptors ??= [];
+      } else {
+        collection = binding.classInterceptors ??= [];
+      }
+
+      collection.push(interceptor);
+    }
+  }
+
+  private _reflectInterceptorOfType(
+    metatype: Type,
+    interceptors: UniqueTypeArray<ɵInterceptor>,
+    metadataKey: string
+  ) {
+    const classInterceptors =
+      Reflector.reflectMetadata<any[]>(metadataKey, metatype) ?? [];
+    interceptors.add(...classInterceptors);
   }
 
   public dispatch(route: BaseRoute): Promise<void | MessageSendable> {

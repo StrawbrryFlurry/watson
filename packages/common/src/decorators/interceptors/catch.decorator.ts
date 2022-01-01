@@ -1,9 +1,14 @@
 import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
-import { ExceptionHandler } from '@common/exceptions';
+import { RuntimeException } from '@common/exceptions';
 import { W_INT_TYPE } from '@common/fields';
 import { InjectionToken } from '@watsonjs/di';
+import { Observable } from 'rxjs';
 
 import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
+
+export interface ExceptionHandler {
+  catch(exception: RuntimeException): void | Promise<void> | Observable<void>;
+}
 
 interface WithCatch {
   prototype: ExceptionHandler;
@@ -26,8 +31,8 @@ EXCEPTION_HANDLER[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.ExceptionHandler;
 
 export type ExceptionHandlerMetadata = WithCatch | ExceptionHandler;
 
-export function UseExceptionHandler(
-  ...handlers: ExceptionHandlerMetadata[]
+export function Catch(
+  handler: ExceptionHandlerMetadata
 ): MethodDecorator & ClassDecorator {
   return (
     target: any,
@@ -37,7 +42,7 @@ export function UseExceptionHandler(
     return applyInterceptorMetadata(
       ɵINTERCEPTOR_TYPE.ExceptionHandler,
       EXCEPTION_HANDLER_METADATA,
-      handlers,
+      [handler],
       target,
       descriptor
     );

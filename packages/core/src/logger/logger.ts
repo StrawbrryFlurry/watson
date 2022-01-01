@@ -1,4 +1,4 @@
-import { Injectable, Injector, InjectorInquirerContext, InjectorLifetime } from '@watsonjs/di';
+import { Injectable, Injector, InjectorLifetime, InquirerContext } from '@watsonjs/di';
 import { green, red, white, yellow } from 'cli-color';
 
 export enum LogType {
@@ -16,7 +16,7 @@ export class Logger {
     `[${(() => this.getDateString())()}] ${yellow(`[${this.context || ""}]`)}`
   )}`;
 
-  constructor(inquirerCtx: InjectorInquirerContext) {
+  constructor(inquirerCtx: InquirerContext) {
     const { inquirer } = inquirerCtx;
 
     if (inquirer === Injector) {

@@ -3,7 +3,9 @@ import { ComponentRef, Injectable } from '@watsonjs/di';
 import iterate from 'iterare';
 
 @Injectable({ providedIn: "module" })
-export abstract class RouterRef<T = any> extends ComponentRef<T> {
+export abstract class RouterRef<
+  T extends object = any
+> extends ComponentRef<T> {
   /**
    * A map of all routes that are
    * bound within this router.

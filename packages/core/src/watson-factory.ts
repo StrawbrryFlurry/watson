@@ -7,7 +7,7 @@ import { isNil } from '@watsonjs/common';
 import {
   ClassProvider,
   Injector,
-  InjectorInquirerContext,
+  InquirerContext,
   ModuleContainer,
   ModuleLoader,
   NewableTo,
@@ -21,9 +21,7 @@ import { WatsonApplication } from './watson-application';
 const DEFAULT_ADAPTER_PACKAGE = "@watsonjs/platform-discordjs";
 
 export class WatsonFactory {
-  private static logger = new Logger(
-    new InjectorInquirerContext(WatsonFactory)
-  );
+  private static logger = new Logger(new InquirerContext(WatsonFactory));
 
   private static async getAdapterOrDefault(
     adapter: NewableTo<AdapterRef> | undefined
