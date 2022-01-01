@@ -83,13 +83,17 @@ export class DynamicInjector implements Injector {
     let parent = this.parent ?? Injector.NULL;
 
     if (providedIn === "ctx") {
-      if (isNil(ctx)) {
-        throw new Error(
-          "[DynamicInjector] Cannot resolve a context bound provider in a dynamic injector"
-        );
+      if (!isNil(ctx)) {
+        return ctx.get(typeOrToken);
       }
 
-      return ctx.get(typeOrToken);
+      if (!isNil(notFoundValue)) {
+        return notFoundValue;
+      }
+
+      throw new Error(
+        "[DynamicInjector] Cannot resolve a context bound provider in a dynamic injector"
+      );
     }
 
     if (!this._isComponent && !isNil(this.scope) && providedIn === "module") {
