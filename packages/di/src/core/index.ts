@@ -18,4 +18,4 @@ export * from "./null-injector";
 export * from "./provider-factory-resolver";
 export * from "./provider-factory";
 export * from "./reflector";
-export * from "./ɵinjector";
+export * from "./injector-capability";

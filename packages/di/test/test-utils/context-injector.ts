@@ -1,6 +1,6 @@
 import { Binding } from '@di/core/binding';
 import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { ɵbindProviders, ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
@@ -18,9 +18,9 @@ export class ContextInjector implements Injector {
     typeOrToken: T,
     notFoundValue?: any,
     ctx?: Injector | null,
-    inquirerContext: InjectorInquirerContext<
+    inquirerContext: InquirerContext<
       Type<any> | Binding<any, any[], any, any> | typeof Injector
-    > = new InjectorInquirerContext(ContextInjector)
+    > = new InquirerContext(ContextInjector)
   ): Promise<R> {
     const binding = this._records.get(typeOrToken);
 

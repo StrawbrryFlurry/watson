@@ -1,9 +1,9 @@
 import { AbstractInjectableFactory } from '@di/core/abstract-factory';
 import { createBinding, findMostTransientDependencyLifetime } from '@di/core/binding';
 import { Injector } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { ɵcreateBindingInstance } from '@di/core/injector-capability';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
-import { ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { InjectorLifetime, ɵdefineInjectable } from '@di/providers/injection-token';
 import { Constructable, Type } from '@di/types';
@@ -45,7 +45,7 @@ export class ComponentFactory<
     ctx?: Injector
   ): Promise<R> {
     const inj = injector ?? this._injector;
-    const inquirerCtx = new InjectorInquirerContext(
+    const inquirerCtx = new InquirerContext(
       getClassOfInstance<typeof AbstractInjectableFactory>(this)
     );
 

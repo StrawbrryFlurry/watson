@@ -1,4 +1,4 @@
-import { InjectorInquirerContext, REQUESTED_BY_INJECTOR } from '@di/core/inquirer-context';
+import { InquirerContext, REQUESTED_BY_INJECTOR } from '@di/core/inquirer-context';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { InjectorLifetime } from '@di/providers/injection-token';
 
@@ -6,7 +6,7 @@ import { InjectorLifetime } from '@di/providers/injection-token';
 export class TestLogger {
   public name: string;
 
-  constructor(inquirerCtx: InjectorInquirerContext) {
+  constructor(inquirerCtx: InquirerContext) {
     const { inquirer } = inquirerCtx;
 
     if (inquirer === REQUESTED_BY_INJECTOR) {

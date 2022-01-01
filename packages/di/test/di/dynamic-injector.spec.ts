@@ -64,7 +64,7 @@ describe("[Dynamic Injector] Injector Lifetimes", () => {
 describe("[Dynamic Injector] Internals", () => {
   const inj = Injector.create([NeedsLogger, TestLogger]);
 
-  test("The injector keeps track of it's history by using the InjectorInquirerContext", async () => {
+  test("The injector keeps track of it's history by using the InquirerContext", async () => {
     const logClient = await inj.get(NeedsLogger);
     expect(logClient.logger.name).toEqual(NeedsLogger.name);
   });

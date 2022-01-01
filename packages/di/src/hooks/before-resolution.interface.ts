@@ -1,5 +1,5 @@
 import { Injector } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { Constructable, CtorParameters } from '@di/types';
 
 /**
@@ -13,6 +13,6 @@ export interface BeforeResolution<T extends Constructable> {
   beforeResolution<D extends CtorParameters<T> = CtorParameters<T>>(
     injector: Injector,
     dependencies: D,
-    inquirerContext: InjectorInquirerContext
+    inquirerContext: InquirerContext
   ): D | Promise<D>;
 }

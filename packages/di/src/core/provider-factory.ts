@@ -1,9 +1,9 @@
 import { AbstractInjectableFactory } from '@di/core/abstract-factory';
 import { Binding, findMostTransientDependencyLifetime } from '@di/core/binding';
 import { Injector } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { ɵcreateBindingInstance } from '@di/core/injector-capability';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
-import { ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { getUnsafeInjectableDef } from '@di/providers/injectable-def';
 import {
@@ -76,7 +76,7 @@ export class ProviderFactory<
     ctx?: Injector
   ): Promise<R> {
     const inj = injector ?? this._injector;
-    const inquirerCtx = new InjectorInquirerContext(
+    const inquirerCtx = new InquirerContext(
       getClassOfInstance<typeof AbstractInjectableFactory>(this)
     );
 

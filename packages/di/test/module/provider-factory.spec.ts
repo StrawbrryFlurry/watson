@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 import { ComponentRef } from '@di/core/component-ref';
 import { Injector } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { ModuleContainer } from '@di/core/module-container';
 import { ModuleLoader } from '@di/core/module-loader';
 import { ModuleRef } from '@di/core/module-ref';
@@ -28,7 +28,7 @@ class ProviderWithModuleDependency {
 
 @Injectable()
 class ProviderWithInquirerCtx {
-  constructor(public readonly inquirerCtx: InjectorInquirerContext) {}
+  constructor(public readonly inquirerCtx: InquirerContext) {}
 }
 
 class ProviderWithContextDependency {}

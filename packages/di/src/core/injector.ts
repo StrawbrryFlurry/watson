@@ -6,7 +6,7 @@ import { Type } from '@di/types';
 import { DynamicInjector } from './dynamic-injector';
 import { NullInjector } from './null-injector';
 
-import type { InjectorInquirerContext } from "./inquirer-context";
+import type { InquirerContext } from "./inquirer-context";
 export type ProviderResolvable<T = any> = CustomProvider<T> | Type<T>;
 
 /**
@@ -70,7 +70,7 @@ export abstract class Injector {
     typeOrToken: T,
     notFoundValue?: any,
     ctx?: Injector | null,
-    inquirerContext?: InjectorInquirerContext
+    inquirerContext?: InquirerContext
   ): Promise<R>;
 
   /**

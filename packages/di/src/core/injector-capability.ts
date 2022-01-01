@@ -1,7 +1,7 @@
 import { Binding, createBinding, FactoryFnWithoutDeps } from '@di/core/binding';
 import { DependencyGraph } from '@di/core/dependency-graph';
 import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { AfterResolution } from '@di/hooks';
 import { isUseExistingProvider } from '@di/providers/custom-provider';
 import { CustomProvider, FactoryProvider, UseExistingProvider } from '@di/providers/custom-provider.interface';
@@ -11,8 +11,8 @@ import { resolveAsyncValue, stringify } from '@di/utils';
 import { isFunction, isNil } from '@di/utils/common';
 
 // @internal
-// Internal injector implementation
-// File name is subject to change
+// Shared implementation of internal injector
+// capabilities.
 // DO NOT use these functions outside
 // of the core API.
 
@@ -86,7 +86,7 @@ export function ɵresolveProvider<
   typeOrToken: T,
   injector: Injector,
   ctx: Injector | null,
-  inquirerContext: InjectorInquirerContext
+  inquirerContext: InquirerContext
 ): Promise<R> {
   const { dependencyGraph } = inquirerContext;
   dependencyGraph!.checkAndThrow(typeOrToken);
@@ -110,7 +110,7 @@ export async function ɵcreateBindingInstance<
   binding: B,
   injector: Injector,
   ctx: Injector | null,
-  inquirerContext: InjectorInquirerContext
+  inquirerContext: InquirerContext
 ): Promise<R> {
   // MultiProviders return an array of bindings.
   if (Array.isArray(binding)) {
@@ -177,7 +177,7 @@ export async function ɵcreateBindingInstance<
     const dep = deps![i];
 
     // In this instance skip
-    if (dep === InjectorInquirerContext) {
+    if (dep === InquirerContext) {
       dependencies.push(<any>inquirerContext.seal());
       continue;
     }

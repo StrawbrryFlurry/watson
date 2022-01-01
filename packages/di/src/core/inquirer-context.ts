@@ -7,7 +7,7 @@ import { DependencyGraph } from './dependency-graph';
 import type { Binding } from "./binding";
 
 export const REQUESTED_BY_INJECTOR = new InjectionToken(
-  "Token for `InjectorInquirerContext indicating that the request was made by an injector`"
+  "Token for `InquirerContext indicating that the request was made by an injector`"
 );
 
 /**
@@ -15,8 +15,8 @@ export const REQUESTED_BY_INJECTOR = new InjectionToken(
  * the inquirer who requested a provider
  * from an injector.
  */
-@Injectable({ providedIn: InjectorInquirerContext })
-export class InjectorInquirerContext<
+@Injectable({ providedIn: InquirerContext })
+export class InquirerContext<
   T extends Binding | typeof REQUESTED_BY_INJECTOR | Type =
     | Binding
     | Type
@@ -63,11 +63,7 @@ export class InjectorInquirerContext<
    * don't change this current instance.
    */
   public clone(inquirer: Binding, parameterIdx: number | null = null) {
-    return new InjectorInquirerContext(
-      inquirer,
-      parameterIdx,
-      this.dependencyGraph
-    );
+    return new InquirerContext(inquirer, parameterIdx, this.dependencyGraph);
   }
 
   /**
@@ -86,6 +82,6 @@ export class InjectorInquirerContext<
       graph.dependencies = this.dependencyGraph!.dependencies;
     }
 
-    return new InjectorInquirerContext(this.inquirer, this.parameterIdx, graph);
+    return new InquirerContext(this.inquirer, this.parameterIdx, graph);
   }
 }

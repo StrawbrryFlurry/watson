@@ -1,9 +1,9 @@
 import { Binding, createBinding } from '@di/core/binding';
 import { ComponentRef } from '@di/core/component-ref';
 import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { ɵbindProviders, ɵcreateBindingInstance } from '@di/core/injector-capability';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { ModuleRef } from '@di/core/module-ref';
-import { ɵbindProviders, ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { CustomProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { getInjectableDef } from '@di/providers/injectable-def';
 import { Providable } from '@di/providers/injection-token';
@@ -77,7 +77,7 @@ export class DynamicInjector implements Injector {
     typeOrToken: T,
     notFoundValue?: any,
     ctx: Injector | null = null,
-    inquirerContext: InjectorInquirerContext = new InjectorInquirerContext()
+    inquirerContext: InquirerContext = new InquirerContext()
   ): Promise<R> {
     const { providedIn } = getInjectableDef(typeOrToken);
     let parent = this.parent ?? Injector.NULL;
@@ -103,7 +103,7 @@ export class DynamicInjector implements Injector {
     const binding = this._records.get(typeOrToken);
 
     if (isNil(binding)) {
-      if (providedIn === InjectorInquirerContext) {
+      if (providedIn === InquirerContext) {
         return <R>inquirerContext;
       }
 
