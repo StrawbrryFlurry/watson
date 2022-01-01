@@ -10,6 +10,9 @@ export interface ComponentDecoratorOptions {
   providers?: (CustomProvider | Type)[];
 }
 
+/**
+ * Decorator that marks a class as a component.
+ */
 export function WatsonComponent(
   options: ComponentDecoratorOptions = {}
 ): ClassDecorator {

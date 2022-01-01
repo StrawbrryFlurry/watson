@@ -10,6 +10,12 @@ export interface WatsonModuleOptions {
   exports?: Type[];
 }
 
+/**
+ * Decorator that marks a class as a module.
+ * A module is a container for other components.
+ * It can be imported by other modules or by other components.
+ * A module can be imported by other modules or by other components.
+ */
 export function WatsonModule(
   options: WatsonModuleOptions = {}
 ): ClassDecorator {
