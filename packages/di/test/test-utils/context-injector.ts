@@ -1,7 +1,7 @@
 import { Binding } from '@di/core/binding';
 import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
+import { ɵbindProviders, ɵcreateBindingInstance } from '@di/core/injector-capability';
 import { InquirerContext } from '@di/core/inquirer-context';
-import { ɵbindProviders, ɵcreateBindingInstance } from '@di/core/ɵinjector';
 import { Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';

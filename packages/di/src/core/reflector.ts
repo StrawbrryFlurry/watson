@@ -1,8 +1,9 @@
 import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, INJECT_DEPENDENCY_METADATA } from '@di/constants';
-import { InjectMetadata } from '@di/decorators/inject.decorator';
 import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isEmpty, isNil } from '@di/utils/common';
+
+import type { InjectMetadata } from "@di/decorators/inject.decorator";
 
 export interface MethodDescriptor {
   propertyKey: string;
@@ -73,12 +74,38 @@ export class Reflector {
    * Optionally takes a `propertyKey`
    * for object-property metadata.
    */
-  public static reflectMetadata<T>(
+  public static reflectMetadata<
+    T,
+    V extends T | null = T | null,
+    R = V extends null ? T | null : V
+  >(
     key: string,
-    metatype: Type,
-    propertyKey?: string
-  ): T {
-    return Reflect.getMetadata(key, metatype, propertyKey!) as T;
+    metatype: Type | object,
+    propertyKey?: string | symbol | null,
+    notFoundValue: V = <V>null
+  ): R {
+    return <R>(
+      (Reflect.getMetadata(key, metatype, <string>propertyKey ?? undefined) ??
+        notFoundValue)
+    );
+  }
+
+  public static mergeMetadata<T>(
+    key: string,
+    metatype: Type | object,
+    cb: (metadata: T) => T,
+    notFoundValue: T | null = null,
+    propertyKey?: string | symbol | null
+  ): void {
+    const property: string = <string>propertyKey ?? undefined;
+    const existingMetadata = Reflector.reflectMetadata<T>(
+      key,
+      metatype,
+      property,
+      notFoundValue
+    );
+    const merged = cb(<T>existingMetadata);
+    Reflect.defineMetadata(key, merged, metatype, property);
   }
 
   /**

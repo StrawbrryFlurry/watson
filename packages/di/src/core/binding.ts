@@ -1,10 +1,12 @@
-import { InjectorInquirerContext } from '@di/core/inquirer-context';
+import { INJECT_FLAG_METADATA } from '@di/constants';
+import { InquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
 import { W_BINDING_DEF } from '@di/fields';
 import { BeforeResolution } from '@di/hooks';
 import { isClassProvider, isCustomProvider, isFactoryProvider } from '@di/providers/custom-provider';
-import { ValueProvider } from '@di/providers/custom-provider.interface';
+import { FactoryProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { resolveForwardRef } from '@di/providers/forward-ref';
+import { getCustomProviderDependencyFlags, InjectFlag } from '@di/providers/inject-flag';
 import { getInjectableDef, getProviderToken } from '@di/providers/injectable-def';
 import { InjectorLifetime, Providable, ProvidedInScope } from '@di/providers/injection-token';
 import { Type } from '@di/types';
@@ -63,6 +65,12 @@ export class Binding<
    * [SomeService, SomeContextProperty]
    */
   public deps: Deps | null;
+  /**
+   * A set of flags that can be used to
+   * control the inject behavior of a
+   * dependency.
+   */
+  public injectFlags: InjectFlag[] = [];
 
   public multi: boolean = false;
 
@@ -189,7 +197,7 @@ export class Binding<
   public callBeforeResolutionHook(
     injector: Injector,
     deps: Deps,
-    inquirerContext: InjectorInquirerContext
+    inquirerContext: InquirerContext
   ): Deps | Promise<Deps> {
     if (isNil(this.beforeResolutionHook)) {
       return deps;
@@ -261,6 +269,21 @@ export function createResolvedBinding(_provider: ValueProvider): Binding {
   return binding;
 }
 
+export function getInjectFlags(
+  provider: ProviderResolvable,
+  deps?: any[]
+): InjectFlag[] {
+  if (isNil(deps)) {
+    return [];
+  }
+
+  if (isCustomProvider(provider)) {
+    return getCustomProviderDependencyFlags(deps);
+  }
+
+  return Reflector.reflectMetadata(INJECT_FLAG_METADATA, provider, null, []);
+}
+
 /**
  * Creates a new binding using `_provider`.
  * Resolves a forwardRef if there is one and
@@ -297,37 +320,38 @@ export function createBinding(_provider: ProviderResolvable): Binding {
 
     binding.metatype = provider;
     binding.deps = deps;
+    binding.injectFlags = getInjectFlags(provider, deps);
     binding.factory = (...args) => Reflect.construct(provider as Type, args);
     token[W_BINDING_DEF] = binding;
     return binding;
   }
 
-  const { multi } = provider;
+  const { multi, deps } = <FactoryProvider>provider;
 
   const binding = new Binding(token, lifetime, providedIn);
   token[W_BINDING_DEF] = binding;
+
+  binding.metatype = provider;
   binding.multi = multi ?? false;
+  binding.deps = deps ?? null;
+  binding.injectFlags = getInjectFlags(provider, deps);
+
   /**
    * UseExisting providers are handled
    * by the injector itself as they
    * point to a different binding.
    */
   if (isClassProvider(provider)) {
-    const { useClass, deps } = provider;
+    const { useClass } = provider;
 
-    binding.metatype = provider;
-    binding.deps = deps ?? Reflector.reflectCtorArgs(useClass) ?? null;
     binding.factory = (...deps) => Reflect.construct(useClass, deps);
   } else if (isFactoryProvider(provider)) {
-    const { useFactory, deps } = provider;
+    const { useFactory } = provider;
 
-    binding.metatype = provider;
-    binding.deps = deps ?? null;
     binding.factory = (...deps) => useFactory(...deps);
   } else {
     const { useValue } = provider as ValueProvider;
 
-    binding.metatype = provider;
     binding.factory = () => useValue;
   }
 

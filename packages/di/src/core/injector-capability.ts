@@ -1,10 +1,12 @@
 import { Binding, createBinding, FactoryFnWithoutDeps } from '@di/core/binding';
 import { DependencyGraph } from '@di/core/dependency-graph';
-import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
+import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { InquirerContext } from '@di/core/inquirer-context';
+import { ModuleRef } from '@di/core/module-ref';
 import { AfterResolution } from '@di/hooks';
 import { isUseExistingProvider } from '@di/providers/custom-provider';
 import { CustomProvider, FactoryProvider, UseExistingProvider } from '@di/providers/custom-provider.interface';
+import { InjectFlag } from '@di/providers/inject-flag';
 import { getInjectableDef, getProviderToken } from '@di/providers/injectable-def';
 import { InjectorLifetime, Providable } from '@di/providers/injection-token';
 import { resolveAsyncValue, stringify } from '@di/utils';
@@ -86,12 +88,19 @@ export function ɵresolveProvider<
   typeOrToken: T,
   injector: Injector,
   ctx: Injector | null,
-  inquirerContext: InquirerContext
+  inquirerContext: InquirerContext,
+  injectFlags: InjectFlag
 ): Promise<R> {
   const { dependencyGraph } = inquirerContext;
   dependencyGraph!.checkAndThrow(typeOrToken);
   dependencyGraph!.add(typeOrToken);
-  return injector.get(typeOrToken, null, ctx, inquirerContext);
+  return injector.get(
+    typeOrToken,
+    NOT_FOUND,
+    ctx,
+    inquirerContext,
+    injectFlags
+  );
 }
 
 /**
@@ -128,7 +137,7 @@ export async function ɵcreateBindingInstance<
     return instances as R;
   }
 
-  const { deps, token, lifetime } = <Binding<T, D, I>>binding;
+  const { deps, token, lifetime, injectFlags } = <Binding<T, D, I>>binding;
   const dependencyGraph = (inquirerContext.dependencyGraph ??=
     new DependencyGraph());
   let lookupCtx = ctx;
@@ -175,6 +184,8 @@ export async function ɵcreateBindingInstance<
 
   for (let i = 0; i < (<D>deps).length; i++) {
     const dep = deps![i];
+    const flags = injectFlags[i];
+    let depInjector: Injector = injector;
 
     // In this instance skip
     if (dep === InquirerContext) {
@@ -182,13 +193,29 @@ export async function ɵcreateBindingInstance<
       continue;
     }
 
+    if (flags & InjectFlag.SkipSelf) {
+      depInjector = injector.parent ?? Injector.NULL;
+    } else if (flags & InjectFlag.Host) {
+      depInjector = await injector.get(ModuleRef);
+    }
+
     const dependencyContext = inquirerContext.clone(<Binding>binding, i);
-    const depInstance = await ɵresolveProvider(
+    let depInstance = await ɵresolveProvider(
       dep,
-      injector,
+      depInjector,
       ctx,
-      dependencyContext
+      dependencyContext,
+      flags
     );
+
+    if (depInstance === NOT_FOUND) {
+      if (flags & InjectFlag.Optional) {
+        depInstance = null;
+      } else {
+        await Injector.NULL.get(dep);
+      }
+    }
+
     dependencyGraph.remove(dep);
     dependencies.push(depInstance);
   }

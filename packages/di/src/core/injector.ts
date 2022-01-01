@@ -1,5 +1,6 @@
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { CustomProvider } from '@di/providers/custom-provider.interface';
+import { InjectFlag } from '@di/providers/inject-flag';
 import { InjectionToken, InjectorLifetime, Providable } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 
@@ -70,7 +71,8 @@ export abstract class Injector {
     typeOrToken: T,
     notFoundValue?: any,
     ctx?: Injector | null,
-    inquirerContext?: InquirerContext
+    inquirerContext?: InquirerContext,
+    injectFlags?: InjectFlag
   ): Promise<R>;
 
   /**

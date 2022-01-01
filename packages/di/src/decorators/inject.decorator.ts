@@ -1,4 +1,5 @@
 import { INJECT_DEPENDENCY_METADATA } from '@di/constants';
+import { Reflector } from '@di/core/reflector';
 import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 
@@ -29,17 +30,13 @@ export function Inject(token: Type | InjectionToken): ParameterDecorator {
       parameterIndex: parameterIndex,
     };
 
-    const existingMetadata =
-      <InjectMetadata[]>(
-        Reflect.getMetadata(INJECT_DEPENDENCY_METADATA, <Type>target)
-      ) ?? [];
-
-    const concatenatedMetadata = [...existingMetadata, metadata];
-
-    Reflect.defineMetadata(
+    Reflector.mergeMetadata(
       INJECT_DEPENDENCY_METADATA,
-      concatenatedMetadata,
-      target
+      target,
+      (existing: InjectMetadata[]) => {
+        return [...existing, metadata];
+      },
+      []
     );
   };
 }

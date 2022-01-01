@@ -9,7 +9,7 @@ export class NullInjector implements Injector {
 
   public async get(
     typeTokenOrProvider: Providable,
-    notFoundValue: any
+    notFoundValue?: any
   ): Promise<any> {
     if (!isNil(notFoundValue)) {
       return notFoundValue;
@@ -17,6 +17,6 @@ export class NullInjector implements Injector {
 
     throw `NullInjectorError: No provider for ${stringify(
       typeTokenOrProvider
-    )}!`;
+    )}`;
   }
 }

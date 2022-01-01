@@ -4,7 +4,8 @@ export const INJECTABLE_METADATA = "ɵinjectable:meta";
 export const COMPONENT_METADATA = "ɵcomponent:meta";
 
 export const INJECT_DEPENDENCY_METADATA = "ɵinject:dependency";
-export const OPTIONAL_DEPENDENCY_METADATA = "ɵinject:optional";
+
+export const INJECT_FLAG_METADATA = "ɵinject:flag";
 
 export const JS_COMMENT_REGEX =
   /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/gm;

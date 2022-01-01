@@ -1,10 +1,20 @@
+import { InjectFlag } from '@di/providers/inject-flag';
 import { Type } from '@di/types';
 
-import { InjectionToken } from './injection-token';
+import type { InjectionToken, Providable } from "./injection-token";
 
 export type FactoryProviderFn<T = any, I extends any[] = any[]> = (
   ...injectArgs: I
 ) => T | Promise<T>;
+
+export type CustomProviderDependenciesWithAugment = [
+  InjectFlag | InjectFlag[],
+  Providable
+];
+
+export type CustomProviderDependency =
+  | Providable
+  | CustomProviderDependenciesWithAugment;
 
 /**
  * Custom providers allow users to define
@@ -35,10 +45,15 @@ export interface CustomProviderBase {
 interface ProviderHasDeps {
   /**
    * Providers that should be injected to the factory | class constructor
-   *  function when it's called.
+   * function when it's called.
    * deps: [SomeDependency] => factory(...[SomeDependency])
+   *
+   * Additionally, you can provide an array instead of the provider token
+   * do specify injection augments for that dependency. For example:
+   *
+   * deps: [[Optional], SomeDependency] => factory(...[SomeDependency ?? null])
    */
-  deps?: (Type | InjectionToken)[];
+  deps?: CustomProviderDependency[];
 }
 
 /**

@@ -31,3 +31,5 @@ export interface ɵHasProv {
 }
 
 export const W_MODULE_PROV = "ɵmoprov";
+
+export const W_INJECT_FLAG = "ɵiflag";
