@@ -23,11 +23,19 @@ export class DependencyGraph {
 
   /**
    * Checks whether the graph already
+   * contains `dependency`.
+   */
+  public has(dependency: Providable) {
+    return this.dependencies.indexOf(dependency) !== -1;
+  }
+
+  /**
+   * Checks whether the graph already
    * contains `dependency` and if so
    * throws a CircularDependencyException.
    */
   public checkAndThrow(dependency: Providable) {
-    if (this.dependencies.indexOf(dependency) !== -1) {
+    if (this.has(dependency)) {
       throw `Circular dependency detected for ${stringify(
         dependency.name
       )}: ${this}`;
@@ -35,6 +43,6 @@ export class DependencyGraph {
   }
 
   public toString() {
-    return this.dependencies.join(" => ");
+    return this.dependencies.map((dep) => stringify(dep.name)).join(" => ");
   }
 }

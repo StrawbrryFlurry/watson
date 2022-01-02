@@ -1,9 +1,10 @@
 import { Binding, createBinding } from '@di/core/binding';
 import { ComponentRef } from '@di/core/component-ref';
 import { Injector, InjectorGetResult, ProviderResolvable } from '@di/core/injector';
-import { ɵbindProviders, ɵcreateBindingInstance } from '@di/core/injector-capability';
+import { ɵallowProviderResolutionInParent, ɵbindProviders, ɵcreateBindingInstance } from '@di/core/injector-capability';
 import { InquirerContext } from '@di/core/inquirer-context';
 import { ModuleRef } from '@di/core/module-ref';
+import { W_INJ_REC } from '@di/fields';
 import { CustomProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { InjectFlag } from '@di/providers/inject-flag';
 import { getInjectableDef } from '@di/providers/injectable-def';
@@ -17,9 +18,14 @@ import { INJECTOR } from './injector-token';
 export class DynamicInjector implements Injector {
   public parent: Injector | null;
   protected _bloom: InjectorBloomFilter;
+
+  public get isComponent() {
+    return this._isComponent;
+  }
   protected _isComponent: boolean;
 
   protected readonly _records: Map<Providable, Binding | Binding[]>;
+  public readonly [W_INJ_REC]: Map<Providable, Binding | Binding[]>;
 
   public get scope(): Type | null {
     return this._scope ? this._scope.metatype ?? this._scope : null;
@@ -32,6 +38,7 @@ export class DynamicInjector implements Injector {
     scope: ModuleRef | null
   ) {
     this._records = new Map<Providable, Binding | Binding[]>();
+    this[W_INJ_REC] = this._records;
     this.parent = parent;
     this._scope = scope;
 
@@ -98,10 +105,7 @@ export class DynamicInjector implements Injector {
       );
     }
 
-    if (
-      (!this._isComponent && !isNil(this.scope) && providedIn === "module") ||
-      (injectFlags && injectFlags & InjectFlag.Self)
-    ) {
+    if (!ɵallowProviderResolutionInParent(typeOrToken, this, injectFlags)) {
       parent = Injector.NULL;
     }
 

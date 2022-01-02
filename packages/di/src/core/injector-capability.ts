@@ -3,6 +3,7 @@ import { DependencyGraph } from '@di/core/dependency-graph';
 import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
 import { InquirerContext } from '@di/core/inquirer-context';
 import { ModuleRef } from '@di/core/module-ref';
+import { W_LAZY_INST } from '@di/fields';
 import { AfterResolution } from '@di/hooks';
 import { isUseExistingProvider } from '@di/providers/custom-provider';
 import { CustomProvider, FactoryProvider, UseExistingProvider } from '@di/providers/custom-provider.interface';
@@ -11,6 +12,8 @@ import { getInjectableDef, getProviderToken } from '@di/providers/injectable-def
 import { InjectorLifetime, Providable } from '@di/providers/injection-token';
 import { resolveAsyncValue, stringify } from '@di/utils';
 import { isFunction, isNil } from '@di/utils/common';
+
+import type { DynamicInjector } from "@di/core/dynamic-injector";
 
 // @internal
 // Shared implementation of internal injector
@@ -75,32 +78,116 @@ export function ɵbindProviders(
   }
 }
 
+export function ɵallowProviderResolutionInParent(
+  typeOrToken: Providable,
+  injector: Injector,
+  injectFlag?: InjectFlag
+) {
+  const { providedIn } = getInjectableDef(typeOrToken);
+  const { scope, isComponent } = <DynamicInjector>injector;
+
+  if (
+    (!isComponent && !isNil(scope) && providedIn === "module") ||
+    (injectFlag && injectFlag & InjectFlag.Self)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
- * Checks the dependency graph for circular
- * dependencies in the current provider
- * resolution. Calls `Injector.get` continuing
- * the provider lookup.
+ * Resolves all dependencies of a binding. This is a recursive
+ * function that will resolve all dependencies of a binding
+ * and all dependencies of those dependencies.
  */
-export function ɵresolveProvider<
+export async function ɵresolveBindingDependencies<
   T extends Providable,
-  R extends InjectorGetResult<T>
+  D extends Providable[] | [],
+  I extends InjectorGetResult<T>,
+  B extends Binding<T, D, I>,
+  O extends object[]
 >(
-  typeOrToken: T,
+  binding: B,
   injector: Injector,
   ctx: Injector | null,
-  inquirerContext: InquirerContext,
-  injectFlags: InjectFlag
-): Promise<R> {
-  const { dependencyGraph } = inquirerContext;
-  dependencyGraph!.checkAndThrow(typeOrToken);
-  dependencyGraph!.add(typeOrToken);
-  return injector.get(
-    typeOrToken,
-    NOT_FOUND,
-    ctx,
-    inquirerContext,
-    injectFlags
-  );
+  inquirerContext: InquirerContext
+): Promise<{ dependencies: O; lazyDependencies: O }> {
+  const { deps, token, injectFlags } = binding;
+  const dependencyGraph = (inquirerContext.dependencyGraph ??=
+    new DependencyGraph());
+
+  dependencyGraph.add(token);
+  const dependencies: (object | null)[] = [];
+  const lazyDependencies: object[] = [];
+
+  for (let i = 0; i < (<D>deps).length; i++) {
+    const dep = deps![i];
+    const flags = injectFlags[i];
+    let depInjector: Injector = injector;
+
+    // In this instance skip
+    if (dep === InquirerContext) {
+      dependencies.push(<any>inquirerContext.seal());
+      continue;
+    }
+
+    if (flags & InjectFlag.SkipSelf) {
+      depInjector = injector.parent ?? Injector.NULL;
+    } else if (flags & InjectFlag.Host) {
+      depInjector = await injector.get(ModuleRef);
+    }
+
+    const dependencyContext = inquirerContext.clone(<Binding>binding, i);
+
+    // if (flags & InjectFlag.Lazy) {
+    //   dependencyGraph!.remove(dep);
+    //   const lazyDependency = await ɵcreateLazyDependency(
+    //     dep,
+    //     depInjector,
+    //     ctx,
+    //     dependencyContext,
+    //     flags
+    //   );
+
+    //   lazyDependencies.push(lazyDependency);
+    //   dependencies.push(lazyDependency);
+    //   continue;
+    // }
+
+    if (dependencyGraph.has(dep) && flags & InjectFlag.Optional) {
+      dependencies.push(null);
+      continue;
+    }
+
+    dependencyGraph!.checkAndThrow(dep);
+    dependencyGraph!.add(dep);
+
+    let instance = await depInjector.get(
+      dep,
+      NOT_FOUND,
+      ctx,
+      dependencyContext,
+      flags
+    );
+
+    if (instance === NOT_FOUND) {
+      if (flags & InjectFlag.Optional) {
+        instance = null;
+      } else {
+        await Injector.NULL.get(dep);
+      }
+    }
+
+    dependencyGraph.remove(dep);
+    dependencies.push(instance);
+  }
+
+  dependencyGraph.remove(token);
+  return {
+    dependencies: <O>dependencies,
+    lazyDependencies: <O>lazyDependencies,
+  };
 }
 
 /**
@@ -137,9 +224,8 @@ export async function ɵcreateBindingInstance<
     return instances as R;
   }
 
-  const { deps, token, lifetime, injectFlags } = <Binding<T, D, I>>binding;
-  const dependencyGraph = (inquirerContext.dependencyGraph ??=
-    new DependencyGraph());
+  const { lifetime } = <Binding<T, D, I>>binding;
+
   let lookupCtx = ctx;
 
   /**
@@ -179,57 +265,15 @@ export async function ɵcreateBindingInstance<
     return <R>instance;
   }
 
-  dependencyGraph.add(token);
-  const dependencies: unknown[] = [];
-
-  for (let i = 0; i < (<D>deps).length; i++) {
-    const dep = deps![i];
-    const flags = injectFlags[i];
-    let depInjector: Injector = injector;
-
-    // In this instance skip
-    if (dep === InquirerContext) {
-      dependencies.push(<any>inquirerContext.seal());
-      continue;
-    }
-
-    if (flags & InjectFlag.SkipSelf) {
-      depInjector = injector.parent ?? Injector.NULL;
-    } else if (flags & InjectFlag.Host) {
-      depInjector = await injector.get(ModuleRef);
-    }
-
-    const dependencyContext = inquirerContext.clone(<Binding>binding, i);
-    let depInstance = await ɵresolveProvider(
-      dep,
-      depInjector,
-      ctx,
-      dependencyContext,
-      flags
-    );
-
-    if (depInstance === NOT_FOUND) {
-      if (flags & InjectFlag.Optional) {
-        depInstance = null;
-      } else {
-        await Injector.NULL.get(dep);
-      }
-    }
-
-    dependencyGraph.remove(dep);
-    dependencies.push(depInstance);
-  }
-
-  dependencyGraph.remove(token);
-
-  const updatedDependencies = await binding.callBeforeResolutionHook(
+  const { dependencies, lazyDependencies } = await ɵresolveBindingDependencies(
+    <Binding>binding,
     injector,
-    <D>dependencies,
+    ctx,
     inquirerContext
   );
 
   const _instance = await resolveAsyncValue(
-    binding.factory(...(<D>updatedDependencies))
+    binding.factory(...(<D>dependencies))
   );
 
   const { afterResolution } = <AfterResolution>_instance ?? {};
@@ -238,9 +282,102 @@ export async function ɵcreateBindingInstance<
     await resolveAsyncValue(afterResolution.call(_instance, injector));
   }
 
+  for (let i = 0; i < lazyDependencies.length; i++) {
+    const lazyDependency = lazyDependencies[i];
+    lazyDependency[W_LAZY_INST] = _instance;
+  }
+
   if (!binding.isTransient()) {
     binding.setInstance(<I>_instance, lookupCtx);
   }
 
   return <R>_instance;
 }
+
+// Figuring out lazy loading providers
+
+// function ɵresolveLazyProvider(target: object, injector: Injector) {
+//   return injector.get(target);
+// }
+
+// export async function ɵcreateLazyDependency(
+//   token: Providable,
+//   injector: Injector,
+//   ctx: Injector | null,
+//   inquirerContext: InquirerContext,
+//   injectFlag: InjectFlag
+// ) {
+//   const { binding, injector: bindingInjector } =
+//     ɵgetBindingFromInjector(token, injector, injectFlag) ?? {};
+
+//   if (isNil(binding)) {
+//     throw new Error(
+//       `No provider for lazy provider ${stringify(token)} in ${stringify(
+//         injector
+//       )}`
+//     );
+//   }
+
+//   const { dependencies } = await ɵresolveBindingDependencies(
+//     binding,
+//     bindingInjector!,
+//     ctx,
+//     inquirerContext
+//   );
+
+//   const lazyDependencyPlaceholder = new Proxy(token, {
+//     get(target, prop) {
+//       if (prop === W_LAZY_INST) {
+//         return target[W_LAZY_INST] ?? null;
+//       }
+
+//       const lazyInstance = lazyDependencyPlaceholder[W_LAZY_INST];
+
+//       if (isNil(lazyInstance)) {
+//         return undefined;
+//       }
+
+//       const provider = binding.factory(...dependencies);
+//       replaceProxyInInstance(lazyInstance, lazyDependencyPlaceholder, provider);
+//       return Reflect.get(provider, prop);
+//     },
+//   });
+
+//   return lazyDependencyPlaceholder;
+// }
+
+// function replaceProxyInInstance(
+//   targetInstance: object,
+//   proxy: object,
+//   resolvedInstance: object
+// ) {
+//   Object.entries(targetInstance).forEach(([key, value]) => {
+//     if (value === proxy) {
+//       targetInstance[key] = resolvedInstance;
+//     }
+//   });
+// }
+
+// export function ɵgetBindingFromInjector(
+//   token: Providable,
+//   injector: Injector,
+//   injectFlag?: InjectFlag
+// ): { binding: Binding; injector: Injector } | null {
+//   const records = (<ɵHasInjectorRecords>(<any>injector))[W_INJ_REC];
+//   const binding = records.get(token);
+
+//   if (!isNil(binding)) {
+//     return { binding, injector };
+//   }
+
+//   const { parent } = injector;
+
+//   if (
+//     !isNil(parent) &&
+//     ɵallowProviderResolutionInParent(token, injector, injectFlag)
+//   ) {
+//     return ɵgetBindingFromInjector(token, parent);
+//   }
+
+//   return null;
+// }
