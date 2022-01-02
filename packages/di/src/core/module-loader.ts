@@ -203,6 +203,11 @@ export class ModuleLoader {
 
       for (const _import of imports) {
         const childDef = modules.get(_import)!;
+        const existingChildRef = container.get(childDef.metatype);
+
+        if (!isNil(existingChildRef)) {
+          continue;
+        }
 
         const childRef = new ModuleImpl(
           childDef.metatype,

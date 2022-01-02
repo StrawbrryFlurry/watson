@@ -21,7 +21,7 @@ export const W_BINDING_DEF = "ɵbidef";
  * {@link InjectorLifetime}
  * {@link InjectorScope}
  */
-export const W_PROV = "ɵprov";
+export const W_PROV = "ɵiprov";
 
 export interface ɵHasProv {
   [W_PROV]: {
@@ -30,7 +30,7 @@ export interface ɵHasProv {
   };
 }
 
-export const W_MODULE_PROV = "ɵmoprov";
+export const W_MODULE_PROV = "ɵmprov";
 
 export const W_INJECT_FLAG = "ɵiflag";
 
@@ -39,10 +39,10 @@ export const W_INJECT_FLAG = "ɵiflag";
  * a map of all bindings that are registered
  * on the injector.
  */
-export const W_INJ_REC = "ɵirecords";
+export const W_INJ_REC = "ɵijrec";
 
 export interface ɵHasInjectorRecords {
   [W_INJ_REC]: Map<any, any>;
 }
 
-export const W_LAZY_INST = "ɵlazy";
+export const W_LAZY_INST = "ɵilazy";
