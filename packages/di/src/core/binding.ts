@@ -1,8 +1,6 @@
 import { INJECT_FLAG_METADATA } from '@di/constants';
-import { InquirerContext } from '@di/core/inquirer-context';
 import { Reflector } from '@di/core/reflector';
 import { W_BINDING_DEF } from '@di/fields';
-import { BeforeResolution } from '@di/hooks';
 import { isClassProvider, isCustomProvider, isFactoryProvider } from '@di/providers/custom-provider';
 import { FactoryProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { resolveForwardRef } from '@di/providers/forward-ref';
@@ -10,8 +8,7 @@ import { getCustomProviderDependencyFlags, InjectFlag } from '@di/providers/inje
 import { getInjectableDef, getProviderToken } from '@di/providers/injectable-def';
 import { InjectorLifetime, Providable, ProvidedInScope } from '@di/providers/injection-token';
 import { Type } from '@di/types';
-import { resolveAsyncValue } from '@di/utils';
-import { isEmpty, isFunction, isNil } from '@di/utils/common';
+import { isEmpty, isNil } from '@di/utils/common';
 import { Observable } from 'rxjs';
 
 import type {
@@ -194,20 +191,6 @@ export class Binding<
     return !isNil(this.deps) && !isEmpty(this.deps);
   }
 
-  public callBeforeResolutionHook(
-    injector: Injector,
-    deps: Deps,
-    inquirerContext: InquirerContext
-  ): Deps | Promise<Deps> {
-    if (isNil(this.beforeResolutionHook)) {
-      return deps;
-    }
-
-    return resolveAsyncValue(
-      this.beforeResolutionHook(injector, deps, inquirerContext)
-    );
-  }
-
   /**
    * Internal factory function that will
    * be called by the injector to create a
@@ -216,8 +199,6 @@ export class Binding<
   public factory!: (
     ...deps: Deps
   ) => Observable<InstanceType> | Promise<InstanceType> | InstanceType;
-
-  public beforeResolutionHook?: BeforeResolution<any>["beforeResolution"];
 }
 
 /**
@@ -310,13 +291,6 @@ export function createBinding(_provider: ProviderResolvable): Binding {
   if (!isCustomProvider(provider)) {
     const deps = Reflector.reflectCtorArgs(provider);
     const binding = new Binding(provider, lifetime, providedIn);
-
-    const { beforeResolution } =
-      (provider.prototype as BeforeResolution<any>) ?? {};
-
-    if (isFunction(beforeResolution)) {
-      binding.beforeResolutionHook = beforeResolution;
-    }
 
     binding.metatype = provider;
     binding.deps = deps;
