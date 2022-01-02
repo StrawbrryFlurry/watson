@@ -13,6 +13,7 @@ export enum InjectFlag {
   Self = 1 << 3,
   SkipSelf = 1 << 4,
   Host = 1 << 5,
+  Lazy = 1 << 6,
 }
 
 export function getCustomProviderDependencyFlags(
@@ -64,8 +65,8 @@ export function makeInjectFlagDecorator(flag: InjectFlag): InjectFlagDecorator {
       target,
       (metadata: number[]) => {
         if (metadata.length === 0) {
-          const deps = Reflector.reflectCtorArgs(<Type>target);
-          metadata.fill(InjectFlag.None, 0, deps.length);
+          const depCount = Reflector.reflectCtorParameterCount(<Type>target);
+          metadata.fill(InjectFlag.None, 0, depCount);
           metadata[parameterIndex] = flag;
           return metadata;
         }

@@ -33,3 +33,16 @@ export interface ɵHasProv {
 export const W_MODULE_PROV = "ɵmoprov";
 
 export const W_INJECT_FLAG = "ɵiflag";
+
+/**
+ * Property on an injector that contains
+ * a map of all bindings that are registered
+ * on the injector.
+ */
+export const W_INJ_REC = "ɵirecords";
+
+export interface ɵHasInjectorRecords {
+  [W_INJ_REC]: Map<any, any>;
+}
+
+export const W_LAZY_INST = "ɵlazy";

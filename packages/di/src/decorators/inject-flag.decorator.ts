@@ -60,3 +60,12 @@ export const Self: InjectFlagDecorator = makeInjectFlagDecorator(
 export const SkipSelf: InjectFlagDecorator = makeInjectFlagDecorator(
   InjectFlag.SkipSelf
 );
+
+/**
+ * Decorator to be used on constructor parameters or
+ * factory dependencies to specify the injector lookup
+ * behavior.
+ */
+export const Lazy: InjectFlagDecorator = makeInjectFlagDecorator(
+  InjectFlag.Lazy
+);

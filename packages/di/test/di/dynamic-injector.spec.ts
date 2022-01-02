@@ -1,11 +1,15 @@
 import 'reflect-metadata';
 
 import { Injector } from '@di/core/injector';
+import { InquirerContext } from '@di/core/inquirer-context';
+import { Lazy } from '@di/decorators/inject-flag.decorator';
+import { Inject } from '@di/decorators/inject.decorator';
 import { Injectable } from '@di/decorators/injectable.decorator';
+import { forwardRef } from '@di/providers/forward-ref';
 import { InjectorLifetime } from '@di/providers/injection-token';
 import { randomUUID } from 'crypto';
 
-import { TestLogger } from '../shared/test-logger';
+import { TestLogger } from '../shared';
 
 class TestLifetimeProvider {
   public id: string;
@@ -26,6 +30,34 @@ class SingletonProvider extends TestLifetimeProvider {}
 @Injectable()
 class NeedsLogger {
   constructor(public readonly logger: TestLogger) {}
+}
+
+@Injectable()
+class LazyLogger {
+  constructor(@Lazy() public readonly logger: TestLogger) {}
+}
+
+@Injectable()
+class CircularLoggerA extends TestLogger {
+  constructor(
+    @Lazy()
+    @Inject(forwardRef(() => CircularLoggerB))
+    public readonly logger: LazyLogger,
+    inquirerCtx: InquirerContext
+  ) {
+    super(inquirerCtx);
+  }
+}
+
+@Injectable()
+class CircularLoggerB extends TestLogger {
+  constructor(
+    @Lazy()
+    public readonly logger: CircularLoggerA,
+    inquirerCtx: InquirerContext
+  ) {
+    super(inquirerCtx);
+  }
 }
 
 describe("[Dynamic Injector] Injector Lifetimes", () => {
@@ -60,6 +92,24 @@ describe("[Dynamic Injector] Injector Lifetimes", () => {
     expect(a_1.id).not.toEqual(b.id);
   });
 });
+
+/*
+describe("Lazy loading", () => {
+  test("Lazy providers are not resolved until they are requested.", async () => {
+    const inj = Injector.create([LazyLogger, TestLogger]);
+
+    const instance = await inj.get(LazyLogger);
+    expect(instance.logger.name).toBe("LazyLogger");
+  });
+
+  it("Can create providers with circular dependencies when using @Lazy", async () => {
+    const inj = Injector.create([CircularLoggerA, CircularLoggerB, TestLogger]);
+    const instance = await inj.get(CircularLoggerA);
+
+    expect(instance.logger);
+  });
+});
+*/
 
 describe("[Dynamic Injector] Internals", () => {
   const inj = Injector.create([NeedsLogger, TestLogger]);
