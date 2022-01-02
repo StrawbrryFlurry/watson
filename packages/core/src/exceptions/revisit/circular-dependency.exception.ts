@@ -1,5 +1,5 @@
 import { isClassConstructor, isUndefined } from '@watsonjs/common';
-import { ModuleRef, Type } from '@watsonjs/di';
+import { ModuleRef, stringify, Type } from '@watsonjs/di';
 
 export class CircularDependencyException<
   T extends Type | ModuleRef
@@ -20,9 +20,9 @@ export class CircularDependencyException<
 
     super(
       context +
-        `Circular dependency detected in ${
-          (type as Type).name
-        }\n${dependencyGraph}`
+        `Circular dependency detected in ${stringify(
+          type.name
+        )}\n${dependencyGraph}`
     );
   }
 }

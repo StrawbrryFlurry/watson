@@ -1,10 +1,10 @@
 import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, INJECT_DEPENDENCY_METADATA } from '@di/constants';
+import { resolveForwardRef } from '@di/providers/forward-ref';
 import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isEmpty, isNil } from '@di/utils/common';
 
 import type { InjectMetadata } from "@di/decorators/inject.decorator";
-
 export interface MethodDescriptor {
   propertyKey: string;
   descriptor: Function;
@@ -108,6 +108,10 @@ export class Reflector {
     Reflect.defineMetadata(key, merged, metatype, property);
   }
 
+  public static reflectCtorParameterCount(type: Type): number {
+    return this.reflectMethodParameters<Type[]>(type).length;
+  }
+
   /**
    * Reflects the constructor argument types
    * for `type`. Additionally checks for
@@ -131,7 +135,7 @@ export class Reflector {
       const inject = injectParameters[i];
       const { parameterIndex, provide } = inject;
 
-      deps[parameterIndex] = provide;
+      deps[parameterIndex] = resolveForwardRef(provide);
     }
 
     return deps;

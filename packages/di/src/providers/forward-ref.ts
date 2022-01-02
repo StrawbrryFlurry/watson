@@ -10,11 +10,12 @@ const FORWARD_REF_KEY = "ɵfwd";
  * DI is declared, but not yet defined.
  *
  * Refer to the {@link [Angular usage notes of forward ref](https://angular.io/api/core/forwardRef)}
+ *
+ * ForwardRef does not, like in NestJS, help you to resolve circular dependencies.
+ * You should use {@link Lazy} for that purpose.
  */
 export function forwardRef<T extends () => Type>(forwardRefFn: T): T {
-  Object.defineProperty(forwardRefFn, FORWARD_REF_KEY, {
-    value: forwardRef,
-  });
+  forwardRefFn[FORWARD_REF_KEY] = forwardRef;
   return forwardRefFn;
 }
 
