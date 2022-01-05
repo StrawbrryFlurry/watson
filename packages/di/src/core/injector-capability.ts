@@ -97,13 +97,13 @@ export function ɵallowProviderResolutionInParent(
   return true;
 }
 
-export async function ɵcreateLazyDependency(
+export function ɵcreateLazyDependency(
   token: Providable,
   injector: Injector,
   ctx: Injector | null,
   inquirerContext: InquirerContext,
   injectFlag: InjectFlag
-): Promise<ɵLazy> {
+): ɵLazy {
   const { binding, injector: bindingInjector } =
     ɵgetBindingFromInjector(token, injector, injectFlag)! ?? {};
 
@@ -115,7 +115,14 @@ export async function ɵcreateLazyDependency(
     );
   }
 
-  const lazyDep = new ɵLazy(() => {
+  let lookupCtx: Injector | null = ctx;
+  const { lifetime } = binding;
+
+  if (lifetime === InjectorLifetime.Scoped) {
+    lookupCtx = bindingInjector;
+  }
+
+  const lazyDep = new ɵLazy(binding, lookupCtx, async () => {
     return ɵcreateBindingInstance(
       binding,
       bindingInjector,
@@ -126,7 +133,6 @@ export async function ɵcreateLazyDependency(
 
   const lazyProxy = new Proxy(lazyDep, {
     get(target, prop) {
-      console.log(prop);
       if (prop === "get") {
         return target[prop].bind(target);
       }
@@ -137,7 +143,6 @@ export async function ɵcreateLazyDependency(
       }
 
       return target.get().then((instance) => {
-        target.instance = instance;
         return Reflect.get(instance, prop, instance);
       });
     },
@@ -211,7 +216,7 @@ export async function ɵresolveBindingDependencies<
 
     if (flags & InjectFlag.Lazy) {
       dependencyGraph!.remove(dep);
-      const lazyDependency = await ɵcreateLazyDependency(
+      const lazyDependency = ɵcreateLazyDependency(
         dep,
         depInjector,
         ctx,
