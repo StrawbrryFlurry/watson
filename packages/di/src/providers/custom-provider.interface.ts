@@ -1,4 +1,4 @@
-import { InjectFlag } from '@di/providers/inject';
+import { InjectFlag } from '@di/providers/inject-flag';
 import { Type } from '@di/types';
 
 import type { InjectionToken, Providable } from "./injection-token";
