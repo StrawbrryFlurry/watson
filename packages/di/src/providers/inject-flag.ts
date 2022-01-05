@@ -4,6 +4,7 @@ import { W_INJECT_FLAG } from '@di/fields';
 import { Type } from '@di/types';
 import { isFunction, isNil } from '@di/utils/common';
 
+import type { InjectionToken } from "@di/providers/injection-token";
 import type { CustomProviderDependency } from "@di/providers/custom-provider.interface";
 
 export enum InjectFlag {
@@ -14,6 +15,12 @@ export enum InjectFlag {
   SkipSelf = 1 << 4,
   Host = 1 << 5,
   Lazy = 1 << 6,
+}
+
+export interface InjectMetadata {
+  propertyKey: string | symbol;
+  parameterIndex: number;
+  inject: Type | InjectionToken;
 }
 
 export function getCustomProviderDependencyFlags(
@@ -49,10 +56,12 @@ export interface InjectFlagDecorator {
   new (): InjectFlag;
 }
 
-export function makeInjectFlagDecorator(flag: InjectFlag): InjectFlagDecorator {
+export function makeInjectFlagDecorator<R extends InjectFlagDecorator>(
+  flag: InjectFlag
+): R {
   const decoratorFn = (
     target: object | Type,
-    parameterKey: string | symbol,
+    propertyKey: string | symbol,
     parameterIndex: number
   ): void => {
     if (isNil(target)) {
@@ -91,5 +100,5 @@ export function makeInjectFlagDecorator(flag: InjectFlag): InjectFlagDecorator {
 
   decoratorFactory.prototype[W_INJECT_FLAG] = flag;
 
-  return <InjectFlagDecorator>decoratorFactory;
+  return <R>decoratorFactory;
 }

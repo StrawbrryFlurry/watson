@@ -1,4 +1,4 @@
-export * from "./inject-flag.decorator";
+export * from "./inject.decorator";
 export * from "./component.decorator";
 export * from "./declare-module-ref.decorator";
 export * from "./inject.decorator";

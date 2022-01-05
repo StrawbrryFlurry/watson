@@ -1,10 +1,11 @@
 import { DESIGN_PARAMETERS, DESIGN_RETURN_TYPE, DESIGN_TYPE, INJECT_DEPENDENCY_METADATA } from '@di/constants';
 import { resolveForwardRef } from '@di/providers/forward-ref';
-import { InjectionToken } from '@di/providers/injection-token';
 import { Type } from '@di/types';
 import { isEmpty, isNil } from '@di/utils/common';
 
-import type { InjectMetadata } from "@di/decorators/inject.decorator";
+import type { InjectMetadata } from "@di/providers/inject-flag";
+import type { InjectionToken } from "@di/providers/injection-token";
+
 export interface MethodDescriptor {
   propertyKey: string;
   descriptor: Function;
@@ -132,10 +133,10 @@ export class Reflector {
       ) ?? [];
 
     for (let i = 0; i < injectParameters.length; i++) {
-      const inject = injectParameters[i];
-      const { parameterIndex, provide } = inject;
+      const injectMetadata = injectParameters[i];
+      const { parameterIndex, inject } = injectMetadata;
 
-      deps[parameterIndex] = resolveForwardRef(provide);
+      deps[parameterIndex] = resolveForwardRef(inject);
     }
 
     return deps;

@@ -4,7 +4,7 @@ import { ComponentRef } from '@di/core/component-ref';
 import { Injector } from '@di/core/injector';
 import { InquirerContext } from '@di/core/inquirer-context';
 import { ModuleRef } from '@di/core/module-ref';
-import { Host, Optional, Self, SkipSelf } from '@di/decorators/inject-flag.decorator';
+import { Host, Optional, Self, SkipSelf } from '@di/decorators/inject.decorator';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { FactoryProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { InjectionToken } from '@di/providers/injection-token';

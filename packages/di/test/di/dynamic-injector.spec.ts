@@ -2,11 +2,11 @@ import 'reflect-metadata';
 
 import { Injector } from '@di/core/injector';
 import { InquirerContext } from '@di/core/inquirer-context';
-import { Lazy } from '@di/decorators/inject-flag.decorator';
-import { Inject } from '@di/decorators/inject.decorator';
+import { Inject, Lazy } from '@di/decorators/inject.decorator';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { forwardRef } from '@di/providers/forward-ref';
 import { InjectorLifetime } from '@di/providers/injection-token';
+import { ILazy } from '@di/types';
 import { randomUUID } from 'crypto';
 
 import { TestLogger } from '../shared';
@@ -34,7 +34,9 @@ class NeedsLogger {
 
 @Injectable()
 class LazyLogger {
-  constructor(@Lazy() public readonly logger: TestLogger) {}
+  constructor(
+    @Lazy() @Inject(TestLogger) public readonly logger: ILazy<TestLogger>
+  ) {}
 }
 
 @Injectable()
@@ -93,23 +95,24 @@ describe("[Dynamic Injector] Injector Lifetimes", () => {
   });
 });
 
-/*
 describe("Lazy loading", () => {
   test("Lazy providers are not resolved until they are requested.", async () => {
     const inj = Injector.create([LazyLogger, TestLogger]);
 
     const instance = await inj.get(LazyLogger);
+    const logger = await instance.logger.get();
+
+    expect(logger.name).toBe("LazyLogger");
     expect(instance.logger.name).toBe("LazyLogger");
   });
 
-  it("Can create providers with circular dependencies when using @Lazy", async () => {
-    const inj = Injector.create([CircularLoggerA, CircularLoggerB, TestLogger]);
-    const instance = await inj.get(CircularLoggerA);
-
-    expect(instance.logger);
-  });
+  //it("Can create providers with circular dependencies when using @Lazy", async () => {
+  //  const inj = Injector.create([CircularLoggerA, CircularLoggerB, TestLogger]);
+  //  const instance = await inj.get(CircularLoggerA);
+  //
+  //  expect(instance.logger);
+  //});
 });
-*/
 
 describe("[Dynamic Injector] Internals", () => {
   const inj = Injector.create([NeedsLogger, TestLogger]);

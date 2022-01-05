@@ -78,6 +78,7 @@ describe("Component Factory basics", () => {
       provide: CONTEXT_PROVIDER,
       useValue: "Hey :3",
     };
+
     const context1 = new ContextInjector([ContextProvider]);
     const context2 = new ContextInjector([ContextProvider]);
 

@@ -44,5 +44,3 @@ export const W_INJ_REC = "ɵijrec";
 export interface ɵHasInjectorRecords {
   [W_INJ_REC]: Map<any, any>;
 }
-
-export const W_LAZY_INST = "ɵilazy";
