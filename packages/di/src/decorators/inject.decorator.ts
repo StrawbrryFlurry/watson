@@ -1,8 +1,6 @@
-import {
-  InjectFlag,
-  makeInjectFlagDecorator,
-  makeProviderInjectDecorator,
-} from "@di/providers/inject-flag";
+import { InjectFlag, makeInjectFlagDecorator, makeProviderInjectDecorator } from '@di/providers/inject-flag';
+
+import type { LazyProvided } from "@di/types";
 
 /**
  * Decorator to be used on constructor parameters or
@@ -50,8 +48,31 @@ export const SkipSelf = makeInjectFlagDecorator(InjectFlag.SkipSelf);
  * Decorator to be used on constructor parameters or
  * factory dependencies to specify the injector lookup
  * behavior.
+ *
+ * Wraps the dependency in a {@link LazyProvided} object
+ * which can be used to lazily resolve that dependency.
+ * The dependency will be resolved only when a property
+ * on the object is accessed or the `get` method is called.
+ *
+ * ```ts
+ * class Boop {
+ *   public boop: string;
+ * }
+ *
+ * class HasLazy {
+ *  constructor(@Lazy(Boop) public lazy: LazyProvided<Boop>) {}
+ *
+ *  public async getBoop(): Promise<string> {
+ *    const boop = await this.lazy.boop;
+ *    return boop;
+ *  }
+ *
+ *  public async getBoopInstance(): Promise<void> {
+ *   const boop: Boop = await this.lazy.get();
+ *  }
+ * }
+ * ```
  */
-
 export const Lazy = makeInjectFlagDecorator(
   InjectFlag.Lazy,
   makeProviderInjectDecorator
@@ -70,3 +91,5 @@ export const Inject = makeInjectFlagDecorator(
   InjectFlag.Inject,
   makeProviderInjectDecorator
 );
+
+declare const _: LazyProvided<any>;

@@ -6,7 +6,7 @@ import { Lazy } from '@di/decorators/inject.decorator';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { forwardRef } from '@di/providers/forward-ref';
 import { InjectionToken, InjectorLifetime } from '@di/providers/injection-token';
-import { ILazy } from '@di/types';
+import { LazyProvided } from '@di/types';
 import { randomUUID } from 'crypto';
 
 import { TestLogger } from '../shared';
@@ -34,14 +34,16 @@ class NeedsLogger {
 
 @Injectable()
 class LazyLogger {
-  constructor(@Lazy(TestLogger) public readonly logger: ILazy<TestLogger>) {}
+  constructor(
+    @Lazy(TestLogger) public readonly logger: LazyProvided<TestLogger>
+  ) {}
 }
 
 @Injectable()
 class CircularLoggerA extends TestLogger {
   constructor(
     @Lazy(forwardRef(() => CircularLoggerB))
-    public readonly logger: ILazy<CircularLoggerB>,
+    public readonly logger: LazyProvided<CircularLoggerB>,
     inquirerCtx: InquirerContext
   ) {
     super(inquirerCtx);
@@ -52,7 +54,7 @@ class CircularLoggerA extends TestLogger {
 class CircularLoggerB extends TestLogger {
   constructor(
     @Lazy(CircularLoggerA)
-    public readonly logger: ILazy<CircularLoggerA>,
+    public readonly logger: LazyProvided<CircularLoggerA>,
     inquirerCtx: InquirerContext
   ) {
     super(inquirerCtx);

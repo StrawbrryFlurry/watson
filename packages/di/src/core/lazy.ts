@@ -2,6 +2,18 @@ import { Binding } from '@di/core/binding';
 import { Injector } from '@di/core/injector';
 import { isNil } from '@di/utils/common';
 
+import type { LazyProvided } from "@di/types";
+
+/**
+ * Internal wrapper for a provider that
+ * is lazily provided. A proxied instance
+ * of this class is then provided to the
+ * inquirer which can use asynchronous getters
+ * to either resolve the lazy provider
+ * or access it's properties.
+ *
+ * @See {@link LazyProvided}
+ */
 export class ɵLazy<T = any> {
   private _factory!: () => Promise<T>;
   public instance: T | null = null;
@@ -29,3 +41,5 @@ export class ɵLazy<T = any> {
     return instance;
   }
 }
+
+declare const _: LazyProvided<any>;
