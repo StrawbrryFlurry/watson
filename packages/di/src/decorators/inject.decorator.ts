@@ -1,8 +1,8 @@
-import { INJECT_DEPENDENCY_METADATA } from '@di/constants';
-import { Reflector } from '@di/core/reflector';
-import { InjectFlag, InjectFlagDecorator, InjectMetadata, makeInjectFlagDecorator } from '@di/providers/inject-flag';
-import { InjectionToken } from '@di/providers/injection-token';
-import { Type } from '@di/types';
+import {
+  InjectFlag,
+  makeInjectFlagDecorator,
+  makeProviderInjectDecorator,
+} from "@di/providers/inject-flag";
 
 /**
  * Decorator to be used on constructor parameters or
@@ -10,9 +10,7 @@ import { Type } from '@di/types';
  * The DI framework provides null if the dependency
  * is not found.
  */
-export const Optional: InjectFlagDecorator = makeInjectFlagDecorator(
-  InjectFlag.Optional
-);
+export const Optional = makeInjectFlagDecorator(InjectFlag.Optional);
 
 /**
  * Decorator to be used on constructor parameters or
@@ -22,9 +20,7 @@ export const Optional: InjectFlagDecorator = makeInjectFlagDecorator(
  * This will skip the current injector and start the
  * resolution from the closest host e.g. Module injector.
  */
-export const Host: InjectFlagDecorator = makeInjectFlagDecorator(
-  InjectFlag.Host
-);
+export const Host = makeInjectFlagDecorator(InjectFlag.Host);
 
 /**
  * Decorator to be used on constructor parameters or
@@ -36,9 +32,7 @@ export const Host: InjectFlagDecorator = makeInjectFlagDecorator(
  * if the provider scope would allow it to be resolved
  * in a parent injector.
  */
-export const Self: InjectFlagDecorator = makeInjectFlagDecorator(
-  InjectFlag.Self
-);
+export const Self = makeInjectFlagDecorator(InjectFlag.Self);
 
 /**
  * Decorator to be used on constructor parameters or
@@ -50,17 +44,17 @@ export const Self: InjectFlagDecorator = makeInjectFlagDecorator(
  * Usually, this is used to resolve the dependency
  * in the module injector.
  */
-export const SkipSelf: InjectFlagDecorator = makeInjectFlagDecorator(
-  InjectFlag.SkipSelf
-);
+export const SkipSelf = makeInjectFlagDecorator(InjectFlag.SkipSelf);
 
 /**
  * Decorator to be used on constructor parameters or
  * factory dependencies to specify the injector lookup
  * behavior.
  */
-export const Lazy: InjectFlagDecorator = makeInjectFlagDecorator(
-  InjectFlag.Lazy
+
+export const Lazy = makeInjectFlagDecorator(
+  InjectFlag.Lazy,
+  makeProviderInjectDecorator
 );
 
 /**
@@ -72,25 +66,7 @@ export const Lazy: InjectFlagDecorator = makeInjectFlagDecorator(
  * implemented by other framework specific
  * tools.
  */
-export const Inject = (inject: Type | InjectionToken) => {
-  return (
-    target: object,
-    propertyKey: string | symbol,
-    parameterIndex: number
-  ) => {
-    const metadata: InjectMetadata = {
-      inject,
-      propertyKey: propertyKey,
-      parameterIndex: parameterIndex,
-    };
-
-    Reflector.mergeMetadata(
-      INJECT_DEPENDENCY_METADATA,
-      target,
-      (existing: InjectMetadata[]) => {
-        return [...existing, metadata];
-      },
-      []
-    );
-  };
-};
+export const Inject = makeInjectFlagDecorator(
+  InjectFlag.Inject,
+  makeProviderInjectDecorator
+);

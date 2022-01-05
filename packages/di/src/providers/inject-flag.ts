@@ -1,8 +1,11 @@
-import { INJECT_FLAG_METADATA } from '@di/constants';
-import { Reflector } from '@di/core/reflector';
-import { W_INJECT_FLAG } from '@di/fields';
-import { Type } from '@di/types';
-import { isFunction, isNil } from '@di/utils/common';
+import {
+  INJECT_DEPENDENCY_METADATA,
+  INJECT_FLAG_METADATA,
+} from "@di/constants";
+import { Reflector } from "@di/core/reflector";
+import { W_INJECT_FLAG } from "@di/fields";
+import { Type } from "@di/types";
+import { isFunction, isNil } from "@di/utils/common";
 
 import type { InjectionToken } from "@di/providers/injection-token";
 import type { CustomProviderDependency } from "@di/providers/custom-provider.interface";
@@ -51,14 +54,45 @@ export function getCustomProviderDependencyFlags(
   });
 }
 
-export interface InjectFlagDecorator {
-  (): ParameterDecorator;
+export interface InjectFlagDecorator<A extends any[]> {
+  (...args: A): ParameterDecorator;
   new (): InjectFlag;
 }
 
-export function makeInjectFlagDecorator<R extends InjectFlagDecorator>(
-  flag: InjectFlag
-): R {
+export function makeProviderInjectDecorator(inject: Type | InjectionToken) {
+  return (
+    target: object,
+    propertyKey: string | symbol,
+    parameterIndex: number
+  ) => {
+    const metadata: InjectMetadata = {
+      inject,
+      propertyKey: propertyKey,
+      parameterIndex: parameterIndex,
+    };
+
+    Reflector.mergeMetadata(
+      INJECT_DEPENDENCY_METADATA,
+      target,
+      (existing: InjectMetadata[]) => {
+        return [...existing, metadata];
+      },
+      []
+    );
+  };
+}
+
+export function makeInjectFlagDecorator<
+  C extends (
+    ...args: any[]
+  ) => (
+    target: object | Type,
+    propertyKey: string | symbol,
+    parameterIndex: number
+  ) => void,
+  A extends any[] = C extends (...args: infer A) => any ? A : never,
+  R extends InjectFlagDecorator<A> = InjectFlagDecorator<A>
+>(flag: InjectFlag, cb?: C): R {
   const decoratorFn = (
     target: object | Type,
     propertyKey: string | symbol,
@@ -94,8 +128,19 @@ export function makeInjectFlagDecorator<R extends InjectFlagDecorator>(
     );
   };
 
-  const decoratorFactory = function () {
-    return decoratorFn;
+  const decoratorFactory = function (...args: A): ParameterDecorator {
+    return (
+      target: object | Type,
+      propertyKey: string | symbol,
+      parameterIndex: number
+    ) => {
+      if (!isNil(cb)) {
+        const decoratorCb = cb(...args);
+        decoratorCb(target, propertyKey, parameterIndex);
+      }
+
+      decoratorFn(target, propertyKey, parameterIndex);
+    };
   };
 
   decoratorFactory.prototype[W_INJECT_FLAG] = flag;
