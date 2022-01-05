@@ -104,31 +104,8 @@ export function ɵcreateLazyDependency(
   inquirerContext: InquirerContext,
   injectFlag: InjectFlag
 ): ɵLazy {
-  const { binding, injector: bindingInjector } =
-    ɵgetBindingFromInjector(token, injector, injectFlag)! ?? {};
-
-  if (isNil(binding)) {
-    throw new Error(
-      `No provider for lazy provider ${stringify(token)} in ${stringify(
-        injector
-      )}`
-    );
-  }
-
-  let lookupCtx: Injector | null = ctx;
-  const { lifetime } = binding;
-
-  if (lifetime === InjectorLifetime.Scoped) {
-    lookupCtx = bindingInjector;
-  }
-
-  const lazyDep = new ɵLazy(binding, lookupCtx, async () => {
-    return ɵcreateBindingInstance(
-      binding,
-      bindingInjector,
-      ctx,
-      inquirerContext
-    );
+  const lazyDep = new ɵLazy(async () => {
+    return injector.get(token, null, ctx, inquirerContext, injectFlag);
   });
 
   const lazyProxy = new Proxy(lazyDep, {
