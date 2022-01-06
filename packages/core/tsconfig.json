@@ -1,7 +1,23 @@
 {
   "extends": "./../../tsconfig.json",
   "compilerOptions": {
-    "sourceRoot": "src"
+    "sourceRoot": "src",
+    "paths": {
+      "@watsonjs/di": ["packages/di"],
+      "@watsonjs/common": ["packages/common"],
+      "@core/adapters": ["./packages/core/src/adapters"],
+      "@core/command": ["./packages/core/src/command"],
+      "@core/di": ["./packages/core/src/di"],
+      "@core/router": ["./packages/core/src/router"],
+      "@core/router/*": ["./packages/core/src/router/*"],
+      "@core/errors": ["./packages/core/src/errors"],
+      "@core/logger": ["./packages/core/src/logger"],
+      "@core/interfaces": ["./packages/core/src/interfaces"],
+      "@core/interfaces/*": ["./packages/core/src/interfaces/*"],
+      "@core/lifecycle": ["./packages/core/src/lifecycle"],
+      "@core/exceptions": ["./packages/core/src/exceptions"],
+      "@core/utils": ["./packages/core/src/util"]
+    }
   },
   "include": ["src/*.ts", "src/**/*.ts"]
 }

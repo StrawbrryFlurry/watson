@@ -1,3 +1,4 @@
+import { WATSON_EXCEPTION_HANDLER_PROVIDER } from '@core/lifecycle';
 import { ApplicationRouterRef, RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
@@ -14,15 +15,7 @@ import {
   ɵInterceptor,
   ɵINTERCEPTOR_TYPE,
 } from '@watsonjs/common';
-import {
-  DynamicInjector,
-  ModuleRef,
-  ProviderResolvable,
-  Reflector,
-  Type,
-  UniqueTypeArray,
-  ValueProvider,
-} from '@watsonjs/di';
+import { DynamicInjector, ModuleRef, ProviderResolvable, Reflector, Type, UniqueTypeArray } from '@watsonjs/di';
 
 export interface RouterRefInjectableBinding {
   /**
@@ -50,23 +43,35 @@ export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
   constructor(
     metatype: Type,
     providers: ProviderResolvable[],
-    moduleRef: ModuleRef,
-    root: ApplicationRouterRef
+    moduleRef: ModuleRef
   ) {
     super(metatype, providers, moduleRef);
-    this.root = root;
-    /**
-     * ComponentsRef only binds `ComponentRef`
-     * as a provider for this instance.
-     */
-    (<DynamicInjector>this._injector).bind(<ValueProvider>{
-      provide: RouterRef,
-      useValue: this,
-      multi: false,
-    });
+
+    const routerProviders = this._makeRouterProviders();
+    (<DynamicInjector>this.injector).bind(...routerProviders);
 
     const interceptors = this.reflectAllInterceptors(metatype);
     this._bindInterceptors(interceptors);
+  }
+
+  private _makeRouterProviders(): ProviderResolvable[] {
+    return [
+      WATSON_EXCEPTION_HANDLER_PROVIDER,
+      /**
+       * ComponentsRef only binds `ComponentRef`
+       * as a provider for this instance.
+       */
+      {
+        provide: RouterRef,
+        useValue: this,
+      },
+    ];
+  }
+
+  public getInterceptor(
+    type: ɵINTERCEPTOR_TYPE
+  ): RouterRefInjectableBinding | null {
+    return this._interceptors.get(type) ?? null;
   }
 
   public reflectAllInterceptors(metatype: Type) {
@@ -124,9 +129,13 @@ export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
     interceptors: UniqueTypeArray<ɵInterceptor>,
     metadataKey: string
   ) {
-    const classInterceptors =
-      Reflector.reflectMetadata<any[]>(metadataKey, metatype) ?? [];
-    interceptors.add(...classInterceptors);
+    const classInterceptors = Reflector.reflectMetadata<any[]>(
+      metadataKey,
+      metatype,
+      null,
+      []
+    );
+    interceptors.add(...classInterceptors!);
   }
 
   public dispatch(route: BaseRoute): Promise<void | MessageSendable> {

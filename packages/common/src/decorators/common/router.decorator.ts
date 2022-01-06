@@ -1,7 +1,7 @@
-import { Prefix } from "@common/command/common";
-import { MatchingStrategy } from "@common/command/matcher";
-import { isNil, isObject, isString } from "@common/utils";
-import { ComponentDecoratorOptions, WatsonComponent } from "@watsonjs/di";
+import { Prefix } from '@common/command/common';
+import { MatchingStrategy } from '@common/command/matcher';
+import { isNil, isObject, isString } from '@common/utils';
+import { ComponentDecoratorOptions, WatsonComponent } from '@watsonjs/di';
 
 export interface RouterDecoratorOptions extends ComponentDecoratorOptions {
   /**
@@ -21,7 +21,7 @@ export interface RouterDecoratorOptions extends ComponentDecoratorOptions {
  * Router options can be used to apply configuration to the underlying
  * event handlers.
  */
-export function Router(routerOptions: RouterDecoratorOptions): ClassDecorator;
+export function Router(routerOptions?: RouterDecoratorOptions): ClassDecorator;
 export function Router(
   options?: string | RouterDecoratorOptions
 ): ClassDecorator {

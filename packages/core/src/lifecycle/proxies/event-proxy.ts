@@ -1,5 +1,5 @@
 import { LifecycleFunction } from '@core/router';
-import { BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
+import { BaseRoute, WatsonEvent } from '@watsonjs/common';
 
 import { AbstractProxy } from './abstract-proxy';
 
@@ -15,11 +15,7 @@ export class EventProxy<
     throw new Error("Method not implemented.");
   }
 
-  public bind(
-    route: BaseRoute,
-    eventHandler: LifecycleFunction,
-    exceptionHandler: ExceptionHandler
-  ): void {
+  public bind(route: BaseRoute, eventHandler: LifecycleFunction): void {
     throw new Error("Method not implemented.");
   }
 }

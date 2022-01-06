@@ -1,5 +1,5 @@
 import { LifecycleFunction } from '@core/router';
-import { CommandRoute, ExceptionHandler, isNil, MessageMatcher, WatsonEvent } from '@watsonjs/common';
+import { CommandRoute, isNil, MessageMatcher, WatsonEvent } from '@watsonjs/common';
 import { Message } from 'discord.js';
 
 import { AbstractProxy } from './abstract-proxy';
@@ -48,20 +48,17 @@ export class CommandProxy extends AbstractProxy<
       return;
     }
 
-    const [eventHandler, excpetionHandler] = this.handlers.get(routeRef) as any;
+    const eventHandler = this.handlers.get(routeRef)!;
 
     try {
       await eventHandler(routeRef, event, parsed);
     } catch (err) {
-      excpetionHandler.handle(err);
+      const exceptionHandler = await this.getExceptionHandler(routeRef);
+      exceptionHandler.handle(<Error>err);
     }
   }
 
-  public bind(
-    route: CommandRoute,
-    handlerFn: LifecycleFunction,
-    exceptionHandler: ExceptionHandler
-  ): void {
+  public bind(route: CommandRoute, handlerFn: LifecycleFunction): void {
     Reflect.apply(this.bindHandler, this, arguments);
   }
 }

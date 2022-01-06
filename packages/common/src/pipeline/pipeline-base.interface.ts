@@ -1,4 +1,5 @@
 import { BaseRoute } from '@common/router/base-route.interface';
+import { ComponentRef } from '@watsonjs/di';
 import { Guild, GuildChannel, TextChannel } from 'discord.js';
 
 import { ContextType } from './context-type.enum';
@@ -19,7 +20,12 @@ export interface PipelineBase<
    * the event emitted.
    */
   route: T;
-  router: any;
+  /**
+   * A reference to the router in
+   * which the route of this pipeline
+   * is registered in.
+   */
+  router: ComponentRef;
   /** The raw event data emitted by the client */
   eventData: D;
   /**

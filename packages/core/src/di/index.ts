@@ -1,4 +1,3 @@
-export * from "./component-factory";
 export * from "./context-injector";
 export * from "./context-provider-factory";
 export * from "./module";

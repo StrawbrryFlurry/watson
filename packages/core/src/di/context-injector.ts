@@ -53,7 +53,6 @@ export class ContextInjector implements Injector {
         binding = createResolvedBinding({
           provide: provide,
           useValue: value,
-          multi: false,
         });
       }
 
@@ -70,7 +69,6 @@ export class ContextInjector implements Injector {
       createResolvedBinding({
         provide: ExecutionContext,
         useValue: ctx,
-        multi: false,
       })
     );
   }
@@ -95,7 +93,7 @@ export class ContextInjector implements Injector {
       return this.parent.get(typeOrToken, notFoundValue, this);
     }
 
-    const binding: Binding<T> | undefined = this._records.get(typeOrToken);
+    const binding = this._records.get(typeOrToken);
 
     if (isNil(binding)) {
       return this.parent.get(typeOrToken, notFoundValue, this, inquirerContext);

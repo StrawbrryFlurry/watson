@@ -1,18 +1,14 @@
+import { ExceptionHandlerRef } from '@core/lifecycle';
 import { LifecycleFunction } from '@core/router/route-handler-factory';
-import { BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
+import { BaseRoute, WatsonEvent } from '@watsonjs/common';
 import iterate from 'iterare';
-
-export interface ProxyHandler {
-  handlerFn: LifecycleFunction;
-  exceptionHandler: ExceptionHandler;
-}
 
 export abstract class AbstractProxy<
   Event extends WatsonEvent = WatsonEvent,
   Route extends BaseRoute = BaseRoute,
   ProxyData = any
 > {
-  public readonly handlers = new Map<Route, ProxyHandler>();
+  public readonly handlers = new Map<Route, LifecycleFunction>();
   public readonly routes: BaseRoute[] = [];
 
   constructor(
@@ -27,25 +23,14 @@ export abstract class AbstractProxy<
     public readonly isWsEvent: boolean = false
   ) {}
 
-  public abstract bind(
-    route: Route,
-    handlerFn: LifecycleFunction,
-    exceptionHandler: ExceptionHandler
-  ): void;
+  public abstract bind(route: Route, handlerFn: LifecycleFunction): void;
 
-  protected bindHandler(
-    route: Route,
-    handlerFn: LifecycleFunction,
-    exceptionHandler: ExceptionHandler
-  ): void {
+  protected bindHandler(route: Route, handlerFn: LifecycleFunction): void {
     this.routes.push(route);
-    this.handlers.set(route, {
-      handlerFn,
-      exceptionHandler,
-    });
+    this.handlers.set(route, handlerFn);
   }
 
-  public getHandlerFns(): [Route, ProxyHandler][] {
+  public getHandlerFns(): [Route, LifecycleFunction][] {
     return iterate(this.handlers).toArray();
   }
 
@@ -56,4 +41,11 @@ export abstract class AbstractProxy<
    * with the data emitted from the adapter.
    */
   public abstract proxy(args: ProxyData): Promise<void>;
+
+  protected getExceptionHandler(
+    route: BaseRoute
+  ): Promise<ExceptionHandlerRef> {
+    const { host } = route;
+    return host.get(ExceptionHandlerRef);
+  }
 }

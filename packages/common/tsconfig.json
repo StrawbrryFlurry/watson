@@ -1,7 +1,29 @@
 {
   "extends": "./../../tsconfig.json",
   "compilerOptions": {
-    "sourceRoot": "src"
+    "sourceRoot": "src",
+    "paths": {
+      "@watsonjs/di": ["packages/di"],
+
+      "@common/builtin": ["./packages/common/src/builtin"],
+      "@common/adapter": ["./packages/common/src/adapter"],
+      "@common/fields": ["packages/common/src/fields.ts"],
+      "@common/exceptions": ["./packages/common/src/exceptions"],
+      "@common/event": ["packages/common/src/event"],
+      "@common/router": ["packages/common/src/router"],
+      "@common/router/*": ["packages/common/src/router/*"],
+      "@common/hooks": ["packages/common/src/hooks"],
+      "@common/inquirable": ["packages/common/src/inquirable"],
+      "@common/enums": ["packages/common/src/enums"],
+      "@common/pipeline": ["packages/common/src/pipeline"],
+      "@common/pipeline/*": ["packages/common/src/pipeline/*"],
+      "@common/discord-types": ["packages/common/src/discord-types"],
+      "@common/decorators": ["./packages/common/src/decorators"],
+      "@common/decorators/*": ["packages/common/src/decorators/*"],
+      "@common/command/*": ["packages/common/src/command/*"],
+      "@common/utils": ["./packages/common/src/utils"],
+      "@common/constants": ["./packages/common/src/constants"]
+    }
   },
   "include": ["*.ts", "**/*.ts"]
 }

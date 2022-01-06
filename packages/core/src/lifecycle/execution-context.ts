@@ -1,5 +1,4 @@
 import { AdapterRef } from '@core/adapters';
-import { RouterRef } from '@core/router';
 import {
   BaseRoute,
   CommandPipeline,
@@ -11,7 +10,7 @@ import {
   PipelineBase,
 } from '@watsonjs/common';
 import { Injector, InjectorGetResult, Providable, Type } from '@watsonjs/di';
-import { Client } from 'discord.js';
+import { Client, ClientEvents } from 'discord.js';
 
 export class ExecutionContextImpl<
   PipelineHost extends
@@ -26,21 +25,17 @@ export class ExecutionContextImpl<
   public adapter: AdapterRef;
   public parent: Injector;
 
-  private pipeline: PipelineHost;
+  private _pipeline: PipelineHost;
 
   constructor(pipeline: PipelineHost) {
-    this.pipeline = pipeline;
-    this.parent = pipeline.router as RouterRef;
+    this._pipeline = pipeline;
+    this.parent = pipeline.router;
   }
 
   public get<T extends Providable, R extends InjectorGetResult<T>>(
     typeOrToken: T
   ): Promise<R> {
     return this.parent.get(typeOrToken);
-  }
-
-  public switchToInteraction(): InteractionPipeline {
-    throw new Error("Method not implemented.");
   }
 
   public setNext(nextFn: Function) {
@@ -68,19 +63,23 @@ export class ExecutionContextImpl<
   }
 
   public switchToCommand(): CommandPipeline {
-    return this.pipeline as CommandPipeline;
+    return <CommandPipeline>this._pipeline;
   }
 
-  public switchToEvent(): EventPipeline<any> {
-    throw new Error("Method not implemented.");
+  public switchToEvent<T extends keyof ClientEvents>(): EventPipeline<T> {
+    return <EventPipeline<T>>this._pipeline;
+  }
+
+  public switchToInteraction(): InteractionPipeline {
+    return <InteractionPipeline>this._pipeline;
   }
 
   public getType<T extends string = ContextType>(): T {
-    return this.pipeline.contextType as T;
+    return this._pipeline.contextType as T;
   }
 
   public getEvent(): PipelineHost["eventData"] {
-    return this.pipeline.getEvent();
+    return this._pipeline.getEvent();
   }
 
   public getRoute(): BaseRoute {

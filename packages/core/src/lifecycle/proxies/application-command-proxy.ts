@@ -1,5 +1,5 @@
 import { LifecycleFunction } from '@core/router';
-import { ApplicationCommandRoute, BaseRoute, ExceptionHandler, WatsonEvent } from '@watsonjs/common';
+import { ApplicationCommandRoute, BaseRoute, WatsonEvent } from '@watsonjs/common';
 import { Injector } from '@watsonjs/di';
 import { Interaction } from 'discord.js';
 
@@ -37,11 +37,7 @@ export class ApplicationCommandProxy extends AbstractProxy<
     throw new Error("Method not implemented.");
   }
 
-  public bind(
-    route: BaseRoute,
-    eventHandler: LifecycleFunction,
-    exceptionHandler: ExceptionHandler
-  ): void {
+  public bind(route: BaseRoute, eventHandler: LifecycleFunction): void {
     Reflect.apply(this.bindHandler, this, arguments);
   }
 }

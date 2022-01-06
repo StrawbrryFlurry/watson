@@ -1,12 +1,5 @@
 import { CommandContainer } from '@core/command';
-import {
-  AbstractProxy,
-  ApplicationCommandProxy,
-  CommandProxy,
-  CommonExceptionHandler,
-  EventProxy,
-  ExceptionHandlerImpl,
-} from '@core/lifecycle';
+import { AbstractProxy, ApplicationCommandProxy, CommandProxy, EventProxy } from '@core/lifecycle';
 import { ApplicationCommandRouteImpl, EventRouteImpl, LifecycleFunction } from '@core/router';
 import {
   APPLICATION_COMMAND_METADATA,
@@ -19,10 +12,6 @@ import {
   CommandRoute,
   EVENT_METADATA,
   EventRoute,
-  EXCEPTION_HANDLER,
-  EXCEPTION_HANDLER_METADATA,
-  ExceptionHandlerMetadata,
-  GLOBAL_EXCEPTION_HANDLER,
   isEmpty,
   isNil,
   MessageMatcher,
@@ -64,9 +53,9 @@ export class RouteExplorer {
     ApplicationCommandRoute
   >();
 
-  private eventProxies = new Map<WatsonEvent, EventProxy>();
+  private _eventProxies = new Map<WatsonEvent, EventProxy>();
   private _commandProxies = new Map<MessageMatcher, EventProxy>();
-  private routeHandlerFactory = new RouteHandlerFactory();
+  private _routeHandlerFactory = new RouteHandlerFactory();
 
   public async explore(injector: Injector) {
     const { modules } = await injector.get(ModuleContainer);
@@ -94,7 +83,7 @@ export class RouteExplorer {
     const routerMetadata = Reflector.reflectMetadata<RouterDecoratorOptions>(
       COMPONENT_METADATA,
       metatype
-    );
+    )!;
 
     const methodsMetadata = methods.reduce((metadata, method) => {
       ROUTE_METADATA.map((key) => ({
@@ -225,14 +214,10 @@ export class RouteExplorer {
     const matcher = await routerRef.get(MessageMatcher);
     this.commandRoutes.set(descriptor, routeRef);
 
-    const handlerFn = await this.routeHandlerFactory.createCommandHandler(
+    const handlerFn = await this._routeHandlerFactory.createCommandHandler(
       routeRef,
       descriptor,
       routerRef
-    );
-    const exceptionHandler = await this._createExceptionHandler(
-      routerRef,
-      method
     );
 
     let proxyRef = this._commandProxies.get(matcher);
@@ -242,7 +227,7 @@ export class RouteExplorer {
       this._commandProxies.set(matcher, proxyRef);
     }
 
-    this._bindRoute(proxyRef, routerRef, routeRef, handlerFn, exceptionHandler);
+    this._bindRoute(proxyRef, routerRef, routeRef, handlerFn);
 
     return routeRef;
   }
@@ -266,20 +251,16 @@ export class RouteExplorer {
     this.applicationCommandRoutes.set(descriptor, routeRef);
 
     const handlerFn =
-      await this.routeHandlerFactory.createApplicationCommandHandler();
-    const exceptionHandler = await this._createExceptionHandler(
-      routerRef,
-      method
-    );
+      await this._routeHandlerFactory.createApplicationCommandHandler();
 
-    let proxyRef = this.eventProxies.get(WatsonEvent.INTERACTION_CREATE);
+    let proxyRef = this._eventProxies.get(WatsonEvent.INTERACTION_CREATE);
 
     if (isNil(proxyRef)) {
       proxyRef = new ApplicationCommandProxy(null as any);
-      this.eventProxies.set(WatsonEvent.INTERACTION_CREATE, proxyRef);
+      this._eventProxies.set(WatsonEvent.INTERACTION_CREATE, proxyRef);
     }
 
-    this._bindRoute(proxyRef, routerRef, routeRef, handlerFn, exceptionHandler);
+    this._bindRoute(proxyRef, routerRef, routeRef, handlerFn);
     return routeRef;
   }
 
@@ -293,20 +274,15 @@ export class RouteExplorer {
     const routeRef = new EventRouteImpl(metadata, routerRef, method);
     this.eventRoutes.set(descriptor, routeRef);
 
-    const handlerFn = await this.routeHandlerFactory.createEventHandler();
-    const exceptionHandler = await this._createExceptionHandler(
-      routerRef,
-      method
-    );
-
-    let proxyRef = this.eventProxies.get(WatsonEvent.INTERACTION_CREATE);
+    const handlerFn = await this._routeHandlerFactory.createEventHandler();
+    let proxyRef = this._eventProxies.get(WatsonEvent.INTERACTION_CREATE);
 
     if (isNil(proxyRef)) {
       proxyRef = new EventProxy(metadata);
-      this.eventProxies.set(WatsonEvent.INTERACTION_CREATE, proxyRef);
+      this._eventProxies.set(WatsonEvent.INTERACTION_CREATE, proxyRef);
     }
 
-    this._bindRoute(proxyRef, routerRef, routeRef, handlerFn, exceptionHandler);
+    this._bindRoute(proxyRef, routerRef, routeRef, handlerFn);
 
     return routeRef;
   }
@@ -315,50 +291,10 @@ export class RouteExplorer {
     proxyRef: AbstractProxy,
     routerRef: RouterRef,
     routeRef: BaseRoute,
-    handlerFn: LifecycleFunction,
-    exceptionHandler: ExceptionHandlerImpl
+    handlerFn: LifecycleFunction
   ) {
     const { handler } = routeRef;
     routerRef.routes.set(handler, routeRef);
-    proxyRef.bind(routeRef, handlerFn, exceptionHandler);
-  }
-
-  private async _createExceptionHandler(
-    routerRef: RouterRef,
-    method: MethodDescriptor
-  ) {
-    const { metatype } = routerRef;
-    const { descriptor } = method;
-
-    const defaultHandlers = [new CommonExceptionHandler()];
-    const moduleExceptionHandlers = await routerRef.get(EXCEPTION_HANDLER, []);
-    const globalExceptionHandlers = await routerRef.get(
-      GLOBAL_EXCEPTION_HANDLER,
-      []
-    );
-
-    const routerExceptionHandlers =
-      Reflector.reflectMetadata<ExceptionHandlerMetadata[]>(
-        EXCEPTION_HANDLER_METADATA,
-        metatype
-      ) ?? [];
-
-    const routeExceptionHandlers =
-      Reflector.reflectMetadata<ExceptionHandlerMetadata[]>(
-        EXCEPTION_HANDLER_METADATA,
-        descriptor
-      ) ?? [];
-
-    const customHandlers = [
-      ...moduleExceptionHandlers,
-      ...globalExceptionHandlers,
-      ...routerExceptionHandlers,
-      ...routeExceptionHandlers,
-    ];
-
-    const handlers = [...customHandlers, ...defaultHandlers];
-    const handler = new ExceptionHandlerImpl(handlers as any);
-
-    return handler;
+    proxyRef.bind(routeRef, handlerFn);
   }
 }
