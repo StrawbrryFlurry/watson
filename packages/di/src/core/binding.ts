@@ -318,6 +318,16 @@ export function createBinding(_provider: ProviderResolvable): Binding {
   if (isClassProvider(provider)) {
     const { useClass } = provider;
 
+    /**
+     * If there were no dependencies provided for
+     * the class we use the classes' constructor
+     * dependencies.
+     */
+    if (isEmpty(deps)) {
+      const deps = Reflector.reflectCtorArgs(useClass);
+      binding.deps = deps ?? null;
+    }
+
     binding.factory = (...deps) => Reflect.construct(useClass, deps);
   } else if (isFactoryProvider(provider)) {
     const { useFactory } = provider;

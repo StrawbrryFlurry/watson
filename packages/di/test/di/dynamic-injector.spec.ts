@@ -5,7 +5,7 @@ import { InquirerContext } from '@di/core/inquirer-context';
 import { Lazy } from '@di/decorators/inject.decorator';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { forwardRef } from '@di/providers/forward-ref';
-import { InjectionToken, InjectorLifetime } from '@di/providers/injection-token';
+import { InjectorLifetime } from '@di/providers/injection-token';
 import { LazyProvided } from '@di/types';
 import { randomUUID } from 'crypto';
 
@@ -121,18 +121,7 @@ describe("Lazy loading", () => {
 });
 
 describe("[Dynamic Injector] Internals", () => {
-  const TransientTestLogger = new InjectionToken("TransientTestLogger", {
-    lifetime: InjectorLifetime.Transient,
-  });
-  const inj = Injector.create([
-    NeedsLogger,
-    TestLogger,
-    {
-      provide: TransientTestLogger,
-      useClass: TestLogger,
-      deps: [InquirerContext],
-    },
-  ]);
+  const inj = Injector.create([NeedsLogger, TestLogger]);
 
   test("The injector keeps track of it's history by using the InquirerContext", async () => {
     const logClient = await inj.get(NeedsLogger);
@@ -140,7 +129,7 @@ describe("[Dynamic Injector] Internals", () => {
   });
 
   test("Resolved providers from the injector without an intermediate dependency get the `REQUESTED_BY_INJECTOR` type as inquirer", async () => {
-    const logger = await inj.get(TransientTestLogger);
+    const logger = await inj.get(TestLogger);
     expect(logger.name).toEqual("[GLOBAL]");
   });
 });
