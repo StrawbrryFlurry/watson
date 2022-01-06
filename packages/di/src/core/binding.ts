@@ -317,6 +317,7 @@ export function createBinding(_provider: ProviderResolvable): Binding {
    */
   if (isClassProvider(provider)) {
     const { useClass } = provider;
+    const klass = resolveForwardRef(useClass);
 
     /**
      * If there were no dependencies provided for
@@ -324,11 +325,11 @@ export function createBinding(_provider: ProviderResolvable): Binding {
      * dependencies.
      */
     if (isEmpty(deps)) {
-      const deps = Reflector.reflectCtorArgs(useClass);
+      const deps = Reflector.reflectCtorArgs(klass);
       binding.deps = deps ?? null;
     }
 
-    binding.factory = (...deps) => Reflect.construct(useClass, deps);
+    binding.factory = (...deps) => Reflect.construct(klass, deps);
   } else if (isFactoryProvider(provider)) {
     const { useFactory } = provider;
 
