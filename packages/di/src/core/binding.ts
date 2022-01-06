@@ -239,8 +239,8 @@ export function findMostTransientDependencyLifetime(
  */
 export function createResolvedBinding(_provider: ValueProvider): Binding {
   const provider = resolveForwardRef(_provider);
-  const { provide, useValue, multi } = provider;
-  const { lifetime, providedIn } = getInjectableDef(provider);
+  const { provide, useValue } = provider;
+  const { lifetime, providedIn, multi } = getInjectableDef(provider);
 
   const binding = new Binding(provide, lifetime, providedIn, () => useValue);
 
@@ -274,7 +274,7 @@ export function getInjectFlags(
  */
 export function createBinding(_provider: ProviderResolvable): Binding {
   const provider = resolveForwardRef(_provider);
-  const { lifetime, providedIn } = getInjectableDef(provider);
+  const { lifetime, providedIn, multi } = getInjectableDef(provider);
   const token = getProviderToken(provider);
 
   /**
@@ -300,7 +300,7 @@ export function createBinding(_provider: ProviderResolvable): Binding {
     return binding;
   }
 
-  const { multi, deps } = <FactoryProvider>provider;
+  const { deps } = <FactoryProvider>provider;
 
   const binding = new Binding(token, lifetime, providedIn);
   token[W_BINDING_DEF] = binding;

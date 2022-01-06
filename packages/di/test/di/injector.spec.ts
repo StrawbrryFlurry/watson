@@ -77,14 +77,14 @@ describe("Basic injector test", () => {
 
   test("Multi providers create instances for each provider", async () => {
     const MULTI_PROVIDER_TOKEN = new InjectionToken<string[]>(
-      "Multi provider test"
+      "Multi provider test",
+      { multi: true }
     );
     const PROVIDER_VALUE = "Beep Boop";
 
     const multiProvider: FactoryProvider = {
       provide: MULTI_PROVIDER_TOKEN,
       useFactory: () => PROVIDER_VALUE,
-      multi: true,
     };
 
     const inj = Injector.create([multiProvider, multiProvider], null, Injector);

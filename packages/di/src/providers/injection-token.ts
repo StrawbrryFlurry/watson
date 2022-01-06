@@ -110,6 +110,14 @@ export interface InjectableOptions {
   providedIn?: ProvidedInScope;
   /** {@link InjectorLifetime} */
   lifetime?: InjectorLifetime;
+  /**
+   * If true, the provider token can
+   * exist multiple times within the
+   * same injector.
+   *
+   * @default false
+   */
+  multi?: boolean;
 }
 
 export interface InjectableDef extends Required<InjectableOptions> {}
@@ -134,8 +142,7 @@ export class InjectionToken<T /* The value that this token provides */ = any> {
     options: InjectableOptions = {}
   ) {
     this.name = `[${INJECTION_TOKE_PREFIX}] ${this._description}`;
-    const { lifetime, providedIn } = options;
-    ɵdefineInjectable(this, { providedIn, lifetime });
+    ɵdefineInjectable(this, options);
   }
 }
 
@@ -148,11 +155,12 @@ export function ɵdefineInjectable(
   typeOrToken: Object | Type | InjectionToken,
   options: InjectableOptions = {}
 ): ɵHasProv[typeof W_PROV] {
-  const { lifetime, providedIn } = options;
+  const { lifetime, providedIn, multi } = options;
 
   const injectableDef = {
     providedIn: resolveForwardRef(providedIn) ?? DEFAULT_SCOPE,
     lifetime: lifetime ?? DEFAULT_LIFETIME,
+    multi: multi ?? false,
   };
 
   typeOrToken[W_PROV] = injectableDef;

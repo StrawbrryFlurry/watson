@@ -34,12 +34,6 @@ export interface CustomProviderBase {
    * if it's a class type, as the parameter type.
    */
   provide: InjectionToken | Function;
-  /**
-   * When true, injector returns an array of instances.
-   * This is useful to allow multiple providers spread across many
-   * files to provide configuration information to a common token.
-   */
-  multi?: boolean;
 }
 
 interface ProviderHasDeps {

@@ -38,12 +38,11 @@ export function ɵbindProviders(
     let binding: Binding;
 
     if (isUseExistingProvider(<CustomProvider>provider)) {
-      const { provide, useExisting, multi } = <UseExistingProvider>provider;
+      const { provide, useExisting } = <UseExistingProvider>provider;
 
       binding = createBinding({
         provide: provide,
         useFactory: () => injector.get(useExisting),
-        multi,
       } as FactoryProvider);
     } else {
       binding = createBinding(provider);

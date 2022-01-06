@@ -27,6 +27,7 @@ export interface ɵHasProv {
   [W_PROV]: {
     providedIn: any;
     lifetime: any;
+    multi: boolean;
   };
 }
 
