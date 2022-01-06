@@ -35,6 +35,9 @@ export abstract class ComponentRef<
     return this.metatype.name;
   }
 
+  public get injector(): Injector {
+    return this._injector;
+  }
   protected _injector: Injector;
 
   /**
