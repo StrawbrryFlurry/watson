@@ -62,7 +62,7 @@ export class ComponentFactoryResolverImpl extends ComponentFactoryResolver {
       return this.parent.resolve(component);
     }
 
-    const _moduleRef = moduleRef ?? this._moduleRef;
+    const _moduleRef = moduleRef ?? <ModuleRef>this._injector;
     const componentRef = await _moduleRef.get<ComponentRef>(component);
     const factory = new ComponentFactory<T>(component, componentRef);
 
@@ -74,7 +74,7 @@ export class ComponentFactoryResolverImpl extends ComponentFactoryResolver {
     component: T,
     moduleRef?: ModuleRef
   ): boolean {
-    const _moduleRef = moduleRef ?? this._moduleRef;
+    const _moduleRef = moduleRef ?? <ModuleRef>this._injector;
     const { components } = _moduleRef;
     return components.has(component);
   }

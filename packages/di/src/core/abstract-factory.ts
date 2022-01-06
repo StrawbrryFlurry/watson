@@ -6,11 +6,11 @@ import type { Constructable, Type } from "@di/types";
 export abstract class AbstractInjectableFactoryResolver<
   T extends AbstractInjectableFactory = AbstractInjectableFactory
 > {
-  protected _moduleRef: ModuleRef;
+  protected _injector: Injector;
   protected _records = new WeakMap<Type, T>();
 
-  constructor(moduleRef: ModuleRef) {
-    this._moduleRef = moduleRef;
+  constructor(injector: Injector) {
+    this._injector = injector;
   }
 
   /**

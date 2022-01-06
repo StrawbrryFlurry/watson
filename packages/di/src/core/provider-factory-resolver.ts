@@ -45,7 +45,7 @@ export class ProviderFactoryResolverImpl extends ProviderFactoryResolver {
       return <ProviderFactory<T>>factory;
     }
 
-    const providerFactory = new ProviderFactory<T>(provider, this._moduleRef);
+    const providerFactory = new ProviderFactory<T>(provider, this._injector);
     this._records.set(provider, providerFactory);
     return providerFactory;
   }

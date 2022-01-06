@@ -1,6 +1,7 @@
 import { Binding, createBinding } from '@di/core/binding';
 import { ComponentFactoryRef } from '@di/core/component-factory';
 import { Injector, InjectorGetResult, NOT_FOUND, ProviderResolvable } from '@di/core/injector';
+import { ProviderFactoryResolver, ProviderFactoryResolverImpl } from '@di/core/provider-factory-resolver';
 import { UniqueTypeArray } from '@di/data-structures';
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { ValueProvider } from '@di/providers/custom-provider.interface';
@@ -73,6 +74,12 @@ export abstract class ComponentRef<
         provide: ComponentFactoryRef,
         useFactory: () =>
           this.parent?.componentFactoryResolver.resolve(this.metatype),
+      },
+      {
+        provide: ProviderFactoryResolver,
+        // We use a factory function cause not every module
+        // needs a `ProviderFactoryResolver`.
+        useFactory: () => new ProviderFactoryResolverImpl(this),
       },
     ];
   }
