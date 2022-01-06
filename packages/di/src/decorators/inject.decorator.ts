@@ -54,6 +54,10 @@ export const SkipSelf = makeInjectFlagDecorator(InjectFlag.SkipSelf);
  * The dependency will be resolved only when a property
  * on the object is accessed or the `get` method is called.
  *
+ * Note that all subsequent property accesses, after an initially
+ * awaited `.get` or any other property of that proxy, will be
+ * synchronous.
+ *
  * ```ts
  * class Boop {
  *   public boop: string;
