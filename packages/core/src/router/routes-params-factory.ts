@@ -13,16 +13,17 @@ import { getFunctionParameters, getInjectableDef, Reflector, resolveAsyncValue }
 
 export type RouteHandlerParameterFactory = (
   ctx: ExecutionContext
-) => Promise<object[]>;
+) => Promise<unknown[]>;
 
 export class RouteParamsFactory {
   public create(routeRef: BaseRoute): RouteHandlerParameterFactory {
-    const { metatype, propertyKey, handler } = routeRef;
+    const { metatype, propertyKey, type } = routeRef;
 
     const handlerParameters = Reflector.reflectMethodParameters(
       metatype,
       propertyKey
     );
+
     const parameterMetadata = Reflector.reflectMetadata<ParameterMetadata[]>(
       PARAM_METADATA,
       metatype,
@@ -30,57 +31,76 @@ export class RouteParamsFactory {
       []
     )!;
 
-    const resolvedParams: any[] = [];
+    let resolveTypeParameterFn: (
+      ctx: ExecutionContext,
+      parameterIdx: number,
+      metadata: ParameterMetadata
+    ) => unknown = () => {};
 
-    for (let i = 0; i < params.length; i++) {
-      const param = params[i];
-      const metadata = paramMetadata.find(
-        (metadata) => metadata.parameterIndex === i
-      );
-
-      if (!metadata) {
-        const { providedIn } = getInjectableDef(param);
-
-        /**
-         * Only resolve context bound types as
-         * other types will likely be used by
-         * the command binding e.g AChannel,
-         * AUser, AString... or other parts
-         * of the framework.
-         */
-        if (providedIn === "ctx") {
-          resolvedParams[i] = await resolveAsyncValue(ctx.get(param));
-        }
-
-        continue;
-      }
-
-      const { factory } = metadata;
-
-      if (isFunction(factory)) {
-        resolvedParams[i] = await resolveAsyncValue(factory(ctx));
-        continue;
-      }
-
-      const type = ctx.getType();
-      let parameterValue: null | Promise<any> = null;
-
-      switch (type) {
-        case "command":
-          parameterValue = this._resolveCommandParameter(ctx, i, metadata);
-          break;
-        case "event":
-          parameterValue = this._resolveEventParameter();
-          break;
-        case "interaction":
-          parameterValue = this._resolveInteractionParameter(ctx, i, metadata);
-          break;
-      }
-
-      resolvedParams[i] = await resolveAsyncValue(parameterValue);
+    switch (type) {
+      case "command":
+        resolveTypeParameterFn = this._resolveCommandParameter.bind(this);
+        break;
+      case "event":
+        resolveTypeParameterFn = this._resolveEventParameter.bind(this);
+        break;
+      case "interaction":
+        resolveTypeParameterFn = this._resolveInteractionParameter.bind(this);
+        break;
     }
 
-    return (ctx: ExecutionContext): object[] => {};
+    const resolvedParameterMetadata = handlerParameters.map(
+      (parameter, idx) => {
+        const metadata = parameterMetadata.find(
+          (metadata) => metadata.parameterIndex === idx
+        );
+
+        if (!isNil(metadata)) {
+          return metadata;
+        }
+
+        return null;
+      }
+    );
+
+    return async (ctx: ExecutionContext): Promise<unknown[]> => {
+      const resolvedParams: unknown[] = [];
+
+      for (let i = 0; i < handlerParameters.length; i++) {
+        const parameter = handlerParameters[i];
+        const metadata = resolvedParameterMetadata[i];
+
+        if (isNil(metadata)) {
+          const { providedIn } = getInjectableDef(parameter);
+
+          /**
+           * Only resolve context bound types as
+           * other types will likely be used by
+           * the command binding e.g AChannel,
+           * AUser, AString... or other parts
+           * of the framework.
+           */
+          if (providedIn === "ctx") {
+            resolvedParams[i] = await resolveAsyncValue(ctx.get(parameter));
+            continue;
+          }
+
+          resolvedParams[i] = null;
+          continue;
+        }
+
+        const { factory } = metadata;
+
+        if (isFunction(factory)) {
+          resolvedParams[i] = await resolveAsyncValue(factory(ctx));
+          continue;
+        }
+
+        resolvedParams[i] = resolveTypeParameterFn(ctx, i, metadata);
+      }
+
+      return resolvedParams;
+    };
   }
 
   private _resolveCommandParameter(
@@ -107,7 +127,7 @@ export class RouteParamsFactory {
     // TODO: I don't think there are any event parameters?
   }
 
-  private async _resolveInteractionParameter(
+  private _resolveInteractionParameter(
     ctx: ExecutionContext,
     idx: number,
     metadata?: ParameterMetadata

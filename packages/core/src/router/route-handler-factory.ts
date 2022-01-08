@@ -20,10 +20,10 @@ import { Message } from 'discord.js';
  * the event proxy to invoke the watson lifecycle
  * when a registered event is fired.
  */
-export type LifecycleFunction = (
-  routeRef: BaseRoute,
-  eventData: unknown[],
-  ...args: unknown[]
+export type LifecycleFunction<T extends BaseRoute = BaseRoute> = (
+  route: T,
+  eventData: [any],
+  ...args: any[]
 ) => Promise<void>;
 
 interface InterceptorHandlers {
@@ -46,7 +46,7 @@ export class RouteHandlerFactory {
     route: CommandRoute,
     handler: Function,
     routerRef: RouterRef
-  ): Promise<LifecycleFunction> {
+  ): Promise<LifecycleFunction<CommandRoute>> {
     const { applyFilters, applyGuards, applyPipes } = this._getInterceptors(
       routerRef,
       handler
@@ -55,7 +55,7 @@ export class RouteHandlerFactory {
     const routerFactory = await routerRef.get(ComponentFactoryRef);
     const paramsFactory = this._paramsFactory.create(route);
 
-    const cb: LifecycleFunction = async (
+    return async (
       route: CommandRoute,
       event: [Message],
       matchResult: MessageMatchResult
@@ -94,8 +94,6 @@ export class RouteHandlerFactory {
         }
       }
     };
-
-    return cb;
   }
 
   public async createApplicationCommandHandler(): Promise<LifecycleFunction> {
