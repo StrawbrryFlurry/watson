@@ -9,17 +9,25 @@ export interface BaseRoute {
    */
   handler: Function;
   /**
-   * Returns the host router that
-   * this route was registered in
+   * The name of the handler method.
+   */
+  propertyKey: string;
+  /**
+   * The host router that this route was registered in
    */
   host: any;
   /**
-   * The type of the execution context
-   * Execution contexts be either `"interaction"`, `event` or `"command"`
+   * The type of the Execution
+   * context:
+   * - "slash"
+   * - "event"
+   * - "command"
    */
   type: string;
   /**
-   * Returns the event that this route is mapped to
+   * The event type this route will map to
+   * @example
+   * `WatsonEvent.MESSAGE_CREATE`
    */
   event: WatsonEvent;
   metatype: Type;

@@ -1,5 +1,6 @@
 import { RouterRef } from '@core/router';
 import { BaseRoute, ContextType, WatsonEvent } from '@watsonjs/common';
+import { MethodDescriptor } from '@watsonjs/di';
 
 /**
  * Represents a route of any type
@@ -9,37 +10,22 @@ import { BaseRoute, ContextType, WatsonEvent } from '@watsonjs/common';
 export abstract class RouteRef<Event extends WatsonEvent = any>
   implements BaseRoute
 {
-  /**
-   * The type of the Execution
-   * context:
-   * - "slash"
-   * - "event"
-   * - "command"
-   */
   public readonly type: ContextType;
-  /**
-   * The event type this route will map to
-   * @example
-   * `WatsonEvent.MESSAGE_CREATE`
-   */
   public readonly event: Event;
-  /**
-   * The handler method descriptor whose decorator registered this route:
-   * e.g @core/command, @Event
-   */
-  public abstract readonly handler: Function;
-  /**
-   * The host router that this route was registered in
-   */
+  public readonly handler: Function;
+  public readonly propertyKey: string;
+
   public abstract readonly host: RouterRef;
 
   public get metatype() {
     return this.host.metatype;
   }
 
-  constructor(type: ContextType, event: Event) {
+  constructor(type: ContextType, event: Event, handler: MethodDescriptor) {
     this.type = type;
     this.event = event;
+    this.handler = handler.descriptor;
+    this.propertyKey = handler.propertyKey;
   }
 
   public getType<T extends string = ContextType>(): T {

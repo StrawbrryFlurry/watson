@@ -9,11 +9,6 @@ import { InjectorLifetime, ɵdefineInjectable } from '@di/providers/injection-to
 import { Constructable, Type } from '@di/types';
 import { getClassOfInstance, stringify } from '@di/utils';
 
-@Injectable({ providedIn: "component", lifetime: InjectorLifetime.Scoped })
-export abstract class ComponentFactoryRef<
-  T extends Type
-> extends AbstractInjectableFactory<T> {}
-
 /**
  * The `ComponentFactory` is used to create
  * instances of a component in the context of
@@ -24,6 +19,11 @@ export abstract class ComponentFactoryRef<
  * module. All components provide a `ComponentFactory`
  * for their own type.
  */
+@Injectable({ providedIn: "component", lifetime: InjectorLifetime.Scoped })
+export abstract class ComponentFactoryRef<
+  T extends Type
+> extends AbstractInjectableFactory<T> {}
+
 export class ComponentFactory<
   T extends Type = Type
 > extends ComponentFactoryRef<T> {

@@ -1,10 +1,10 @@
 import { FILTER_METADATA } from '@common/constants';
 import { W_INT_TYPE } from '@common/fields';
 import { ExecutionContext } from '@common/pipeline';
-import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
+import { AsyncType, InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
+import { applyInterceptorMetadata, InterceptorType } from './interceptor';
 
 /**
  * Filters work in a similar way to guards. Their difference being that they will not throw an error if the command shouldn't be run.
@@ -22,7 +22,7 @@ interface WithPassThrough {
   prototype: PassThrough;
 }
 
-export type FilterFn = (ctx: ExecutionContext) => boolean;
+export type FilterFn = (ctx: ExecutionContext) => AsyncType<boolean>;
 
 export type FiltersMetadata = PassThrough | WithPassThrough | FilterFn;
 
@@ -31,14 +31,14 @@ export const GLOBAL_FILTER = new InjectionToken<FiltersMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_FILTER[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Filter;
+GLOBAL_FILTER[W_INT_TYPE] = InterceptorType.Filter;
 
 export const FILTER = new InjectionToken<FiltersMetadata[]>(
   "Filters for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-FILTER[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Filter;
+FILTER[W_INT_TYPE] = InterceptorType.Filter;
 
 export function UseFilters(
   ...filters: FiltersMetadata[]
@@ -49,7 +49,7 @@ export function UseFilters(
     descriptor?: PropertyDescriptor
   ) => {
     return applyInterceptorMetadata(
-      ɵINTERCEPTOR_TYPE.Filter,
+      InterceptorType.Filter,
       FILTER_METADATA,
       filters,
       target,

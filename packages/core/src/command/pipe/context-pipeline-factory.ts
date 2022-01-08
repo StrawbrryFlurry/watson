@@ -35,7 +35,7 @@ type CreatePipelineArguments<T extends { create: any }> = T["create"] extends (
  * handling of that event so far.
  */
 export class ContextPipelineFactory {
-  constructor(private _injector: Injector) {}
+  constructor() {}
 
   public create<
     R extends BaseRoute,
@@ -43,28 +43,28 @@ export class ContextPipelineFactory {
     Pipe extends PipeMatch[0],
     PipeCreateFnArgs extends CreatePipelineArguments<PipeMatch[1]>,
     O extends OmitFirstElement<OmitFirstElement<PipeCreateFnArgs>>
-  >(routeRef: R, moduleInjector: Injector, ...options: O): Promise<Pipe> {
+  >(routeRef: R, injector: Injector, ...options: O): Promise<Pipe> {
     const o = <any>options;
 
     switch (routeRef.type) {
       case "command": {
         return CommandPipelineImpl.create(
           routeRef as any as CommandRoute,
-          moduleInjector,
+          injector,
           ...(o as [Message, MessageMatchResult])
         ) as any;
       }
       case "interaction": {
         return InteractionPipelineImpl.create(
           routeRef as any as ApplicationCommandRoute,
-          moduleInjector,
+          injector,
           ...(o as [any])
         ) as any;
       }
       case "event": {
         return EventPipelineImpl.create(
           routeRef as any as EventRoute,
-          moduleInjector,
+          injector,
           ...(o as [unknown[]])
         ) as any;
       }

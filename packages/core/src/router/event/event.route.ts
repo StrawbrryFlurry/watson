@@ -7,7 +7,6 @@ export class EventRouteImpl<T extends WatsonEvent>
   extends RouteRef<WatsonEvent>
   implements EventRoute
 {
-  public handler: Function;
   public host: RouterRef<any>;
 
   constructor(
@@ -15,8 +14,7 @@ export class EventRouteImpl<T extends WatsonEvent>
     router: RouterRef,
     handler: MethodDescriptor
   ) {
-    super(ContextType.event, event);
-    this.handler = handler.descriptor;
+    super(ContextType.event, event, handler);
     this.host = router;
   }
 }

@@ -1,5 +1,5 @@
 import { BaseRoute } from '@common/router/base-route.interface';
-import { ComponentRef } from '@watsonjs/di';
+import { ComponentRef, Injector } from '@watsonjs/di';
 import { Guild, GuildChannel, TextChannel } from 'discord.js';
 
 import { ContextType } from './context-type.enum';
@@ -45,5 +45,5 @@ export interface PipelineBase<
    * Returns the context injector of
    * this pipeline context.
    */
-  getInjector<T = any>(): T;
+  getInjector(): Injector;
 }

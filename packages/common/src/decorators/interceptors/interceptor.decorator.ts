@@ -4,7 +4,7 @@ import { ExecutionContext } from '@common/pipeline';
 import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
+import { applyInterceptorMetadata, InterceptorType } from './interceptor';
 
 export type NextHandler = () => any;
 
@@ -23,14 +23,14 @@ export const GLOBAL_INTERCEPTOR = new InjectionToken<InterceptorMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_INTERCEPTOR[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Interceptor;
+GLOBAL_INTERCEPTOR[W_INT_TYPE] = InterceptorType.Interceptor;
 
 export const INTERCEPTOR = new InjectionToken<InterceptorMetadata[]>(
   "Interceptor for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-INTERCEPTOR[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Interceptor;
+INTERCEPTOR[W_INT_TYPE] = InterceptorType.Interceptor;
 
 export function UseInterceptors(
   ...interceptors: InterceptorMetadata[]
@@ -41,7 +41,7 @@ export function UseInterceptors(
     descriptor?: PropertyDescriptor
   ) => {
     return applyInterceptorMetadata(
-      ɵINTERCEPTOR_TYPE.Interceptor,
+      InterceptorType.Interceptor,
       INTERCEPTOR_METADATA,
       interceptors,
       target,

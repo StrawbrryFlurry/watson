@@ -18,7 +18,6 @@ export class ApplicationCommandRouteImpl
   implements ApplicationCommandRoute
 {
   public commandType: any;
-  public handler: Function;
   public host: any;
   public parent: ApplicationCommandRoute | null;
   public commandId: string | null = null;
@@ -43,6 +42,6 @@ export class ApplicationCommandRouteImpl
     handler: MethodDescriptor,
     parent?: ApplicationCommandRoute
   ) {
-    super(ContextType.interaction, WatsonEvent.INTERACTION_CREATE);
+    super(ContextType.interaction, WatsonEvent.INTERACTION_CREATE, handler);
   }
 }

@@ -19,7 +19,6 @@ export class CommandRouteImpl
   implements CommandRoute
 {
   public readonly configuration: CommandConfigurationImpl;
-  public readonly handler: Function;
   public readonly host: RouterRef;
   public readonly parent: CommandRoute | null = null;
 
@@ -32,7 +31,7 @@ export class CommandRouteImpl
     handler: MethodDescriptor,
     parent?: CommandRoute
   ) {
-    super(ContextType.command, WatsonEvent.COMMAND);
+    super(ContextType.command, WatsonEvent.COMMAND, handler);
 
     this.configuration = new CommandConfigurationImpl(
       this,
@@ -41,7 +40,6 @@ export class CommandRouteImpl
       handler
     );
 
-    this.handler = handler.descriptor;
     this.host = router;
     this.parent = parent ?? null;
   }

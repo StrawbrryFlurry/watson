@@ -1,6 +1,25 @@
-import { BaseRoute, MessageSendable } from '@watsonjs/common';
-import { ComponentRef, Injectable } from '@watsonjs/di';
+import { BaseRoute, InterceptorType, MessageSendable, ɵInterceptor } from '@watsonjs/common';
+import { ComponentRef, Injectable, Type } from '@watsonjs/di';
 import iterate from 'iterare';
+
+export interface RouterBoundInterceptors<
+  C extends Type & ɵInterceptor = any,
+  I extends object = any,
+  Cb extends () => any = any
+> {
+  /**
+   * Interceptors registered by using the class Type
+   */
+  classInterceptors?: C[];
+  /**
+   * Interceptors registered by using a class instance
+   */
+  instanceInterceptors?: I[];
+  /**
+   * Interceptors registered as a callback function
+   */
+  callbackInterceptors?: Cb[];
+}
 
 @Injectable({ providedIn: "module" })
 export abstract class RouterRef<
@@ -50,6 +69,11 @@ export abstract class RouterRef<
   public getRoute<T extends BaseRoute>(methodRef: Function): T | null {
     return <T>this.routes.get(methodRef) ?? null;
   }
+
+  public abstract getInterceptors(
+    type: InterceptorType,
+    handler?: Function
+  ): Required<RouterBoundInterceptors>;
 
   /**
    * Dispatches `route`, essentially imitating an

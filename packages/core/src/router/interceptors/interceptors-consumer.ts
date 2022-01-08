@@ -1,63 +1,51 @@
-import { Interceptor } from '@core/logger';
-import { isFunction, isNil } from '@watsonjs/common';
-import { Type } from '@watsonjs/di';
+import { RouterBoundInterceptors, RouterRef } from '@core/router';
+import { ExecutionContext, InterceptorType } from '@watsonjs/common';
 
-import { ModuleInitException } from '../../exceptions/revisit';
+export abstract class InterceptorsConsumer<
+  F extends (...args: any[]) => any,
+  T extends object,
+  R extends Function
+> {
+  public type: InterceptorType;
 
-export abstract class InterceptorsConsumer {
-  protected getInstance<T = any, R = any>(
-    type: Interceptor,
-    injectable: Type | T,
-    consumerFn: string,
-    moduleToken: string,
-    router: any
-  ): R {
-    if (consumerFn in injectable) {
-      return injectable as any as R;
+  constructor(type: InterceptorType) {
+    this.type = type;
+  }
+
+  public abstract create(routerRef: RouterRef, handler: Function): R;
+
+  protected getInterceptors(
+    routerRef: RouterRef,
+    handler: Function
+  ): Required<RouterBoundInterceptors> {
+    return routerRef.getInterceptors(this.type, handler);
+  }
+
+  protected async makeInterceptorCbs(
+    ctx: ExecutionContext,
+    interceptors: Required<RouterBoundInterceptors<any, T, F>>,
+    key: keyof T
+  ): Promise<F[]> {
+    const { callbackInterceptors, classInterceptors, instanceInterceptors } =
+      interceptors;
+
+    const interceptorCbs: F[] = [];
+
+    for (let i = 0; i < callbackInterceptors.length; i++) {
+      interceptorCbs.push(callbackInterceptors[i]);
     }
 
-    const moduleRef = ("" as any).getModuleByToken(moduleToken);
-
-    if (!isFunction(injectable)) {
-      throw new ModuleInitException(
-        /*INTERCEPTOR_NOT_FOUND */ ("A" as any)(
-          type,
-          (injectable as any).name,
-          injectable as any,
-          router,
-          moduleRef
-        )
-      );
+    for (let i = 0; i < classInterceptors.length; i++) {
+      const classInterceptor = classInterceptors[i];
+      const instance: T = await ctx.get(classInterceptor);
+      instanceInterceptors.push(instance);
     }
 
-    const injectableRef = moduleRef.injectables.get(injectable);
-
-    if (isNil(injectableRef)) {
-      throw new ModuleInitException(
-        /*INTERCEPTOR_NOT_FOUND */ ("A" as any)(
-          type,
-          (injectable as Type).name,
-          injectable as Type,
-          router,
-          moduleRef
-        )
-      );
+    for (let i = 0; i < instanceInterceptors.length; i++) {
+      const instance = instanceInterceptors[i];
+      interceptorCbs.push(<F>(<any>instance[key]).bind(instance));
     }
 
-    const { instance } = injectableRef;
-
-    if (!(consumerFn in (instance as Type))) {
-      throw new ModuleInitException(
-        /* BAD_INTERCEPTOR_IMPLEMENTATION */ ("A" as any)(
-          type,
-          (injectable as Type).name,
-          injectable as Type,
-          router,
-          moduleRef
-        )
-      );
-    }
-
-    return instance as R;
+    return interceptorCbs;
   }
 }

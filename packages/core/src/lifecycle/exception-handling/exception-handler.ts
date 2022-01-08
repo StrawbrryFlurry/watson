@@ -3,10 +3,10 @@ import { Logger } from '@core/logger';
 import {
   AsyncResolvable,
   ExceptionHandler,
+  InterceptorType,
   isNil,
   ResolvedAsyncValue,
   RuntimeException,
-  ɵINTERCEPTOR_TYPE,
 } from '@watsonjs/common';
 import {
   AfterResolution,
@@ -69,7 +69,7 @@ export class ExceptionHandlerImpl implements AfterResolution {
     }
 
     const { classInterceptors, instanceInterceptors } =
-      this._routerRef.getInterceptor(ɵINTERCEPTOR_TYPE.ExceptionHandler) ?? {};
+      this._routerRef.getInterceptors(InterceptorType.ExceptionHandler) ?? {};
 
     const [[instanceHandler], [classHandler]] = [
       instanceInterceptors ?? [null],

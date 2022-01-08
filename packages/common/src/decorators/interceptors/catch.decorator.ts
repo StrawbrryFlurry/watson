@@ -2,7 +2,7 @@ import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
 import { RuntimeException } from '@common/exceptions';
 import { AsyncResolvable } from '@common/utils';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
+import { applyInterceptorMetadata, InterceptorType } from './interceptor';
 
 export abstract class ExceptionHandler {
   /**
@@ -31,7 +31,7 @@ export function Catch(handler: ExceptionHandlerMetadata): ClassDecorator {
     descriptor?: PropertyDescriptor
   ) => {
     return applyInterceptorMetadata(
-      ɵINTERCEPTOR_TYPE.ExceptionHandler,
+      InterceptorType.ExceptionHandler,
       EXCEPTION_HANDLER_METADATA,
       [handler],
       target,

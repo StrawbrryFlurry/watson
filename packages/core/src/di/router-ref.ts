@@ -1,43 +1,29 @@
 import { WATSON_EXCEPTION_HANDLER_PROVIDER } from '@core/lifecycle';
-import { ApplicationRouterRef, RouterRef } from '@core/router/application-router';
+import { ApplicationRouterRef, RouterBoundInterceptors, RouterRef } from '@core/router/application-router';
 import {
   BaseRoute,
   EXCEPTION_HANDLER_METADATA,
   FILTER_METADATA,
   GUARD_METADATA,
+  InterceptorType,
   isClassConstructor,
   isFunction,
   isNil,
   MessageSendable,
   PIPE_METADATA,
   PREFIX_METADATA,
+  W_INT_SRC,
   W_INT_TYPE,
   ɵInterceptor,
-  ɵINTERCEPTOR_TYPE,
 } from '@watsonjs/common';
-import { DynamicInjector, ModuleRef, ProviderResolvable, Reflector, Type, UniqueTypeArray } from '@watsonjs/di';
-
-export interface RouterRefInjectableBinding {
-  /**
-   * Interceptors registered by using the class Type
-   */
-  classInterceptors?: (Type & ɵInterceptor)[];
-  /**
-   * Interceptors registered by using a class instance
-   */
-  instanceInterceptors?: object[];
-  /**
-   * Interceptors registered as a callback function
-   */
-  callbackInterceptors?: (() => any)[];
-}
+import { DynamicInjector, ModuleRef, ProviderResolvable, Reflector, Type } from '@watsonjs/di';
 
 export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
   public root: ApplicationRouterRef;
 
   protected _interceptors = new Map<
-    ɵINTERCEPTOR_TYPE,
-    RouterRefInjectableBinding
+    InterceptorType,
+    Map<Type, RouterBoundInterceptors>
   >();
 
   constructor(
@@ -68,14 +54,42 @@ export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
     ];
   }
 
-  public getInterceptor(
-    type: ɵINTERCEPTOR_TYPE
-  ): RouterRefInjectableBinding | null {
-    return this._interceptors.get(type) ?? null;
+  public getInterceptors(
+    type: InterceptorType,
+    handler?: Function
+  ): Required<RouterBoundInterceptors> {
+    const interceptorsOfType = this._interceptors.get(type) ?? null;
+
+    if (isNil(interceptorsOfType)) {
+      return {
+        callbackInterceptors: [],
+        classInterceptors: [],
+        instanceInterceptors: [],
+      };
+    }
+
+    const routerInterceptors = interceptorsOfType.get(RouterRef) ?? {};
+    const handlerInterceptors =
+      interceptorsOfType.get(handler ?? Function /* Empty */) ?? {};
+
+    return {
+      callbackInterceptors: [
+        ...(routerInterceptors.callbackInterceptors ?? []),
+        ...(handlerInterceptors.callbackInterceptors ?? []),
+      ],
+      classInterceptors: [
+        ...(routerInterceptors.classInterceptors ?? []),
+        ...(handlerInterceptors.classInterceptors ?? []),
+      ],
+      instanceInterceptors: [
+        ...(routerInterceptors.instanceInterceptors ?? []),
+        ...(handlerInterceptors.instanceInterceptors ?? []),
+      ],
+    };
   }
 
   public reflectAllInterceptors(metatype: Type) {
-    const injectables = new UniqueTypeArray<ɵInterceptor>();
+    const injectables: ɵInterceptor[] = [];
 
     if (isNil(metatype) || isNil(metatype.prototype)) {
       return injectables;
@@ -97,11 +111,19 @@ export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
   private _bindInterceptors(interceptors: ɵInterceptor[]) {
     for (const interceptor of interceptors) {
       const type = interceptor[W_INT_TYPE];
-      let binding = this._interceptors.get(type);
+      const source = interceptor[W_INT_SRC] ?? RouterRef;
+      let typeInterceptors = this._interceptors.get(type);
 
-      if (isNil(binding)) {
-        binding = {};
-        this._interceptors.set(type, binding);
+      if (isNil(typeInterceptors)) {
+        typeInterceptors = new Map();
+        this._interceptors.set(type, typeInterceptors);
+      }
+
+      let sourceInterceptors = typeInterceptors.get(source);
+
+      if (isNil(sourceInterceptors)) {
+        sourceInterceptors = {};
+        typeInterceptors.set(source, sourceInterceptors);
       }
 
       const isClassCtor = isClassConstructor(interceptor);
@@ -113,11 +135,11 @@ export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
       let collection: unknown[];
 
       if (isCallbackFunction) {
-        collection = binding.callbackInterceptors ??= [];
+        collection = sourceInterceptors.callbackInterceptors ??= [];
       } else if (isInstance) {
-        collection = binding.instanceInterceptors ??= [];
+        collection = sourceInterceptors.instanceInterceptors ??= [];
       } else {
-        collection = binding.classInterceptors ??= [];
+        collection = sourceInterceptors.classInterceptors ??= [];
       }
 
       collection.push(interceptor);
@@ -126,16 +148,32 @@ export class RouterRefImpl<T extends object = any> extends RouterRef<T> {
 
   private _reflectInterceptorOfType(
     metatype: Type,
-    interceptors: UniqueTypeArray<ɵInterceptor>,
+    interceptors: ɵInterceptor[],
     metadataKey: string
   ) {
+    const methods = Reflector.reflectMethodsOfType(this.metatype);
+    const methodInterceptors = methods.map((method) => {
+      return Reflector.reflectMetadata<any[]>(
+        metadataKey,
+        method,
+        null,
+        []
+      )!.map((interceptor) => {
+        // We need to remember, to which method that interceptor
+        // was added.
+        interceptor[W_INT_SRC] = method;
+        return interceptor;
+      });
+    });
+
     const classInterceptors = Reflector.reflectMetadata<any[]>(
       metadataKey,
       metatype,
       null,
       []
     );
-    interceptors.add(...classInterceptors!);
+
+    interceptors.push(...classInterceptors!, ...methodInterceptors.flat());
   }
 
   public dispatch(route: BaseRoute): Promise<void | MessageSendable> {

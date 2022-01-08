@@ -25,10 +25,10 @@
     "paths": {
       "@watsonjs/*": ["packages/*"],
 
-      "@common/builtin": ["./packages/common/src/builtin"],
-      "@common/adapter": ["./packages/common/src/adapter"],
+      "@common/builtin": ["packages/common/src/builtin"],
+      "@common/adapter": ["packages/common/src/adapter"],
       "@common/fields": ["packages/common/src/fields.ts"],
-      "@common/exceptions": ["./packages/common/src/exceptions"],
+      "@common/exceptions": ["packages/common/src/exceptions"],
       "@common/event": ["packages/common/src/event"],
       "@common/router": ["packages/common/src/router"],
       "@common/router/*": ["packages/common/src/router/*"],
@@ -38,24 +38,24 @@
       "@common/pipeline": ["packages/common/src/pipeline"],
       "@common/pipeline/*": ["packages/common/src/pipeline/*"],
       "@common/discord-types": ["packages/common/src/discord-types"],
-      "@common/decorators": ["./packages/common/src/decorators"],
+      "@common/decorators": ["packages/common/src/decorators"],
       "@common/decorators/*": ["packages/common/src/decorators/*"],
       "@common/command/*": ["packages/common/src/command/*"],
-      "@common/utils": ["./packages/common/src/utils"],
-      "@common/constants": ["./packages/common/src/constants"],
+      "@common/utils": ["packages/common/src/utils"],
+      "@common/constants": ["packages/common/src/constants"],
 
-      "@core/adapters": ["./packages/core/src/adapters"],
-      "@core/command": ["./packages/core/src/command"],
-      "@core/di": ["./packages/core/src/di"],
-      "@core/router": ["./packages/core/src/router"],
-      "@core/router/*": ["./packages/core/src/router/*"],
-      "@core/errors": ["./packages/core/src/errors"],
-      "@core/logger": ["./packages/core/src/logger"],
-      "@core/interfaces": ["./packages/core/src/interfaces"],
-      "@core/interfaces/*": ["./packages/core/src/interfaces/*"],
-      "@core/lifecycle": ["./packages/core/src/lifecycle"],
-      "@core/exceptions": ["./packages/core/src/exceptions"],
-      "@core/utils": ["./packages/core/src/util"],
+      "@core/adapters": ["packages/core/src/adapters"],
+      "@core/command": ["packages/core/src/command"],
+      "@core/di": ["packages/core/src/di"],
+      "@core/router": ["packages/core/src/router"],
+      "@core/router/*": ["packages/core/src/router/*"],
+      "@core/errors": ["packages/core/src/errors"],
+      "@core/logger": ["packages/core/src/logger"],
+      "@core/interfaces": ["packages/core/src/interfaces"],
+      "@core/interfaces/*": ["packages/core/src/interfaces/*"],
+      "@core/lifecycle": ["packages/core/src/lifecycle"],
+      "@core/exceptions": ["packages/core/src/exceptions"],
+      "@core/utils": ["packages/core/src/util"],
 
       "@di/decorators/*": ["packages/di/src/decorators/*"],
       "@di/data-structures": ["packages/di/src/data-structures"],
@@ -69,5 +69,5 @@
       "@di/fields": ["packages/di/src/fields"]
     }
   },
-  "exclude": ["node_modules", "./**/*.spec.ts", "dist"]
+  "exclude": ["node_modules", "**/*.spec.ts", "dist"]
 }

@@ -4,7 +4,7 @@ import { ExecutionContext } from '@common/pipeline';
 import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
+import { applyInterceptorMetadata, InterceptorType } from './interceptor';
 
 /**
  * Guards will check incoming commands for user permissions or other data you might
@@ -33,14 +33,14 @@ export const GLOBAL_GUARD = new InjectionToken<GuardsMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_GUARD[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Guard;
+GLOBAL_GUARD[W_INT_TYPE] = InterceptorType.Guard;
 
 export const GUARD = new InjectionToken<GuardsMetadata[]>(
   "Filter for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-GUARD[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Guard;
+GUARD[W_INT_TYPE] = InterceptorType.Guard;
 
 export function UseGuards(
   ...guards: GuardsMetadata[]
@@ -51,7 +51,7 @@ export function UseGuards(
     descriptor?: PropertyDescriptor
   ) => {
     return applyInterceptorMetadata(
-      ɵINTERCEPTOR_TYPE.Guard,
+      InterceptorType.Guard,
       GUARD_METADATA,
       guards,
       target,

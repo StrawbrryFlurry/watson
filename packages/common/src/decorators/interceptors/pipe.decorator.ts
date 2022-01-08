@@ -4,7 +4,7 @@ import { W_INT_TYPE } from '@common/fields';
 import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
 import { Observable } from 'rxjs';
 
-import { applyInterceptorMetadata, ɵINTERCEPTOR_TYPE } from './interceptor';
+import { applyInterceptorMetadata, InterceptorType } from './interceptor';
 
 /**
  * Alters an argument passed to a route
@@ -26,14 +26,14 @@ export const GLOBAL_PIPE = new InjectionToken<PipesMetadata[]>(
   { providedIn: "root", lifetime: InjectorLifetime.Event }
 );
 
-GLOBAL_PIPE[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Pipe;
+GLOBAL_PIPE[W_INT_TYPE] = InterceptorType.Pipe;
 
 export const PIPE = new InjectionToken<PipesMetadata[]>(
   "Pipe for the current module",
   { providedIn: "module", lifetime: InjectorLifetime.Event }
 );
 
-PIPE[W_INT_TYPE] = ɵINTERCEPTOR_TYPE.Pipe;
+PIPE[W_INT_TYPE] = InterceptorType.Pipe;
 
 /**
  * TODO:
@@ -49,7 +49,7 @@ export function UsePipes(
     descriptor?: PropertyDescriptor
   ) => {
     return applyInterceptorMetadata(
-      ɵINTERCEPTOR_TYPE.Pipe,
+      InterceptorType.Pipe,
       PIPE_METADATA,
       pipes,
       target,

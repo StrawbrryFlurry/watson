@@ -19,6 +19,10 @@ export abstract class PipelineBaseImpl<
     return this._eventData;
   }
 
+  public get ctx(): ExecutionContext {
+    return <ExecutionContext>this._injector;
+  }
+
   private _eventData: D;
 
   constructor(route: R, type: ContextType, eventData: D) {
@@ -32,8 +36,8 @@ export abstract class PipelineBaseImpl<
     return this._eventData;
   }
 
-  public getInjector<T = Injector>(): T {
-    return this._injector as any as T;
+  public getInjector(): Injector {
+    return this._injector;
   }
 
   public isFromGuild(): this is PipelineBase<any, any> & PipelineWithGuildCtx {

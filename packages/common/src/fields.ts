@@ -20,7 +20,7 @@
  * we have a reference point to what method a specific
  * injectable needs to be provided.
  */
-export const W_INT_TYPE = "ɵintt";
+export const W_INT_TYPE = "ɵinttp";
 
 /**
  * The element ID is used by the DI
@@ -43,14 +43,15 @@ export const W_INT_TYPE = "ɵintt";
  */
 export const W_ELEMENT_ID = "ɵeid";
 
-export enum InjectorElementId {
-  Root = 0,
-  Context = -1,
-  Injector = -2,
-}
-
-export const W_PARAM_TYPE = "ɵcmdprmtype";
+export const W_PARAM_TYPE = "ɵprmtp";
 
 export interface ɵHasParamType {
   [W_PARAM_TYPE]: any;
 }
+
+/**
+ * The source handler through which
+ * the interceptor was added. Usually,
+ * this is the handler method of a router.
+ */
+export const W_INT_SRC = "ɵintsc";

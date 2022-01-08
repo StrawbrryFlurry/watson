@@ -2,7 +2,7 @@ import { applyStackableMetadata } from '@common/decorators/apply-stackable-metad
 import { W_INT_TYPE } from '@common/fields';
 import { isMethodDecorator } from '@common/utils';
 
-export enum ɵINTERCEPTOR_TYPE {
+export enum InterceptorType {
   Guard,
   Prefix,
   ExceptionHandler,
@@ -12,12 +12,12 @@ export enum ɵINTERCEPTOR_TYPE {
 }
 
 export interface ɵInterceptor {
-  [W_INT_TYPE]: ɵINTERCEPTOR_TYPE;
+  [W_INT_TYPE]: InterceptorType;
 }
 
 function ɵdefineInterceptorType(
   interceptors: (object | Function)[],
-  type: ɵINTERCEPTOR_TYPE
+  type: InterceptorType
 ) {
   for (const interceptor of interceptors) {
     interceptor[W_INT_TYPE] = type;
@@ -25,7 +25,7 @@ function ɵdefineInterceptorType(
 }
 
 export function applyInterceptorMetadata<T extends Array<unknown>>(
-  type: ɵINTERCEPTOR_TYPE,
+  type: InterceptorType,
   metadata: string,
   payload: T,
   target: any,

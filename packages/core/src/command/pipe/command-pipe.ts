@@ -14,11 +14,6 @@ import { Guild, GuildMember, Message, StageChannel, TextBasedChannels, User, Voi
 
 import { PipelineBaseImpl } from './pipeline-base';
 
-export interface ParsedCommandData {
-  command: string;
-  prefix: Prefix;
-}
-
 export class CommandPipelineImpl
   extends PipelineBaseImpl<Message, CommandRoute>
   implements CommandPipeline
@@ -105,14 +100,14 @@ export class CommandPipelineImpl
     return [this.message] as T;
   }
 
-  protected async createExecutionContext(moduleInj: Injector): Promise<void> {
-    const inquirableFactory = new ContextProviderFactory(moduleInj);
+  protected async createExecutionContext(injector: Injector): Promise<void> {
+    const inquirableFactory = new ContextProviderFactory(injector);
     const bindingFactory: ContextBindingFactory = (bind) => {
       inquirableFactory.bindGlobals(this, bind);
       bind(MessageCtx, this.message);
       bind(PrefixRef, () => this.prefixText, true);
     };
 
-    await this.createAndBindInjector(moduleInj, bindingFactory);
+    await this.createAndBindInjector(injector, bindingFactory);
   }
 }
