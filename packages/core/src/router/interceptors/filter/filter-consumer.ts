@@ -1,47 +1,37 @@
+import { RouterRef } from '@core/router/application-router';
 import { InterceptorsConsumer } from '@core/router/interceptors';
-import { ExecutionContext, FiltersMetadata, PassThrough, PipelineBase } from '@watsonjs/common';
+import { ExecutionContext, FilterFn, InterceptorType, PassThrough } from '@watsonjs/common';
 import { resolveAsyncValue } from '@watsonjs/di';
 
-export class FiltersConsumer extends InterceptorsConsumer {
+export type FiltersConsumerFn = (
+  pipeline: ExecutionContext
+) => Promise<boolean>;
+
+export class FiltersConsumer extends InterceptorsConsumer<
+  FilterFn,
+  PassThrough,
+  FiltersConsumerFn
+> {
   constructor() {
-    super();
+    super(InterceptorType.Filter);
   }
 
-  public create({ route, router, metadata, moduleKey }: any) {
-    const filters = metadata.map((filter: any) =>
-      this.getInstance<FiltersMetadata, PassThrough>(
-        "filter",
-        filter,
-        "pass",
-        moduleKey,
-        router
-      )
-    );
+  public create(routerRef: RouterRef, handler: Function): FiltersConsumerFn {
+    const filters = this.getInterceptors(routerRef, handler);
 
-    return async (pipeline: PipelineBase) => {
-      for (const filter of filters) {
-        const data = pipeline.getEvent();
+    return async (ctx: ExecutionContext) => {
+      const interceptors = await this.makeInterceptorCbs(ctx, filters, "pass");
 
-        const ctx = new (ExecutionContext as any)(
-          pipeline,
-          data,
-          route,
-          (this as any).adapter
-        );
+      for (let i = 0; i < interceptors.length; i++) {
+        const filter = interceptors[i];
+        const pass = await resolveAsyncValue(filter(ctx));
 
-        const res = await this.tryPass(ctx, filter);
-
-        if (res === false) {
+        if (!pass) {
           return false;
         }
       }
 
       return true;
     };
-  }
-
-  public tryPass(ctx: ExecutionContext, filter: PassThrough) {
-    const { pass } = filter;
-    return resolveAsyncValue(pass(ctx));
   }
 }

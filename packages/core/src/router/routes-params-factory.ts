@@ -4,18 +4,32 @@ import {
   ExecutionContext,
   isFunction,
   isNil,
+  PARAM_METADATA,
   ParameterMetadata,
   PipelineBase,
   SlashCommandParameterMetadata,
 } from '@watsonjs/common';
-import { getFunctionParameters, getInjectableDef, resolveAsyncValue, Type } from '@watsonjs/di';
+import { getFunctionParameters, getInjectableDef, Reflector, resolveAsyncValue } from '@watsonjs/di';
+
+export type RouteHandlerParameterFactory = (
+  ctx: ExecutionContext
+) => Promise<object[]>;
 
 export class RouteParamsFactory {
-  public async createFromContext(
-    params: Type[],
-    paramMetadata: ParameterMetadata[],
-    ctx: ExecutionContext
-  ) {
+  public create(routeRef: BaseRoute): RouteHandlerParameterFactory {
+    const { metatype, propertyKey, handler } = routeRef;
+
+    const handlerParameters = Reflector.reflectMethodParameters(
+      metatype,
+      propertyKey
+    );
+    const parameterMetadata = Reflector.reflectMetadata<ParameterMetadata[]>(
+      PARAM_METADATA,
+      metatype,
+      propertyKey,
+      []
+    )!;
+
     const resolvedParams: any[] = [];
 
     for (let i = 0; i < params.length; i++) {
@@ -66,7 +80,7 @@ export class RouteParamsFactory {
       resolvedParams[i] = await resolveAsyncValue(parameterValue);
     }
 
-    return resolvedParams;
+    return (ctx: ExecutionContext): object[] => {};
   }
 
   private _resolveCommandParameter(

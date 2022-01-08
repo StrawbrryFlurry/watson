@@ -1,9 +1,19 @@
+import { ContextPipelineFactory } from '@core/command';
 import { ResponseController } from '@core/lifecycle';
 import { RouteParamsFactory } from '@core/router';
 import { RouterRef } from '@core/router/application-router';
-import { FiltersConsumer, GuardsConsumer, PipesConsumer } from '@core/router/interceptors';
-import { BaseRoute, CommandRoute, ExecutionContext, PARAM_METADATA, ParameterMetadata } from '@watsonjs/common';
-import { Reflector } from '@watsonjs/di';
+import {
+  FiltersConsumer,
+  FiltersConsumerFn,
+  GuardsConsumer,
+  GuardsConsumerFn,
+  PipesConsumer,
+  PipesConsumerFn,
+} from '@core/router/interceptors';
+import { rethrowWithContext } from '@core/utils';
+import { BaseRoute, CommandRoute, MessageMatchResult, RuntimeException } from '@watsonjs/common';
+import { ComponentFactoryRef, resolveAsyncValue } from '@watsonjs/di';
+import { Message } from 'discord.js';
 
 /**
  * The handler function will be called by
@@ -16,97 +26,76 @@ export type LifecycleFunction = (
   ...args: unknown[]
 ) => Promise<void>;
 
-export class RouteHandlerFactory {
-  private paramsFactory = new RouteParamsFactory();
-  private responseController = new ResponseController();
+interface InterceptorHandlers {
+  applyGuards: GuardsConsumerFn;
+  applyPipes: PipesConsumerFn;
+  applyFilters: FiltersConsumerFn;
+  // applyInterceptors: GuardsConsumer;
+}
 
-  private pipesConsumer = new PipesConsumer();
-  private guardsConsumer = new GuardsConsumer();
-  private filtersConsumer = new FiltersConsumer();
+export class RouteHandlerFactory {
+  private _paramsFactory = new RouteParamsFactory();
+  private _responseController = new ResponseController();
+  private _pipelineFactory = new ContextPipelineFactory();
+
+  private _pipesConsumer = new PipesConsumer();
+  private _guardsConsumer = new GuardsConsumer();
+  private _filtersConsumer = new FiltersConsumer();
 
   public async createCommandHandler<RouteResult = any>(
     route: CommandRoute,
     handler: Function,
-    router: RouterRef
+    routerRef: RouterRef
   ): Promise<LifecycleFunction> {
-    /*
-    const { filters, guards, pipes, paramsFactory } = this.getMetadata(
-      handler,
-      router
+    const { applyFilters, applyGuards, applyPipes } = this._getInterceptors(
+      routerRef,
+      handler
     );
 
-    const applyGuards = this.guardsConsumer.create({
-      route: route,
-      router: router,
-      metadata: guards,
-      moduleKey: moduleKey,
-    });
+    const routerFactory = await routerRef.get(ComponentFactoryRef);
+    const paramsFactory = this._paramsFactory.create(route);
 
-    const applyPipes = this.pipesConsumer.create({
-      route: route,
-      router: router,
-      metadata: pipes,
-      moduleKey: moduleKey,
-    });
-
-    const applyFilters = this.filtersConsumer.create({
-      route: route,
-      router: router,
-      metadata: filters,
-      moduleKey: moduleKey,
-    });
-
-    const lifeCycle: LifecycleFunction = async (
+    const cb: LifecycleFunction = async (
       route: CommandRoute,
       event: [Message],
-      parsed: ParsedCommandData
+      matchResult: MessageMatchResult
     ) => {
-      const { prefix, command } = parsed;
       const [message] = event;
-      const pipeline = new CommandPipelineHost(command, prefix, route);
-      const context = new ExecutionContextHost(
-        pipeline,
-        event,
+      const pipelineRef = await this._pipelineFactory.create(
         route,
-        this.adapterRef
+        routerRef,
+        message,
+        matchResult
       );
-*/
 
-    try {
-      /**
-       * Initialize the pipeline and parse
-       * the message content
-       */
-      /*
+      const { ctx } = pipelineRef;
 
-        await pipeline.invokeFromMessage(message);
-
-        const didPass = await applyFilters(pipeline);
+      try {
+        const didPass = await applyFilters(ctx);
 
         if (didPass !== true) {
           return;
         }
 
-        await applyGuards(pipeline);
-        await applyPipes(pipeline);
+        await applyGuards(ctx);
+        await applyPipes(ctx);
 
-        const params = await paramsFactory(context);
-        const resolvable = handler.apply(router.instance, params);
-        const result = (await resolveAsyncValue(resolvable)) as RouteResult;
+        const params = await paramsFactory(ctx);
+        const routerInstance = await routerFactory.create(null, ctx);
+        const resolvable = handler.apply(routerInstance, params);
+        const result: RouteResult = await resolveAsyncValue(resolvable);
 
-        await this.responseController.apply(context, result);
+        await this._responseController.apply(ctx, result);
       } catch (err) {
-        if (err instanceof EventException) {
-          rethrowWithContext(err, context);
+        if (err instanceof RuntimeException) {
+          rethrowWithContext(err, ctx);
         } else {
           throw err;
         }
       }
     };
-*/
-    } catch {}
 
-    return "lifeCycle" as any;
+    return cb;
   }
 
   public async createApplicationCommandHandler(): Promise<LifecycleFunction> {
@@ -117,51 +106,18 @@ export class RouteHandlerFactory {
     return null as any;
   }
 
-  /**
-   * Reflects the metadata key for both
-   * the router type and the handler function
-   */
-  private reflectKey<T>(
-    metadataKey: string,
-    handler: Function,
-    router: RouterRef
-  ): T[] {
-    const { metatype } = router;
-
-    const handlerMetadata: T[] =
-      Reflect.getMetadata(metadataKey, handler) || [];
-
-    const routerMetadata: T[] =
-      Reflect.getMetadata(metadataKey, metatype) || [];
-
-    const allMetadata = [...routerMetadata, ...handlerMetadata];
-    const metadata = [...new Set(allMetadata)];
-
-    return metadata;
-  }
-
-  private async getParamFactory(router: RouterRef, handler: Function) {
-    const { paramMetadata, params } = this.reflectParams(router, handler);
-    const paramsFactory = (ctx: ExecutionContext) =>
-      this.paramsFactory.createFromContext(params, paramMetadata, ctx);
-  }
-
-  private reflectParams(router: RouterRef, handler: Function) {
-    const { metatype } = router;
-    const { name } = handler;
-
-    const paramMetadata =
-      Reflector.reflectMetadata<ParameterMetadata[]>(
-        PARAM_METADATA,
-        metatype,
-        name
-      ) ?? [];
-
-    const params = Reflector.reflectMethodParameters(metatype, name) ?? [];
+  private _getInterceptors(
+    routerRef: RouterRef,
+    handler: Function
+  ): InterceptorHandlers {
+    const applyFilters = this._filtersConsumer.create(routerRef, handler);
+    const applyGuards = this._guardsConsumer.create(routerRef, handler);
+    const applyPipes = this._pipesConsumer.create(routerRef, handler);
 
     return {
-      paramMetadata,
-      params,
+      applyFilters,
+      applyGuards,
+      applyPipes,
     };
   }
 }

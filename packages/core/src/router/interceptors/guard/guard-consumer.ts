@@ -1,21 +1,36 @@
+import { RouterRef } from '@core/router';
 import { InterceptorsConsumer } from '@core/router/interceptors/interceptors-consumer';
-import { CanActivate, ExecutionContext, PipelineBase, UnauthorizedException } from '@watsonjs/common';
+import { CanActivate, ExecutionContext, GuardFn, InterceptorType, UnauthorizedException } from '@watsonjs/common';
 import { resolveAsyncValue } from '@watsonjs/di';
 
-export class GuardsConsumer extends InterceptorsConsumer {
+export type GuardsConsumerFn = (ctx: ExecutionContext) => Promise<void>;
+
+export class GuardsConsumer extends InterceptorsConsumer<
+  GuardFn,
+  CanActivate,
+  GuardsConsumerFn
+> {
   constructor() {
-    super();
+    super(InterceptorType.Guard);
   }
 
-  public create({ route, router, metadata, moduleKey }: any) {
-    const guards = metadata.map((guard: any) =>
-      this.getInstance("guard", guard, "canActivate", moduleKey, router)
-    );
+  public create(routerRef: RouterRef, handler: Function): GuardsConsumerFn {
+    const guards = this.getInterceptors(routerRef, handler);
 
-    return async (pipeline: PipelineBase) => {
-      for (const guard of guards) {
-        const ctx = new (ExecutionContext as any)(pipeline, null, route);
-        await this.tryActivate(ctx, guard);
+    return async (ctx: ExecutionContext) => {
+      const interceptors = await this.makeInterceptorCbs(
+        ctx,
+        guards,
+        "canActivate"
+      );
+
+      for (let i = 0; i < interceptors.length; i++) {
+        const canActivate = interceptors[i];
+        const couldActivate = await resolveAsyncValue(canActivate(ctx));
+
+        if (!couldActivate) {
+          throw new UnauthorizedException();
+        }
       }
     };
   }

@@ -1,26 +1,27 @@
+import { RouterRef } from '@core/router';
 import { InterceptorsConsumer } from '@core/router/interceptors/interceptors-consumer';
-import { PipelineBase, PipeTransform } from '@watsonjs/common';
+import { ExecutionContext, InterceptorType, PipeTransform, PipeTransformFn } from '@watsonjs/common';
 import { resolveAsyncValue } from '@watsonjs/di';
 
-export class PipesConsumer extends InterceptorsConsumer {
+export type PipesConsumerFn = (ctx: ExecutionContext) => Promise<void>;
+
+export class PipesConsumer extends InterceptorsConsumer<
+  PipeTransformFn,
+  PipeTransform,
+  PipesConsumerFn
+> {
   constructor() {
-    super();
+    super(InterceptorType.Pipe);
   }
 
-  public create({ router, metadata, moduleKey }: any) {
-    const pipes = metadata.map((pipe: any) =>
-      this.getInstance<PipesConsumer, PipeTransform>(
-        "pipe",
-        pipe,
-        "transform",
-        moduleKey,
-        router
-      )
-    );
+  public create(routerRef: RouterRef, handler: Function): PipesConsumerFn {
+    const pipes = this.getInterceptors(routerRef, handler);
 
-    return (pipeline: PipelineBase) => {
-      const { argumentHost } = pipeline as any;
-      return this.transform(argumentHost, pipes);
+    return async (ctx: ExecutionContext) => {
+      return this.transform(
+        ctx,
+        await this.makeInterceptorCbs(ctx, pipes, "transform")
+      );
     };
   }
 
@@ -30,13 +31,13 @@ export class PipesConsumer extends InterceptorsConsumer {
    * pipe or the argument wrapper as its
    * source
    */
-  private async transform(argumentHost: any, pipes: PipeTransform[]) {
+  private async transform(argumentHost: any, pipes: PipeTransformFn[]) {
     const { arguments: args } = argumentHost;
 
     for (const argument of args) {
       pipes.reduce(async (previous, pipe) => {
         const value = await previous;
-        const transformed = pipe.transform(value);
+        const transformed = pipe(value);
 
         return resolveAsyncValue(transformed);
       }, Promise.resolve(argument));
