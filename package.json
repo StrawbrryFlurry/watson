@@ -60,11 +60,17 @@
     "xxhashjs": "^0.2.2"
   },
   "devDependencies": {
-    "@nrwl/cli": "13.3.11",
-    "@nrwl/jest": "13.3.11",
-    "@nrwl/node": "13.3.11",
-    "@nrwl/tao": "13.3.11",
-    "@nrwl/workspace": "13.3.11",
+    "@nrwl/cli": "13.4.3",
+    "@nrwl/jest": "13.4.3",
+    "@nrwl/node": "13.4.3",
+    "@nrwl/tao": "13.4.3",
+    "@nrwl/workspace": "13.4.3",
+    "@nrwl/eslint-plugin-nx": "13.4.3",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "@nrwl/linter": "13.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
     "@types/cli-color": "^2.0.1",
     "@types/jest": "^26.0.24",
     "@types/luxon": "^2.0.7",
@@ -86,3 +92,4 @@
     "typescript": "4.5.4"
   }
 }
+
