@@ -3,32 +3,11 @@
   "sourceRoot": "packages/core/src",
   "projectType": "library",
   "targets": {
-    "build-deploy": {
-      "builder": "@nrwl/workspace:run-commands",
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "commands": [
-          "nx build core",
-          "ttsc -p dist/packages/core/tsconfig.build.json"
-        ],
-        "parallel": false
-      }
-    },
-    "build": {
-      "builder": "@nrwl/node:package",
-      "options": {
-        "outputPath": "dist/packages/core",
-        "tsConfig": "packages/core/tsconfig.json",
-        "packageJson": "packages/core/package.json",
-        "main": "packages/core/src/index.ts",
-        "assets": ["packages/core/README.md"],
-        "tsPlugins": [
-          {
-            "name": "@watsonjs/ts-transformer",
-            "options": {
-              "excludeNamespace": ["@watsonjs"]
-            }
-          }
-        ]
+        "lintFilePatterns": ["packages/core/**/*.ts"]
       }
     },
     "test": {
@@ -38,7 +17,25 @@
         "jestConfig": "packages/core/jest.config.js",
         "passWithNoTests": true
       }
+    },
+    "build": {
+      "executor": "@nrwl/node:package",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/core",
+        "tsConfig": "packages/core/tsconfig.lib.json",
+        "packageJson": "packages/core/package.json",
+        "main": "packages/core/src/index.ts",
+        "assets": ["packages/core/*.md"],
+        "tsPlugins": [
+          {
+            "name": "@watsonjs/ts-transformer",
+            "options": {
+              "excludeNamespace": ["@watsonjs"]
+            }
+          }
+        ]
+      }
     }
-  },
-  "implicitDependencies": []
+  }
 }

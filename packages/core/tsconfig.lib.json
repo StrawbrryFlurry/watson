@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "paths": {
+      "@watsonjs/di": ["packages/di/src"],
+      "@watsonjs/common": ["packages/common/src"],
+
+      "@core/adapters": ["packages/core/src/lib/adapters"],
+      "@core/command": ["packages/core/src/lib/command"],
+      "@core/di": ["packages/core/src/lib/di"],
+      "@core/router": ["packages/core/src/lib/router"],
+      "@core/router/*": ["packages/core/src/lib/router/*"],
+      "@core/errors": ["packages/core/src/lib/errors"],
+      "@core/logger": ["packages/core/src/lib/logger"],
+      "@core/interfaces": ["packages/core/src/lib/interfaces"],
+      "@core/interfaces/*": ["packages/core/src/lib/interfaces/*"],
+      "@core/lifecycle": ["packages/core/src/lib/lifecycle"],
+      "@core/exceptions": ["packages/core/src/lib/exceptions"],
+      "@core/utils": ["packages/core/src/lib/util"]
+    }
+  },
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "include": ["**/*.ts"]
+}

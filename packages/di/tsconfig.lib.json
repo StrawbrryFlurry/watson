@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "paths": {
+      "@di/decorators/*": ["packages/di/src/lib/decorators/*"],
+      "@di/data-structures": ["packages/di/src/lib/data-structures"],
+      "@di/core/*": ["packages/di/src/lib/core/*"],
+      "@di/hooks": ["packages/di/src/lib/hooks"],
+      "@di/providers/*": ["packages/di/src/lib/providers/*"],
+      "@di/types": ["packages/di/src/lib/types"],
+      "@di/constants": ["packages/di/src/lib/constants"],
+      "@di/utils": ["packages/di/src/lib/utils"],
+      "@di/utils/common": ["packages/di/src/lib/utils/shared.util"],
+      "@di/fields": ["packages/di/src/lib/fields"]
+    }
+  },
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "include": ["**/*.ts"]
+}

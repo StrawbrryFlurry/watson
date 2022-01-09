@@ -7,7 +7,7 @@ import { Type } from '@di/types';
 import { isNil } from '@di/utils/common';
 
 export class ContextInjector implements Injector {
-  public parent: Injector | null;
+  public parent!: Injector | null;
   private _records = new Map<Providable, Binding>();
 
   constructor(providers: ProviderResolvable[]) {

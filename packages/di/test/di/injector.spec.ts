@@ -8,7 +8,8 @@ import { Host, Optional, Self, SkipSelf } from '@di/decorators/inject.decorator'
 import { Injectable } from '@di/decorators/injectable.decorator';
 import { FactoryProvider, ValueProvider } from '@di/providers/custom-provider.interface';
 import { InjectionToken } from '@di/providers/injection-token';
-import { TestLogger } from 'packages/di/test/shared/test-logger';
+
+import { TestLogger } from '../../test/shared/test-logger';
 
 @Injectable()
 class NoopLogger {

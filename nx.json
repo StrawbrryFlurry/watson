@@ -1,35 +1,16 @@
 {
-  "implicitDependencies": {
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
-    },
-    ".eslintrc.json": "*"
-  },
-  "npmScope": "watsonjs",
-  "targetDependencies": {
-    "build": [
-      {
-        "target": "build",
-        "projects": "dependencies"
-      }
-    ]
-  },
-  "workspaceLayout": {
-    "appsDir": "packages",
-    "libsDir": "packages"
+  "extends": "@nrwl/workspace/presets/core.json",
+  "npmScope": "test",
+  "affected": {
+    "defaultBase": "master"
   },
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"],
-        "parallel": 1
+        "cacheableOperations": ["build", "lint", "test", "e2e"]
       }
     }
-  },
-  "affected": {
-    "defaultBase": "master"
   },
   "cli": {
     "packageManager": "pnpm",

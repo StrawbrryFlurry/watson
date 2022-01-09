@@ -6,8 +6,8 @@ import { ModuleLoader } from '@di/core/module-loader';
 import { ModuleRef } from '@di/core/module-ref';
 import { ValueProvider } from '@di/providers/custom-provider.interface';
 import { InjectorLifetime } from '@di/providers/injection-token';
-import { ContextInjector } from 'packages/di/test/test-utils';
 
+import { ContextInjector } from '../../test/test-utils';
 import { AppModule } from './app.module';
 import {
   CONTEXT_PROVIDER,
