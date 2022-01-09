@@ -1,10 +1,13 @@
-import { CommandArgument } from '@common/command/command-argument.interface';
-import { PIPE_METADATA } from '@common/constants';
-import { W_INT_TYPE } from '@common/fields';
-import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
-import { Observable } from 'rxjs';
+import { CommandArgument } from "@common/command/command-argument.interface";
+import { PIPE_METADATA } from "@common/constants";
+import { W_INT_TYPE } from "@common/fields";
+import { InjectionToken, InjectorLifetime } from "@watsonjs/di";
+import { Observable } from "rxjs";
 
-import { applyInterceptorMetadata, InterceptorType } from './interceptor';
+import {
+  applyInterceptorMetadata,
+  InterceptorType,
+} from "./apply-interceptor-metadata";
 
 /**
  * Alters an argument passed to a route

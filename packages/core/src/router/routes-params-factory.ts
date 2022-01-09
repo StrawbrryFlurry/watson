@@ -8,8 +8,13 @@ import {
   ParameterMetadata,
   PipelineBase,
   SlashCommandParameterMetadata,
-} from '@watsonjs/common';
-import { getFunctionParameters, getInjectableDef, Reflector, resolveAsyncValue } from '@watsonjs/di';
+} from "@watsonjs/common";
+import {
+  getFunctionParameters,
+  getInjectableDef,
+  Reflector,
+  resolveAsyncValue,
+} from "@watsonjs/di";
 
 export type RouteHandlerParameterFactory = (
   ctx: ExecutionContext

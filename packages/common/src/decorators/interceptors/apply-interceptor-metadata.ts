@@ -1,6 +1,6 @@
-import { applyStackableMetadata } from '@common/decorators/apply-stackable-metadata';
-import { W_INT_TYPE } from '@common/fields';
-import { isMethodDecorator } from '@common/utils';
+import { applyStackableMetadata } from "@common/decorators/apply-stackable-metadata";
+import { W_INT_TYPE } from "@common/fields";
+import { isMethodDecorator } from "@common/utils";
 
 export enum InterceptorType {
   Guard,

@@ -1,10 +1,13 @@
-import { INTERCEPTOR_METADATA } from '@common/constants';
-import { W_INT_TYPE } from '@common/fields';
-import { ExecutionContext } from '@common/pipeline';
-import { InjectionToken, InjectorLifetime } from '@watsonjs/di';
-import { Observable } from 'rxjs';
+import { INTERCEPTOR_METADATA } from "@common/constants";
+import { W_INT_TYPE } from "@common/fields";
+import { ExecutionContext } from "@common/pipeline";
+import { InjectionToken, InjectorLifetime } from "@watsonjs/di";
+import { Observable } from "rxjs";
 
-import { applyInterceptorMetadata, InterceptorType } from './interceptor';
+import {
+  applyInterceptorMetadata,
+  InterceptorType,
+} from "./apply-interceptor-metadata";
 
 export type NextHandler = () => any;
 

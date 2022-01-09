@@ -1,8 +1,11 @@
-import { EXCEPTION_HANDLER_METADATA } from '@common/constants';
-import { RuntimeException } from '@common/exceptions';
-import { AsyncResolvable } from '@common/utils';
+import { EXCEPTION_HANDLER_METADATA } from "@common/constants";
+import { RuntimeException } from "@common/exceptions";
+import { AsyncResolvable } from "@common/utils";
 
-import { applyInterceptorMetadata, InterceptorType } from './interceptor';
+import {
+  applyInterceptorMetadata,
+  InterceptorType,
+} from "./apply-interceptor-metadata";
 
 export abstract class ExceptionHandler {
   /**

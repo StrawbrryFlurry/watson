@@ -1,7 +1,7 @@
-import { ContextPipelineFactory } from '@core/command';
-import { ResponseController } from '@core/lifecycle';
-import { RouteParamsFactory } from '@core/router';
-import { RouterRef } from '@core/router/application-router';
+import { ContextPipelineFactory } from "@core/command";
+import { ResponseController } from "@core/lifecycle";
+import { RouteParamsFactory } from "@core/router";
+import { RouterRef } from "@core/router/application-router";
 import {
   FiltersConsumer,
   FiltersConsumerFn,
@@ -9,18 +9,23 @@ import {
   GuardsConsumerFn,
   PipesConsumer,
   PipesConsumerFn,
-} from '@core/router/interceptors';
-import { rethrowWithContext } from '@core/utils';
-import { BaseRoute, CommandRoute, MessageMatchResult, RuntimeException } from '@watsonjs/common';
-import { ComponentFactoryRef, resolveAsyncValue } from '@watsonjs/di';
-import { Message } from 'discord.js';
+} from "@core/router/interceptors";
+import { rethrowWithContext } from "@core/utils";
+import {
+  BaseRoute,
+  CommandRoute,
+  MessageMatchResult,
+  RuntimeException,
+} from "@watsonjs/common";
+import { ComponentFactoryRef, resolveAsyncValue } from "@watsonjs/di";
+import { Message } from "discord.js";
 
 /**
  * The handler function will be called by
  * the event proxy to invoke the watson lifecycle
  * when a registered event is fired.
  */
-export type LifecycleFunction<T extends BaseRoute = BaseRoute> = (
+export type LifecycleFunction<T extends BaseRoute = any> = (
   route: T,
   eventData: [any],
   ...args: any[]
@@ -101,6 +106,10 @@ export class RouteHandlerFactory {
   }
 
   public async createEventHandler(): Promise<LifecycleFunction> {
+    return null as any;
+  }
+
+  private _createHandler(): LifecycleFunction {
     return null as any;
   }
 

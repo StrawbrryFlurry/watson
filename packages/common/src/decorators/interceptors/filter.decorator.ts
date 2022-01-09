@@ -1,10 +1,13 @@
-import { FILTER_METADATA } from '@common/constants';
-import { W_INT_TYPE } from '@common/fields';
-import { ExecutionContext } from '@common/pipeline';
-import { AsyncType, InjectionToken, InjectorLifetime } from '@watsonjs/di';
-import { Observable } from 'rxjs';
+import { FILTER_METADATA } from "@common/constants";
+import { W_INT_TYPE } from "@common/fields";
+import { ExecutionContext } from "@common/pipeline";
+import { AsyncType, InjectionToken, InjectorLifetime } from "@watsonjs/di";
+import { Observable } from "rxjs";
 
-import { applyInterceptorMetadata, InterceptorType } from './interceptor';
+import {
+  applyInterceptorMetadata,
+  InterceptorType,
+} from "./apply-interceptor-metadata";
 
 /**
  * Filters work in a similar way to guards. Their difference being that they will not throw an error if the command shouldn't be run.
